@@ -64,8 +64,8 @@ if __name__ == '__main__':
 
     t = Treatment()
     t.set_treatment_file_for_current_sim()
-    B = t.get_current_treatment()
-    print(B)
-    t.change_treatment(4,1)
+    # B = t.get_current_treatment()
+    # print(B)
+    t.change_treatment(np.arange(50,60,1),np.ones_like(np.arange(50,60,1)))
     B = t.get_current_treatment()
     print(B)
