@@ -1,3 +1,3 @@
 #!/bin/bash -l
 
-./project.exe
+project.exe 
