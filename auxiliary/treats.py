@@ -7,7 +7,7 @@ class Treatment():
 
     def __init__(self):
         self.filename = "Treatment_schedule.mat"
-        self.dir = './'
+        self.dir = './../PhysiCell_V_1.10.4'
         self.schedule = None
 
     def get_current_treatment(self):
@@ -33,11 +33,13 @@ class Treatment():
 
         if mode == "default":
             " default means no treatment "
-            # Create a numpy array of length simulation_time/treatment_interval
-            schedule = np.zeros((int(max_time/treatment_interval),2))
+            # Create a numpy array of length simulation_time/treatment_interval, first column -> time, second -> treatment, third -> if decision is made
+            schedule = np.zeros((int(max_time/treatment_interval)+1,3))
 
             # Write treatment timing
-            schedule[:,0] = np.arange(int(max_time/treatment_interval))*treatment_interval
+            schedule[:,0] = np.arange(int(max_time/treatment_interval)+1)*treatment_interval
+            # Write for zero time that decision has been made
+            schedule[0,2] = 1
             self.schedule = schedule
             # Save numpy array to treatment matlab file
             mdict = {'schedule': schedule}
@@ -54,6 +56,8 @@ class Treatment():
 
         # Change the specified decision
         schedule[time, 1] = decision
+        # Write that decision has been made
+        schedule[time, 2]  = 1
         # Save back to matlab
         mdict = {'schedule': schedule}
         mat_file = Path(self.dir) / self.filename
@@ -66,6 +70,6 @@ if __name__ == '__main__':
     t.set_treatment_file_for_current_sim()
     # B = t.get_current_treatment()
     # print(B)
-    t.change_treatment(np.arange(50,60,1),np.ones_like(np.arange(50,60,1)))
+    t.change_treatment(np.arange(14,25,1),np.zeros_like(np.arange(14,25,1)))
     B = t.get_current_treatment()
     print(B)

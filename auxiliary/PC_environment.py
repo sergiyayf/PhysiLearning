@@ -4,6 +4,9 @@ from gym.spaces import Discrete, Box
 import numpy as np
 import os
 import subprocess
+from pathlib import Path
+from get_output import get_PC_output
+from treats import Treatment
 import time
 
 # create environment
@@ -16,7 +19,7 @@ class PC_env(Env):
 
         # set up timer
         self.time = 0
-        self.max_time = 1000
+        self.max_time = 4
         self.treatment_time_step = 60
 
         # set up initial wild type, mutant and treatment decision
@@ -32,29 +35,41 @@ class PC_env(Env):
         # trajectory for plotting
         self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
 
+        # treatment object
+        self.treatment = Treatment()
+
     def step(self, action):
-        # update tiemr
+        # update timer
         self.time += 1
         # get tumor updated state
 
         if self.simulation_progressed(self.time):
-            self.state[0] = get_PC_output()['susceptible']
-            self.state[1] = get_PC_output()['resistant']
+            dict = get_PC_output(file = 'output'+'{:08n}'.format(self.time)+'.xml',
+                                          dir = './../PhysiCell_V_1.10.4/output')
+            self.state[0] = dict['susceptible']
+            self.state[1] = dict['resistant']
         else:
             q = 0
             while q < 1000:
-                please_wait()
+                # sleep x seconds
+                time.sleep(5)
+                # check for progress again
                 if self.simulation_progressed(self.time):
+                    # quit while loop
                     break
                 else:
+                    print('Waiting for progress')
                     q+=1
-            if q == 1000:
-                raise FileNotFoundError(' Simulation did not progress to this point ')
-            self.state[0] = get_PC_output()['susceptible']
-            self.state[1] = get_PC_output()['resistant']
+                if q == 1000:
+                    raise FileNotFoundError(' Simulation did not progress to this point ')
+            dict = get_PC_output(file='output' + '{:08n}'.format(self.time) + '.xml',
+                                 dir='./../PhysiCell_V_1.10.4/output')
+            self.state[0] = dict['susceptible']
+            self.state[1] = dict['resistant']
 
         # do action (apply treatment or not)
         self.state[2] = action
+        self.treatment.change_treatment(self.time,action)
 
         # record trajectory
         self.trajectory[:,self.time - 1] = self.state
@@ -82,6 +97,7 @@ class PC_env(Env):
         self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
 
         self.cleanup()
+        self.treatment.set_treatment_file_for_current_sim()
         self.start_new_sim()
         return self.state
 
@@ -99,12 +115,28 @@ class PC_env(Env):
         return
 
     def simulation_progressed(self,time):
-        filename = 'output'+'{:04n}'.format(time)
-        return True
+        # check for existence of file with filename of this time
+        filename = 'output'+'{:08n}'.format(time)+'.xml'
+        directory = './../PhysiCell_V_1.10.4/output'
+        file = Path(directory) / filename
+        if os.path.exists(file):
+            return True
+        else:
+            return False
+
 
 if __name__ == '__main__':
     env = PC_env()
     env.reset()
+    print(env.time)
+    env.step(1)
+    print(env.time)
+    env.step(0)
+    print(env.time)
+    env.step(1)
+    print(env.time)
+    env.step(0)
+    print(env.time)
     #command = "conda deactivate && cd ..\PhysiCell_V_1.10.4 && project.exe && exit"
     #p = subprocess.Popen(["start", "cmd", "/K", command], shell=True)
     #print("executing")
