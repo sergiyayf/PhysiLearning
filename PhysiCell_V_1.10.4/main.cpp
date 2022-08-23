@@ -224,7 +224,9 @@ int main( int argc, char* argv[] )
 			/*
 			  Custom add-ons could potentially go here. 
 			*/
-			
+            
+            // Here is treatment wait thing
+			/*
             if( fabs(PhysiCell_globals.current_time - treatment_timer) < 0.01 * diffusion_dt ) { 
 				// check treatment schedule matrix 
                 
@@ -275,8 +277,10 @@ int main( int argc, char* argv[] )
                 			
                 
                 treatment_timer +=60;
-			}
-            
+			}*/
+            if( fabs(PhysiCell_globals.current_time - 40) < 0.01 * diffusion_dt ) { 
+                activate_drug_dc();
+            }
 			PhysiCell_globals.current_time += diffusion_dt;
 		}
 		

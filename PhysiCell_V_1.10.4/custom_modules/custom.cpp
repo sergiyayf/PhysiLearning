@@ -118,9 +118,11 @@ void create_cell_types( void )
 	*/ 
 	
 	cell_defaults.functions.update_phenotype = phenotype_function; 
-	cell_defaults.functions.custom_cell_rule = susceptible_cell_phenotype_update_rule; 
+	cell_defaults.functions.custom_cell_rule = NULL; 
 	cell_defaults.functions.contact_function = contact_function; 
 	
+    Cell_Definition* pWT = find_cell_definition("susceptible");
+    pWT->functions.custom_cell_rule = susceptible_cell_phenotype_update_rule;
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
 	*/
@@ -188,34 +190,58 @@ void setup_microenvironment( void )
 
 void setup_tissue( void )
 {
-	double Xmin = microenvironment.mesh.bounding_box[0]; 
-	double Ymin = microenvironment.mesh.bounding_box[1]; 
-	double Zmin = microenvironment.mesh.bounding_box[2]; 
-
-	double Xmax = microenvironment.mesh.bounding_box[3]; 
+	// place a cluster of tumor cells at the center 
+    double cell_radius = cell_defaults.phenotype.geometry.radius; 
+	double cell_spacing = 0.95 * 2.0 * cell_radius; 
+	
+	
+		
+	Cell* pCell = NULL;
+	    
+    int n = 0; 
+    int resistant_cells = parameters.ints("number_of_resistant_cells");
+    int susceptible_cells = parameters.ints("number_of_susceptible_cells");
+    std::cout<<"susceptible"<<susceptible_cells<<std::endl; 
+    double tumor_radius = std::sqrt(resistant_cells+susceptible_cells)*cell_radius; // 250.0; 
+    double x = 0.0; 
+    double x_outer = tumor_radius; 
+	double y = 0.0; 
+    double Xmin = microenvironment.mesh.bounding_box[0]; 
+	double Ymin = microenvironment.mesh.bounding_box[1];
+    double Xmax = microenvironment.mesh.bounding_box[3]; 
 	double Ymax = microenvironment.mesh.bounding_box[4]; 
-	double Zmax = microenvironment.mesh.bounding_box[5]; 
-	
-	if( default_microenvironment_options.simulate_2D == true )
-	{
-		Zmin = 0.0; 
-		Zmax = 0.0; 
+    double Xrange = Xmax - Xmin; 
+	double Yrange = Ymax - Ymin;
+    
+	while( n < resistant_cells)
+	{  
+        
+        double r = tumor_radius +1; 
+        while (r>0.7*tumor_radius) {
+        x = Xmin + UniformRandom()*Xrange; 
+        y = Ymin + UniformRandom()*Yrange; 
+        r = norm( {x,y,0.0} ); 
+        }
+        
+        pCell = create_cell( get_cell_definition("resistant") );         
+		pCell->assign_position( {x,y,0.0} );
+		n++; 
+	} 
+	while( n < resistant_cells+susceptible_cells)
+	{  
+        
+        double r = tumor_radius +1; 
+        while (r>tumor_radius || r<0.7*tumor_radius ) {
+        x = Xmin + UniformRandom()*Xrange; 
+        y = Ymin + UniformRandom()*Yrange; 
+        r = norm( {x,y,0.0} ); 
+        }
+        
+        pCell = create_cell( get_cell_definition("susceptible") ); 
+        pCell->assign_position( {x,y,0.0} );
+		n++; 
 	}
-	
-	double Xrange = Xmax - Xmin; 
-	double Yrange = Ymax - Ymin; 
-	double Zrange = Zmax - Zmin; 
-	
-	// create some of each type of cell 
-	
-	Cell* pC;
-	Cell_Definition* pCD = cell_definitions_by_index[0]; 
-    pC = create_cell( *pCD ); 
-    pC->assign_position( {0.0,0.0,0.0});
-	
-	
-	// load cells from your CSV file (if enabled)
-	//load_cells_from_pugixml(); 	
+		
 	
 	return; 
 }
@@ -235,7 +261,7 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 	static int cycle_end_index = live.find_phase_index( PhysiCell_constants::live ); 
     double pressure = pCell->state.simple_pressure;
     
-    double multiplier = 1 - pressure / 2; 
+    double multiplier = 1 - pressure / 5; 
     phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index) = multiplier * 
 		pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(cycle_start_index,cycle_end_index);
 	 
