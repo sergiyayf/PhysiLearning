@@ -224,64 +224,14 @@ int main( int argc, char* argv[] )
 			/*
 			  Custom add-ons could potentially go here. 
 			*/
+
             
-            // Here is treatment wait thing
-			
-            if( fabs(PhysiCell_globals.current_time - treatment_timer) < 0.01 * diffusion_dt ) { 
-				// check treatment schedule matrix 
-                
-                std::vector<std::vector<double>> B = read_matlab( "Treatment_schedule.mat");
-               
-                // check if time in matrix is the same as current simulation time 
-                if (fabs(B[std::round(PhysiCell_globals.current_time/60)][0]-PhysiCell_globals.current_time)<0.01){
-                    // check if decision on treatment has been made by the agent 
-                    if (fabs(B[std::round(PhysiCell_globals.current_time/60)][2]-1)<0.01){
-                        if (std::round(B[std::round(PhysiCell_globals.current_time/60)][1])){
-                                activate_drug_dc();
-                                //std::cout<<" Treat "<<std::endl;
-                        } else {
-                                deactivate_drug_dc();
-                                //std::cout<<" No treat"<<std::endl;
-                        }
-                    } else {
-                     // wait
-                        int q = 0; 
-                        while (q<1000) {
-                            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                            B = read_matlab( "Treatment_schedule.mat");
-                            if (fabs(B[std::round(PhysiCell_globals.current_time/60)][2]-1)<0.01){
-                                break; 
-                            } else {
-                                std::cout<<"Waiting for agent decision"<<std::endl;
-                                std::cout<<"Current time= "<<PhysiCell_globals.current_time/60<<std::endl;
-                                std::cout<<"Current decision made= "<<B[std::round(PhysiCell_globals.current_time/60)][2]<<std::endl;
-                                q++;
-                            }
-                            if (q ==1000){
-                                throw "Waiting for agent decision for too long"; 
-                            }                                                   
-                            
-                        }
-                        // do treatment 
-                        if (std::round(B[std::round(PhysiCell_globals.current_time/60)][1])){
-                                activate_drug_dc();
-                                //std::cout<<" Treat "<<std::endl;
-                        } else {
-                                deactivate_drug_dc();
-                                //std::cout<<" No treat"<<std::endl;
-                        }
-                        
-                        
-                    }
-                } else { std::cout<<" Warning: Something is wrong with treatment timing"<<std::endl; }
-                			
-                
-                treatment_timer +=60;
-			}
-            /*
-            if( fabs(PhysiCell_globals.current_time - 40) < 0.01 * diffusion_dt ) { 
+            if( fabs(PhysiCell_globals.current_time - 3000) < 0.01 * diffusion_dt ) { 
                 activate_drug_dc();
-            }*/
+            }
+            if( fabs(PhysiCell_globals.current_time - 4000) < 0.01 * diffusion_dt ) { 
+                deactivate_drug_dc();
+            }
 			PhysiCell_globals.current_time += diffusion_dt;
 		}
 		

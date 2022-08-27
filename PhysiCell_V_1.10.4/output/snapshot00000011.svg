@@ -1,0 +1,787 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with PhysiCell (http://PhysiCell.MathCancer.org/) -->
+<svg 
+ xmlns:dc="http://purl.org/dc/elements/1.1/" 
+ xmlns:cc="http://creativecommons.org/ns#" 
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+ xmlns:svg="http://www.w3.org/2000/svg" 
+ xmlns="http://www.w3.org/2000/svg" 
+ version="1.1" 
+ width="500" 
+ height="535" 
+ id="svg2">
+  <rect x="0" y="0" width="500" height="535" stroke-width="1" stroke="white" fill="white"/>
+  <text x="6.25" y="15"
+   font-family="Arial" font-size="12.5" fill="black" >
+   Current time: 2 days, 7 hours, and 0.00 minutes, z = 0.00 &#956;m
+  </text>
+  <text x="6.25" y="28.75"
+   font-family="Arial" font-size="11.875" fill="black" >
+   187 agents
+  </text>
+ <g id="tissue" 
+    transform="translate(0,535) scale(1,-1)">
+  <g id="ECM">
+  </g>
+  <g id="cells">
+   <g id="cell0" type="resistant" dead="false" >
+  <circle cx="274.403" cy="239.697" r="5.6996" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="274.403" cy="239.697" r="3.62965" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell99" type="susceptible" dead="false" >
+  <circle cx="180.926" cy="275.809" r="5.99856" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="180.926" cy="275.809" r="3.77902" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell2" type="resistant" dead="false" >
+  <circle cx="249.984" cy="255.113" r="5.78136" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="249.984" cy="255.113" r="3.66981" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell3" type="resistant" dead="false" >
+  <circle cx="272.556" cy="259.645" r="5.99786" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="272.556" cy="259.645" r="3.77881" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell4" type="resistant" dead="false" >
+  <circle cx="240.422" cy="260.603" r="5.97215" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="240.422" cy="260.603" r="3.76861" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell5" type="resistant" dead="true" >
+  <circle cx="256.183" cy="273.905" r="1.39209" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="256.183" cy="273.905" r="1.3463" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell6" type="resistant" dead="false" >
+  <circle cx="278.798" cy="230.039" r="5.96335" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="278.798" cy="230.039" r="3.76469" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell7" type="resistant" dead="false" >
+  <circle cx="246.072" cy="230.609" r="5.99898" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="246.072" cy="230.609" r="3.77912" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell8" type="resistant" dead="false" >
+  <circle cx="245.259" cy="278.8" r="5.99898" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="245.259" cy="278.8" r="3.77912" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell9" type="resistant" dead="true" >
+  <circle cx="260.217" cy="261.461" r="0.970247" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="260.217" cy="261.461" r="0.965451" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell10" type="susceptible" dead="false" >
+  <circle cx="252.66" cy="201.35" r="5.98888" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="252.66" cy="201.35" r="3.77566" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell11" type="susceptible" dead="false" >
+  <circle cx="215.938" cy="244.703" r="5.99899" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="215.938" cy="244.703" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell12" type="susceptible" dead="false" >
+  <circle cx="204.746" cy="299.566" r="5.99884" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="204.746" cy="299.566" r="3.77909" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell13" type="susceptible" dead="false" >
+  <circle cx="257.947" cy="305.277" r="5.99563" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="257.947" cy="305.277" r="3.77808" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell14" type="susceptible" dead="true" >
+  <circle cx="285.137" cy="225.25" r="2.07993" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="285.137" cy="225.25" r="1.7923" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell15" type="susceptible" dead="false" >
+  <circle cx="205.303" cy="229.09" r="4.91894" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="205.303" cy="229.09" r="3.11941" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell16" type="susceptible" dead="false" >
+  <circle cx="244.843" cy="219.277" r="5.99899" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="244.843" cy="219.277" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell17" type="susceptible" dead="false" >
+  <circle cx="289.921" cy="243.548" r="5.99898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="289.921" cy="243.548" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell18" type="susceptible" dead="false" >
+  <circle cx="224.716" cy="236.311" r="5.99534" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="224.716" cy="236.311" r="3.77798" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell19" type="susceptible" dead="false" >
+  <circle cx="220.604" cy="213.287" r="5.99077" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="220.604" cy="213.287" r="3.77632" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell20" type="susceptible" dead="true" >
+  <circle cx="256.416" cy="323.531" r="1.8546" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="256.416" cy="323.531" r="1.63381" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell21" type="susceptible" dead="false" >
+  <circle cx="242.186" cy="289.284" r="5.96806" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="242.186" cy="289.284" r="3.76681" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell22" type="susceptible" dead="false" >
+  <circle cx="298.411" cy="268.867" r="5.96475" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="298.411" cy="268.867" r="3.76542" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell23" type="susceptible" dead="false" >
+  <circle cx="263.777" cy="283.417" r="5.99899" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="263.777" cy="283.417" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell24" type="susceptible" dead="false" >
+  <circle cx="218.76" cy="324.795" r="5.9537" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="218.76" cy="324.795" r="3.76035" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell25" type="susceptible" dead="true" >
+  <circle cx="168.884" cy="216.893" r="2.56481" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="168.884" cy="216.893" r="2.01874" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell26" type="susceptible" dead="false" >
+  <circle cx="234.247" cy="219.55" r="5.99899" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="234.247" cy="219.55" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell27" type="susceptible" dead="false" >
+  <circle cx="288.168" cy="274.163" r="5.99897" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="288.168" cy="274.163" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell28" type="susceptible" dead="false" >
+  <circle cx="232.05" cy="198.773" r="5.99898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="232.05" cy="198.773" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell29" type="susceptible" dead="false" >
+  <circle cx="262.642" cy="205.319" r="5.99891" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="262.642" cy="205.319" r="3.77911" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell30" type="susceptible" dead="false" >
+  <circle cx="183.686" cy="224.747" r="5.99831" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="183.686" cy="224.747" r="3.77895" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell31" type="susceptible" dead="true" >
+  <circle cx="206.924" cy="287.387" r="1.92217" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="206.924" cy="287.387" r="1.70782" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell32" type="susceptible" dead="false" >
+  <circle cx="326.611" cy="288.446" r="5.64079" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="326.611" cy="288.446" r="3.59365" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell33" type="susceptible" dead="false" >
+  <circle cx="217.444" cy="290.852" r="5.99836" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="217.444" cy="290.852" r="3.77896" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell34" type="susceptible" dead="true" >
+  <circle cx="311.45" cy="210.325" r="2.03585" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="311.45" cy="210.325" r="1.76946" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell35" type="susceptible" dead="false" >
+  <circle cx="182.027" cy="248.222" r="5.99862" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="182.027" cy="248.222" r="3.77903" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell36" type="susceptible" dead="false" >
+  <circle cx="282.387" cy="295.533" r="5.99513" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="282.387" cy="295.533" r="3.77791" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell37" type="susceptible" dead="false" >
+  <circle cx="236.408" cy="270.788" r="5.99898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="236.408" cy="270.788" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell38" type="susceptible" dead="false" >
+  <circle cx="225.169" cy="221.773" r="4.77252" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="225.169" cy="221.773" r="3.00768" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell39" type="susceptible" dead="false" >
+  <circle cx="213.424" cy="234.49" r="5.99899" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="213.424" cy="234.49" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell40" type="susceptible" dead="false" >
+  <circle cx="276.209" cy="280.949" r="5.99899" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="276.209" cy="280.949" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell41" type="susceptible" dead="false" >
+  <circle cx="299.131" cy="236.705" r="5.9969" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="299.131" cy="236.705" r="3.77851" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell42" type="susceptible" dead="true" >
+  <circle cx="171.532" cy="270.045" r="3.32939" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="171.532" cy="270.045" r="2.37261" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell43" type="susceptible" dead="false" >
+  <circle cx="262.999" cy="194.019" r="5.97503" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="262.999" cy="194.019" r="3.77003" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell44" type="susceptible" dead="false" >
+  <circle cx="189.129" cy="268.44" r="5.60152" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="189.129" cy="268.44" r="3.56698" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell45" type="susceptible" dead="false" >
+  <circle cx="273.52" cy="197.98" r="5.99899" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="273.52" cy="197.98" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell46" type="susceptible" dead="true" >
+  <circle cx="275.235" cy="318.217" r="1.81898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="275.235" cy="318.217" r="1.64771" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell47" type="susceptible" dead="false" >
+  <circle cx="274.098" cy="220.234" r="5.99899" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="274.098" cy="220.234" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell48" type="susceptible" dead="false" >
+  <circle cx="322.956" cy="256.155" r="5.93949" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="322.956" cy="256.155" r="3.7535" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell49" type="susceptible" dead="true" >
+  <circle cx="288.959" cy="232.916" r="4.99591" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="288.959" cy="232.916" r="3.19846" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell52" type="susceptible" dead="false" >
+  <circle cx="224.195" cy="191.033" r="5.99261" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="224.195" cy="191.033" r="3.777" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell53" type="susceptible" dead="false" >
+  <circle cx="255.078" cy="223.587" r="5.99891" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="255.078" cy="223.587" r="3.77911" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell54" type="resistant" dead="false" >
+  <circle cx="268.467" cy="274.111" r="5.25055" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="268.467" cy="274.111" r="3.3459" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell55" type="susceptible" dead="false" >
+  <circle cx="229.177" cy="258.685" r="5.99898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="229.177" cy="258.685" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell56" type="susceptible" dead="true" >
+  <circle cx="203.824" cy="192.473" r="2.64703" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="203.824" cy="192.473" r="2.05576" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell57" type="resistant" dead="false" >
+  <circle cx="256.567" cy="234.725" r="5.99898" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="256.567" cy="234.725" r="3.77912" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell58" type="susceptible" dead="false" >
+  <circle cx="228.861" cy="291.091" r="5.99898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="228.861" cy="291.091" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell59" type="susceptible" dead="true" >
+  <circle cx="216.433" cy="298.673" r="1.43231" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="216.433" cy="298.673" r="1.37866" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell60" type="susceptible" dead="false" >
+  <circle cx="218.13" cy="255.55" r="5.99888" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="218.13" cy="255.55" r="3.7791" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell61" type="susceptible" dead="false" >
+  <circle cx="231.126" cy="209.284" r="5.99898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="231.126" cy="209.284" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell62" type="susceptible" dead="false" >
+  <circle cx="183.341" cy="206.548" r="5.99678" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="183.341" cy="206.548" r="3.77847" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell63" type="susceptible" dead="false" >
+  <circle cx="266.106" cy="313.293" r="5.99889" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="266.106" cy="313.293" r="3.7791" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell64" type="susceptible" dead="false" >
+  <circle cx="226.376" cy="302.001" r="5.99898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="226.376" cy="302.001" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell65" type="susceptible" dead="true" >
+  <circle cx="197.146" cy="255.49" r="1.77551" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="197.146" cy="255.49" r="1.61959" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell66" type="susceptible" dead="false" >
+  <circle cx="293.989" cy="253.797" r="5.68127" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="293.989" cy="253.797" r="3.61242" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell67" type="susceptible" dead="false" >
+  <circle cx="222.953" cy="280.864" r="5.99455" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="222.953" cy="280.864" r="3.77771" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell68" type="susceptible" dead="false" >
+  <circle cx="204.607" cy="240.495" r="5.87205" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="204.607" cy="240.495" r="3.7196" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell69" type="susceptible" dead="false" >
+  <circle cx="271.835" cy="291.385" r="5.99895" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="271.835" cy="291.385" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell70" type="susceptible" dead="false" >
+  <circle cx="242.742" cy="207.865" r="5.97138" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="242.742" cy="207.865" r="3.76827" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell71" type="susceptible" dead="true" >
+  <circle cx="293.319" cy="292.297" r="1.6974" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="293.319" cy="292.297" r="1.57105" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell72" type="susceptible" dead="false" >
+  <circle cx="199.601" cy="313.516" r="5.98572" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="199.601" cy="313.516" r="3.77434" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell73" type="resistant" dead="false" >
+  <circle cx="254.973" cy="263.968" r="5.29027" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="254.973" cy="263.968" r="3.37158" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell74" type="susceptible" dead="false" >
+  <circle cx="289.393" cy="204.185" r="5.99898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="289.393" cy="204.185" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell75" type="susceptible" dead="false" >
+  <circle cx="296.59" cy="225.455" r="5.97987" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="296.59" cy="225.455" r="3.77193" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell76" type="susceptible" dead="true" >
+  <circle cx="253.026" cy="286.417" r="3.96654" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="253.026" cy="286.417" r="2.67717" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell77" type="susceptible" dead="false" >
+  <circle cx="288.657" cy="263.254" r="5.99897" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="288.657" cy="263.254" r="3.77912" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell78" type="resistant" dead="false" >
+  <circle cx="245.22" cy="241.984" r="5.9989" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="245.22" cy="241.984" r="3.77911" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell79" type="susceptible" dead="false" >
+  <circle cx="189.997" cy="282.616" r="5.95404" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="189.997" cy="282.616" r="3.76045" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell80" type="susceptible" dead="false" >
+  <circle cx="221.174" cy="311.936" r="5.92834" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="221.174" cy="311.936" r="3.74807" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell81" type="susceptible" dead="false" >
+  <circle cx="277.278" cy="310.021" r="5.99787" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="277.278" cy="310.021" r="3.77882" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell82" type="susceptible" dead="false" >
+  <circle cx="237.385" cy="299.22" r="5.99894" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="237.385" cy="299.22" r="3.77911" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell83" type="susceptible" dead="true" >
+  <circle cx="267.791" cy="332.049" r="2.4977" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="267.791" cy="332.049" r="1.95472" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell179" type="resistant" dead="false" >
+  <circle cx="270.771" cy="249.376" r="5.36311" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="270.771" cy="249.376" r="3.43858" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell85" type="susceptible" dead="false" >
+  <circle cx="273.041" cy="209.226" r="5.99356" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="273.041" cy="209.226" r="3.77736" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell86" type="susceptible" dead="false" >
+  <circle cx="263.738" cy="216.442" r="5.99891" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="263.738" cy="216.442" r="3.77911" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell87" type="susceptible" dead="false" >
+  <circle cx="294.961" cy="214.138" r="5.9918" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="294.961" cy="214.138" r="3.77671" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell88" type="susceptible" dead="false" >
+  <circle cx="268.904" cy="302.283" r="5.99749" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="268.904" cy="302.283" r="3.7787" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell89" type="susceptible" dead="false" >
+  <circle cx="226.509" cy="247.671" r="5.99888" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="226.509" cy="247.671" r="3.7791" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell90" type="susceptible" dead="true" >
+  <circle cx="195.502" cy="210.675" r="1.44546" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="195.502" cy="210.675" r="1.37413" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell91" type="susceptible" dead="false" >
+  <circle cx="172.01" cy="206.236" r="5.84963" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="172.01" cy="206.236" r="3.70737" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell92" type="susceptible" dead="false" >
+  <circle cx="195.931" cy="292.299" r="5.9986" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="195.931" cy="292.299" r="3.77903" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell93" type="susceptible" dead="false" >
+  <circle cx="213.654" cy="187.426" r="5.99883" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="213.654" cy="187.426" r="3.77909" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell94" type="susceptible" dead="false" >
+  <circle cx="211.837" cy="220.888" r="5.99878" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="211.837" cy="220.888" r="3.77907" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell95" type="resistant" dead="false" >
+  <circle cx="261.601" cy="255.144" r="5.99873" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="261.601" cy="255.144" r="3.77906" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell96" type="susceptible" dead="true" >
+  <circle cx="186.08" cy="296.318" r="2.82116" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="186.08" cy="296.318" r="2.13461" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell97" type="susceptible" dead="false" >
+  <circle cx="180.179" cy="235.789" r="5.99864" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="180.179" cy="235.789" r="3.77904" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell98" type="susceptible" dead="false" >
+  <circle cx="171.832" cy="243.831" r="5.91959" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="171.832" cy="243.831" r="3.74378" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell100" type="susceptible" dead="false" >
+  <circle cx="191.254" cy="231.739" r="5.27017" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="191.254" cy="231.739" r="3.35877" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell101" type="susceptible" dead="false" >
+  <circle cx="308.106" cy="307.629" r="5.85898" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="308.106" cy="307.629" r="3.71302" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell102" type="susceptible" dead="false" >
+  <circle cx="213.16" cy="176.711" r="5.36435" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="213.16" cy="176.711" r="3.41902" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell103" type="susceptible" dead="false" >
+  <circle cx="211.451" cy="281.099" r="5.99591" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="211.451" cy="281.099" r="3.7782" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell104" type="susceptible" dead="false" >
+  <circle cx="210.327" cy="209.466" r="5.99807" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="210.327" cy="209.466" r="3.77888" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell105" type="susceptible" dead="true" >
+  <circle cx="246.036" cy="306.222" r="1.41004" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="246.036" cy="306.222" r="1.3608" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell106" type="susceptible" dead="false" >
+  <circle cx="287.907" cy="305.389" r="5.99787" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="287.907" cy="305.389" r="3.77882" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell107" type="resistant" dead="false" >
+  <circle cx="278.032" cy="269.492" r="5.99786" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="278.032" cy="269.492" r="3.77881" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell108" type="susceptible" dead="false" >
+  <circle cx="313.997" cy="261.25" r="5.09938" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="313.997" cy="261.25" r="3.24612" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell109" type="susceptible" dead="false" >
+  <circle cx="253.338" cy="212.262" r="5.99769" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="253.338" cy="212.262" r="3.77876" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell110" type="susceptible" dead="false" >
+  <circle cx="260.756" cy="294.247" r="5.99749" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="260.756" cy="294.247" r="3.7787" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell111" type="susceptible" dead="false" >
+  <circle cx="194.034" cy="303.552" r="5.99703" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="194.034" cy="303.552" r="3.77857" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell112" type="susceptible" dead="false" >
+  <circle cx="310.51" cy="239.704" r="5.9969" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="310.51" cy="239.704" r="3.77851" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell113" type="susceptible" dead="false" >
+  <circle cx="303.686" cy="289.755" r="5.99659" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="303.686" cy="289.755" r="3.77842" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell114" type="susceptible" dead="true" >
+  <circle cx="191.966" cy="191.78" r="1.66414" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="191.966" cy="191.78" r="1.54844" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell115" type="susceptible" dead="true" >
+  <circle cx="189.828" cy="215.797" r="2.43517" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="189.828" cy="215.797" r="1.96087" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell116" type="susceptible" dead="false" >
+  <circle cx="272.137" cy="180.761" r="5.76011" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="272.137" cy="180.761" r="3.65819" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell117" type="susceptible" dead="false" >
+  <circle cx="207.327" cy="251.584" r="5.99623" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="207.327" cy="251.584" r="3.77829" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell118" type="susceptible" dead="false" >
+  <circle cx="214.277" cy="266.25" r="5.99591" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="214.277" cy="266.25" r="3.7782" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell119" type="susceptible" dead="false" >
+  <circle cx="249.825" cy="297.38" r="5.99563" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="249.825" cy="297.38" r="3.77808" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell120" type="susceptible" dead="false" >
+  <circle cx="234.609" cy="240.332" r="5.65023" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="234.609" cy="240.332" r="3.59472" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell121" type="susceptible" dead="false" >
+  <circle cx="286.62" cy="285.185" r="5.99513" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="286.62" cy="285.185" r="3.77791" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell122" type="susceptible" dead="false" >
+  <circle cx="225.192" cy="269.527" r="5.99455" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="225.192" cy="269.527" r="3.77771" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell123" type="susceptible" dead="false" >
+  <circle cx="299.375" cy="299.026" r="4.87163" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="299.375" cy="299.026" r="3.08618" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell124" type="susceptible" dead="false" >
+  <circle cx="307.767" cy="279.319" r="5.92759" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="307.767" cy="279.319" r="3.74815" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell125" type="susceptible" dead="false" >
+  <circle cx="283.519" cy="213.936" r="5.99356" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="283.519" cy="213.936" r="3.77736" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell126" type="susceptible" dead="true" >
+  <circle cx="234.392" cy="310.097" r="5.99305" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="234.392" cy="310.097" r="3.77721" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell127" type="susceptible" dead="false" >
+  <circle cx="233.638" cy="179.609" r="5.57173" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="233.638" cy="179.609" r="3.55857" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell128" type="susceptible" dead="false" >
+  <circle cx="201.165" cy="215.596" r="5.99124" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="201.165" cy="215.596" r="3.77661" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell129" type="susceptible" dead="true" >
+  <circle cx="303.591" cy="218.161" r="1.91513" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="303.591" cy="218.161" r="1.7033" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell130" type="susceptible" dead="true" >
+  <circle cx="299.77" cy="208.482" r="1.78473" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="299.77" cy="208.482" r="1.6267" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell131" type="susceptible" dead="false" >
+  <circle cx="211.426" cy="198.383" r="5.93861" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="211.426" cy="198.383" r="3.75365" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell132" type="susceptible" dead="false" >
+  <circle cx="253.194" cy="189.181" r="5.84442" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="253.194" cy="189.181" r="3.70555" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell133" type="susceptible" dead="true" >
+  <circle cx="208.791" cy="320.038" r="3.32247" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="208.791" cy="320.038" r="2.36987" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell134" type="susceptible" dead="true" >
+  <circle cx="205.8" cy="270.568" r="3.16816" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="205.8" cy="270.568" r="2.29653" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell135" type="susceptible" dead="false" >
+  <circle cx="193.76" cy="181.954" r="5.98305" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="193.76" cy="181.954" r="3.77338" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell136" type="susceptible" dead="false" >
+  <circle cx="324.247" cy="222.313" r="5.40602" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="324.247" cy="222.313" r="3.46287" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell137" type="susceptible" dead="false" >
+  <circle cx="176.907" cy="216.057" r="5.91727" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="176.907" cy="216.057" r="3.74369" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell138" type="susceptible" dead="false" >
+  <circle cx="307.312" cy="228.841" r="5.97987" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="307.312" cy="228.841" r="3.77193" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell139" type="susceptible" dead="true" >
+  <circle cx="259.963" cy="187.309" r="1.71775" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="259.963" cy="187.309" r="1.58347" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell140" type="resistant" dead="false" >
+  <circle cx="237.365" cy="250.399" r="5.97215" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="237.365" cy="250.399" r="3.76861" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell141" type="susceptible" dead="false" >
+  <circle cx="245.854" cy="195.176" r="4.73949" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="245.854" cy="195.176" r="2.99088" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell142" type="susceptible" dead="false" >
+  <circle cx="234.227" cy="281.463" r="5.96806" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="234.227" cy="281.463" r="3.76681" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell143" type="susceptible" dead="false" >
+  <circle cx="188.193" cy="257.553" r="5.96806" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="188.193" cy="257.553" r="3.76681" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell144" type="susceptible" dead="false" >
+  <circle cx="303.936" cy="258.523" r="5.96475" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="303.936" cy="258.523" r="3.76542" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell145" type="resistant" dead="false" >
+  <circle cx="266.671" cy="228.991" r="5.96335" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="266.671" cy="228.991" r="3.76469" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell146" type="susceptible" dead="false" >
+  <circle cx="254.989" cy="316.221" r="5.96015" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="254.989" cy="316.221" r="3.76324" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell147" type="susceptible" dead="false" >
+  <circle cx="228.999" cy="320.013" r="5.9537" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="228.999" cy="320.013" r="3.76035" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell148" type="susceptible" dead="true" >
+  <circle cx="200.93" cy="281.054" r="3.02011" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="200.93" cy="281.054" r="2.22612" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell149" type="susceptible" dead="false" >
+  <circle cx="317.932" cy="274.783" r="5.94317" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="317.932" cy="274.783" r="3.75568" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell150" type="susceptible" dead="false" >
+  <circle cx="221.857" cy="202.322" r="5.93861" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="221.857" cy="202.322" r="3.75365" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell151" type="susceptible" dead="false" >
+  <circle cx="312.76" cy="250.95" r="5.93949" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="312.76" cy="250.95" r="3.7535" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell152" type="susceptible" dead="false" >
+  <circle cx="296.933" cy="280.747" r="5.92759" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="296.933" cy="280.747" r="3.74815" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell153" type="susceptible" dead="false" >
+  <circle cx="210.186" cy="309.546" r="5.92834" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="210.186" cy="309.546" r="3.74807" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell154" type="susceptible" dead="false" >
+  <circle cx="172.735" cy="226.803" r="5.91727" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="172.735" cy="226.803" r="3.74369" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell155" type="susceptible" dead="false" >
+  <circle cx="168.644" cy="254.49" r="5.67273" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="168.644" cy="254.49" r="3.61318" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell156" type="resistant" dead="false" >
+  <circle cx="281.873" cy="256.056" r="4.85634" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="281.873" cy="256.056" r="3.09551" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell157" type="susceptible" dead="false" >
+  <circle cx="318.196" cy="231.121" r="5.87331" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="318.196" cy="231.121" r="3.72159" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell158" type="susceptible" dead="false" >
+  <circle cx="196.804" cy="248.31" r="5.87205" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="196.804" cy="248.31" r="3.7196" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell159" type="susceptible" dead="true" >
+  <circle cx="312.676" cy="302.604" r="1.31362" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="312.676" cy="302.604" r="1.25459" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell160" type="susceptible" dead="false" >
+  <circle cx="173.355" cy="195.457" r="5.68846" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="173.355" cy="195.457" r="3.624" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell161" type="susceptible" dead="false" >
+  <circle cx="243.755" cy="183.448" r="5.84442" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="243.755" cy="183.448" r="3.70555" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell162" type="susceptible" dead="false" >
+  <circle cx="313.966" cy="219.988" r="5.77519" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="313.966" cy="219.988" r="3.67247" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell163" type="susceptible" dead="true" >
+  <circle cx="198.938" cy="199.693" r="1.8043" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="198.938" cy="199.693" r="1.62038" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell164" type="resistant" dead="false" >
+  <circle cx="255.328" cy="245.915" r="5.78136" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="255.328" cy="245.915" r="3.66981" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell165" type="susceptible" dead="false" >
+  <circle cx="241.844" cy="172.561" r="5.76489" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="241.844" cy="172.561" r="3.66131" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell166" type="susceptible" dead="true" >
+  <circle cx="182.797" cy="195.978" r="3.0154" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="182.797" cy="195.978" r="2.20727" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell167" type="resistant" dead="false" >
+  <circle cx="264.515" cy="241.585" r="5.36311" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="264.515" cy="241.585" r="3.43858" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell168" type="susceptible" dead="true" >
+  <circle cx="269.822" cy="191.786" r="1.5776" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="269.822" cy="191.786" r="1.4649" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell169" type="susceptible" dead="false" >
+  <circle cx="312.739" cy="296.023" r="5.64822" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="312.739" cy="296.023" r="3.60127" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell170" type="susceptible" dead="false" >
+  <circle cx="178.008" cy="257.434" r="4.58621" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="178.008" cy="257.434" r="2.92992" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell171" type="susceptible" dead="false" >
+  <circle cx="265.759" cy="324.432" r="5.68646" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="265.759" cy="324.432" r="3.619" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell172" type="susceptible" dead="true" >
+  <circle cx="234.731" cy="187.971" r="1.60661" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="234.731" cy="187.971" r="1.46535" stroke-width="0.5" stroke="black" fill="black"/>
+   </g>
+   <g id="cell173" type="susceptible" dead="false" >
+  <circle cx="302.431" cy="247.323" r="5.68127" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="302.431" cy="247.323" r="3.61242" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell174" type="susceptible" dead="false" >
+  <circle cx="316.302" cy="285.879" r="5.64079" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="316.302" cy="285.879" r="3.59365" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell175" type="susceptible" dead="false" >
+  <circle cx="275.221" cy="329.508" r="5.67185" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="275.221" cy="329.508" r="3.60692" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell176" type="susceptible" dead="false" >
+  <circle cx="235.077" cy="230.132" r="5.65023" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="235.077" cy="230.132" r="3.59472" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell177" type="susceptible" dead="false" >
+  <circle cx="198.006" cy="262.447" r="5.60152" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="198.006" cy="262.447" r="3.56698" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell178" type="susceptible" dead="false" >
+  <circle cx="332.586" cy="216.423" r="5.40602" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="332.586" cy="216.423" r="3.46287" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell180" type="susceptible" dead="false" >
+  <circle cx="204.463" cy="182.074" r="5.36435" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="204.463" cy="182.074" r="3.41902" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell181" type="resistant" dead="false" >
+  <circle cx="246.714" cy="268.706" r="5.29027" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="246.714" cy="268.706" r="3.37158" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell182" type="susceptible" dead="false" >
+  <circle cx="189.53" cy="241.082" r="5.27017" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="189.53" cy="241.082" r="3.35877" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell183" type="resistant" dead="false" >
+  <circle cx="264.318" cy="265.572" r="5.25055" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="264.318" cy="265.572" r="3.3459" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell184" type="susceptible" dead="false" >
+  <circle cx="308.834" cy="269.142" r="5.09938" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="308.834" cy="269.142" r="3.24612" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell185" type="resistant" dead="false" >
+  <circle cx="280.351" cy="247.317" r="4.85634" stroke-width="0.5" stroke="black" fill="red"/>
+  <circle cx="280.351" cy="247.317" r="3.09551" stroke-width="0.5" stroke="red" fill="red"/>
+   </g>
+   <g id="cell186" type="susceptible" dead="false" >
+  <circle cx="197.434" cy="224.851" r="4.91894" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="197.434" cy="224.851" r="3.11941" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell187" type="susceptible" dead="false" >
+  <circle cx="297.901" cy="308.099" r="4.87163" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="297.901" cy="308.099" r="3.08618" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell188" type="susceptible" dead="false" >
+  <circle cx="178.231" cy="266.172" r="4.58621" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="178.231" cy="266.172" r="2.92992" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell189" type="susceptible" dead="false" >
+  <circle cx="219.565" cy="227.672" r="4.77252" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="219.565" cy="227.672" r="3.00768" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+   <g id="cell190" type="susceptible" dead="false" >
+  <circle cx="238.5" cy="192.074" r="4.73949" stroke-width="0.5" stroke="black" fill="grey"/>
+  <circle cx="238.5" cy="192.074" r="2.99088" stroke-width="0.5" stroke="grey" fill="grey"/>
+   </g>
+  </g>
+ </g>
+  <rect x="287.5" y="517.5" width="200" height="5" stroke-width="1" stroke="rgb(255,255,255)" fill="rgb(0,0,0)"/>
+  <text x="290.625" y="514.375"
+   font-family="Arial" font-size="12.5" fill="black" >
+   200 &#956;m
+  </text>
+  <text x="12.5" y="522.5"
+   font-family="Arial" font-size="9.375" fill="black" >
+   0 days, 0 hours, 0 minutes, and 27.6857 seconds
+  </text>
+  <rect x="0" y="35" width="500" height="500" stroke-width="1" stroke="rgb(0,0,0)" fill="none"/>
+</svg>

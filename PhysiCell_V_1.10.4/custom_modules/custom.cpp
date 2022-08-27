@@ -121,8 +121,17 @@ void create_cell_types( void )
 	cell_defaults.functions.custom_cell_rule = NULL; 
 	cell_defaults.functions.contact_function = contact_function; 
 	
+    static int drug_index = microenvironment.find_density_index( "drug" ); 
+    
     Cell_Definition* pWT = find_cell_definition("susceptible");
     pWT->functions.custom_cell_rule = susceptible_cell_phenotype_update_rule;
+    pWT->functions.update_phenotype = phenotype_function;
+    pWT->phenotype.secretion.uptake_rates[drug_index] = 1.0; 
+    
+    Cell_Definition* pRT = find_cell_definition("resistant");
+    pRT->functions.custom_cell_rule = NULL;
+    pRT->functions.update_phenotype = phenotype_function;
+    pRT->phenotype.secretion.uptake_rates[drug_index] = 1.0; 
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
 	*/
@@ -138,9 +147,9 @@ void create_cell_types( void )
 void set_circular_boundary_conditions( void ) {
     
     std::vector<double> center_by_indices = {(double)microenvironment.mesh.x_coordinates.size()/2, (double)microenvironment.mesh.y_coordinates.size()/2, (double)microenvironment.mesh.z_coordinates.size()/2}; // find center voxel 
-    double system_radius = (double)microenvironment.mesh.x_coordinates.size()/2-5.0;
+    double system_radius = (double)microenvironment.mesh.x_coordinates.size()/2-1.0;
 	// if there are more substrates, resize accordingly 
-	std::vector<double> bc_vector = {35.0} ;
+	std::vector<double> bc_vector = {38.0} ;
 	for (unsigned int k = 0; k< microenvironment.mesh.z_coordinates.size(); k++) {
 		// loop through y  
 		for (unsigned int j = 0; j< microenvironment.mesh.y_coordinates.size() ; j++) {
@@ -201,7 +210,7 @@ void setup_tissue( void )
     int n = 0; 
     int resistant_cells = parameters.ints("number_of_resistant_cells");
     int susceptible_cells = parameters.ints("number_of_susceptible_cells");
-    std::cout<<"susceptible"<<susceptible_cells<<std::endl; 
+    
     double tumor_radius = std::sqrt(resistant_cells+susceptible_cells)*cell_radius; // 250.0; 
     double x = 0.0; 
     double x_outer = tumor_radius; 
@@ -217,7 +226,7 @@ void setup_tissue( void )
 	{  
         
         double r = tumor_radius +1; 
-        while (r>0.7*tumor_radius) {
+        while (r>0.4*tumor_radius) {
         x = Xmin + UniformRandom()*Xrange; 
         y = Ymin + UniformRandom()*Yrange; 
         r = norm( {x,y,0.0} ); 
@@ -231,7 +240,7 @@ void setup_tissue( void )
 	{  
         
         double r = tumor_radius +1; 
-        while (r>tumor_radius || r<0.7*tumor_radius ) {
+        while (r>tumor_radius || r<0.4*tumor_radius ) {
         x = Xmin + UniformRandom()*Xrange; 
         y = Ymin + UniformRandom()*Yrange; 
         r = norm( {x,y,0.0} ); 
@@ -240,7 +249,8 @@ void setup_tissue( void )
         pCell = create_cell( get_cell_definition("susceptible") ); 
         pCell->assign_position( {x,y,0.0} );
 		n++; 
-	}
+	}  
+	    
 		
 	
 	return; 
@@ -261,9 +271,18 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 	static int cycle_end_index = live.find_phase_index( PhysiCell_constants::live ); 
     double pressure = pCell->state.simple_pressure;
     
-    double multiplier = 1 - pressure / 5; 
+    double multiplier = 1.0;
+    if (pressure < 1) {
+        multiplier = 1 - pressure;
+    } else {
+        multiplier = 0.0;
+    }
     phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index) = multiplier * 
 		pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(cycle_start_index,cycle_end_index);
+        /*std::cout<<"Pressure:"<<pressure<<std::endl;
+        std::cout<<"multiplier:"<<multiplier<<std::endl;
+        std::cout<<"Referencee_live_phenotype:"<<pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(cycle_start_index,cycle_end_index)<<std::endl;
+        std::cout<<"actual:"<<phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index)<<std::endl;*/
 	 
     return; }
 
@@ -280,8 +299,9 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 	static bool indices_initiated = false; 
 	
 
-	double treatment_drug_proliferation_saturation = 12.0; 
-      	double treatment_drug_death_saturation = 31.95;
+	double treatment_drug_proliferation_saturation = 22.0; 
+    double treatment_drug_death_saturation = 33.0;
+    double treatment_drug_death_threshold = 27.5;
 	
 	// set necrosis without removal; 
 	//necrosis.phases[1].removal_at_phase_exit = false;
@@ -289,16 +309,25 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 	static int necrosis_model_index = phenotype.death.find_death_model_index("necrosis"); 
 
 	double pDrug = (pCell->nearest_density_vector())[drug_index];
-	phenotype.secretion.uptake_rates[drug_index] = 0.0; 
+    double multiplier = 0.0; 
+	//phenotype.secretion.uptake_rates[drug_index] = 0.0; 
 	phenotype.secretion.secretion_rates[drug_index] = 0.0; 
 	phenotype.secretion.saturation_densities[drug_index] = 30.0;	
 	if (pDrug > treatment_drug_proliferation_saturation) {
 		phenotype.cycle.data.transition_rate(start_phase_index,end_phase_index) = 0.0; 
 	}
 	
-	if (pDrug > treatment_drug_death_saturation) {
-		phenotype.death.rates[necrosis_model_index] = pCell->parameters.max_necrosis_rate;  
+	if( pDrug > treatment_drug_death_threshold )
+	{
+		multiplier = ( pDrug - treatment_drug_death_threshold ) 
+			/ ( treatment_drug_death_saturation - treatment_drug_death_threshold );
 	}
+	
+	if (pDrug > treatment_drug_death_saturation) {
+		multiplier = 1.0;  
+	}
+	phenotype.death.rates[necrosis_model_index] = multiplier * pCell->parameters.max_necrosis_rate;  
+    
 	return;		
 
 }	   
