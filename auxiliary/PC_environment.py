@@ -19,7 +19,7 @@ class PC_env(Env):
 
         # set up timer
         self.time = 0
-        self.max_time = 4
+        self.max_time = 180
         self.treatment_time_step = 60
 
         # set up initial wild type, mutant and treatment decision
@@ -50,17 +50,17 @@ class PC_env(Env):
             self.state[1] = dict['resistant']
         else:
             q = 0
-            while q < 1000:
+            while q < 10000:
                 # sleep x seconds
-                time.sleep(5)
+                time.sleep(1/100)
                 # check for progress again
                 if self.simulation_progressed(self.time):
                     # quit while loop
                     break
                 else:
-                    print('Waiting for progress')
+                    #print('Waiting for progress')
                     q+=1
-                if q == 1000:
+                if q == 10000:
                     raise FileNotFoundError(' Simulation did not progress to this point ')
             dict = get_PC_output(file='output' + '{:08n}'.format(self.time) + '.xml',
                                  dir='./../PhysiCell_V_1.10.4/output')
