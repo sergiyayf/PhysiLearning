@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 from get_output import get_PC_output
 from treats import Treatment
-import time
+import zmq
 
 # create environment
 class PC_env(Env):
@@ -38,43 +38,32 @@ class PC_env(Env):
         # treatment object
         self.treatment = Treatment()
 
+        self.context = zmq.Context()
+        self.socket = None
+
     def step(self, action):
         # update timer
         self.time += 1
         # get tumor updated state
-
-        if self.simulation_progressed(self.time):
-            dict = get_PC_output(file = 'output'+'{:08n}'.format(self.time)+'.xml',
-                                          dir = './../PhysiCell_V_1.10.4/output')
-            self.state[0] = dict['susceptible']
-            self.state[1] = dict['resistant']
-        else:
-            q = 0
-            while q < 10000:
-                # sleep x seconds
-                time.sleep(1/100)
-                # check for progress again
-                if self.simulation_progressed(self.time):
-                    # quit while loop
-                    break
-                else:
-                    #print('Waiting for progress')
-                    q+=1
-                if q == 10000:
-                    raise FileNotFoundError(' Simulation did not progress to this point ')
-            dict = get_PC_output(file='output' + '{:08n}'.format(self.time) + '.xml',
-                                 dir='./../PhysiCell_V_1.10.4/output')
-            self.state[0] = dict['susceptible']
-            self.state[1] = dict['resistant']
+        message = self.socket.recv()
+        type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
+        self.state[0] = int(type0[0])
+        type1 = re.findall(r'%s(\d+)' % "Type 1:", message)
+        self.state[1] = int(type1[0])
 
         # do action (apply treatment or not)
         self.state[2] = action
-        self.treatment.change_treatment(self.time,action)
-
+        if action == 0 :
+            self.socket.send(b"Stop treatment")
+        elif action == 1:
+            self.socket.send(b"Treat")
         # record trajectory
         self.trajectory[:,self.time - 1] = self.state
         # get the reward
-        reward = self.time/np.sum(self.state[0:2])
+        if np.sum(self.state[0:2]) != 0:
+            reward = 100/np.sum(self.state[0:2])
+        else:
+            reward = 200;
         # check if we are done
         # check for existence of final.svg
         if self.time >= self.max_time:
@@ -97,8 +86,14 @@ class PC_env(Env):
         self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
 
         self.cleanup()
-        self.treatment.set_treatment_file_for_current_sim()
+
+        # create a socket to talk to server
+        self.socket = self.context.socket(zmq.REQ)
+        self.socket.connect("rcp://localhost:5555")
+        # send initial no treatment request
+        self.socket.send(b"Start simulation")
         self.start_new_sim()
+
         return self.state
 
     def start_new_sim(self):
@@ -109,8 +104,8 @@ class PC_env(Env):
         return
 
     def cleanup(self):
-        command = "conda deactivate && cd ..\PhysiCell_V_1.10.4 && make data-cleanup && exit"
-        subprocess.call(["start","/wait", "cmd", "/K", command], shell=True)
+        command = "cd ../PhysiCell_V_1.10.4 && make data-cleanup && exit"
+        subprocess.call([command], shell=True)
         print("cleaned output")
         return
 

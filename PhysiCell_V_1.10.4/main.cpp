@@ -72,8 +72,7 @@
 #include <cmath>
 #include <omp.h>
 #include <fstream>
-#include <thread>
-#include <chrono>
+#include <zmq.hpp>
 
 #include "./core/PhysiCell.h"
 #include "./modules/PhysiCell_standard_modules.h" 
@@ -129,6 +128,16 @@ int main( int argc, char* argv[] )
 	create_cell_types();
 	
 	setup_tissue();
+    
+    // initilize zmq context with single IO thread 
+	zmq::context_t context{1};
+	// contruct REP socket and bind to interface
+	zmq::socket_t socket{context,zmq::socket_type::rep};
+	socket.bind("tcp://*:5555");
+    
+    // set doctor_timer 
+    int doctor_timer = 60; 
+    
 
 	/* Users typically stop modifying here. END USERMODS */ 
 	
@@ -224,6 +233,47 @@ int main( int argc, char* argv[] )
 			/*
 			  Custom add-ons could potentially go here. 
 			*/
+            
+            // zmq code block here 
+			if (fabs (PhysiCell_globals.current_time - doctor_timer)<0.01*diffusion_dt) {
+				
+				std::cout<<"Code will start"<<std::endl;
+				zmq::message_t request;
+				// recieve a request from client 
+				socket.recv(request, zmq::recv_flags::none);
+				std::cout<<"Recieved "<<request.to_string() << std::endl;
+                // do treatment or not
+                if (request.to_string() == "Treat") {
+                    activate_drug_dc();
+                } else if (request.to_string() == "Stop treatment") {
+                    deactivate_drug_dc();
+                } else if (request.to_string() == "Start simulation") {
+                    deactivate_drug_dc();
+                } 
+				
+				// try to change cell position to string;
+				std::string data{"Type 0:"};
+				int type_0_counter = 0;
+				int type_1_counter = 0;
+					for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) { 
+						if ((*all_cells)[cells_it]->type == 0) {
+					       type_0_counter++;
+					} else if ((*all_cells)[cells_it]->type == 1 ) {
+				 		type_1_counter++;
+					}
+				}
+				
+				data.append(std::to_string(type_0_counter));
+				data.append(" Type 1:");
+				data.append(std::to_string(type_1_counter));
+						
+				
+				// send the reply to the client 
+				socket.send(zmq::buffer(data), zmq::send_flags::none);
+				
+				std::cout<<"Code ended here"<<std::endl;
+                doctor_timer+=60;
+			}
 
             
             if( fabs(PhysiCell_globals.current_time - 3000) < 0.01 * diffusion_dt ) { 
