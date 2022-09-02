@@ -72,7 +72,7 @@
 #include <cmath>
 #include <omp.h>
 #include <fstream>
-#include <zmq.hpp>
+//#include <zmq.hpp>
 
 #include "./core/PhysiCell.h"
 #include "./modules/PhysiCell_standard_modules.h" 
@@ -130,6 +130,7 @@ int main( int argc, char* argv[] )
 	setup_tissue();
     
     // initilize zmq context with single IO thread 
+    /*
 	zmq::context_t context{1};
 	// contruct REP socket and bind to interface
 	zmq::socket_t socket{context,zmq::socket_type::rep};
@@ -137,7 +138,7 @@ int main( int argc, char* argv[] )
     
     // set doctor_timer 
     int doctor_timer = 60; 
-    
+    */
 
 	/* Users typically stop modifying here. END USERMODS */ 
 	
@@ -235,6 +236,7 @@ int main( int argc, char* argv[] )
 			*/
             
             // zmq code block here 
+            /*
 			if (fabs (PhysiCell_globals.current_time - doctor_timer)<0.01*diffusion_dt) {
 				
 				std::cout<<"Code will start"<<std::endl;
@@ -273,15 +275,9 @@ int main( int argc, char* argv[] )
 				
 				std::cout<<"Code ended here"<<std::endl;
                 doctor_timer+=60;
-			}
+			}*/
 
-            
-            if( fabs(PhysiCell_globals.current_time - 3000) < 0.01 * diffusion_dt ) { 
-                activate_drug_dc();
-            }
-            if( fabs(PhysiCell_globals.current_time - 4000) < 0.01 * diffusion_dt ) { 
-                deactivate_drug_dc();
-            }
+
 			PhysiCell_globals.current_time += diffusion_dt;
 		}
 		

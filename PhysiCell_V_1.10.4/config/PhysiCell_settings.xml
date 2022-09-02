@@ -30,12 +30,12 @@
 		<folder>output</folder>  
 
 		<full_data>
-			<interval units="min">300</interval>
+			<interval units="min">600</interval>
 			<enable>true</enable>
 		</full_data>
 		
 		<SVG>
-			<interval units="min">300</interval>
+			<interval units="min">600</interval>
 			<enable>true</enable>
 		</SVG>
 		
@@ -366,8 +366,8 @@
 	<user_parameters>
 		<random_seed type="int" units="dimensionless" description="">0</random_seed>
         <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">1</number_of_cells>
-        <number_of_resistant_cells type="int" units="none" description="">10</number_of_resistant_cells>
-        <number_of_susceptible_cells type="int" units="none" description="">40</number_of_susceptible_cells>
+        <number_of_resistant_cells type="int" units="none" description="">5</number_of_resistant_cells>
+        <number_of_susceptible_cells type="int" units="none" description="">45</number_of_susceptible_cells>
     </user_parameters>
 	
 </PhysiCell_settings>
