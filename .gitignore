@@ -1,0 +1,20 @@
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Simulations
+simulations/
+results/
+runs/
+data/
+images/
+PhysiCell_V_1.10.4/output
+
+# SVGs 
+*.svg
+*.pdf
+
+
+

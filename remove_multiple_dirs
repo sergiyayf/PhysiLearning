@@ -1,0 +1,9 @@
+#!/bin/bash 
+for ((i = 1; i <= ${1}; i++)); do 
+	rm -r PhysiCell_V_1.10.4_$i
+		
+done
+ 
+
+
+
