@@ -2,16 +2,14 @@
 from gym import Env
 from gym.spaces import Discrete, Box
 import numpy as np
-import os
 import subprocess
-from pathlib import Path
 import zmq
 import re
 import time
 
 # create environment
 class PC_env(Env):
-    def __init__(self,port):
+    def __init__(self,port, job_name = '0000000'):
         # setting up environment
         # set up discrete action space
         self.action_space = Discrete(2)
@@ -36,6 +34,7 @@ class PC_env(Env):
         self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
 
         # socket
+        self.job_name = job_name
         self.port = port
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
@@ -93,11 +92,11 @@ class PC_env(Env):
         command = "cd ../PhysiCell_V_1.10.4_"+self.port+" && make data-cleanup && exit"
         subprocess.run([command], shell=True)
 
-        command = "bash run.sh "+self.port
+        command = "bash run.sh "+self.port+" "+self.job_name+self.port
         p = subprocess.Popen([command], shell=True)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect('ipc:///raven/ptmp/saif/'+self.port)
+        self.socket.connect('ipc:///raven/ptmp/saif/'+self.job_name+self.port)
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
         self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
@@ -108,7 +107,7 @@ class PC_env(Env):
 
     
 if __name__ == '__main__':
-    env = PC_env()
+    env = PC_env('0')
     env.reset()
     print(env.time)
     
