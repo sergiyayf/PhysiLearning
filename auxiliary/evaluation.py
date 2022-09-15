@@ -25,6 +25,7 @@ class Evaluation():
         -------
 
         """
+        final_score = np.zeros(num_episodes) 
         model = PPO.load(os.path.join('Training', 'SavedModels', model_name))
         for episode in range(num_episodes):
             # reset the environment
@@ -55,7 +56,7 @@ class Evaluation():
         -------
 
         """
-        df = pd.DataFrame(self.env.trajectory,columns=['Type 0', 'Type 1', 'Treatment'])
+        df = pd.DataFrame(np.transpose(self.env.trajectory),columns=['Type 0', 'Type 1', 'Treatment'])
         df.to_csv('trajectory_'+str(episode)+'.csv')
         return
 
@@ -67,5 +68,6 @@ class Evaluation():
         return
 
 if __name__ == '__main__':
-    env = PC_env()
-    eval = Evaluation(env)
+    env = PC_env('0')
+    evaluation = Evaluation(env)
+    evaluation.run_model('PPO_vector_500000_steps')

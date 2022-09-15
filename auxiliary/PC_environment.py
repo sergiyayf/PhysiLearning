@@ -12,8 +12,9 @@ class PC_env(Env):
     def __init__(self,port, job_name = '0000000'):
         # setting up environment
         # set up discrete action space
+        self.burden = 1000 
         self.action_space = Discrete(2)
-        self.observation_space = Box(low=0,high=100,shape=(3,))
+        self.observation_space = Box(low=0,high=self.burden,shape=(3,))
 
         # set up timer
         self.time = 0
@@ -31,7 +32,7 @@ class PC_env(Env):
                       self.initial_drug]
 
         # trajectory for plotting
-        self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
+        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
 
         # socket
         self.job_name = job_name
@@ -45,7 +46,7 @@ class PC_env(Env):
 
     def step(self, action):
         # update timer
-        self.time += 60
+        self.time += self.treatment_time_step
         # get tumor updated state
         print('stepping')
         message = str(self.socket.recv(),'utf-8')
@@ -58,15 +59,15 @@ class PC_env(Env):
         self.state[2] = action
         
         # record trajectory
-        self.trajectory[:,self.time - 1] = self.state
+        self.trajectory[:,int(self.time/self.treatment_time_step) - 1] = self.state
         # get the reward
         if np.sum(self.state[0:2]) != 0:
-            reward = (1000-self.state[0]-5*self.state[1])*1e-3 # this means about 60 % of the simulation space is filled
+            reward = (self.burden-self.state[0]-10*self.state[1])/self.burden # this means about 60 % of the simulation space is filled
         else:
             reward = 5
         # check if we are done
         #reward = 1 
-        if self.time >= self.max_time or np.sum(self.state[0:2])>=1000:
+        if self.time >= self.max_time or np.sum(self.state[0:2])>=self.burden:
             done = True
             self.socket.send(b"End simulation")
             self.socket.close()
@@ -89,8 +90,8 @@ class PC_env(Env):
 
     def reset(self):
         time.sleep(3.0)
-        command = "cd ../PhysiCell_V_1.10.4_"+self.port+" && make data-cleanup && exit"
-        subprocess.run([command], shell=True)
+        #command = "cd ../PhysiCell_V_1.10.4_"+self.port+" && make data-cleanup && exit"
+        #subprocess.run([command], shell=True)
 
         command = "bash run.sh "+self.port+" "+self.job_name+self.port
         p = subprocess.Popen([command], shell=True)
@@ -99,7 +100,7 @@ class PC_env(Env):
         self.socket.connect('ipc:///raven/ptmp/saif/'+self.job_name+self.port)
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
-        self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
+        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
             
         self.socket.send(b"Start simulation")
         print('Reset sim, bound to port'+self.port)
