@@ -12,7 +12,7 @@ log_path = os.path.join('Training', 'Logs')
 model_path = os.path.join('Training', 'SavedModels')
 checkpoint_callback = CheckpointCallback(save_freq=20000,save_path = model_path, name_prefix = 'PPO_vector')
 
-def make_env(port, rank, job_name = job_name, seed=0):
+def make_env(port, rank, job_name = '000000', seed=0):
         """
             Utility function for multiprocessed env.
             :param env_id: (str) the environment ID
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # create the vectorized environment
     env = SubprocVecEnv([make_env(i,i,job_name = sys.argv[1]) for i in range(num_cpu)])
     
-    model = PPO('MlpPolicy', env, tensorboard_log=log_path, ent_coef = 0.01, verbose = 1)
+    model = PPO('MlpPolicy', env, tensorboard_log=log_path, ent_coef = 0.01, verbose = 1, n_steps = 300)
     
     # train model
     model.learn(total_timesteps=int(1e7), callback=checkpoint_callback)

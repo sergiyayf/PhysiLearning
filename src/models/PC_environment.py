@@ -48,7 +48,7 @@ class PC_env(Env):
         # update timer
         self.time += self.treatment_time_step
         # get tumor updated state
-        print('stepping')
+        
         message = str(self.socket.recv(),'utf-8')
          
         type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
@@ -90,10 +90,7 @@ class PC_env(Env):
 
     def reset(self):
         time.sleep(3.0)
-        #command = "cd ../PhysiCell_V_1.10.4_"+self.port+" && make data-cleanup && exit"
-        #subprocess.run([command], shell=True)
-
-        command = "bash run.sh "+self.port+" "+self.job_name+self.port
+        command = "bash ./bin/run.sh "+self.port+" "+self.job_name+self.port
         p = subprocess.Popen([command], shell=True)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
@@ -101,9 +98,8 @@ class PC_env(Env):
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
-            
+           
         self.socket.send(b"Start simulation")
-        print('Reset sim, bound to port'+self.port)
         return self.state
 
     
@@ -111,11 +107,6 @@ if __name__ == '__main__':
     env = PC_env('0')
     env.reset()
     print(env.time)
-    
-    #command = "conda deactivate && cd ..\PhysiCell_V_1.10.4 && project.exe && exit"
-    #p = subprocess.Popen(["start", "cmd", "/K", command], shell=True)
-    #print("executing")
-    #print(p.poll())
 
 
 

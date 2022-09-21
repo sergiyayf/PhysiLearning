@@ -1,0 +1,22 @@
+#agent things
+job:
+  nodes: 1
+  ntasks: 1
+  mem: 3000
+  cpus-per-task: 1
+  time: 24:00:00
+  
+PhysiCell:
+  cells: None
+
+learning:
+  opts:
+    n_cpus: 1
+    n_steps: 300
+    verbose: 1
+    entropy: 0.01
+  env:
+    burden: 1000
+    steps: 60
+    max_time: 30000
+      

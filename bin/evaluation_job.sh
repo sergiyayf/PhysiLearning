@@ -1,10 +1,10 @@
 #!/bin/bash -l
 
 # Standard output and error:
-#SBATCH -o ./tjob.out.%j
-#SBATCH -e ./tjob.err.%j
+#SBATCH -o ./logs/tjob.out.%j
+#SBATCH -e ./logs/tjob.err.%j
 # Initial working directory:
-#SBATCH -D ./
+#SBATCH -D ./../
 # Job Name:
 #SBATCH -J PhysiLearning
 # Queue (Partition):
@@ -33,4 +33,4 @@ export LD_LIBRARY_PATH=/u/saif/soft/libzmq/lib:$LD_LIBRARY_PATH
 # for pinning threads correctly:
 export OMP_PLACES=cores
 
-srun --exclusive --ntasks=1 --cpus-per-task=1 --mem-per-cpu=3000 python3 ./evaluation.py
+srun --exclusive --ntasks=1 --cpus-per-task=1 --mem-per-cpu=3000 python3 ./src/evaluation/evaluation.py
