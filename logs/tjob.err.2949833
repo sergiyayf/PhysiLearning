@@ -1,5 +1,0 @@
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** STEP 2949833.1 ON ravc4029 CANCELLED AT 2022-09-20T17:20:56 ***
-slurmstepd: error: *** STEP 2949833.0 ON ravc4029 CANCELLED AT 2022-09-20T17:20:56 ***
-slurmstepd: error: *** JOB 2949833 ON ravc4029 CANCELLED AT 2022-09-20T17:20:56 ***

@@ -5,6 +5,19 @@ from stable_baselines3 import PPO
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import sys 
+
+def AT(obs,env,threshold = 0.6):
+    """ 
+    cycling adaptive therapy strategy
+    """
+    tumor_size = np.sum(obs[0:2])
+    
+    if tumor_size > threshold:
+        action = 1
+    else:
+        action = 0 
+    return action 
 
 class Evaluation():
 
@@ -35,17 +48,30 @@ class Evaluation():
 
             while not done:
                 action, _state = model.predict(obs)
-                obs, reward, done, info = env.step(action)
+                obs, reward, done, info = self.env.step(action)
                 score += reward
 
             final_score[episode] = score
             print(f'Episode {episode} - Score: {score}')
 
-            self.save_trajectory(episode)
+            self.save_trajectory('trajectory_{0}.csv'.format(episode))
 
         return
+    
+    def run_AT(self, num_episodes=1):
+        """ Run adaptive therapy for comperison""" 
+        for episode in range(num_episodes):
+            obs = self.env.reset()
+            done = False 
+            score = 0
+            while not done:
+                action = AT(obs,self.env)
+                obs, reward, done, info = self.env.step(action)
+                score += reward
+            
+            self.save_trajectory('AT_trajectory_{0}'.format(episode))
 
-    def save_trajectory(self,episode):
+    def save_trajectory(self,name):
         """
         Save the trajectory to a csv file
         Parameters
@@ -57,7 +83,7 @@ class Evaluation():
 
         """
         df = pd.DataFrame(np.transpose(self.env.trajectory),columns=['Type 0', 'Type 1', 'Treatment'])
-        df.to_csv('trajectory_'+str(episode)+'.csv')
+        df.to_csv(name)
         return
 
     def plot_trajectory(self, episode = 0):
@@ -68,6 +94,14 @@ class Evaluation():
         return
 
 if __name__ == '__main__':
-    env = PC_env('0')
+    config_file = 'config.yaml'
+    env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
     evaluation = Evaluation(env)
-    evaluation.run_model('PPO_vector_500000_steps')
+    most_recent_evaluation = 0
+    if most_recent_evaluation: 
+
+        most_recent_file = sorted([os.path.join('Training','Logs',f) for f in os.listdir('./Training/Logs/') ], key=os.path.getctime)[-1] 
+        evaluation.run_model(most_recent_file,num_episodes=3)
+    evaluation.run_model('./LV_not_treat_pretrained', num_episodes=3) 
+    #evaluation.run_AT(num_episodes=3) 
+    

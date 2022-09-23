@@ -1,8 +1,7 @@
-Using cpu device
-Wrapping the env with a `Monitor` wrapper
-Wrapping the env in a DummyVecEnv.
-Logging to Training/Logs/PPO_1
-Binding to port: ipc:///raven/ptmp/saif/29498330
+Parsing config file config.yaml
+Training agent on one environment
+Logging to Training\Logs/PPO_2
+Binding to port: ipc:///raven/ptmp/saif/29614910
 Using config file ./config/PhysiCell_settings.xml ... 
 1
 dc? 1
@@ -207,31 +206,58 @@ Using PhysiCell version 1.10.4
 See ALL_CITATIONS.txt for this list.
 current simulated time: 0 min (max: 72000 min)
 total agents: 50
-interval wall time: 0 days, 0 hours, 0 minutes, and 1.4452e-05 seconds 
-total wall time: 0 days, 0 hours, 0 minutes, and 1.8132e-05 seconds 
+interval wall time: 0 days, 0 hours, 0 minutes, and 1.1933e-05 seconds 
+total wall time: 0 days, 0 hours, 0 minutes, and 1.6114e-05 seconds 
 
 
 Using method diffusion_decay_solver__constant_coefficients_LOD_2D (2D LOD with Thomas Algorithm) ... 
 
 current simulated time: 3000 min (max: 72000 min)
-total agents: 38
-interval wall time: 0 days, 0 hours, 0 minutes, and 8.6594 seconds 
-total wall time: 0 days, 0 hours, 0 minutes, and 8.65942 seconds 
+total agents: 149
+interval wall time: 0 days, 0 hours, 0 minutes, and 12.275 seconds 
+total wall time: 0 days, 0 hours, 0 minutes, and 12.275 seconds 
 
 current simulated time: 6000 min (max: 72000 min)
-total agents: 152
-interval wall time: 0 days, 0 hours, 0 minutes, and 12.3458 seconds 
-total wall time: 0 days, 0 hours, 0 minutes, and 21.0053 seconds 
+total agents: 327
+interval wall time: 0 days, 0 hours, 0 minutes, and 21.1397 seconds 
+total wall time: 0 days, 0 hours, 0 minutes, and 33.4147 seconds 
 
 current simulated time: 9000 min (max: 72000 min)
-total agents: 294
-interval wall time: 0 days, 0 hours, 0 minutes, and 20.0936 seconds 
-total wall time: 0 days, 0 hours, 0 minutes, and 41.0989 seconds 
+total agents: 603
+interval wall time: 0 days, 0 hours, 0 minutes, and 36.5184 seconds 
+total wall time: 0 days, 0 hours, 1 minutes, and 9.93313 seconds 
 
 current simulated time: 12000 min (max: 72000 min)
-total agents: 569
-interval wall time: 0 days, 0 hours, 0 minutes, and 34.345 seconds 
-total wall time: 0 days, 0 hours, 1 minutes, and 15.4439 seconds 
+total agents: 639
+interval wall time: 0 days, 0 hours, 0 minutes, and 49.2728 seconds 
+total wall time: 0 days, 0 hours, 1 minutes, and 59.2059 seconds 
+
+current simulated time: 15000 min (max: 72000 min)
+total agents: 777
+interval wall time: 0 days, 0 hours, 0 minutes, and 52.9182 seconds 
+total wall time: 0 days, 0 hours, 2 minutes, and 52.1241 seconds 
+
+----------------------------
+| time/              |     |
+|    fps             | 1   |
+|    iterations      | 1   |
+|    time_elapsed    | 216 |
+|    total_timesteps | 300 |
+----------------------------
+current simulated time: 18000 min (max: 72000 min)
+total agents: 454
+interval wall time: 0 days, 0 hours, 0 minutes, and 41.4914 seconds 
+total wall time: 0 days, 0 hours, 3 minutes, and 33.6155 seconds 
+
+current simulated time: 21000 min (max: 72000 min)
+total agents: 459
+interval wall time: 0 days, 0 hours, 0 minutes, and 41.1696 seconds 
+total wall time: 0 days, 0 hours, 4 minutes, and 14.7851 seconds 
+
+current simulated time: 24000 min (max: 72000 min)
+total agents: 515
+interval wall time: 0 days, 0 hours, 0 minutes, and 42.1689 seconds 
+total wall time: 0 days, 0 hours, 4 minutes, and 56.954 seconds 
 
                                   
 ================================= 
@@ -240,11 +266,11 @@ Global information about the job:
   
 Job owner: saif(43745)
 Job name:  PhysiLearning
-Node list: ravc4029
-Job start: Tue Sep 20 17:18:37 CEST 2022
-Job end:   Tue Sep 20 17:20:56 CEST 2022
+Node list: ravc4003
+Job start: Thu Sep 22 17:31:02 CEST 2022
+Job end:   Thu Sep 22 17:36:19 CEST 2022
 Work dir:  /u/saif/Serhii_EvoChan/PhysiLearning/bin/./../
-Command:   /raven/u/saif/Serhii_EvoChan/PhysiLearning/bin/single_env_job.sh
+Command:   /raven/u/saif/Serhii_EvoChan/PhysiLearning/bin/job.sh
   
   
   
@@ -255,10 +281,10 @@ tasks of the per-task memory high-water marks; cf. "man sacct"):
   
 JobID           JobName NNodes NTasks  NCPUS       MaxRSS       AveRSS    Elapsed ExitCode 
 ------------ ---------- ------ ------ ------ ------------ ------------ ---------- -------- 
-2949833      PhysiLear+      1             4                             00:02:19      0:0 
-2949833.0       python3      1      1      2      245.05M      245.05M   00:02:21     0:15 
-2949833.1       project      1      1      2        5.67M        5.67M   00:01:49     0:15 
+2961491      PhysiLear+      1            10                             00:05:17      0:0 
+2961491.0       python3      1      1      2      205.31M      205.31M   00:05:20     0:15 
+2961491.1       project      1      1      2        5.75M        5.75M   00:05:06     0:15 
   
-Maximum memory per node: 0.250934 GB (defined as MaxRSS*Ntasks/NNodes)
-CPU utilization: 32.7 %
+Maximum memory per node: 0.210238 GB (defined as MaxRSS*Ntasks/NNodes)
+CPU utilization: 19.1 %
      

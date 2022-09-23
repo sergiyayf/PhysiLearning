@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "./src/models/evaluation.py", line 105, in <module>
+    evaluation.run_model('./data/LV_not_treat_pretrained', num_episodes=3) 
+  File "./src/models/evaluation.py", line 42, in run_model
+    model = PPO.load(os.path.join('Training', 'SavedModels', model_name))
+  File "/u/saif/.local/lib/python3.8/site-packages/stable_baselines3/common/base_class.py", line 704, in load
+    data, params, pytorch_variables = load_from_zip_file(
+  File "/u/saif/.local/lib/python3.8/site-packages/stable_baselines3/common/save_util.py", line 388, in load_from_zip_file
+    load_path = open_path(load_path, "r", verbose=verbose, suffix="zip")
+  File "/mpcdf/soft/SLE_15/packages/x86_64/anaconda/3/2021.05/lib/python3.8/functools.py", line 875, in wrapper
+    return dispatch(args[0].__class__)(*args, **kw)
+  File "/u/saif/.local/lib/python3.8/site-packages/stable_baselines3/common/save_util.py", line 232, in open_path_str
+    return open_path(pathlib.Path(path), mode, verbose, suffix)
+  File "/mpcdf/soft/SLE_15/packages/x86_64/anaconda/3/2021.05/lib/python3.8/functools.py", line 875, in wrapper
+    return dispatch(args[0].__class__)(*args, **kw)
+  File "/u/saif/.local/lib/python3.8/site-packages/stable_baselines3/common/save_util.py", line 284, in open_path_pathlib
+    return open_path(path, mode, verbose, suffix)
+  File "/mpcdf/soft/SLE_15/packages/x86_64/anaconda/3/2021.05/lib/python3.8/functools.py", line 875, in wrapper
+    return dispatch(args[0].__class__)(*args, **kw)
+  File "/u/saif/.local/lib/python3.8/site-packages/stable_baselines3/common/save_util.py", line 264, in open_path_pathlib
+    raise error
+  File "/u/saif/.local/lib/python3.8/site-packages/stable_baselines3/common/save_util.py", line 256, in open_path_pathlib
+    path = path.open("rb")
+  File "/mpcdf/soft/SLE_15/packages/x86_64/anaconda/3/2021.05/lib/python3.8/pathlib.py", line 1221, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/mpcdf/soft/SLE_15/packages/x86_64/anaconda/3/2021.05/lib/python3.8/pathlib.py", line 1077, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: 'Training/SavedModels/data/LV_not_treat_pretrained.zip'
+srun: error: ravc4059: task 0: Exited with exit code 1
+srun: launch/slurm: _step_signal: Terminating StepId=2961502.0

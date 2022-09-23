@@ -15,7 +15,7 @@ checkpoint_callback = CheckpointCallback(save_freq=20000,save_path = model_path,
 if __name__ == '__main__':
     
     # create environment
-    env = PC_env('0',job_name = sys.argv[1]) 
+    env = PC_env.from_yaml('config.yaml',port='0',job_name=sys.argv[1]) 
     
     model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef = 0.01, verbose = 1, n_steps = 300)
     

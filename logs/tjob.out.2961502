@@ -1,0 +1,28 @@
+                                  
+================================= 
+Global information about the job: 
+================================= 
+  
+Job owner: saif(43745)
+Job name:  PhysiLearning
+Node list: ravc4059
+Job start: Thu Sep 22 17:36:02 CEST 2022
+Job end:   Thu Sep 22 17:36:24 CEST 2022
+Work dir:  /u/saif/Serhii_EvoChan/PhysiLearning/bin/./../
+Command:   /raven/u/saif/Serhii_EvoChan/PhysiLearning/bin/evaluation_job.sh
+  
+  
+  
+==========================================================================================
+Information on jobsteps (Note: MaxRSS/AveRSS is the maximum/average over all 
+tasks of the per-task memory high-water marks; cf. "man sacct"): 
+==========================================================================================
+  
+JobID           JobName NNodes NTasks  NCPUS       MaxRSS       AveRSS    Elapsed ExitCode 
+------------ ---------- ------ ------ ------ ------------ ------------ ---------- -------- 
+2961502      PhysiLear+      1             8                             00:00:22      1:0 
+2961502.0       python3      1      1      2        1.47M        1.47M   00:00:21      1:0 
+  
+Maximum memory per node: 0.001509 GB (defined as MaxRSS*Ntasks/NNodes)
+CPU utilization: 0 %
+     
