@@ -1,0 +1,43 @@
+# global configuration
+global:
+  evaluate_after: 0
+
+# job configuration
+job:
+  nodes: 1
+  ntasks: 1
+  mem-per-task: 3000
+  cpus-per-task: 60
+  time: '05:00:00'
+  agent_buffer: 1
+
+# PhysiCell configuration
+PhysiCell:
+  cells: None
+
+# Reinforcement learning configuration
+learning:
+  # Model options 
+  model:
+    name: 'PPO'
+    n_envs: 1
+    n_steps: 300
+    verbose: 1
+    ent_coef: 0.01
+    total_timesteps: 1.e+7
+    save_freq: 1000
+    model_save_prefix: 'PPO_test_load_env' 
+    load:
+      enable_loading: 1
+      external_file_loading: 1 
+      external_file_name: './data/LV_not_treat_pretrained'
+  # Environment configuration  
+  env:
+    burden: 1000
+    treatment_time_step: 60
+    max_time: 30000
+    initial_wt: 1
+    initial_mut: 0
+    # reward shaping flag for some predefined rewards
+    reward_shaping: 2
+      

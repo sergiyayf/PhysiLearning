@@ -90,15 +90,10 @@ int main( int argc, char* argv[] )
 	
 	char port [1024];
     	
-        zmq::context_t context(1);
+    zmq::context_t context(1);
 	zmq::socket_t socket{context,zmq::socket_type::rep};	
 	if( argc > 1 )
 	{
-
-        // initilize zmq context with single IO thread
-	    //zmq::context_t context{1};
-	    // contruct REP socket and bind to interface
-	    //zmq::socket_t socket{context,zmq::socket_type::rep};
 	    sprintf( port , "ipc:///raven/ptmp/saif/%s" , argv[1]);
 	    socket.bind(port);
 		std::cout<<"Binding to port: "<<port<<std::endl;
@@ -108,7 +103,8 @@ int main( int argc, char* argv[] )
 		socket.bind("ipc:///raven/ptmp/saif/1");
         std::cout<<"Warning: Port is not specified, reinforcement learning will not work"<<std::endl;
 	}
-	
+
+
 	bool XML_status = false;
 	char copy_command [1024];
 	int doctor_timer = 0;

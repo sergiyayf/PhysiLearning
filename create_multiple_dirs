@@ -1,9 +1,0 @@
-#!/bin/bash 
-for ((i = 1; i <= ${1}; i++)); do 
-	cp -r PhysiCell_V_1.10.4_0 PhysiCell_V_1.10.4_$i
-		
-done
- 
-
-
-

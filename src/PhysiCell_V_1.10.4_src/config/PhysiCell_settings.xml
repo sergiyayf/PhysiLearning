@@ -30,12 +30,12 @@
 		<folder>output</folder>  
 
 		<full_data>
-			<interval units="min">3000</interval>
+			<interval units="min">60</interval>
 			<enable>true</enable>
 		</full_data>
 		
 		<SVG>
-			<interval units="min">600</interval>
+			<interval units="min">60</interval>
 			<enable>true</enable>
 		</SVG>
 		
@@ -52,8 +52,8 @@
 	<microenvironment_setup>
 		<variable name="drug" units="dimensionless" ID="0">
         <physical_parameter_set>
-          <diffusion_coefficient units="micron^2/min">5000.0</diffusion_coefficient>
-          <decay_rate units="1/min">0.01</decay_rate>
+          <diffusion_coefficient units="micron^2/min">1000.0</diffusion_coefficient>
+          <decay_rate units="1/min">0.02</decay_rate>
         </physical_parameter_set>
         <initial_condition units="mmHg">0</initial_condition>
         <Dirichlet_boundary_condition units="mmHg" enabled="True">0</Dirichlet_boundary_condition>

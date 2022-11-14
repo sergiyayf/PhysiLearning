@@ -126,12 +126,12 @@ void create_cell_types( void )
     Cell_Definition* pWT = find_cell_definition("susceptible");
     pWT->functions.custom_cell_rule = susceptible_cell_phenotype_update_rule;
     pWT->functions.update_phenotype = phenotype_function;
-    pWT->phenotype.secretion.uptake_rates[drug_index] = 1.0; 
+    //pWT->phenotype.secretion.uptake_rates[drug_index] = 1.0; 
     
     Cell_Definition* pRT = find_cell_definition("resistant");
     pRT->functions.custom_cell_rule = NULL;
     pRT->functions.update_phenotype = phenotype_function;
-    pRT->phenotype.secretion.uptake_rates[drug_index] = 1.0; 
+    //pRT->phenotype.secretion.uptake_rates[drug_index] = 1.0; 
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
 	*/
@@ -279,11 +279,7 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
     }
     phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index) = multiplier * 
 		pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(cycle_start_index,cycle_end_index);
-        /*std::cout<<"Pressure:"<<pressure<<std::endl;
-        std::cout<<"multiplier:"<<multiplier<<std::endl;
-        std::cout<<"Referencee_live_phenotype:"<<pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(cycle_start_index,cycle_end_index)<<std::endl;
-        std::cout<<"actual:"<<phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index)<<std::endl;*/
-	 
+        	 
     return; }
 
  /* Scuceptible cell rule */
@@ -296,37 +292,27 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 	static int drug_index = microenvironment.find_density_index( "drug" ); 
 	static int start_phase_index; 
 	static int end_phase_index; 
-	static bool indices_initiated = false; 
-	
-
-	double treatment_drug_proliferation_saturation = 22.0; 
-    double treatment_drug_death_saturation = 33.0;
-    double treatment_drug_death_threshold = 27.5;
-	
-	// set necrosis without removal; 
-	//necrosis.phases[1].removal_at_phase_exit = false;
+	double treatment_drug_proliferation_saturation = 10.0; 
+    	double treatment_drug_death_saturation = 30.0;
+   	double treatment_drug_death_threshold = 15.0;
 		
-	static int necrosis_model_index = phenotype.death.find_death_model_index("necrosis"); 
+	static int apoptosis_model_index = phenotype.death.find_death_model_index(PhysiCell_constants::apoptosis_death_model); 
 
 	double pDrug = (pCell->nearest_density_vector())[drug_index];
-    double multiplier = 0.0; 
-	//phenotype.secretion.uptake_rates[drug_index] = 0.0; 
-	phenotype.secretion.secretion_rates[drug_index] = 0.0; 
-	phenotype.secretion.saturation_densities[drug_index] = 30.0;	
-	if (pDrug > treatment_drug_proliferation_saturation) {
-		phenotype.cycle.data.transition_rate(start_phase_index,end_phase_index) = 0.0; 
-	}
-	
+	double multiplier = 1.0; 
+	if (phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index)>0.8*pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index)){
 	if( pDrug > treatment_drug_death_threshold )
 	{
-		multiplier = ( pDrug - treatment_drug_death_threshold ) 
-			/ ( treatment_drug_death_saturation - treatment_drug_death_threshold );
+		multiplier = 10000*( pDrug - treatment_drug_death_threshold ) 
+				/ ( treatment_drug_death_saturation - treatment_drug_death_threshold );
 	}
 	
 	if (pDrug > treatment_drug_death_saturation) {
-		multiplier = 1.0;  
-	}
-	phenotype.death.rates[necrosis_model_index] = multiplier * pCell->parameters.max_necrosis_rate;  
+			multiplier = 10000.0;  
+			}
+	
+	phenotype.death.rates[apoptosis_model_index] = multiplier * pCell->parameters.pReference_live_phenotype->death.rates[apoptosis_model_index];  
+    	}	
     
 	return;		
 
