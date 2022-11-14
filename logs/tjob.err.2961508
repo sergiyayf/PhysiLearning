@@ -1,5 +1,0 @@
-slurmstepd: error: *** STEP 2961508.3 ON ravc4059 CANCELLED AT 2022-09-22T17:59:19 DUE TO TIME LIMIT ***
-slurmstepd: error: *** STEP 2961508.0 ON ravc4059 CANCELLED AT 2022-09-22T17:59:19 DUE TO TIME LIMIT ***
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** JOB 2961508 ON ravc4059 CANCELLED AT 2022-09-22T17:59:19 DUE TO TIME LIMIT ***
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.

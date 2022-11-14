@@ -7,8 +7,8 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 3000
-  cpus-per-task: 5
-  time: '00:05:00'
+  cpus-per-task: 60
+  time: '05:00:00'
   agent_buffer: 1
 
 # PhysiCell configuration
@@ -36,8 +36,8 @@ learning:
     burden: 1000
     treatment_time_step: 60
     max_time: 30000
-    initial_wt: 45
-    initial_mut: 5
+    initial_wt: 1
+    initial_mut: 0
     # reward shaping flag for some predefined rewards
     reward_shaping: 2
       
