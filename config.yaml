@@ -1,7 +1,7 @@
 # global configuration
 global:
   transport_type: 'ipc://'
-  transport_address: '/tmp/'
+  transport_address: '/tmp/' # for raven use '/ptmp/saif/'
   evaluate_after: 0
 
 # job configuration
@@ -35,6 +35,7 @@ learning:
       external_file_name: './data/LV_not_treat_pretrained'
   # Environment configuration  
   env:
+    type: 'PhysiCell'
     burden: 1000
     treatment_time_step: 60
     max_time: 60000
