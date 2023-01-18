@@ -7,11 +7,12 @@ import zmq
 import re
 import time
 import yaml
+import warnings
 
 # create environment
 class PC_env(Env):
     def __init__(self,port='0', job_name='0000000', burden=1000, max_time=30000,
-            initial_wt=45, initial_mut=5, treatment_time_step=60, reward_shaping_flag=0):
+            initial_wt=45, initial_mut=5, treatment_time_step=60, transport_type='ipc://',transport_address=f'/tmp/0',reward_shaping_flag=0):
         # setting up environment
         # set up discrete action space
         self.burden = burden 
@@ -41,7 +42,9 @@ class PC_env(Env):
         self.port = port
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect('ipc:///raven/ptmp/saif/'+self.port)
+        self.transport_type = transport_type
+        self.transport_address = transport_address
+        self.socket.connect(f'{self.transport_type}{self.transport_address}')
         
         # reward shaping flag
         self.reward_shaping_flag = reward_shaping_flag
@@ -56,10 +59,17 @@ class PC_env(Env):
         timestep = config['learning']['env']['treatment_time_step']
         initial_mut = config['learning']['env']['initial_mut']
         reward_shaping_flag = config['learning']['env']['reward_shaping']
+        transport_type = config['global']['transport_type']
+        transport_address = config['global']['transport_address']
+        if transport_type == 'ipc://':
+            transport_address = f'{transport_address}{job_name}{port}'
+        else :
+            warnings.warn('Transport type is different from ipc, please check the config file if everything is correct')
+            transport_address = f'{transport_address}:{port}'
         
         return cls(port=port, job_name=job_name, burden=burden, max_time=max_time,
-                initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
-                reward_shaping_flag=reward_shaping_flag)
+                initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut, transport_type=transport_type,
+                transport_address=transport_address, reward_shaping_flag=reward_shaping_flag)
 
     def step(self, action):
         # update timer
@@ -115,11 +125,12 @@ class PC_env(Env):
 
     def reset(self):
         time.sleep(3.0)
-        command = "bash ./bin/run.sh "+self.port+" "+self.job_name+self.port
+        port_connection = f"{self.transport_type}{self.transport_address}"
+        command = f"bash ./bin/run.sh {self.port} {port_connection}"
         p = subprocess.Popen([command], shell=True)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect('ipc:///raven/ptmp/saif/'+self.job_name+self.port)
+        self.socket.connect(f'{self.transport_type}{self.transport_address}')
         self.state = [self.initial_wt/self.burden, self.initial_mut/self.burden, self.initial_drug]
         self.time = 0
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))

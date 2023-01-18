@@ -1,0 +1,11 @@
+numpy>=1.24.0 
+matplotlib>=3.6.2
+pandas>=1.5.2
+seaborn>=0.12.1
+gym>=0.21.0
+stable-baselines3>=1.6.2
+pyzmq>=24.0.1
+pyyaml>=6.0
+tensorboard>=2.11.0
+dvc
+

@@ -94,7 +94,7 @@ int main( int argc, char* argv[] )
 	zmq::socket_t socket{context,zmq::socket_type::rep};	
 	if( argc > 1 )
 	{
-	    sprintf( port , "ipc:///raven/ptmp/saif/%s" , argv[1]);
+	    sprintf( port , argv[1]);
 	    socket.bind(port);
 		std::cout<<"Binding to port: "<<port<<std::endl;
 	}

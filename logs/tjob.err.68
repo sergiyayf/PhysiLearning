@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/home/saif/Projects/PhysiLearning/./src/models/evaluation.py", line 3, in <module>
+    from PC_environment import PC_env
+  File "/home/saif/Projects/PhysiLearning/src/models/PC_environment.py", line 13, in <module>
+    class PC_env(Env):
+  File "/home/saif/Projects/PhysiLearning/src/models/PC_environment.py", line 15, in PC_env
+    initial_wt=45, initial_mut=5, treatment_time_step=60, transport_type='ipc://',transport_address=f'/tmp/{self.job_name}{self.port}',reward_shaping_flag=0):
+NameError: name 'self' is not defined
+srun: error: mela: task 0: Exited with exit code 1

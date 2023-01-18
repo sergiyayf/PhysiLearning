@@ -1,0 +1,9 @@
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+srun: got SIGCONT
+slurmstepd-mela: error: *** STEP 69.1 ON mela CANCELLED AT 2023-01-18T14:12:13 ***
+slurmstepd-mela: error: *** JOB 69 ON mela CANCELLED AT 2023-01-18T14:12:13 ***
+srun: forcing job termination
+slurmstepd-mela: error: *** STEP 69.0 ON mela CANCELLED AT 2023-01-18T14:12:13 ***
+srun: error: mela: task 0: Terminated
+srun: error: mela: task 0: Terminated

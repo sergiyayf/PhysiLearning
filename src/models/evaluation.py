@@ -65,12 +65,12 @@ class Evaluation():
             done = False 
             score = 0
             while not done:
-                #action = AT(obs,self.env)
-                action = 1
+                action = AT(obs,self.env)
+                #action = 1
                 obs, reward, done, info = self.env.step(action)
                 score += reward
             
-            self.save_trajectory('full_treatment_trajectory_{0}'.format(episode))
+            self.save_trajectory('manual_AT_treatment_trajectory_{0}'.format(episode))
 
     def save_trajectory(self,name):
         """
@@ -103,6 +103,6 @@ if __name__ == '__main__':
 
         most_recent_file = sorted([os.path.join('Training','Logs',f) for f in os.listdir('./Training/Logs/') ], key=os.path.getctime)[-1] 
         evaluation.run_model(most_recent_file,num_episodes=3)
-    #evaluation.run_model('./LV_not_treat_pretrained', num_episodes=1) 
-    evaluation.run_AT(num_episodes=1) 
+    evaluation.run_model('./LV_not_treat_pretrained', num_episodes=1) 
+   # evaluation.run_AT(num_episodes=1) 
     
