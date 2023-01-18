@@ -52,7 +52,14 @@ if __name__ == '__main__':
     
     # if single environment job to be run
     if n_envs == 1: 
-        print('Training agent on one environment') 
+        print('Training agent on one environment')
+        if env_type == 'PhysiCell':
+            env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+        elif env_type == 'LV':
+            from ODE_environments import LV_env
+            env = LV_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+        else:
+            raise ValueError('Environment type not recognized')
         env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
     else:
         print('Training agent on {0} environments'.format(num_cpu))

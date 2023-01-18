@@ -5,8 +5,9 @@ from gym.spaces import Discrete, Box
 import numpy as np
 
 # create environment
-class AT_env(Env):
-    def __init__(self):
+class LV_env(Env):
+    def __init__(self, port='0', job_name='0000000', burden=1000, max_time=30000,
+            initial_wt=45, initial_mut=5, treatment_time_step=60, transport_type='ipc://',transport_address=f'/tmp/0',reward_shaping_flag=0):
         # setting up environment
         # set up discrete action space
         self.action_space = Discrete(2)
@@ -35,6 +36,28 @@ class AT_env(Env):
         self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
         self.real_step_count = 0
 
+    @classmethod
+    def from_yaml(cls, yaml_file, port='0', job_name='000000'):
+        with open(yaml_file, 'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+        burden = config['learning']['env']['burden']
+        max_time = config['learning']['env']['max_time']
+        initial_wt = config['learning']['env']['initial_wt']
+        timestep = config['learning']['env']['treatment_time_step']
+        initial_mut = config['learning']['env']['initial_mut']
+        reward_shaping_flag = config['learning']['env']['reward_shaping']
+        transport_type = config['global']['transport_type']
+        transport_address = config['global']['transport_address']
+        if transport_type == 'ipc://':
+            transport_address = f'{transport_address}{job_name}{port}'
+        else:
+            warnings.warn('Transport type is different from ipc, please check the config file if everything is correct')
+            transport_address = f'{transport_address}:{port}'
+
+        return cls(port=port, job_name=job_name, burden=burden, max_time=max_time,
+                   initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
+                   transport_type=transport_type,
+                   transport_address=transport_address, reward_shaping_flag=reward_shaping_flag)
     def step(self, action):
         self.time += 1
         # grow_tumor
