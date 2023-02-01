@@ -56,7 +56,7 @@ class Evaluation():
             final_score[episode] = score
             print(f'Episode {episode} - Score: {score}')
 
-            self.save_trajectory('test_{0}.csv'.format(episode))
+            self.save_trajectory('eval_test_{0}.csv'.format(episode))
 
         return
     
@@ -114,6 +114,6 @@ if __name__ == '__main__':
 
         most_recent_file = sorted([os.path.join('Training','Logs',f) for f in os.listdir('./Training/Logs/') ], key=os.path.getctime)[-1] 
         evaluation.run_model(most_recent_file,num_episodes=3)
-    evaluation.run_model('./LV_not_treat_pretrained', num_episodes=1) 
-   # evaluation.run_AT(num_episodes=1) 
+    #evaluation.run_model('./LV_not_treat_pretrained', num_episodes=1)
+    evaluation.run_AT(num_episodes=1)
     

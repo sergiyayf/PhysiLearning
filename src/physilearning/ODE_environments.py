@@ -33,7 +33,7 @@ class LV_env(Env):
         self.death_rate_treat = [0.15,0.00]
         self.competition = [2.4e3,1]
 
-        self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
+        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
         self.real_step_count = 0#
 
         self.reward_shaping_flag = reward_shaping_flag
@@ -70,26 +70,11 @@ class LV_env(Env):
         self.state[2] = action
 
         # record trajectory
-        self.trajectory[:,self.time - 1] = self.state
+        self.trajectory[:,int(self.time/self.treatment_time_step)-1] = self.state
         # get the reward
         rewards = Reward(self.reward_shaping_flag)
         reward = rewards.get_reward(self.state)
-        """
-        if self.reward_shaping_flag == 0:
-            reward = 1
-        elif self.reward_shaping_flag == 1:
-            reward = 1 - self.state[0]
-        elif self.reward_shaping_flag == 2:
-            reward = 1 - self.state[1]
-        elif self.reward_shaping_flag == 3:
-            reward = 1 - self.state[0] - self.state[1]
-        else:
-            if np.sum(self.state[0:2]) != 0:
-                reward = 1 - self.state[0] - 10 * self.state[
-                    1]  # this means about 60 % of the simulation space is filled
-            else:
-                reward = 5
-        """
+
         # check if we are done
         if self.time >= self.max_time or self.burden <= 0 or self.burden >= 1:
             done = True
@@ -110,7 +95,7 @@ class LV_env(Env):
 
         self.time = 0
 
-        self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
+        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
         self.current_death_rate = [self.death_rate[0],self.death_rate[1]]
 
         return self.state

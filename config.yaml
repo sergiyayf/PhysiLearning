@@ -26,11 +26,11 @@ learning:
     n_steps: 300
     verbose: 1
     ent_coef: 0.01
-    total_timesteps: 1.e+7
-    save_freq: 1000
-    model_save_prefix: 'PPO_test_load_env' 
+    total_timesteps: 1.e+6
+    save_freq: 10000
+    model_save_prefix: 'PPO_test_on_mela'
     load:
-      enable_loading: 1
+      enable_loading: 0
       external_file_loading: 1 
       external_file_name: './data/LV_not_treat_pretrained'
   # Environment configuration  
@@ -42,5 +42,5 @@ learning:
     initial_wt: 45
     initial_mut: 5
     # reward shaping flag for some predefined rewards
-    reward_shaping: 2
+    reward_shaping: 0
       

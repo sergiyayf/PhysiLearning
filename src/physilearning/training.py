@@ -1,7 +1,6 @@
 # imports
 import os
 import sys
-from PC_environment import PC_env
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from stable_baselines3.common.utils import set_random_seed
@@ -17,6 +16,7 @@ def make_env(port, rank, job_name = '000000', config_file='config.yaml', seed=0)
             :param seed: (int) the inital seed for RNG
             :param rank: (int) index of the subprocess
         """
+        from physilearning.PC_environment import PC_env
         def _init():
             env = PC_env.from_yaml(config_file,port=str(port),job_name = job_name)
             env.seed(seed + rank)
@@ -43,6 +43,7 @@ if __name__ == '__main__':
     enable_loading = config['learning']['model']['load']['enable_loading']
     load_from_external_file = config['learning']['model']['load']['external_file_loading']
     external_file_name = config['learning']['model']['load']['external_file_name']
+    env_type = config['learning']['env']['type']
 
     # create callbacks 
     checkpoint_callback = CheckpointCallback(save_freq=save_freq,save_path = model_path, name_prefix = name_prefix)
@@ -54,13 +55,14 @@ if __name__ == '__main__':
     if n_envs == 1: 
         print('Training agent on one environment')
         if env_type == 'PhysiCell':
+            from physilearning.PC_environment import PC_env
             env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
         elif env_type == 'LV':
-            from ODE_environments import LV_env
+            from physilearning.ODE_environments import LV_env
             env = LV_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
         else:
             raise ValueError('Environment type not recognized')
-        env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+
     else:
         print('Training agent on {0} environments'.format(num_cpu))
         # create the vectorized environment
