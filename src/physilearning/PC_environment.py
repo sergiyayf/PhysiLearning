@@ -8,6 +8,7 @@ import re
 import time
 import yaml
 import warnings
+from physilearning.reward import Reward
 
 # create environment
 class PC_env(Env):
@@ -71,6 +72,7 @@ class PC_env(Env):
                 initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut, transport_type=transport_type,
                 transport_address=transport_address, reward_shaping_flag=reward_shaping_flag)
 
+
     def step(self, action):
         # update timer
         self.time += self.treatment_time_step
@@ -88,21 +90,9 @@ class PC_env(Env):
         # record trajectory
         self.trajectory[:,int(self.time/self.treatment_time_step) - 1] = self.state
         # get the reward
-        if self.reward_shaping_flag == 0:
-            reward = 1 
-        elif self.reward_shaping_flag == 1: 
-            reward = 1-self.state[0]
-        elif self.reward_shaping_flag == 2:
-            reward = 1-self.state[1]
-        elif self.reward_shaping_flag == 3:
-            reward = 1-self.state[0]-self.state[1]
-        else:
-            if np.sum(self.state[0:2]) != 0:
-                reward = 1-self.state[0]-10*self.state[1] # this means about 60 % of the simulation space is filled
-            else:
-                reward = 5
-        # check if we are done
-        #reward = 1 
+        rewards = Reward(self.reward_shaping_flag)
+        reward = rewards.get_reward(self.state)
+
         if self.time >= self.max_time or np.sum(self.state[0:2])>=1:
             done = True
             self.socket.send(b"End simulation")

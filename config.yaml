@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 3000
-  cpus-per-task: 60
+  cpus-per-task: 1
   time: '05:00:00'
   agent_buffer: 1
 
@@ -35,12 +35,12 @@ learning:
       external_file_name: './data/LV_not_treat_pretrained'
   # Environment configuration  
   env:
-    type: 'PhysiCell'
+    type: 'LV' #'PhysiCell' # 'LV'
     burden: 1000
     treatment_time_step: 60
     max_time: 60000
-    initial_wt: 1
-    initial_mut: 0
+    initial_wt: 45
+    initial_mut: 5
     # reward shaping flag for some predefined rewards
     reward_shaping: 2
       

@@ -1,11 +1,13 @@
 # imports
 import os
-from PC_environment import PC_env
+from physilearning.PC_environment import PC_env
+from physilearning.ODE_environments import LV_env
 from stable_baselines3 import PPO
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import sys 
+import sys
+import yaml
 
 def AT(obs,env,threshold = 0.6):
     """ 
@@ -54,7 +56,7 @@ class Evaluation():
             final_score[episode] = score
             print(f'Episode {episode} - Score: {score}')
 
-            self.save_trajectory('trajectory_{0}.csv'.format(episode))
+            self.save_trajectory('test_{0}.csv'.format(episode))
 
         return
     
@@ -96,7 +98,16 @@ class Evaluation():
 
 if __name__ == '__main__':
     config_file = 'config.yaml'
-    env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+    with open(config_file, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+        # define paths and load others from config
+    print('Parsing config file {0}'.format(config_file))
+    env_type = config['learning']['env']['type']
+    if env_type == 'PhysiCell':
+        env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+    elif env_type == 'LV':
+        env = LV_env.from_yaml(config_file)
+
     evaluation = Evaluation(env)
     most_recent_evaluation = 0
     if most_recent_evaluation: 

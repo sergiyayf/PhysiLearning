@@ -1,25 +1,25 @@
 # imports
-import gym
+import yaml
 from gym import Env
 from gym.spaces import Discrete, Box
 import numpy as np
+from physilearning.reward import Reward
 
 # create environment
 class LV_env(Env):
-    def __init__(self, port='0', job_name='0000000', burden=1000, max_time=30000,
-            initial_wt=45, initial_mut=5, treatment_time_step=60, transport_type='ipc://',transport_address=f'/tmp/0',reward_shaping_flag=0):
+    def __init__(self, burden=1000, max_time=3000,
+            initial_wt=45, initial_mut=5, treatment_time_step=60, reward_shaping_flag=0):
         # setting up environment
         # set up discrete action space
         self.action_space = Discrete(2)
         self.observation_space = Box(low=0,high=1,shape=(3,))
-
         self.time = 0
+        self.treatment_time_step = treatment_time_step
+        self.max_time = max_time
+        self.threshold_burden = burden
 
-        self.max_time = 500
-        self.threshold_burden = 1000
-
-        self.initial_wt = 45
-        self.initial_mut = 5
+        self.initial_wt = initial_wt
+        self.initial_mut = initial_mut
         self.initial_drug = 0
         self.burden = self.initial_mut+self.initial_wt
         self.state = [self.initial_wt/self.threshold_burden,
@@ -34,7 +34,9 @@ class LV_env(Env):
         self.competition = [2.4e3,1]
 
         self.trajectory = np.zeros((np.shape(self.state)[0],self.max_time))
-        self.real_step_count = 0
+        self.real_step_count = 0#
+
+        self.reward_shaping_flag = reward_shaping_flag
 
     @classmethod
     def from_yaml(cls, yaml_file, port='0', job_name='000000'):
@@ -54,12 +56,11 @@ class LV_env(Env):
             warnings.warn('Transport type is different from ipc, please check the config file if everything is correct')
             transport_address = f'{transport_address}:{port}'
 
-        return cls(port=port, job_name=job_name, burden=burden, max_time=max_time,
+        return cls(burden=burden, max_time=max_time,
                    initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
-                   transport_type=transport_type,
-                   transport_address=transport_address, reward_shaping_flag=reward_shaping_flag)
+                   reward_shaping_flag=reward_shaping_flag)
     def step(self, action):
-        self.time += 1
+        self.time += self.treatment_time_step
         # grow_tumor
         self.state[0] = self.grow(0,1)
         self.state[1] = self.grow(1,0)
@@ -71,11 +72,24 @@ class LV_env(Env):
         # record trajectory
         self.trajectory[:,self.time - 1] = self.state
         # get the reward
-        if self.state[2] == 0:
+        rewards = Reward(self.reward_shaping_flag)
+        reward = rewards.get_reward(self.state)
+        """
+        if self.reward_shaping_flag == 0:
             reward = 1
+        elif self.reward_shaping_flag == 1:
+            reward = 1 - self.state[0]
+        elif self.reward_shaping_flag == 2:
+            reward = 1 - self.state[1]
+        elif self.reward_shaping_flag == 3:
+            reward = 1 - self.state[0] - self.state[1]
         else:
-            reward = 0
-        # reward = self.state[2]
+            if np.sum(self.state[0:2]) != 0:
+                reward = 1 - self.state[0] - 10 * self.state[
+                    1]  # this means about 60 % of the simulation space is filled
+            else:
+                reward = 5
+        """
         # check if we are done
         if self.time >= self.max_time or self.burden <= 0 or self.burden >= 1:
             done = True

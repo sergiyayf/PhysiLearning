@@ -30,4 +30,4 @@ export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # for pinning threads correctly:
 export OMP_PLACES=cores
 
-srun --ntasks=1 --cpus-per-task=1 --mem-per-cpu=3000 python3 ./src/models/evaluation.py ${SLURM_JOBID}
+srun --ntasks=1 --cpus-per-task=1 --mem-per-cpu=3000 python3 ./src/physilearning/evaluation.py ${SLURM_JOBID}

@@ -10,7 +10,7 @@ mpl.rcParams['pdf.fonttype'] = 42  # to make text editable in pdf output
 #mpl.rcParams['font.sans-serif'] = ['Arial']  # to make it Arial
 
 fig, ax = plt.subplots(figsize=(8, 4))
-df = pd.read_csv(r'../data/saved_trajectories/manual_AT_treatment_trajectory_0',index_col=[0])
+df = pd.read_csv(r'../../../data/saved_trajectories/manual_AT_treatment_trajectory_0', index_col=[0])
 print(df)
 x = np.arange(0,len(df))
 ax.fill_between(x, 0, df['Treatment'], color='orange', label='drug')
