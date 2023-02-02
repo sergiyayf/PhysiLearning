@@ -109,11 +109,12 @@ if __name__ == '__main__':
         env = LV_env.from_yaml(config_file)
 
     evaluation = Evaluation(env)
-    most_recent_evaluation = 0
+    most_recent_evaluation = 1
     if most_recent_evaluation: 
 
-        most_recent_file = sorted([os.path.join('Training','Logs',f) for f in os.listdir('./Training/Logs/') ], key=os.path.getctime)[-1] 
-        evaluation.run_model(most_recent_file,num_episodes=3)
+        most_recent_file = sorted([os.path.join('Training','SavedModels',f) for f in os.listdir('./Training/SavedModels/') ], key=os.path.getctime)[-1]
+        model_name = os.path.basename(most_recent_file).split('.')[0]
+        evaluation.run_model(model_name,num_episodes=3)
     #evaluation.run_model('./LV_not_treat_pretrained', num_episodes=1)
-    evaluation.run_AT(num_episodes=1)
+    #evaluation.run_AT(num_episodes=1)
     

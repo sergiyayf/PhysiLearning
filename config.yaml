@@ -26,9 +26,9 @@ learning:
     n_steps: 300
     verbose: 1
     ent_coef: 0.01
-    total_timesteps: 1.e+6
-    save_freq: 10000
-    model_save_prefix: 'PPO_test_on_mela'
+    total_timesteps: 1.e+7
+    save_freq: 100000
+    model_save_prefix: '020223PPO_no_treat_test'
     load:
       enable_loading: 0
       external_file_loading: 1 
@@ -42,5 +42,5 @@ learning:
     initial_wt: 45
     initial_mut: 5
     # reward shaping flag for some predefined rewards
-    reward_shaping: 0
+    reward_shaping: 4
       

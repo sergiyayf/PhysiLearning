@@ -76,9 +76,12 @@ if __name__ == '__main__':
         else:
             # find the odldest saved file
             # load
-            newest_file = sorted([os.path.join('Training','Logs',f) for f in os.listdir('./Training/Logs/') ], key=os.path.getctime)[-1]
+            most_recent_file = \
+            sorted([os.path.join('Training', 'SavedModels', f) for f in os.listdir('./Training/SavedModels/')],
+                   key=os.path.getctime)[-1]
+            model_name = os.path.basename(most_recent_file).split('.')[0]
 
-            model = PPO.load(oldest_file, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
+            model = PPO.load(model_name, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
     else:
         model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
     

@@ -5,6 +5,9 @@ env/
 venv/
 
 # Simulations
+logs/
+__pycache__/
+*.egg*/
 simulations/
 results/
 runs/
