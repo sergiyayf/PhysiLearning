@@ -79,9 +79,9 @@ if __name__ == '__main__':
             most_recent_file = \
             sorted([os.path.join('Training', 'SavedModels', f) for f in os.listdir('./Training/SavedModels/')],
                    key=os.path.getctime)[-1]
-            model_name = os.path.basename(most_recent_file).split('.')[0]
+            #model_name = os.path.basename(most_recent_file).split('.')[0]
 
-            model = PPO.load(model_name, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
+            model = PPO.load(most_recent_file, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
     else:
         model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
     

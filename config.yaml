@@ -30,8 +30,8 @@ learning:
     save_freq: 100000
     model_save_prefix: '020223PPO_no_treat_test'
     load:
-      enable_loading: 0
-      external_file_loading: 1 
+      enable_loading: 1
+      external_file_loading: 0
       external_file_name: './data/LV_not_treat_pretrained'
   # Environment configuration  
   env:
