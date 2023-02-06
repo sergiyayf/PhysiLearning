@@ -87,8 +87,8 @@ class LV_env(Env):
     def step(self, action):
         self.time += self.treatment_time_step
         # grow_tumor
-        self.state[0] = self.grow(0,1)
-        self.state[1] = self.grow(1,0)
+        self.state[0] = self.grow(0,1,self.growth_function_flag)
+        self.state[1] = self.grow(1,0,self.growth_function_flag)
 
         self.burden = np.sum(self.state[0:2])
         # do action (apply treatment or not)
@@ -134,6 +134,13 @@ class LV_env(Env):
                     self.current_death_rate[0]*=0.80
                 elif self.current_death_rate[0] < self.death_rate[0]:
                     self.current_death_rate = [self.death_rate[0],self.death_rate[1]]
+
+                print(self.growth_rate[i])
+                print(self.state[i])
+                print(self.state[j])
+                print(self.competition[j])
+                print(self.capacity)
+                print(self.current_death_rate[i])
 
                 new_pop_size = self.state[i] * \
                                (1 + self.growth_rate[i] * (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -

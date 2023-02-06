@@ -103,7 +103,7 @@ if __name__ == '__main__':
         config = yaml.load(f, Loader=yaml.FullLoader)
         # define paths and load others from config
     print('Parsing config file {0}'.format(config_file))
-    env_type = config['learning']['env']['type']
+    env_type = config['env']['type']
     if env_type == 'PhysiCell':
         env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
     elif env_type == 'LV':
@@ -119,7 +119,7 @@ if __name__ == '__main__':
         model_name = os.path.basename(most_recent_file).split('.')[0]
         evaluation.run_model(model_name,num_episodes=3)
     #evaluation.run_model('./LV_not_treat_pretrained', num_episodes=1)
-    evaluation.run_model(r'060223_jonaEnv_test_rew+1_300000_steps', num_episodes=6)
+    #evaluation.run_model(r'060223_jonaEnv_test_rew+1_300000_steps', num_episodes=6)
 
-    #evaluation.run_AT(num_episodes=1)
+    evaluation.run_AT(num_episodes=1)
     
