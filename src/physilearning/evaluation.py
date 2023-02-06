@@ -2,6 +2,7 @@
 import os
 from physilearning.PC_environment import PC_env
 from physilearning.ODE_environments import LV_env
+from physilearning.jonaLVenv import jonaLVenv
 from stable_baselines3 import PPO
 import numpy as np
 import pandas as pd
@@ -56,7 +57,7 @@ class Evaluation():
             final_score[episode] = score
             print(f'Episode {episode} - Score: {score}')
 
-            self.save_trajectory('eval_test_{0}.csv'.format(episode))
+            self.save_trajectory('jenv_test_{0}.csv'.format(episode))
 
         return
     
@@ -107,14 +108,18 @@ if __name__ == '__main__':
         env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
     elif env_type == 'LV':
         env = LV_env.from_yaml(config_file)
+    elif env_type == 'jonaLVenv':
+        env = jonaLVenv()
 
     evaluation = Evaluation(env)
-    most_recent_evaluation = 1
+    most_recent_evaluation = 0
     if most_recent_evaluation: 
 
         most_recent_file = sorted([os.path.join('Training','SavedModels',f) for f in os.listdir('./Training/SavedModels/') ], key=os.path.getctime)[-1]
         model_name = os.path.basename(most_recent_file).split('.')[0]
         evaluation.run_model(model_name,num_episodes=3)
     #evaluation.run_model('./LV_not_treat_pretrained', num_episodes=1)
+    evaluation.run_model(r'060223_jonaEnv_test_rew+1_300000_steps', num_episodes=6)
+
     #evaluation.run_AT(num_episodes=1)
     

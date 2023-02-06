@@ -43,7 +43,7 @@ if __name__ == '__main__':
     enable_loading = config['learning']['model']['load']['enable_loading']
     load_from_external_file = config['learning']['model']['load']['external_file_loading']
     external_file_name = config['learning']['model']['load']['external_file_name']
-    env_type = config['learning']['env']['type']
+    env_type = config['env']['type']
 
     # create callbacks 
     checkpoint_callback = CheckpointCallback(save_freq=save_freq,save_path = model_path, name_prefix = name_prefix)
@@ -60,6 +60,9 @@ if __name__ == '__main__':
         elif env_type == 'LV':
             from physilearning.ODE_environments import LV_env
             env = LV_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+        elif env_type == 'jonaLVenv':
+            from physilearning.jonaLVenv import jonaLVenv
+            env = jonaLVenv()
         else:
             raise ValueError('Environment type not recognized')
 

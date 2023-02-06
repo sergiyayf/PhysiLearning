@@ -54,12 +54,12 @@ class PC_env(Env):
     def from_yaml(cls,yaml_file,port='0',job_name = '000000'):
         with open(yaml_file,'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
-        burden = config['learning']['env']['burden']
-        max_time = config['learning']['env']['max_time']
-        initial_wt = config['learning']['env']['initial_wt']
-        timestep = config['learning']['env']['treatment_time_step']
-        initial_mut = config['learning']['env']['initial_mut']
-        reward_shaping_flag = config['learning']['env']['reward_shaping']
+        burden = config['env']['threshold_burden']
+        max_time = config['env']['max_time']
+        initial_wt = config['env']['PC']['initial_wt']
+        timestep = config['env']['treatment_time_step']
+        initial_mut = config['env']['PC']['initial_mut']
+        reward_shaping_flag = config['env']['reward_shaping']
         transport_type = config['global']['transport_type']
         transport_address = config['global']['transport_address']
         if transport_type == 'ipc://':
