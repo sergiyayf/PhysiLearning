@@ -95,5 +95,5 @@ if __name__ == '__main__':
     # train model
 
     model.learn(total_timesteps=int(total_timesteps), callback=[checkpoint_callback,copy_config_callback], tb_log_name=logname)
-
+    model.save(os.path.join(model_path, logname+'_final'))
     env.close()

@@ -23,12 +23,12 @@ learning:
   model:
     name: 'PPO'
     n_envs: 1
-    n_steps: 300
+    n_steps: 1000
     verbose: 1
     ent_coef: 0.01
-    total_timesteps: 1.e+7
-    save_freq: 1.e+6
-    model_save_prefix: '070223_test_callback'
+    total_timesteps: 1.e+8
+    save_freq: 1.e+7
+    model_save_prefix: '070223_Jlikeparams_rewf=0_grf=1'
     load:
       enable_loading: 0
       external_file_loading: 0
@@ -39,13 +39,13 @@ env:
   type: 'LV' #'PhysiCell' # 'LV'
   threshold_burden: 1000
   treatment_time_step: 60
-  max_time: 60000
-  reward_shaping: 4   # reward shaping flag for some predefined rewards
+  max_time: 120000
+  reward_shaping: 0   # reward shaping flag for some predefined rewards
 
   # LV environment settings
   LV:
-    initial_wt: 30
-    initial_mut: 10
+    initial_wt: 45
+    initial_mut: 5
     carrying_capacity: 1500.0
     growth_rate_wt: 0.015 #0.0175
     growth_rate_mut: 0.01 #0.0175
