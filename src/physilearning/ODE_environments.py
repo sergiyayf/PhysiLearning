@@ -28,7 +28,7 @@ class LV_env(Env):
                       self.initial_mut/self.threshold_burden,
                       self.initial_drug]
 
-        self.capacity = carrying_capacity
+        self.capacity = carrying_capacity/self.threshold_burden
         # 1 - wt, 2 - resistant
         self.growth_rate = [growth_rate_wt,growth_rate_mut]
         self.death_rate = [death_rate_wt,death_rate_mut]

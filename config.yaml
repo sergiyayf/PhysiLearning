@@ -10,7 +10,7 @@ job:
   ntasks: 1
   mem-per-task: 3000
   cpus-per-task: 1
-  time: '05:00:00'
+  time: '15:00:00'
   agent_buffer: 1
 
 # PhysiCell configuration
@@ -26,9 +26,9 @@ learning:
     n_steps: 300
     verbose: 1
     ent_coef: 0.01
-    total_timesteps: 1.e+8
-    save_freq: 100000
-    model_save_prefix: '060223_jonaEnv_test_rew+1'
+    total_timesteps: 1.e+7
+    save_freq: 1.e+6
+    model_save_prefix: '070223_test_callback'
     load:
       enable_loading: 0
       external_file_loading: 0
@@ -44,8 +44,8 @@ env:
 
   # LV environment settings
   LV:
-    initial_wt: 45
-    initial_mut: 5
+    initial_wt: 30
+    initial_mut: 10
     carrying_capacity: 1500.0
     growth_rate_wt: 0.015 #0.0175
     growth_rate_mut: 0.01 #0.0175
@@ -55,7 +55,7 @@ env:
     treat_death_rate_mut: 0.001 #0.0
     competition_wt: 3.0 #2400.0
     competition_mut: 1.0
-    growth_function_flag: 1     # flag for growth function 0 - for delayed death, 1 - for immediate
+    growth_function_flag: 1 # flag for growth function 0 - for delayed death, 1 - for immediate
 
 
   # note this is not yet functional

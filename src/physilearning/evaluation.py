@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import sys
 import yaml
 
-def AT(obs,env,threshold = 0.6):
+def AT(obs,env,threshold = .6):
     """ 
     cycling adaptive therapy strategy
     """
@@ -73,7 +73,7 @@ class Evaluation():
                 obs, reward, done, info = self.env.step(action)
                 score += reward
             
-            self.save_trajectory('manual_AT_treatment_trajectory_{0}'.format(episode))
+            self.save_trajectory('manual_AT_treatment_2norm_{0}'.format(episode))
 
     def save_trajectory(self,name):
         """

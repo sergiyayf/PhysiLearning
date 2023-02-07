@@ -4,7 +4,8 @@ import sys
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from stable_baselines3.common.utils import set_random_seed
-from stable_baselines3.common.callbacks import CheckpointCallback 
+from stable_baselines3.common.callbacks import CheckpointCallback
+from physilearning.callbacks import CustomCallback
 import multiprocessing as mp
 import yaml
 
@@ -44,9 +45,12 @@ if __name__ == '__main__':
     load_from_external_file = config['learning']['model']['load']['external_file_loading']
     external_file_name = config['learning']['model']['load']['external_file_name']
     env_type = config['env']['type']
+    logname = config['learning']['model']['model_save_prefix']
 
     # create callbacks 
     checkpoint_callback = CheckpointCallback(save_freq=save_freq,save_path = model_path, name_prefix = name_prefix)
+    copy_config_callback = CustomCallback(logname)
+    #tensorboard_callback = TensorboardCallback()
 
     # create environment
     num_cpu = n_envs # This should be equal to the number of cores allocated by the job - (agent_buffer)
@@ -89,6 +93,7 @@ if __name__ == '__main__':
         model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
     
     # train model
-    model.learn(total_timesteps=int(total_timesteps), callback=checkpoint_callback)
-        
+
+    model.learn(total_timesteps=int(total_timesteps), callback=[checkpoint_callback,copy_config_callback], tb_log_name=logname)
+
     env.close()

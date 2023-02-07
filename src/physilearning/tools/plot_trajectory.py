@@ -11,7 +11,7 @@ mpl.rcParams['pdf.fonttype'] = 42  # to make text editable in pdf output
 
 def plot_trajectory(ax,episode=0):
     #df = pd.read_csv(f'../../../eval_test_{episode}.csv', index_col=[0])
-    df = pd.read_csv(f'../../../manual_AT_treatment_trajectory_0', index_col=[0])
+    df = pd.read_csv(f'../../../manual_AT_treatment_2norm_0', index_col=[0])
     x = np.arange(0,len(df))
     ax.fill_between(x, 0, df['Treatment'], color='orange', label='drug')
     ax.plot(x, (df['Type 0'] + df['Type 1']), 'k', label='total', linewidth=2)
