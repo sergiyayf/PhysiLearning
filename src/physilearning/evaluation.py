@@ -30,7 +30,7 @@ class Evaluation():
         self.env = env
 
 
-    def run_model(self, model_name, num_episodes = 1):
+    def run_model(self, model_name, num_episodes = 1, path='./',name='model'):
         """
         Method to run the the environment with the loaded policy
         Parameters
@@ -42,7 +42,7 @@ class Evaluation():
 
         """
         final_score = np.zeros(num_episodes) 
-        model = PPO.load(os.path.join('Training', 'SavedModels', model_name))
+        model = PPO.load(model_name)
         for episode in range(num_episodes):
             # reset the environment
             obs = self.env.reset()
@@ -56,12 +56,12 @@ class Evaluation():
 
             final_score[episode] = score
             print(f'Episode {episode} - Score: {score}')
-
-            self.save_trajectory('jenv_test_{0}.csv'.format(episode))
+            filename = os.path.join(path, '{1}_{0}.csv'.format(name,episode))
+            self.save_trajectory(filename)
 
         return
     
-    def run_AT(self, num_episodes=1):
+    def run_AT(self, num_episodes=1, name='AT', path='./'):
         """ Run adaptive therapy for comperison""" 
         for episode in range(num_episodes):
             obs = self.env.reset()
@@ -72,8 +72,8 @@ class Evaluation():
                 #action = 1
                 obs, reward, done, info = self.env.step(action)
                 score += reward
-            
-            self.save_trajectory('manual_AT_treatment_2norm_{0}'.format(episode))
+            filename = os.path.join(path, '{1}_{0}_fixedAT.csv'.format(name,episode))
+            self.save_trajectory(filename)
 
     def save_trajectory(self,name):
         """
@@ -98,28 +98,48 @@ class Evaluation():
         return
 
 if __name__ == '__main__':
+    #configure evaluation
     config_file = 'config.yaml'
     with open(config_file, 'r') as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
+        general_config = yaml.load(f, Loader=yaml.FullLoader)
         # define paths and load others from config
     print('Parsing config file {0}'.format(config_file))
-    env_type = config['env']['type']
-    if env_type == 'PhysiCell':
-        env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
-    elif env_type == 'LV':
-        env = LV_env.from_yaml(config_file)
-    elif env_type == 'jonaLVenv':
-        env = jonaLVenv()
 
-    evaluation = Evaluation(env)
-    most_recent_evaluation = 0
-    if most_recent_evaluation: 
+    if general_config['eval']['from_file']:
+        # configure environment and model to load
+        model_training_path = general_config['eval']['path']
+        model_prefix = general_config['eval']['model_prefix']
+        model_config_file = os.path.join(model_training_path,'Training','Configs',model_prefix+'.yaml')
+        with open(model_config_file, 'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+            # define paths and load others from config
+        print('Parsing config file {0}'.format(model_config_file))
 
-        most_recent_file = sorted([os.path.join('Training','SavedModels',f) for f in os.listdir('./Training/SavedModels/') ], key=os.path.getctime)[-1]
-        model_name = os.path.basename(most_recent_file).split('.')[0]
-        evaluation.run_model(model_name,num_episodes=3)
+        env_type = config['env']['type']
+        if env_type == 'PhysiCell':
+            env = PC_env.from_yaml(model_config_file,port='0',job_name=sys.argv[1])
+        elif env_type == 'LV':
+            env = LV_env.from_yaml(model_config_file)
+
+        evaluation = Evaluation(env)
+
+        if general_config['eval']['fixed_AT_protocol']:
+            evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'], name=model_prefix, path=os.path.join(model_training_path,'Evaluations'))
+        else:
+            model_name = os.path.join(model_training_path, 'Training', 'SavedModels', model_prefix+general_config['eval']['step_to_load'])
+            evaluation.run_model(model_name,num_episodes=general_config['eval']['num_episodes'],path=os.path.join(model_training_path,'Evaluations'),name=model_prefix)
+
+
+
+
+    #most_recent_evaluation = 0
+    #if most_recent_evaluation:
+
+    #    most_recent_file = sorted([os.path.join('Training','SavedModels',f) for f in os.listdir('./Training/SavedModels/') ], key=os.path.getctime)[-1]
+    #    model_name = os.path.basename(most_recent_file).split('.')[0]
+    #    evaluation.run_model(model_name,num_episodes=3)
     #evaluation.run_model('./LV_not_treat_pretrained', num_episodes=1)
     #evaluation.run_model(r'060223_jonaEnv_test_rew+1_300000_steps', num_episodes=6)
 
-    evaluation.run_AT(num_episodes=1)
+
     

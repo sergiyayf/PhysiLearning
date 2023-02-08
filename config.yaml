@@ -63,4 +63,14 @@ env:
     initial_wt: 45
     initial_mut: 5
 
-      
+# evaluation configuration
+eval:
+  most_recent: 0
+  from_file: 1
+  path: './data/070223_raven_model_tests/'
+  model_prefix: '070223_minelikeparams_rewf=0_growthf=4'
+  fixed_AT_protocol: 0
+  num_episodes: 6
+  step_to_load: '_50000000_steps'
+
+
