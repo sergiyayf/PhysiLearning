@@ -34,7 +34,7 @@ class CfgRead:
 
         return UserParameters
 
-    def write_new_param(self, parameter="switching_time", value = '10'):
+    def write_new_custom_param(self, parameter="switching_time", value = '10'):
         """
         Write new switching_time to the file
 
@@ -47,7 +47,6 @@ class CfgRead:
                 value of the parameter to be written to the xml file
 
         """
-
         xml_file = self._file
         tree = ET.parse(xml_file)
 
@@ -64,4 +63,33 @@ class CfgRead:
         tree.write(xml_file)
         return
 
+    def write_new_param(self, parent_nodes = ['save', 'full_data'], parameter="enable", value = 'false'):
+        """
+        Write new parameter to the file
+
+        Parameters
+        ----------
+        parameter: str
+                name of the parameter to be rewritten
+
+        value: str
+                value of the parameter to be written to the xml file
+
+        """
+        xml_file = self._file
+        tree = ET.parse(xml_file)
+
+        current_node = tree.getroot()
+        for node in parent_nodes:
+            current_node = current_node.find(node)
+
+        # Find child node of interest and rewrite it
+        node = current_node.find(parameter)
+        node_value = node.text
+        #print("node value before = ",node_value)
+        node.text = str(value)
+        #print("new node value = ", node.text)
+
+        tree.write(xml_file)
+        return
 

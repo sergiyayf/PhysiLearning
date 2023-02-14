@@ -100,7 +100,7 @@ int main( int argc, char* argv[] )
 	}
 	else
 	{
-		socket.bind("ipc:///raven/ptmp/saif/1");
+		socket.bind("ipc:/tmp/1");
         std::cout<<"Warning: Port is not specified, reinforcement learning will not work"<<std::endl;
 	}
 

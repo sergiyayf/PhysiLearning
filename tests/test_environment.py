@@ -7,8 +7,6 @@ def test_PC_env_constructuion():
     env = PC_env()
     assert env 
 
-def test_LV_env_constr
-
 def test_PC_env_from_yaml():
     env = PC_env.from_yaml('../config.yaml')
     assert env

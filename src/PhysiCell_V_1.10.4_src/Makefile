@@ -2,6 +2,7 @@ VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
 PROGRAM_NAME := project
 
 CC := g++
+
 # CC := g++-mp-7 # typical macports compiler name
 # CC := g++-7 # typical homebrew compiler name 
 
@@ -32,7 +33,7 @@ ARCH := native # best auto-tuning
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 
-ZMQLIB := -I/u/saif/soft/libzmq/include/ -L/u/saif/soft/libzmq/lib/ -lzmq -I/u/saif/programm_installs/cppzmq/
+ZMQLIB := -L/usr/lib/x86_64-linux-gnu/ -lzmq
 
 ifeq ($(OS),Windows_NT)
 else
@@ -46,7 +47,7 @@ else
 	endif
 endif
 
-COMPILE_COMMAND := $(CC) $(CFLAGS) $(ZMQLIB)
+COMPILE_COMMAND := $(CC) $(CFLAGS)
 
 BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM_solvers.o BioFVM_matlab.o \
 BioFVM_utilities.o BioFVM_basic_agent.o BioFVM_MultiCellDS.o BioFVM_agent_container.o 
@@ -70,7 +71,7 @@ ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS)
 # compile the project 
 
 all: main.cpp $(ALL_OBJECTS) 
-	$(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp 
+	$(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp $(ZMQLIB)
 	make name
 
 name:

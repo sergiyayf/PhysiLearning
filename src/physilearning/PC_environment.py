@@ -56,9 +56,9 @@ class PC_env(Env):
             config = yaml.load(f, Loader=yaml.FullLoader)
         burden = config['env']['threshold_burden']
         max_time = config['env']['max_time']
-        initial_wt = config['env']['PC']['initial_wt']
+        initial_wt = config['env']['PC']['number_of_susceptible_cells']['value']
         timestep = config['env']['treatment_time_step']
-        initial_mut = config['env']['PC']['initial_mut']
+        initial_mut = config['env']['PC']['number_of_resistant_cells']['value']
         reward_shaping_flag = config['env']['reward_shaping']
         transport_type = config['global']['transport_type']
         transport_address = config['global']['transport_address']
@@ -116,7 +116,7 @@ class PC_env(Env):
     def reset(self):
         time.sleep(3.0)
         port_connection = f"{self.transport_type}{self.transport_address}"
-        command = f"bash ./bin/run.sh {self.port} {port_connection}"
+        command = f"bash ./scripts/run.sh {self.port} {port_connection}"
         p = subprocess.Popen([command], shell=True)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)

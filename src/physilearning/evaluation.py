@@ -115,9 +115,10 @@ if __name__ == '__main__':
             # define paths and load others from config
         print('Parsing config file {0}'.format(model_config_file))
 
-        env_type = config['env']['type']
+        env_type = 'PhysiCell'
+        #env_type = config['env']['type']
         if env_type == 'PhysiCell':
-            env = PC_env.from_yaml(model_config_file,port='0',job_name=sys.argv[1])
+            env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
         elif env_type == 'LV':
             env = LV_env.from_yaml(model_config_file)
 
@@ -127,7 +128,7 @@ if __name__ == '__main__':
             evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'], name=model_prefix, path=os.path.join(model_training_path,'Evaluations'))
         else:
             model_name = os.path.join(model_training_path, 'Training', 'SavedModels', model_prefix+general_config['eval']['step_to_load'])
-            evaluation.run_model(model_name,num_episodes=general_config['eval']['num_episodes'],path=os.path.join(model_training_path,'Evaluations'),name=model_prefix)
+            evaluation.run_model(model_name,num_episodes=general_config['eval']['num_episodes'],path=os.path.join(model_training_path,'Evaluations'),name='PCeval'+model_prefix)
 
 
 
