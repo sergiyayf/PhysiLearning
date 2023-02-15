@@ -2,7 +2,7 @@
 import os
 from physilearning.PC_environment import PC_env
 from physilearning.ODE_environments import LV_env
-from physilearning.jonaLVenv import jonaLVenv
+
 from stable_baselines3 import PPO
 import numpy as np
 import pandas as pd
@@ -130,7 +130,9 @@ if __name__ == '__main__':
             model_name = os.path.join(model_training_path, 'Training', 'SavedModels', model_prefix+general_config['eval']['step_to_load'])
             evaluation.run_model(model_name,num_episodes=general_config['eval']['num_episodes'],path=os.path.join(model_training_path,'Evaluations'),name='PCeval'+model_prefix)
 
-
+    else:
+        evaluation = Evaluation(PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1]))
+        evaluation.run_AT(num_episodes=1, name='AT', path='./')
 
 
     #most_recent_evaluation = 0

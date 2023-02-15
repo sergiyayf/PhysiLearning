@@ -154,7 +154,7 @@ int main( int argc, char* argv[] )
 	
 	char filename[1024];
 	sprintf( filename , "%s/initial" , PhysiCell_settings.folder.c_str() ); 
-	save_PhysiCell_to_MultiCellDS_v2( filename , microenvironment , PhysiCell_globals.current_time ); 
+	save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
 	
 	// save a quick SVG cross section through z = 0, after setting its 
 	// length bar to 200 microns 
@@ -227,7 +227,7 @@ int main( int argc, char* argv[] )
 			}
 
 			// update the microenvironment
-			microenvironment.simulate_diffusion_decay( diffusion_dt );
+			//microenvironment.simulate_diffusion_decay( diffusion_dt );
 			
 			// run PhysiCell 
 			((Cell_Container *)microenvironment.agent_container)->update_all_cells( PhysiCell_globals.current_time );
@@ -247,12 +247,15 @@ int main( int argc, char* argv[] )
                 // do treatment or not
                 if (request.to_string() == "Treat") {
 			//std::cout<<"Treating"<<std::endl;
-                    activate_drug_dc();
+                    //activate_drug_dc();
+		    treatment_on();
                 } else if (request.to_string() == "Stop treatment") {
 			//std::cout<<"Deactivating treatment"<<std::endl;
-                    deactivate_drug_dc();
+                    //deactivate_drug_dc();
+		    treatment_off();
                 } else if (request.to_string() == "Start simulation") {
-                    deactivate_drug_dc();
+                    //deactivate_drug_dc();
+		    treatment_off();
                 } else if (request.to_string() == "End simulation") {
 			
 			break;

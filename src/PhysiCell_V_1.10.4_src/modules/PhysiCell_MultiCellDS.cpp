@@ -244,8 +244,19 @@ void add_PhysiCell_cells_to_open_xml_pugi( pugi::xml_document& xml_dom, std::str
 			attrib = node_temp1.append_attribute( "size" ); 
 			attrib.set_value( size ); 
 			node_temp1 = node_temp1.parent(); 
-			index += size; 			
-			
+			index += size;
+
+			size = 1;
+			node_temp1 = node_temp1.append_child( "label" );
+			node_temp1.append_child( pugi::node_pcdata ).set_value( "transition_rate" );
+			attrib = node_temp1.append_attribute( "index" );
+			attrib.set_value( index );
+			attrib = node_temp1.append_attribute( "size" );
+			attrib.set_value( size );
+			node_temp1 = node_temp1.parent();
+			index += size;
+
+
 			// nuclear volume, cytoplasmic volume, fluid fraction, calcified fraction, 
 			
 			size = 1; 
@@ -540,7 +551,7 @@ void add_PhysiCell_cells_to_open_xml_pugi( pugi::xml_document& xml_dom, std::str
 		
 		int number_of_data_entries = (*all_cells).size(); 
 		int size_of_each_datum = 1 + 1 + 3 + 1  // ID,parent_ID,x,y,z, total_volume 
-			+1+1+1+1 // cycle information 
+			+1+1+1+1+1 // cycle information
 			+1+1+1+1 // volume information 
 			+3+1 // orientation, polarity; 
 			+1+3+1+3+1+1; // motility 
@@ -619,7 +630,8 @@ void add_PhysiCell_cells_to_open_xml_pugi( pugi::xml_document& xml_dom, std::str
 			
 			// dTemp = pCell->phenotype.cycle.phases[pCell->phenotype.current_phase_index].elapsed_time; 
 			fwrite( (char*) &( pCell->phenotype.cycle.data.elapsed_time_in_phase ) , sizeof(double) , 1 , fp ); // elapsed time in phase 
-			
+
+			fwrite( (char*) &( pCell->phenotype.cycle.data.transition_rate(0,1) ) , sizeof(double) , 1 , fp ); // elapsed time in phase
 			// volume information
 			// nuclear volume, cytoplasmic volume, fluid fraction, calcified fraction, 
 			fwrite( (char*) &( pCell->phenotype.volume.nuclear ) , sizeof(double) , 1 , fp );  // nuclear volume 

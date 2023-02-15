@@ -221,18 +221,20 @@ untar:
 
 # easier animation 
 
-FRAMERATE := 24
+FRAMERATE := 8
 OUTPUT := output
 
 jpeg: 
-	@magick identify -format "%h" $(OUTPUT)/initial.svg > __H.txt 
-	@magick identify -format "%w" $(OUTPUT)/initial.svg > __W.txt 
+	identify -format "%h" $(OUTPUT)/initial.svg > __H.txt 
+	identify -format "%w" $(OUTPUT)/initial.svg > __W.txt 
 	@expr 2 \* \( $$(grep . __H.txt) / 2 \) > __H1.txt 
 	@expr 2 \* \( $$(grep . __W.txt) / 2 \) > __W1.txt 
 	@echo "$$(grep . __W1.txt)!x$$(grep . __H1.txt)!" > __resize.txt 
-	@magick mogrify -format jpg -resize $$(grep . __resize.txt) $(OUTPUT)/s*.svg
+	mogrify -format jpg -resize $$(grep . __resize.txt) $(OUTPUT)/s*.svg
 	rm -f __H*.txt __W*.txt __resize.txt 
 	
+povs: 
+	@echo for scene in *.pov; do povray +w640 +h480 +a0.3 -D $scene; done
 gif: 
 	magick convert $(OUTPUT)/s*.svg $(OUTPUT)/out.gif 
 	 

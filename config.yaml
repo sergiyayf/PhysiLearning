@@ -69,7 +69,7 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './data/070223_raven_model_tests/'
   model_prefix: '070223_minelikeparams_rewf=4_growthf=0'
   fixed_AT_protocol: 0

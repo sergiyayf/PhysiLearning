@@ -124,7 +124,7 @@ void create_cell_types( void )
     static int drug_index = microenvironment.find_density_index( "drug" ); 
     
     Cell_Definition* pWT = find_cell_definition("susceptible");
-    pWT->functions.custom_cell_rule = susceptible_cell_phenotype_update_rule;
+    pWT->functions.custom_cell_rule = susceptible_cell_on_off_treatment_rule;
     pWT->functions.update_phenotype = phenotype_function;
     //pWT->phenotype.secretion.uptake_rates[drug_index] = 1.0; 
     
@@ -182,6 +182,15 @@ void deactivate_drug_dc( void )
 microenvironment.set_substrate_dirichlet_activation(0,false); 
 }
 
+void treatment_on( void ) {
+	parameters.bools("treatment") = true;
+	return;
+}
+void treatment_off( void ) {
+	parameters.bools("treatment") = false;
+	return;
+}
+
 void setup_microenvironment( void )
 {
 	// set domain parameters 
@@ -197,7 +206,7 @@ void setup_microenvironment( void )
 	return; 
 }
 
-void setup_tissue( void )
+void setup_2D_circular_tissue( void )
 {
 	// place a cluster of tumor cells at the center 
     double cell_radius = cell_defaults.phenotype.geometry.radius; 
@@ -256,8 +265,58 @@ void setup_tissue( void )
 	return; 
 }
 
+void setup_tissue( void ) {
+
+ 	Cell* pCell = NULL; 	
+        pCell = create_cell( get_cell_definition("susceptible") ); 
+        pCell->assign_position( {0.0,0.0,0.0} );
+	return;
+}
 std::vector<std::string> my_coloring_function( Cell* pCell )
-{ return paint_by_number_cell_coloring(pCell); }
+{
+	 static int cycle_start_index = live.find_phase_index( PhysiCell_constants::live );
+	 static int cycle_end_index = live.find_phase_index( PhysiCell_constants::live );
+	 double growth_rate = pCell->phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index);
+	 double max_growth_rate = pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(cycle_start_index,cycle_end_index);
+	// Color cells
+	
+	 std:: vector<std::string> output(4, "black"); 
+	if (pCell->phenotype.death.dead == false && pCell->type == 0) {
+       		int growth_color = (int) round((growth_rate/max_growth_rate)*155+100);
+		char szTempString [128];
+		sprintf( szTempString, "rgb(%u,%u,%u)",0 , 0, growth_color); 		
+		output[0].assign( szTempString );
+		output[1].assign( szTempString );
+		output[2].assign( szTempString ); 
+	} 
+	
+	if (pCell->phenotype.death.dead == false && pCell->type == 1) {
+       		int growth_color = (int) round((growth_rate/max_growth_rate)*155+100);
+		char szTempString [128];
+		sprintf( szTempString, "rgb(%u,%u,%u)", growth_color, growth_color, 0); 		
+		output[0].assign( szTempString );
+		output[1].assign( szTempString );
+		output[2].assign( szTempString ); 
+	}
+	// if cells are dead color differently
+	if (pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::apoptotic )  // Apoptotic - Red
+        {
+                output[0] = "rgb(255,0,0)";
+                output[2] = "rgb(125,0,0)";
+        }
+
+        // Necrotic - Brown
+        if( pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrotic_swelling ||
+                pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrotic_lysed ||
+                pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrotic )
+        {
+                output[0] = "rgb(250,138,38)";
+                output[2] = "rgb(139,69,19)";
+        }
+	
+
+return output;} // paint_by_number_cell_coloring(pCell); }
+
 
 void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 { 
@@ -272,18 +331,20 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
     double pressure = pCell->state.simple_pressure;
     
     double multiplier = 1.0;
-    if (pressure < 1) {
-        multiplier = 1 - pressure;
+    double growth_layer = 2; 
+    multiplier = 1+1/(1+std::exp(growth_layer))-1/(1+std::exp(growth_layer-pressure));
+    /*if (pressure < 3) {
+        multiplier = 3 - pressure;
     } else {
         multiplier = 0.0;
-    }
+    }*/
     phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index) = multiplier * 
 		pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(cycle_start_index,cycle_end_index);
         	 
     return; }
 
  /* Scuceptible cell rule */
-void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, double dt)
+void susceptible_cell_with_drug_treatment_rule( Cell* pCell, Phenotype& phenotype, double dt)
 {
 	if( phenotype.death.dead == true ) 
 	{return;}
@@ -297,7 +358,7 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
    	double treatment_drug_death_threshold = 15.0;
 		
 	static int apoptosis_model_index = phenotype.death.find_death_model_index(PhysiCell_constants::apoptosis_death_model); 
-
+	
 	double pDrug = (pCell->nearest_density_vector())[drug_index];
 	double multiplier = 1.0; 
 	if (phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index)>0.8*pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index)){
@@ -316,7 +377,35 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
     
 	return;		
 
-}	   
+}
+
+ /* Scuceptible cell binary treatment rule */
+void susceptible_cell_on_off_treatment_rule( Cell* pCell, Phenotype& phenotype, double dt)
+{
+	if( phenotype.death.dead == true ) 
+	{return;}
+	
+	// set up parameters 
+	
+	static int start_phase_index; 
+	static int end_phase_index; 
+		
+	static int apoptosis_model_index = phenotype.death.find_death_model_index(PhysiCell_constants::apoptosis_death_model); 
+	
+	double multiplier = 1.0;
+        double relative_growth_rate = phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index)/pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index);
+	if (relative_growth_rate > 0.95){
+	if( parameters.bools("treatment") )
+	{
+		multiplier = std::exp(-relative_growth_rate)*55555000;
+	}
+	
+	phenotype.death.rates[apoptosis_model_index] = multiplier * pCell->parameters.pReference_live_phenotype->death.rates[apoptosis_model_index];  
+    	}	
+    
+	return;		
+
+}
 void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
 { return; } 
 

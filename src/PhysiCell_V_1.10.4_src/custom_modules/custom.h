@@ -75,7 +75,7 @@ using namespace PhysiCell;
 
 void create_cell_types( void );
 void setup_tissue( void ); 
-
+void setup_2D_circular_tissue( void );
 // set up the BioFVM microenvironment 
 void setup_microenvironment( void ); 
 
@@ -92,4 +92,10 @@ void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& 
 void set_circular_boundary_conditions( void );
 void activate_drug_dc( void ); 
 void deactivate_drug_dc (void);
-void susceptible_cell_phenotype_update_rule(Cell* pCell, Phenotype& phenotype, double dt);
+void treatment_on( void );
+void treatment_off( void );
+void treatment_on( void );
+void treatment_off( void ); 
+void susceptible_cell_with_drug_treatment_rule(Cell* pCell, Phenotype& phenotype, double dt);
+void susceptible_cell_on_off_treatment_rule(Cell* pCell, Phenotype& phenotype, double dt); 
+
