@@ -901,7 +901,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 		int index = 0; 
 
 
-// compatibilty : first 18 entries 
+// compatibilty : first 19 entries
 		// ID 					<label index="0" size="1">ID</label>
 		name = "ID"; 
 		size = 1; 
@@ -1041,7 +1041,17 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 		data_sizes.push_back( size ); 
 		data_start_indices.push_back( index ); 
 		cell_data_size += size; 
-		index += size; 		
+		index += size;
+		//					<label index="18" size="1">transition_rate</label>
+		name = "transition_rate";
+		units = "none";
+		size = 1;
+		data_names.push_back( name );
+		data_units.push_back(units);
+		data_sizes.push_back( size );
+		data_start_indices.push_back( index );
+		cell_data_size += size;
+		index += size;
 
 /* state variables to save */ 
 // state 
@@ -1815,7 +1825,9 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 		// name = "orientation"; 
 		std::fwrite( &( pCell->state.orientation ) , sizeof(double) , 3 , fp ); 
 		// name = "polarity"; 
-		std::fwrite( &( pCell->phenotype.geometry.polarity ) , sizeof(double) , 1 , fp ); 
+		std::fwrite( &( pCell->phenotype.geometry.polarity ) , sizeof(double) , 1 , fp );
+		// name = "transition_rate";";
+		std::fwrite( &( pCell->phenotype.cycle.data.transition_rate(0,1) ) , sizeof(double) , 1 , fp );
 
  /* state variables to save */ 
 // state
