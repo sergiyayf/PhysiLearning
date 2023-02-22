@@ -26,7 +26,8 @@ setup(
     install_requires=['numpy>=1.24.0','matplotlib>=3.6.2',
                       'pandas>=1.5.2','seaborn>=0.12.1',
                       'gym>=0.21.0','stable-baselines3>=1.6.2',
-                      'pyzmq>=24.0.1','pyyaml>=5.4.1','tensorboard>=2.7.0','dvc','click'
+                      'pyzmq>=24.0.1','pyyaml>=5.4.1','tensorboard>=2.7.0','dvc','click',
+                      'scipy', 'pymc>=4.0.1'
                       ],
     python_requires=">=3.8",
     classifiers=['Operating System :: ubuntu',

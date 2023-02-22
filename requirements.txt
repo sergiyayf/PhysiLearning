@@ -9,4 +9,7 @@ pyyaml>=6.0
 tensorboard>=2.11.0
 dvc
 click
+scipy
+pymc>=4.0.1
+```
 

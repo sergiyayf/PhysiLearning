@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import sys
 import yaml
 
-def AT(obs,env,threshold = .6):
+def AT(obs,env,threshold = .9):
     """ 
     cycling adaptive therapy strategy
     """
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     else:
         evaluation = Evaluation(PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1]))
-        evaluation.run_AT(num_episodes=1, name='AT', path='./')
+        evaluation.run_AT(num_episodes=1, name='2AT_2x', path='./')
 
 
     #most_recent_evaluation = 0
