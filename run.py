@@ -1,6 +1,5 @@
 import yaml 
 import subprocess
-import time 
 import re
 from physilearning.tools.xml_reader import CfgRead
 
@@ -8,7 +7,7 @@ if __name__=='__main__':
     """
         Code to submit a reinforcement learning PhysiCell job configured by the config.yaml file
     """
-    
+
     # read config
     with open('config.yaml','r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
@@ -47,7 +46,12 @@ if __name__=='__main__':
     (out,err) = p.communicate()
     print(str(out,'utf-8'))
     # get submitted job ID in case want to directly evaluate the job after job finishes 
-    jobid = re.findall(r'%s(\d+)' % "job", str(out,'utf-8'))
+    #jobid = re.findall(r'%s(\d+)' % "job", str(out,'utf-8'))
+    # find a number after "Submitted batch job" in the output
+    jobid = re.findall(r'\d+', str(out,'utf-8'))[0]
+    # copy config to file config_jobid.yaml
+    copy_command = 'cp config.yaml config_{0}.yaml'.format(jobid)
+    subprocess.call([copy_command],shell=True)
     
     # run evaluation_job submission script with dependency to run after RL job is finished 
     if config['global']['evaluate_after']:

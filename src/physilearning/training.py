@@ -26,7 +26,7 @@ def make_env(port, rank, job_name = '000000', config_file='config.yaml', seed=0)
         return _init
 
 if __name__ == '__main__':
-    config_file = 'config.yaml'
+    config_file = f'config_{sys.argv[1]}.yaml'
     with open(config_file,'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
     
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     # create callbacks 
     checkpoint_callback = CheckpointCallback(save_freq=save_freq,save_path = model_path, name_prefix = name_prefix)
-    copy_config_callback = CustomCallback(logname)
+    copy_config_callback = CustomCallback(config_file,logname)
     #tensorboard_callback = TensorboardCallback()
 
     # create environment

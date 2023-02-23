@@ -6,9 +6,10 @@ class CustomCallback(BaseCallback):
 
     :param verbose: Verbosity level: 0 for no output, 1 for info messages, 2 for debug messages
     """
-    def __init__(self, logname = 'config', verbose=0):
+    def __init__(self, config_file='config.yaml', logname = 'config', verbose=0):
         super(CustomCallback, self).__init__(verbose)
         self.logname = logname
+        self.config_file = config_file
         # Those variables will be accessible in the callback
         # (they are defined in the base class)
         # The RL model
@@ -33,7 +34,9 @@ class CustomCallback(BaseCallback):
         """
         # copy config.yaml to the training folder using os
         os.system(r'echo "copying config.yaml to Training/Configs/"')
-        command = f'cp config.yaml ./Training/Configs/{self.logname}.yaml'
+        command = f'cp {self.config_file} ./Training/Configs/{self.logname}.yaml'
+        os.system(command)
+        command = f'rm {self.config_file}'
         os.system(command)
 
         return True

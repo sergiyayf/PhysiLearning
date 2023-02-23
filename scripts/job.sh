@@ -17,7 +17,7 @@ module load anaconda/3/plvenv
 # Export
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
-export LD_LIBRARY_PATH=/u/saif/soft/libzmq/lib:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=/u/saif/soft/libzmq/lib:$LD_LIBRARY_PATH
 # for pinning threads correctly:
 export OMP_PLACES=cores
 # run a programm

@@ -22,9 +22,9 @@ learning:
     n_steps: 1000
     verbose: 1
     ent_coef: 0.01
-    total_timesteps: 1.e+8
+    total_timesteps: 1.e+2
     save_freq: 1.e+7
-    model_save_prefix: '22_02_23_rew_f=4_actual_params_instant_treat'
+    model_save_prefix: '23_test_4'
     load:
       enable_loading: 0
       external_file_loading: 0
@@ -51,7 +51,7 @@ env:
     treat_death_rate_mut: 0.00 #0.0
     competition_wt: 1.0 #2400.0
     competition_mut: 1.0
-    growth_function_flag: 4 # flag for growth function 0 - for delayed death, 1 - for immediate
+    growth_function_flag: 0 # flag for growth function 0 - for delayed death, 1 - for immediate
 
 
   # note this is not yet functional

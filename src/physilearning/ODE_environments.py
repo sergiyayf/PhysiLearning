@@ -135,13 +135,6 @@ class LV_env(Env):
                 elif self.current_death_rate[0] < self.death_rate[0]:
                     self.current_death_rate = [self.death_rate[0],self.death_rate[1]]
 
-                print(self.growth_rate[i])
-                print(self.state[i])
-                print(self.state[j])
-                print(self.competition[j])
-                print(self.capacity)
-                print(self.current_death_rate[i])
-
                 new_pop_size = self.state[i] * \
                                (1 + self.growth_rate[i] * (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
                                 self.current_death_rate[i])
