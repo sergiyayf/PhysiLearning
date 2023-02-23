@@ -15,6 +15,7 @@ data/
 images/
 PhysiCell_V_1.10.4/output
 Training/
+Evaluations/
 
 # SVGs 
 *.svg

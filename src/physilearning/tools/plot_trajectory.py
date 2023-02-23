@@ -11,8 +11,8 @@ mpl.rcParams['pdf.fonttype'] = 42  # to make text editable in pdf output
 
 def plot_trajectory(ax,episode=0):
     df = pd.read_csv(
-        f'/home/saif/Projects/PhysiLearning/0_2AT_2x_fixedAT.csv',
-        index_col=[0])
+        f'/home/saif/Projects/PhysiLearning/Evaluations/0_truePCeval22_02_23_rew_f=0_actual_params_instant_treat.csv',
+        index_col=[0])[0:320]
     #df = pd.read_csv(f'../../../data/070223_raven_model_tests/Evaluations/{episode}_070223_minelikeparams_rewf=4_growthf=0.csv', index_col=[0])
     #df = pd.read_csv(f'../../../data/070223_raven_model_tests/Evaluations/0_070223_JKlikeparams_rewf=4_growthf=0_fixedAT.csv', index_col=[0])
     x = np.arange(0,len(df))
@@ -22,14 +22,15 @@ def plot_trajectory(ax,episode=0):
     ax.plot(x, df['Type 1'], 'g', label='mut', linewidth=2)
     ax.set_xlabel('time')
     ax.set_ylabel('# Cells')
+    ax.set_title(f'PC_evaluation')
 
 
 fig, ax = plt.subplots(figsize=(8, 4))
 plot_trajectory(ax,0)
 
-#fig, ax = plt.subplots(4,5,figsize=(16, 8))
-#for i in range(20):
+# fig, ax = plt.subplots(4,5,figsize=(16, 8))
+# for i in range(20):
 #    plot_trajectory(ax[i//5,i%5],i)
 
-#fig.savefig(r'..\results\images\manual_AT.pdf',transparent=True)
+fig.savefig(f'/home/saif/Projects/PhysiLearning/data/images/PC_eval.svg',transparent=True)
 plt.show()

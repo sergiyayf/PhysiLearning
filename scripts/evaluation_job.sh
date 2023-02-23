@@ -14,7 +14,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=6000MB
 #for OpenMP:
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=12
 #
 #SBATCH --mail-type=none
 #SBATCH --mail-user=saif@mpl.mpg.de

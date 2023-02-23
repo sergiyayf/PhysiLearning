@@ -24,7 +24,7 @@ learning:
     ent_coef: 0.01
     total_timesteps: 1.e+8
     save_freq: 1.e+7
-    model_save_prefix: '070223_Jlikeparams_rewf=0_grf=1'
+    model_save_prefix: '22_02_23_rew_f=4_actual_params_instant_treat'
     load:
       enable_loading: 0
       external_file_loading: 0
@@ -35,7 +35,7 @@ env:
   type: 'LV' #'PhysiCell' # 'LV'
   threshold_burden: 1000
   treatment_time_step: 60
-  max_time: 120000
+  max_time: 60000
   reward_shaping: 0   # reward shaping flag for some predefined rewards
 
   # LV environment settings
@@ -43,15 +43,15 @@ env:
     initial_wt: 45
     initial_mut: 5
     carrying_capacity: 1500.0
-    growth_rate_wt: 0.015 #0.0175
-    growth_rate_mut: 0.01 #0.0175
-    death_rate_wt: 0.001
-    death_rate_mut: 0.001
-    treat_death_rate_wt: 0.05 #0.015
-    treat_death_rate_mut: 0.001 #0.0
-    competition_wt: 3.0 #2400.0
+    growth_rate_wt: 0.035 #0.0175
+    growth_rate_mut: 0.032 #0.0175
+    death_rate_wt: 0.00036
+    death_rate_mut: 0.00036
+    treat_death_rate_wt: 0.15 #0.015
+    treat_death_rate_mut: 0.00 #0.0
+    competition_wt: 1.0 #2400.0
     competition_mut: 1.0
-    growth_function_flag: 1 # flag for growth function 0 - for delayed death, 1 - for immediate
+    growth_function_flag: 4 # flag for growth function 0 - for delayed death, 1 - for immediate
 
 
   # note this is not yet functional
@@ -69,11 +69,12 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
-  path: './data/070223_raven_model_tests/'
-  model_prefix: '070223_minelikeparams_rewf=4_growthf=0'
+  from_file: 1
+  path: './'
+  model_prefix: '22_02_23_rew_f=0_actual_params_instant_treat'
   fixed_AT_protocol: 0
   num_episodes: 1
-  step_to_load: '_50000000_steps'
+  step_to_load: '_70000000_steps'
+  evaluate_on: 'PhysiCell'
 
 
