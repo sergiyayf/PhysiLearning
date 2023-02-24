@@ -23,7 +23,7 @@
 	</overall>
 	
 	<parallel>
-		<omp_num_threads>10</omp_num_threads>
+		<omp_num_threads>1</omp_num_threads>
 	</parallel> 
 	
 	<save>
@@ -364,7 +364,7 @@
 	</initial_conditions>	
 	
 	<user_parameters>
-		<random_seed type="int" units="dimensionless" description="">0</random_seed>
+	<random_seed type="int" units="dimensionless" description="">0</random_seed>
         <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">1</number_of_cells>
         <number_of_resistant_cells type="int" units="none" description="">5</number_of_resistant_cells>
 	<number_of_susceptible_cells type="int" units="none" description="">45</number_of_susceptible_cells>i
