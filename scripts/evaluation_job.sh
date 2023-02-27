@@ -1,8 +1,8 @@
 #!/bin/bash -l
 
 # Standard output and error:
-#SBATCH -o ./logs/tjob.out.%j
-#SBATCH -e ./logs/tjob.err.%j
+#SBATCH -o ./logs/OutEvaltjob.out.%j
+#SBATCH -e ./logs/ErrEvaltjob.err.%j
 # Initial working directory:
 #SBATCH -D ./../
 # Job Name:
@@ -14,7 +14,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=6000MB
 #for OpenMP:
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=20
 #
 #SBATCH --mail-type=none
 #SBATCH --mail-user=saif@mpl.mpg.de
@@ -30,4 +30,4 @@ export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # for pinning threads correctly:
 export OMP_PLACES=cores
 
-srun --ntasks=1 --cpus-per-task=1 --mem-per-cpu=3000 python3 ./src/physilearning/evaluation.py ${SLURM_JOBID}
+srun --exclusive --ntasks=1 --cpus-per-task=1 --mem-per-cpu=300 python3 ./src/physilearning/evaluation.py ${SLURM_JOBID}

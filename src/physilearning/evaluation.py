@@ -72,7 +72,7 @@ class Evaluation():
                 #action = 1
                 obs, reward, done, info = self.env.step(action)
                 score += reward
-            filename = os.path.join(path, '{1}_{0}_fixedAT_60onPC.csv'.format(name,episode))
+            filename = os.path.join(path, '{1}_{0}_fixedAT_60.csv'.format(name,episode))
             self.save_trajectory(filename)
 
     def save_trajectory(self,name):
@@ -131,8 +131,15 @@ if __name__ == '__main__':
             evaluation.run_model(model_name,num_episodes=general_config['eval']['num_episodes'],path=os.path.join(model_training_path,'Evaluations'),name='truePCeval'+model_prefix)
 
     else:
-        evaluation = Evaluation(PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1]))
-        evaluation.run_AT(num_episodes=1, name='2AT_2x', path='./')
+        env_type = general_config['eval']['evaluate_on']
+        if env_type == 'PhysiCell':
+            env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+        elif env_type == 'LV':
+            env = LV_env.from_yaml(config_file)
+        evaluation = Evaluation(env)
+        if general_config['eval']['fixed_AT_protocol']:
+            evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'], name='AT')
+
 
 
     #most_recent_evaluation = 0

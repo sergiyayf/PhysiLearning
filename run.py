@@ -4,15 +4,29 @@ import re
 from physilearning.tools.xml_reader import CfgRead
 import click
 
+def change_PC_config(PC_conf = None, n_envs = 1):
+    """Change the PhysiCell settings file to run multiple simulations in parallel
+    for now only works for 1 environment
+    """
+    copy_PhysiCell = 'bash ./scripts/create_dirs.sh {0}'.format(n_envs - 1)
+    subprocess.call([copy_PhysiCell], shell=True)
+    xml_reader = CfgRead('./simulations/PhysiCell_V_1.10.4_0/config/PhysiCell_settings.xml')
+
+    for key in PC_conf:
+        print('Changing {0} to {1}'.format(key, PC_conf[key]['value']))
+        xml_reader.write_new_param(parent_nodes=PC_conf[key]['parent_nodes'], parameter=key,
+                                   value=PC_conf[key]['value'])
+
+    # xml_reader.write_new_param(parent_nodes=['save', 'full_data'], parameter="enable", value='true')
+
 @click.group()
 def cli():
     pass
 
 @cli.command()
-def main():
+def train():
+    """Submit a training job
     """
-            Code to submit a reinforcement learning PhysiCell job configured by the config.yaml file
-        """
 
     # read config
     with open('config.yaml', 'r') as f:
@@ -33,17 +47,9 @@ def main():
 
     # prepare PhysiCell simulations for job submission
     if config['env']['type'] == 'PhysiCell':
-
-        # read in PhysiCell config file and initilize xml reader
-        xml_reader = CfgRead('./simulations/PhysiCell_V_1.10.4_0/config/PhysiCell_settings.xml')
         PC_conf = config['env']['PC']
-        for key in PC_conf:
-            xml_reader.write_new_param(parent_nodes=PC_conf[key]['parent_nodes'], parameter=key,
-                                       value=PC_conf[key]['value'])
+        change_PC_config(PC_conf, n_envs)
 
-        # xml_reader.write_new_param(parent_nodes=['save', 'full_data'], parameter="enable", value='true')
-        copy_PhysiCell = 'bash ./scripts/create_dirs.sh {0}'.format(n_envs - 1)
-        subprocess.call([copy_PhysiCell], shell=True)
 
     # construct a command to run by shell
     command = 'cd ./scripts && sbatch --nodes={0} --ntasks={1} --mem={2}MB --cpus-per-task={3} \
@@ -68,8 +74,26 @@ def main():
 
 @cli.command()
 def simulate_patients():
+    """Submit a job to simulate virtual patients patients
+    """
     click.echo('Simulating patients')
     eval_command = 'cd ./scripts && sbatch simulate_patients_job.sh'
+    p_eval = subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
+
+@cli.command()
+def evaluate():
+    """Submit a job to evaluate the trained model or how fixed AT protocol performs
+    """
+    # read config
+    with open('config.yaml', 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+    n_envs = config['learning']['model']['n_envs']
+    # prepare PhysiCell simulations for job submission
+    if config['eval']['evaluate_on'] == 'PhysiCell':
+        PC_conf = config['env']['PC']
+        change_PC_config(PC_conf, n_envs)
+    click.echo('Evaluating')
+    eval_command = 'cd ./scripts && sbatch evaluation_job.sh'
     p_eval = subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
 if __name__=='__main__':

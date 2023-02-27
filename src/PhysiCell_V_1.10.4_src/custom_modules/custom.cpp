@@ -266,10 +266,17 @@ void setup_2D_circular_tissue( void )
 }
 
 void setup_tissue( void ) {
-
+	
+    	int resistant_cells = parameters.ints("number_of_resistant_cells");
+    	int susceptible_cells = parameters.ints("number_of_susceptible_cells");
+	if (resistant_cells == 0 && susceptible_cells == 1){
  	Cell* pCell = NULL; 	
         pCell = create_cell( get_cell_definition("susceptible") ); 
         pCell->assign_position( {0.0,0.0,0.0} );
+	}
+	else {
+	setup_2D_circular_tissue();
+	}
 	return;
 }
 std::vector<std::string> my_coloring_function( Cell* pCell )
@@ -397,7 +404,7 @@ void susceptible_cell_on_off_treatment_rule( Cell* pCell, Phenotype& phenotype, 
 	if (relative_growth_rate > 0.95){
 	if( parameters.bools("treatment") )
 	{
-		multiplier = std::exp(-relative_growth_rate)*55555000;
+		multiplier = std::exp(-relative_growth_rate)*5000;
 	}
 	
 	phenotype.death.rates[apoptosis_model_index] = multiplier * pCell->parameters.pReference_live_phenotype->death.rates[apoptosis_model_index];  
