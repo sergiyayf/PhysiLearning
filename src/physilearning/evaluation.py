@@ -22,6 +22,20 @@ def AT(obs,env,threshold = .60):
         action = 0 
     return action 
 
+def AT_Zhang_et_at(obs,env,threshold = .50):
+    """
+    cycling adaptive therapy strategy
+    """
+    tumor_size = np.sum(obs[0:2])
+    ini_tumor_size = env.trajectory[0,0]+env.trajectory[1,0]
+    if tumor_size > ini_tumor_size:
+        action = 1
+    else:
+        if env.trajectory[2,int(env.time/env.treatment_time_step)-1] == 1 and tumor_size > threshold:
+            action = 1
+        else:
+            action = 0
+    return action
 class Evaluation():
 
     def __init__(self,env):
@@ -68,11 +82,11 @@ class Evaluation():
             done = False 
             score = 0
             while not done:
-                action = AT(obs,self.env)
+                action = AT_Zhang_et_at(obs,self.env)
                 #action = 1
                 obs, reward, done, info = self.env.step(action)
                 score += reward
-            filename = os.path.join(path, '{1}_{0}_fixedAT_60.csv'.format(name,episode))
+            filename = os.path.join(path, '{1}_{0}_Zhang_AT.csv'.format(name,episode))
             self.save_trajectory(filename)
 
     def save_trajectory(self,name):

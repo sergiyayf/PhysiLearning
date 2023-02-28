@@ -33,7 +33,7 @@ learning:
 env:
   # general env settings
   type: 'LV' #'PhysiCell' # 'LV'
-  threshold_burden: 3000
+  threshold_burden: 4000
   treatment_time_step: 60
   max_time: 60000
   reward_shaping: 0   # reward shaping flag for some predefined rewards
@@ -65,6 +65,9 @@ env:
     number_of_resistant_cells:
         parent_nodes: ['user_parameters']
         value: 5
+    enable_chkpt:
+        parent_nodes: ['user_parameters']
+        value: 'true'
 
 # evaluation configuration
 eval:

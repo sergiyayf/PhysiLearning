@@ -8,6 +8,9 @@ def change_PC_config(PC_conf = None, n_envs = 1):
     """Change the PhysiCell settings file to run multiple simulations in parallel
     for now only works for 1 environment
     """
+    clean_sims = 'bash ./scripts/cleanup_simulations.sh'
+    subprocess.call([clean_sims], shell=True)
+
     copy_PhysiCell = 'bash ./scripts/create_dirs.sh {0}'.format(n_envs - 1)
     subprocess.call([copy_PhysiCell], shell=True)
     xml_reader = CfgRead('./simulations/PhysiCell_V_1.10.4_0/config/PhysiCell_settings.xml')

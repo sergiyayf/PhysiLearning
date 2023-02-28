@@ -77,7 +77,7 @@ class PC_env(Env):
         # update timer
         self.time += self.treatment_time_step
         # get tumor updated state
-        
+
         message = str(self.socket.recv(),'utf-8')
          
         type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
@@ -86,7 +86,7 @@ class PC_env(Env):
         self.state[1] = int(type1[0])/self.burden
         # do action (apply treatment or not)
         self.state[2] = action
-        
+
         # record trajectory
         self.trajectory[:,int(self.time/self.treatment_time_step) - 1] = self.state
         # get the reward

@@ -480,6 +480,8 @@ void load_cells_physicell( std::string outputname ) {
                     pC->state.orientation[2] =  B[index+2][i];
                 } else if (value == "polarity") {
                     pC->phenotype.geometry.polarity =  B[index][i];
+                } else if (value == "transition_rate") {
+                    pC->phenotype.cycle.data.transition_rate(0,1) =  B[index][i];
                 } else if (value == "velocity") {
                     pC->velocity[0] =  B[index][i];
                     pC->velocity[1] =  B[index+1][i];
@@ -711,15 +713,16 @@ void load_cells_physicell( std::string outputname ) {
                     }
                 }
                 // TRANSFORMATIONS
-                 
+
                   else if (value == "transformation_rates"){
                     for (int cell_type_ID = 0; cell_type_ID<std::stoi(size); cell_type_ID++){
                         
                         double value =  B[index+cell_type_ID][i];
-                        set_single_behavior(pC,"transform to cell type "+std::to_string(cell_type_ID),value); 
+                        // keep transformation rates in the cell type
+                        set_single_behavior(pC,"transform to cell type "+std::to_string(cell_type_ID),value);
                         
                     }
-                } 
+                }
                 // CUSTOM
                 else {
                     
@@ -759,6 +762,193 @@ void load_cells_physicell( std::string outputname ) {
 
     }
     
+return;}
+
+void load_minimal_cells_physicell( std::string outputname ) {
+    Cell* pC;
+    pugi::xml_document checkpointing_document;
+    pugi::xml_node physicell_checkpoint_root;
+    std::string filename = outputname+".xml";
+
+    checkpointing_document.load_file(filename.c_str());
+
+    pugi::xml_parse_result result = checkpointing_document.load_file( filename.c_str());
+    if( result.status != pugi::xml_parse_status::status_ok )
+	{
+		std::cout << "Error loading " << filename << "!" << std::endl;
+
+	} else {
+        std::cout << "Succesfully loaded " << filename << "!" << std::endl;
+    }
+
+    // Get the root of file
+    physicell_checkpoint_root = checkpointing_document.child("MultiCellDS");
+
+    // Get name of the root node
+    std::string name = xml_get_my_name( physicell_checkpoint_root );
+
+    // Now see if I can find the labels node;
+
+    pugi::xml_node cellular_information_node = physicell_checkpoint_root.child("cellular_information");
+    pugi::xml_node cell_populations_node = cellular_information_node.child("cell_populations");
+    pugi::xml_node cell_population_node = cell_populations_node.child("cell_population");
+    pugi::xml_node custom_node = cell_population_node.child("custom");
+    pugi::xml_node simplified_data_node = custom_node.child("simplified_data");
+    pugi::xml_node labels_node = simplified_data_node.child("labels");
+    std::string name2 = xml_get_my_name( labels_node );
+
+    // Now loop through all labels node and see if I can find all the paramet names in the xml file
+    pugi::xml_node node1 = labels_node.first_child();
+
+    // Read matlab cell data into a matrix
+    std::string matlab_filename = outputname+"_cells.mat";
+    std::vector<std::vector<double>> B = read_matlab( matlab_filename );
+
+    // Get number of cells in the simulation
+    int number_of_cells = B[0].size();
+
+    // Loop through every cell and initiate it in the simulation
+    for (int i = 0; i < number_of_cells; i++) {
+        // get cell definition and create a cell
+        node1 = labels_node.first_child();
+        int index;
+        while (node1) {
+            std::string value = xml_get_my_string_value( node1 );
+            std::string index_str = node1.attribute("index").value();
+            index = std::stoi(index_str);
+            if (value == "cell_type") {
+
+                break;
+            } else {
+                node1 = node1.next_sibling();
+            }
+        }
+            Cell_Definition* pCD = cell_definitions_by_index[B[index][i]];
+            pC = create_cell( *pCD );
+            // go through all saved data
+            node1 = labels_node.first_child();
+
+            while( node1 )
+            {
+                std::string value = xml_get_my_string_value( node1 );
+                std::string index_str = node1.attribute("index").value();
+                index = std::stoi(index_str);
+                std::string size = node1.attribute("size").value();
+                // General
+
+	       	if (value == "ID") {
+                    pC->ID =  B[index][i];
+                }
+		// If the code also includes parent_ID for lineage tracking uncomment
+		//else if (value == "parent_ID") {
+                //    pC->parent_ID =  B[index][i];
+                //}
+	       	else if (value == "position") {
+                    pC->assign_position({B[index][i],B[index+1][i],B[index+2][i]});
+
+                } else if (value == "total_volume") {
+                    pC->set_total_volume(B[index][i]);
+
+                } else if (value == "cell_type") {
+                    pC->type =  B[index][i];
+                } else if (value == "pressure") {
+                    pC->state.simple_pressure =  B[index][i];
+                } else if (value == "dead") {
+                    pC->phenotype.death.dead = B[index][i];
+                    if (pC->phenotype.death.dead == true) {
+                        pC->flag_for_removal();
+                    }
+                }
+                /*
+                else if (value == "cycle_model") {
+                    if (B[index][i] == 0) {
+                    pC->functions.cycle_model = Ki67_advanced;
+                    pC->phenotype.cycle.sync_to_cycle_model( pC->functions.cycle_model);
+
+                    } else if (B[index][i] == 1) {
+                    pC->functions.cycle_model = Ki67_basic;
+                    pC->phenotype.cycle.sync_to_cycle_model( pC->functions.cycle_model);
+
+                    } else if (B[index][i] == 2) {
+                    pC->functions.cycle_model = flow_cytometry_cycle_model;
+                    pC->phenotype.cycle.sync_to_cycle_model( pC->functions.cycle_model);
+
+                    }  else if (B[index][i] == 5) {
+                    pC->functions.cycle_model = live;
+                    pC->phenotype.cycle.sync_to_cycle_model( pC->functions.cycle_model);
+
+                    } else if (B[index][i] == 6) {
+                    pC->functions.cycle_model = flow_cytometry_separated_cycle_model;
+                    pC->phenotype.cycle.sync_to_cycle_model( pC->functions.cycle_model);
+
+                    } else if (B[index][i] == 7) {
+                    pC->functions.cycle_model = cycling_quiescent;
+                    pC->phenotype.cycle.sync_to_cycle_model( pC->functions.cycle_model);
+
+                    }
+                } else if (value == "nuclear_volume") {
+                    pC->phenotype.volume.nuclear =  B[index][i];
+                } else if (value == "cytoplasmic_volume") {
+                    pC->phenotype.volume.cytoplasmic =  B[index][i];
+                } else if (value == "fluid_fraction") {
+                    pC->phenotype.volume.fluid_fraction =  B[index][i];
+                } else if (value == "calcified_fraction") {
+                    pC->phenotype.volume.calcified_fraction = B[index][i];
+                } else if (value == "transition_rate") {
+                    pC->phenotype.cycle.data.transition_rate(0,1) =  B[index][i];
+                } else if (value == "velocity") {
+                    pC->velocity[0] =  B[index][i];
+                    pC->velocity[1] =  B[index+1][i];
+                    pC->velocity[2] =  B[index+2][i];
+                }
+                // STATE
+                  else if (value == "pressure") {
+                    pC->state.simple_pressure =  B[index][i];
+                } else if (value == "dead") {
+                    pC->phenotype.death.dead = B[index][i];
+                } else if (value == "current_death_model"){
+                    pC->phenotype.death.current_death_model_index =  B[index][i];
+                } else if (value == "death_rates"){
+                    for (int death_models = 0; death_models<std::stoi(size); death_models++){
+
+                        double value =  B[index+death_models][i];
+                        pC->phenotype.death.rates[death_models] = value;
+
+                    }
+                }
+                // VOLUME
+                  else if (value == "cytoplasmic_biomass_change_rate"){
+                    pC->phenotype.volume.cytoplasmic_biomass_change_rate= B[index][i];
+                } else if (value == "nuclear_biomass_change_rate"){
+                    pC->phenotype.volume.nuclear_biomass_change_rate= B[index][i];
+                } else if (value == "fluid_change_rate"){
+                    pC->phenotype.volume.fluid_change_rate= B[index][i];
+                } else if (value == "calcification_rate"){
+                    pC->phenotype.volume.calcification_rate= B[index][i];
+                } else if (value == "target_solid_cytoplasmic"){
+                    pC->phenotype.volume.target_solid_cytoplasmic= B[index][i];
+                } else if (value == "target_solid_nuclear"){
+                    pC->phenotype.volume.target_solid_nuclear= B[index][i];
+                } else if (value == "target_fluid_fraction"){
+                    pC->phenotype.volume.target_fluid_fraction= B[index][i];
+                }
+                // GEOMETRY
+                  else if (value == "radius"){
+                    pC->phenotype.geometry.radius= B[index][i];
+                } else if (value == "nuclear_radius"){
+                    pC->phenotype.geometry.nuclear_radius= B[index][i];
+                } else if (value == "surface_area"){
+                    pC->phenotype.geometry.surface_area= B[index][i];
+                }*/
+                // MECHANICS
+
+                node1 = node1.next_sibling();
+
+
+            }
+
+    }
+
 return;}
 
 }; 

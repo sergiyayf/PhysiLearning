@@ -266,7 +266,11 @@ void setup_2D_circular_tissue( void )
 }
 
 void setup_tissue( void ) {
-	
+
+    if (parameters.bools("enable_chkpt")){
+        std::cout<<"Loading cell information from"<<parameters.strings("filename_chkpt")+"_cells.mat"<<std::endl;
+        load_minimal_cells_physicell(parameters.strings("filename_chkpt"));
+	} else {
     	int resistant_cells = parameters.ints("number_of_resistant_cells");
     	int susceptible_cells = parameters.ints("number_of_susceptible_cells");
 	if (resistant_cells == 0 && susceptible_cells == 1){
@@ -276,6 +280,7 @@ void setup_tissue( void ) {
 	}
 	else {
 	setup_2D_circular_tissue();
+	}
 	}
 	return;
 }

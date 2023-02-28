@@ -208,7 +208,7 @@
           <cell_transformations>
             <transformation_rates>
                 <transformation_rate name="susceptible" units="1/min">0.0</transformation_rate>
-		<transformation_rate name="resistant" units="1/min">0.00000002</transformation_rate> <!--approx. one cell per 30000 per generation mutates  -->
+		<transformation_rate name="resistant" units="1/min">0.0</transformation_rate> <!--approx. one cell per 30000 per generation mutates  -->
                 </transformation_rates>
             </cell_transformations>
 
@@ -364,11 +364,13 @@
 	</initial_conditions>	
 	
 	<user_parameters>
-	<random_seed type="int" units="dimensionless" description="">0</random_seed>
+        <random_seed type="int" units="dimensionless" description="">0</random_seed>
         <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">1</number_of_cells>
         <number_of_resistant_cells type="int" units="none" description="">5</number_of_resistant_cells>
-	<number_of_susceptible_cells type="int" units="none" description="">45</number_of_susceptible_cells>i
-	<treatment type="bool" units="none" description="">false</treatment>
+        <number_of_susceptible_cells type="int" units="none" description="">45</number_of_susceptible_cells>
+        <treatment type="bool" units="none" description="">false</treatment>
+        <enable_chkpt description="" type="bool" units="none">false</enable_chkpt>
+        <filename_chkpt description="" type="string" units="none">./../presims/final</filename_chkpt>
     </user_parameters>
 	
 </PhysiCell_settings>
