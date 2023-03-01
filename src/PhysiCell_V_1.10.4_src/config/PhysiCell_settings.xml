@@ -35,7 +35,7 @@
 		</full_data>
 		
 		<SVG>
-			<interval units="min">600</interval>
+			<interval units="min">60</interval>
 			<enable>true</enable>
 		</SVG>
 		

@@ -75,7 +75,7 @@ using namespace PhysiCell;
 
 void create_cell_types( void );
 void setup_tissue( void ); 
-void setup_2D_circular_tissue( void );
+void setup_round_tumoroid( void );
 // set up the BioFVM microenvironment 
 void setup_microenvironment( void ); 
 

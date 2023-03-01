@@ -206,7 +206,7 @@ void setup_microenvironment( void )
 	return; 
 }
 
-void setup_2D_circular_tissue( void )
+void setup_round_tumoroid( void )
 {
 	// place a cluster of tumor cells at the center 
     double cell_radius = cell_defaults.phenotype.geometry.radius; 
@@ -223,26 +223,35 @@ void setup_2D_circular_tissue( void )
     double tumor_radius = std::sqrt(resistant_cells+susceptible_cells)*cell_radius; // 250.0; 
     double x = 0.0; 
     double x_outer = tumor_radius; 
-	double y = 0.0; 
+	double y = 0.0;
+	double z = 0.0;
     double Xmin = microenvironment.mesh.bounding_box[0]; 
 	double Ymin = microenvironment.mesh.bounding_box[1];
+	double Zmin = microenvironment.mesh.bounding_box[2];
     double Xmax = microenvironment.mesh.bounding_box[3]; 
-	double Ymax = microenvironment.mesh.bounding_box[4]; 
+	double Ymax = microenvironment.mesh.bounding_box[4];
+	double Zmax = microenvironment.mesh.bounding_box[5];
     double Xrange = Xmax - Xmin; 
 	double Yrange = Ymax - Ymin;
-    
+	double Zrange = Zmax - Zmin;
+
 	while( n < resistant_cells)
 	{  
         
         double r = tumor_radius +1; 
         while (r>0.4*tumor_radius) {
         x = Xmin + UniformRandom()*Xrange; 
-        y = Ymin + UniformRandom()*Yrange; 
-        r = norm( {x,y,0.0} ); 
+        y = Ymin + UniformRandom()*Yrange;
+        if( default_microenvironment_options.simulate_2D == false ){
+        z = Zmin + UniformRandom()*Zrange;
+        } else {
+        z = 0.0;
+        }
+        r = norm( {x,y,z} );
         }
         
         pCell = create_cell( get_cell_definition("resistant") );         
-		pCell->assign_position( {x,y,0.0} );
+		pCell->assign_position( {x,y,z} );
 		n++; 
 	} 
 	while( n < resistant_cells+susceptible_cells)
@@ -251,12 +260,17 @@ void setup_2D_circular_tissue( void )
         double r = tumor_radius +1; 
         while (r>tumor_radius || r<0.4*tumor_radius ) {
         x = Xmin + UniformRandom()*Xrange; 
-        y = Ymin + UniformRandom()*Yrange; 
-        r = norm( {x,y,0.0} ); 
+        y = Ymin + UniformRandom()*Yrange;
+        if( default_microenvironment_options.simulate_2D == false ){
+        z = Zmin + UniformRandom()*Zrange;
+        } else {
+        z = 0.0;
+        }
+        r = norm( {x,y,z} );
         }
         
         pCell = create_cell( get_cell_definition("susceptible") ); 
-        pCell->assign_position( {x,y,0.0} );
+        pCell->assign_position( {x,y,z} );
 		n++; 
 	}  
 	    
@@ -279,7 +293,7 @@ void setup_tissue( void ) {
         pCell->assign_position( {0.0,0.0,0.0} );
 	}
 	else {
-	setup_2D_circular_tissue();
+	setup_round_tumoroid();
 	}
 	}
 	return;
@@ -406,11 +420,13 @@ void susceptible_cell_on_off_treatment_rule( Cell* pCell, Phenotype& phenotype, 
 	
 	double multiplier = 1.0;
         double relative_growth_rate = phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index)/pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index);
-	if (relative_growth_rate > 0.95){
+	if (relative_growth_rate > 0.5){
 	if( parameters.bools("treatment") )
 	{
-		multiplier = std::exp(-relative_growth_rate)*5000;
-	}
+		multiplier = std::exp(std::pow(relative_growth_rate,4))*2000-2000*std::exp(std::pow(0.5,4));
+	} else {
+        multiplier = 1.0;
+    }
 	
 	phenotype.death.rates[apoptosis_model_index] = multiplier * pCell->parameters.pReference_live_phenotype->death.rates[apoptosis_model_index];  
     	}	

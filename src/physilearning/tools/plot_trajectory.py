@@ -11,8 +11,8 @@ mpl.rcParams['pdf.fonttype'] = 42  # to make text editable in pdf output
 
 def plot_trajectory(ax,episode=0):
     df = pd.read_csv(
-        f'/home/saif/Projects/PhysiLearning/0_AT_fixedAT_70.csv',
-        index_col=[0])[0:320]
+        f'/home/saif/Projects/PhysiLearning/0_AT_Zhang_AT.csv',
+        index_col=[0])
     #df = pd.read_csv(f'../../../data/070223_raven_model_tests/Evaluations/{episode}_070223_minelikeparams_rewf=4_growthf=0.csv', index_col=[0])
     #df = pd.read_csv(f'../../../data/070223_raven_model_tests/Evaluations/0_070223_JKlikeparams_rewf=4_growthf=0_fixedAT.csv', index_col=[0])
     x = np.arange(0,len(df))

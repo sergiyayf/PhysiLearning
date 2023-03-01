@@ -22,7 +22,7 @@ def AT(obs,env,threshold = .60):
         action = 0 
     return action 
 
-def AT_Zhang_et_at(obs,env,threshold = .50):
+def AT_Zhang_et_at(obs,env,threshold = .80):
     """
     cycling adaptive therapy strategy
     """
@@ -82,7 +82,7 @@ class Evaluation():
             done = False 
             score = 0
             while not done:
-                action = AT_Zhang_et_at(obs,self.env)
+                action = AT(obs,self.env)
                 #action = 1
                 obs, reward, done, info = self.env.step(action)
                 score += reward
