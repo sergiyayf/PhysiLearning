@@ -5,6 +5,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.callbacks import CheckpointCallback
+from sb3_contrib import RecurrentPPO as rPPO
 from physilearning.callbacks import CustomCallback
 import multiprocessing as mp
 import yaml
@@ -46,6 +47,7 @@ if __name__ == '__main__':
     external_file_name = config['learning']['model']['load']['external_file_name']
     env_type = config['env']['type']
     logname = config['learning']['model']['model_save_prefix']
+    optimization_algorithm = config['learning']['model']['name']
 
     # create callbacks 
     checkpoint_callback = CheckpointCallback(save_freq=save_freq,save_path = model_path, name_prefix = name_prefix)
@@ -90,8 +92,12 @@ if __name__ == '__main__':
 
             model = PPO.load(most_recent_file, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
     else:
-        model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
-    
+        if optimization_algorithm == 'PPO':
+            model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
+        elif optimization_algorithm == 'RecurrentPPO':
+            model = rPPO('MlpLstmPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
+        else:
+            raise ValueError('Optimization algorithm not recognized')
     # train model
 
     model.learn(total_timesteps=int(total_timesteps), callback=[checkpoint_callback,copy_config_callback], tb_log_name=logname)

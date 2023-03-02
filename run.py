@@ -55,8 +55,9 @@ def train():
 
 
     # construct a command to run by shell
-    command = 'cd ./scripts && sbatch --nodes={0} --ntasks={1} --mem={2}MB --cpus-per-task={3} \
+    command = 'cd ./scripts && sbatch --exclusive --nodes={0} --ntasks={1} --mem={2}MB --cpus-per-task={3} \
                 --time={4} job.sh'.format(nodes, ntasks, mem, cpus_per_task, wall_clock_time)
+
     p = subprocess.Popen([command], shell=True, stdout=subprocess.PIPE)
     (out, err) = p.communicate()
     print(str(out, 'utf-8'))

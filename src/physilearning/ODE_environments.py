@@ -11,24 +11,28 @@ class LV_env(Env):
             initial_wt=45, initial_mut=5, growth_rate_wt=0.0175, growth_rate_mut=0.0175,
             death_rate_wt=0.001, death_rate_mut=0.001, treat_death_rate_wt=0.15,
             treat_death_rate_mut=0.0, competition_wt=2.4e3, competition_mut=1.0,
-            treatment_time_step=60, reward_shaping_flag=0, growth_function_flag=0):
+            treatment_time_step=60, reward_shaping_flag=0, growth_function_flag=0,normalize_to=1000):
         # setting up environment
         # set up discrete action space
         self.action_space = Discrete(2)
-        self.observation_space = Box(low=0,high=1,shape=(3,))
+        self.observation_space = Box(low=0,high=normalize_to,shape=(3,))
         self.time = 0
         self.treatment_time_step = treatment_time_step
         self.max_time = max_time
-        self.threshold_burden = burden
-        self.initial_wt = initial_wt
-        self.initial_mut = initial_mut
+        self.threshold_burden_in_number = burden
+        self.threshold_burden = normalize_to
+        self.initial_wt = initial_wt*normalize_to/burden
+        self.initial_mut = initial_mut*normalize_to/burden
         self.initial_drug = 0
         self.burden = self.initial_mut+self.initial_wt
-        self.state = [self.initial_wt/self.threshold_burden,
-                      self.initial_mut/self.threshold_burden,
+        # self.state = [self.initial_wt/self.threshold_burden,
+        #               self.initial_mut/self.threshold_burden,
+        #               self.initial_drug]
+        # self.capacity = carrying_capacity / self.threshold_burden
+        self.state = [self.initial_wt,
+                      self.initial_mut,
                       self.initial_drug]
-
-        self.capacity = carrying_capacity/self.threshold_burden
+        self.capacity = carrying_capacity*normalize_to/burden
         # 1 - wt, 2 - resistant
         self.growth_rate = [growth_rate_wt,growth_rate_mut]
         self.death_rate = [death_rate_wt,death_rate_mut]
@@ -52,10 +56,15 @@ class LV_env(Env):
         max_time = config['env']['max_time']
         timestep = config['env']['treatment_time_step']
         reward_shaping_flag = config['env']['reward_shaping']
+        normalize_to = config['env']['normalize_to']
 
         # LV specific settings
         initial_wt = config['env']['LV']['initial_wt']
+        if isinstance(initial_wt, str):
+            initial_wt = np.random.random_integers(low=0, high=burden, size=1)[0]
         initial_mut = config['env']['LV']['initial_mut']
+        if isinstance(initial_mut, str):
+            initial_mut = np.random.random_integers(low=0, high=0.01*burden, size=1)[0]
         carrying_capacity = config['env']['LV']['carrying_capacity']
         growth_rate_wt = config['env']['LV']['growth_rate_wt']
         growth_rate_mut = config['env']['LV']['growth_rate_mut']
@@ -83,7 +92,7 @@ class LV_env(Env):
                    death_rate_wt=death_rate_wt, death_rate_mut=death_rate_mut,
                    competition_wt=competition_wt, competition_mut=competition_mut,
                    treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
-                   growth_function_flag=growth_function_flag)
+                   growth_function_flag=growth_function_flag, normalize_to=normalize_to)
     def step(self, action):
         self.time += self.treatment_time_step
         # grow_tumor
@@ -97,11 +106,11 @@ class LV_env(Env):
         # record trajectory
         self.trajectory[:,int(self.time/self.treatment_time_step)-1] = self.state
         # get the reward
-        rewards = Reward(self.reward_shaping_flag)
+        rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
         reward = rewards.get_reward(self.state)
 
         # check if we are done
-        if self.time >= self.max_time or self.burden <= 0 or self.burden >= 1:
+        if self.time >= self.max_time or self.burden <= 0 or self.burden >= self.threshold_burden:
             done = True
         else:
             done = False
@@ -116,8 +125,8 @@ class LV_env(Env):
     def reset(self):
         self.real_step_count += 1
 
-        self.state = [self.initial_wt/self.threshold_burden, self.initial_mut/self.threshold_burden, self.initial_drug]
-
+        #self.state = [self.initial_wt/self.threshold_burden, self.initial_mut/self.threshold_burden, self.initial_drug]
+        self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
 
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))

@@ -10,19 +10,20 @@ import matplotlib.pyplot as plt
 import sys
 import yaml
 
-def AT(obs,env,threshold = .60):
+def AT(obs,env,threshold = .690):
     """ 
     cycling adaptive therapy strategy
     """
     tumor_size = np.sum(obs[0:2])
     
-    if tumor_size > threshold:
+    if tumor_size > threshold*env.threshold_burden:
+    #if tumor_size > threshold:
         action = 1
     else:
         action = 0 
     return action 
 
-def AT_Zhang_et_at(obs,env,threshold = .80):
+def AT_Zhang_et_at(obs,env,threshold = .980):
     """
     cycling adaptive therapy strategy
     """
@@ -86,7 +87,7 @@ class Evaluation():
                 #action = 1
                 obs, reward, done, info = self.env.step(action)
                 score += reward
-            filename = os.path.join(path, '{1}_{0}_Zhang_AT.csv'.format(name,episode))
+            filename = os.path.join(path, 'newLV_test_for_longer_LSTM_{1}_{0}_p1.csv'.format(name,episode))
             self.save_trajectory(filename)
 
     def save_trajectory(self,name):

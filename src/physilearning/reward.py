@@ -2,8 +2,9 @@
 import numpy as np
 
 class Reward:
-    def __init__(self, reward_shaping_flag = 0):
+    def __init__(self, reward_shaping_flag=0, normalization=1):
         self.reward_shaping_flag = reward_shaping_flag
+        self.normalization = normalization
 
     def get_reward(self, obs):
         # +1 for each time step
@@ -24,6 +25,13 @@ class Reward:
                 reward = 1
             else:
                 reward = 0
+
+        # +1-normalized_cell_count-treatment_on
+        elif self.reward_shaping_flag == 5:
+            if np.sum(obs[0:2]) != 0:
+                reward = 1 - np.sum(obs[0:2]) / self.normalization - obs[2]
+            else:
+                reward = 500
 
         # 1 - number of sensitive cells - 10 * number of resistant cells
         else:
