@@ -21,8 +21,18 @@ class LV_env(Env):
         self.max_time = max_time
         self.threshold_burden_in_number = burden
         self.threshold_burden = normalize_to
-        self.initial_wt = initial_wt*normalize_to/burden
-        self.initial_mut = initial_mut*normalize_to/burden
+        self.wt_random = isinstance(initial_wt, str)
+        if self.wt_random:
+            self.initial_wt = np.random.random_integers(low=0, high=self.threshold_burden_in_number, size=1)[0]
+            self.initial_wt = self.initial_wt*self.threshold_burden/self.threshold_burden_in_number
+        else:
+            self.initial_wt = initial_wt*normalize_to/burden
+        self.mut_random = isinstance(initial_mut, str)
+        if self.mut_random:
+            self.initial_mut = np.random.random_integers(low=0, high=0.01*self.threshold_burden_in_number, size=1)[0]
+            self.initial_mut = self.initial_mut*self.threshold_burden/self.threshold_burden_in_number
+        else:
+            self.initial_mut = initial_mut*normalize_to/burden
         self.initial_drug = 0
         self.burden = self.initial_mut+self.initial_wt
         # self.state = [self.initial_wt/self.threshold_burden,
@@ -60,11 +70,7 @@ class LV_env(Env):
 
         # LV specific settings
         initial_wt = config['env']['LV']['initial_wt']
-        if isinstance(initial_wt, str):
-            initial_wt = np.random.random_integers(low=0, high=burden, size=1)[0]
         initial_mut = config['env']['LV']['initial_mut']
-        if isinstance(initial_mut, str):
-            initial_mut = np.random.random_integers(low=0, high=0.01*burden, size=1)[0]
         carrying_capacity = config['env']['LV']['carrying_capacity']
         growth_rate_wt = config['env']['LV']['growth_rate_wt']
         growth_rate_mut = config['env']['LV']['growth_rate_mut']
@@ -110,7 +116,10 @@ class LV_env(Env):
         reward = rewards.get_reward(self.state)
 
         # check if we are done
-        if self.time >= self.max_time or self.burden <= 0 or self.burden >= self.threshold_burden:
+        if self.state[0] <= 0 and self.state[1] <= 0:
+            self.state = [0,0,0]
+
+        if self.time >= self.max_time or self.burden >= self.threshold_burden:
             done = True
         else:
             done = False
@@ -126,6 +135,15 @@ class LV_env(Env):
         self.real_step_count += 1
 
         #self.state = [self.initial_wt/self.threshold_burden, self.initial_mut/self.threshold_burden, self.initial_drug]
+        if self.wt_random:
+            self.initial_wt = \
+            np.random.random_integers(low=0, high=self.threshold_burden_in_number, size=1)[0]
+            self.initial_wt = self.initial_wt*self.threshold_burden/self.threshold_burden_in_number
+        if self.mut_random:
+            self.initial_mut = \
+            np.random.random_integers(low=0, high=0.01*self.threshold_burden_in_number, size=1)[0]
+            self.initial_mut = self.initial_mut*self.threshold_burden/self.threshold_burden_in_number
+
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
 

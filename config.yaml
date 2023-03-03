@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 10
+  cpus-per-task: 6
   time: '15:00:00'
   agent_buffer: 1
 
@@ -22,9 +22,9 @@ learning:
     n_steps: 2056
     verbose: 1
     ent_coef: 0.01
-    total_timesteps: 2.e+7
+    total_timesteps: 1.e+6
     save_freq: 2.e+5
-    model_save_prefix: 'rPPO_LSTM_overnight'
+    model_save_prefix: 'rPPO_LSTM_no_resistant_try_to_kill'
     load:
       enable_loading: 0
       external_file_loading: 0
@@ -42,7 +42,7 @@ env:
   # LV environment settings
   LV:
     initial_wt: 800
-    initial_mut: 'random'
+    initial_mut: 0
     carrying_capacity: 1500.0
     growth_rate_wt: 0.035 #0.0175
     growth_rate_mut: 0.022 #0.0175
@@ -50,7 +50,7 @@ env:
     death_rate_mut: 0.00036
     treat_death_rate_wt: 0.2 #0.015
     treat_death_rate_mut: 0.00 #0.0
-    competition_wt: 1.1 #2400.0
+    competition_wt: 1.15 #2400.0
     competition_mut: 1.0
     growth_function_flag: 1 # flag for growth function 0 - for delayed death, 1 - for immediate
 
@@ -76,12 +76,12 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: '22_02_23_rew_f=0_actual_params_instant_treat'
-  fixed_AT_protocol: 1
-  num_episodes: 1
-  step_to_load: '_70000000_steps'
+  model_prefix: 'rPPO_LSTM_with_fixed_random_ini2'
+  fixed_AT_protocol: 0
+  num_episodes: 10
+  step_to_load: '_500000_steps'
   evaluate_on: 'LV'
 
 

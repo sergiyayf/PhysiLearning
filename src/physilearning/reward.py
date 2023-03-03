@@ -28,14 +28,15 @@ class Reward:
 
         # +1-normalized_cell_count-treatment_on
         elif self.reward_shaping_flag == 5:
-            if np.sum(obs[0:2]) != 0:
-                reward = 1 - np.sum(obs[0:2]) / self.normalization - obs[2]
+            if np.sum(obs[0:2]) > 1e-6:
+                reward = 1 - 0.1*np.sum(obs[0:2]) / self.normalization - 0.5*obs[2]
             else:
-                reward = 500
+                reward = 10
+                print('giving max reward')
 
         # 1 - number of sensitive cells - 10 * number of resistant cells
         else:
-            if np.sum(obs[0:2]) != 0:
+            if np.sum(obs[0:2]) > 0:
                 reward = 1 - obs[0] - 10 * obs[1]  # this means about 60 % of the simulation space is filled
             else:
                 reward = 5

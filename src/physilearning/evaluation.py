@@ -143,7 +143,7 @@ if __name__ == '__main__':
             evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'], name=model_prefix, path=os.path.join(model_training_path,'Evaluations'))
         else:
             model_name = os.path.join(model_training_path, 'Training', 'SavedModels', model_prefix+general_config['eval']['step_to_load'])
-            evaluation.run_model(model_name,num_episodes=general_config['eval']['num_episodes'],path=os.path.join(model_training_path,'Evaluations'),name='truePCeval'+model_prefix)
+            evaluation.run_model(model_name,num_episodes=general_config['eval']['num_episodes'],path=os.path.join(model_training_path,'Evaluations'),name='Eval'+model_prefix)
 
     else:
         env_type = general_config['eval']['evaluate_on']
