@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 6
+  cpus-per-task: 10
   time: '15:00:00'
   agent_buffer: 1
 
@@ -17,14 +17,14 @@ job:
 learning:
   # Model options 
   model:
-    name: 'RecurrentPPO'
+    name: 'PPO' #'RecurrentPPO' # 'PPO'
     n_envs: 1
-    n_steps: 2056
+    n_steps: 1024
     verbose: 1
-    ent_coef: 0.01
+    ent_coef: 0.001
     total_timesteps: 1.e+6
-    save_freq: 2.e+5
-    model_save_prefix: 'rPPO_LSTM_no_resistant_try_to_kill'
+    save_freq: 1.e+5
+    model_save_prefix: 'LV_improve_nicely'
     load:
       enable_loading: 0
       external_file_loading: 0
@@ -33,26 +33,26 @@ learning:
 env:
   # general env settings
   type: 'LV' #'PhysiCell' # 'LV'
-  threshold_burden: 1000
-  treatment_time_step: 60
-  max_time: 60000
-  reward_shaping: 5   # reward shaping flag for some predefined rewards
-  normalize_to: 1000
+  threshold_burden: 2000
+  treatment_time_step: 1
+  max_time: 1000
+  reward_shaping: 0   # reward shaping flag for some predefined rewards
+  normalize_to: 2000
 
   # LV environment settings
   LV:
-    initial_wt: 800
-    initial_mut: 0
-    carrying_capacity: 1500.0
-    growth_rate_wt: 0.035 #0.0175
-    growth_rate_mut: 0.022 #0.0175
-    death_rate_wt: 0.00036
-    death_rate_mut: 0.00036
-    treat_death_rate_wt: 0.2 #0.015
+    initial_wt: 490
+    initial_mut: 1
+    carrying_capacity: 3500
+    growth_rate_wt: 0.0357 #0.0175
+    growth_rate_mut: 0.0275 #0.0175
+    death_rate_wt: 0.0036
+    death_rate_mut: 0.0036
+    treat_death_rate_wt: 0.06 #0.015
     treat_death_rate_mut: 0.00 #0.0
-    competition_wt: 1.15 #2400.0
+    competition_wt: 1.2 #2400.0
     competition_mut: 1.0
-    growth_function_flag: 1 # flag for growth function 0 - for delayed death, 1 - for immediate
+    growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
 
 
   # note this is not yet functional
@@ -62,13 +62,13 @@ env:
         value: 'true'
     number_of_susceptible_cells:
         parent_nodes: ['user_parameters']
-        value: 95
+        value: 490
     number_of_resistant_cells:
         parent_nodes: ['user_parameters']
-        value: 5
+        value: 1
     enable_chkpt:
         parent_nodes: ['user_parameters']
-        value: 'true'
+        value: 'false'
     filename_chkpt:
         parent_nodes: ['user_parameters']
         value: './../presims/patient_1/final'
@@ -76,12 +76,12 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
-  model_prefix: 'rPPO_LSTM_with_fixed_random_ini2'
-  fixed_AT_protocol: 0
-  num_episodes: 10
-  step_to_load: '_500000_steps'
-  evaluate_on: 'LV'
-
+  model_prefix: 'test_similar_env'
+  fixed_AT_protocol: 1
+  num_episodes: 1
+  step_to_load: '_100000_steps'
+  save_name: 'PC_AT75percent'
+  evaluate_on: 'PhysiCell'
 

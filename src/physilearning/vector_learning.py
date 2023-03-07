@@ -30,7 +30,7 @@ def make_env(port, rank, job_name = '000000', seed=0):
 if __name__ == '__main__':
     mp.set_start_method('spawn')
     # create environment
-    num_cpu = 10 # Number of cores
+    num_cpu = 6 # Number of cores
     # create the vectorized environment
     env = SubprocVecEnv([make_env(i,i,job_name = sys.argv[1]) for i in range(num_cpu)])
     

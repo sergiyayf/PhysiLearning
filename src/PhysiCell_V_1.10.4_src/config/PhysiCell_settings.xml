@@ -92,7 +92,7 @@
 
           <death>
             <model code="100" name="apoptosis">
-	      <death_rate units="1/min">0.000006</death_rate> <!-- approx one percent of cells per generation -->
+	      <death_rate units="1/min">0.00006</death_rate> <!-- approx one percent of cells per generation -->
               <phase_durations units="min">
                 <duration index="0" fixed_duration="true">60</duration>
               </phase_durations>
@@ -228,7 +228,7 @@
 
           <death>
             <model code="100" name="apoptosis">
-              <death_rate units="1/min">0.000006</death_rate>
+              <death_rate units="1/min">0.00006</death_rate>
               <phase_durations units="min">
                 <duration index="0" fixed_duration="true">60</duration>
               </phase_durations>
@@ -371,6 +371,7 @@
         <treatment type="bool" units="none" description="">false</treatment>
         <enable_chkpt description="" type="bool" units="none">false</enable_chkpt>
         <filename_chkpt description="" type="string" units="none">./../presims/final</filename_chkpt>
+        <treatment_death_rate type="double" units="1/min" description="">0.0004</treatment_death_rate>
     </user_parameters>
 	
 </PhysiCell_settings>

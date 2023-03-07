@@ -16,7 +16,7 @@ class PC_env(Env):
             initial_wt=45, initial_mut=5, treatment_time_step=60, transport_type='ipc://',transport_address=f'/tmp/0',reward_shaping_flag=0):
         # setting up environment
         # set up discrete action space
-        self.burden = burden 
+        self.threshold_burden = burden
         self.action_space = Discrete(2)
         self.observation_space = Box(low=0,high=1,shape=(3,))
 
@@ -31,8 +31,8 @@ class PC_env(Env):
         self.initial_drug = 0
 
         # set up initial state
-        self.state = [self.initial_wt/self.burden,
-                      self.initial_mut/self.burden,
+        self.state = [self.initial_wt,
+                      self.initial_mut,
                       self.initial_drug]
 
         # trajectory for plotting
@@ -81,9 +81,9 @@ class PC_env(Env):
         message = str(self.socket.recv(),'utf-8')
          
         type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
-        self.state[0] = int(type0[0])/self.burden
+        self.state[0] = int(type0[0])
         type1 = re.findall(r'%s(\d+)' % "Type 1:", message)
-        self.state[1] = int(type1[0])/self.burden
+        self.state[1] = int(type1[0])
         # do action (apply treatment or not)
         self.state[2] = action
 
@@ -93,7 +93,7 @@ class PC_env(Env):
         rewards = Reward(self.reward_shaping_flag)
         reward = rewards.get_reward(self.state)
 
-        if self.time >= self.max_time or np.sum(self.state[0:2])>=1:
+        if self.time >= self.max_time or np.sum(self.state[0:2])>=self.threshold_burden:
             done = True
             self.socket.send(b"End simulation")
             self.socket.close()
@@ -121,7 +121,7 @@ class PC_env(Env):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(f'{self.transport_type}{self.transport_address}')
-        self.state = [self.initial_wt/self.burden, self.initial_mut/self.burden, self.initial_drug]
+        self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
            

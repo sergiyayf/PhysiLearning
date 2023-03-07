@@ -239,7 +239,7 @@ void setup_round_tumoroid( void )
 	{  
         
         double r = tumor_radius +1; 
-        while (r>0.4*tumor_radius) {
+        while (r>0.2*tumor_radius) {
         x = Xmin + UniformRandom()*Xrange; 
         y = Ymin + UniformRandom()*Yrange;
         if( default_microenvironment_options.simulate_2D == false ){
@@ -258,7 +258,7 @@ void setup_round_tumoroid( void )
 	{  
         
         double r = tumor_radius +1; 
-        while (r>tumor_radius || r<0.4*tumor_radius ) {
+        while (r>tumor_radius || r<0.2*tumor_radius ) {
         x = Xmin + UniformRandom()*Xrange; 
         y = Ymin + UniformRandom()*Yrange;
         if( default_microenvironment_options.simulate_2D == false ){
@@ -421,14 +421,22 @@ void susceptible_cell_on_off_treatment_rule( Cell* pCell, Phenotype& phenotype, 
 	double multiplier = 1.0;
         double relative_growth_rate = phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index)/pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index);
 	if (relative_growth_rate > 0.5){
+	    double treatment_death_rate = parameters.doubles("treatment_death_rate");
+	    double random_number = UniformRandom();
 	if( parameters.bools("treatment") )
 	{
-		multiplier = std::exp(std::pow(relative_growth_rate,4))*2000-2000*std::exp(std::pow(0.5,4));
+		multiplier = relative_growth_rate-0.5;
+		if (random_number < treatment_death_rate*multiplier) {
+            pCell->start_death(apoptosis_model_index);
+	    //pCell->phenotype.death.dead = true;
+	    //pCell->flag_for_removal();
+        }
+
 	} else {
         multiplier = 1.0;
     }
-	
-	phenotype.death.rates[apoptosis_model_index] = multiplier * pCell->parameters.pReference_live_phenotype->death.rates[apoptosis_model_index];  
+
+	//phenotype.death.rates[apoptosis_model_index] = multiplier * pCell->parameters.pReference_live_phenotype->death.rates[apoptosis_model_index];
     	}	
     
 	return;		

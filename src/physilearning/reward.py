@@ -32,7 +32,6 @@ class Reward:
                 reward = 1 - 0.1*np.sum(obs[0:2]) / self.normalization - 0.5*obs[2]
             else:
                 reward = 10
-                print('giving max reward')
 
         # 1 - number of sensitive cells - 10 * number of resistant cells
         else:

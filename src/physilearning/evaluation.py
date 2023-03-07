@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 import sys
 import yaml
 
-def AT(obs,env,threshold = .690):
+def AT(obs,env,threshold = .75):
     """ 
     cycling adaptive therapy strategy
     """
     tumor_size = np.sum(obs[0:2])
-    
+    print(tumor_size)
     if tumor_size > threshold*env.threshold_burden:
     #if tumor_size > threshold:
         action = 1
@@ -23,16 +23,17 @@ def AT(obs,env,threshold = .690):
         action = 0 
     return action 
 
-def AT_Zhang_et_at(obs,env,threshold = .980):
+def AT_Zhang_et_at(obs,env,threshold = .50):
     """
     cycling adaptive therapy strategy
     """
     tumor_size = np.sum(obs[0:2])
     ini_tumor_size = env.trajectory[0,0]+env.trajectory[1,0]
+    action = 0
     if tumor_size > ini_tumor_size:
         action = 1
     else:
-        if env.trajectory[2,int(env.time/env.treatment_time_step)-1] == 1 and tumor_size > threshold:
+        if env.trajectory[2,int(env.time/env.treatment_time_step)-1] == 1 and tumor_size > threshold*ini_tumor_size:
             action = 1
         else:
             action = 0
@@ -87,7 +88,7 @@ class Evaluation():
                 #action = 1
                 obs, reward, done, info = self.env.step(action)
                 score += reward
-            filename = os.path.join(path, 'newLV_test_for_longer_LSTM_{1}_{0}_p1.csv'.format(name,episode))
+            filename = os.path.join(path, '{1}_{0}.csv'.format(name,episode))
             self.save_trajectory(filename)
 
     def save_trajectory(self,name):
@@ -147,13 +148,14 @@ if __name__ == '__main__':
 
     else:
         env_type = general_config['eval']['evaluate_on']
+        save_name = general_config['eval']['save_name']
         if env_type == 'PhysiCell':
             env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
         elif env_type == 'LV':
             env = LV_env.from_yaml(config_file)
         evaluation = Evaluation(env)
         if general_config['eval']['fixed_AT_protocol']:
-            evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'], name='AT')
+            evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'], name=save_name)
 
 
 

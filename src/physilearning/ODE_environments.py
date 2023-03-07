@@ -51,7 +51,7 @@ class LV_env(Env):
         self.competition = [competition_wt,competition_mut]
         self.growth_function_flag = growth_function_flag
 
-        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
+        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
         self.real_step_count = 0
 
         self.reward_shaping_flag = reward_shaping_flag
@@ -100,31 +100,37 @@ class LV_env(Env):
                    treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
                    growth_function_flag=growth_function_flag, normalize_to=normalize_to)
     def step(self, action):
-        self.time += self.treatment_time_step
-        # grow_tumor
-        self.state[0] = self.grow(0,1,self.growth_function_flag)
-        self.state[1] = self.grow(1,0,self.growth_function_flag)
-
-        self.burden = np.sum(self.state[0:2])
         # do action (apply treatment or not)
         self.state[2] = action
+        # grow_tumor
+        reward = 0
+        for t in range(0,self.treatment_time_step):
+            #step time
+            self.time += 1
 
-        # record trajectory
-        self.trajectory[:,int(self.time/self.treatment_time_step)-1] = self.state
-        # get the reward
-        rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
-        reward = rewards.get_reward(self.state)
+            self.state[0] = self.grow(0,1,self.growth_function_flag)
+            self.state[1] = self.grow(1,0,self.growth_function_flag)
 
-        # check if we are done
-        if self.state[0] <= 0 and self.state[1] <= 0:
-            self.state = [0,0,0]
+            self.burden = np.sum(self.state[0:2])
 
-        if self.time >= self.max_time or self.burden >= self.threshold_burden:
-            done = True
-        else:
-            done = False
+            # record trajectory
+            self.trajectory[:,self.time-1] = self.state
+
+            # check if done
+            if self.state[0] <= 0 and self.state[1] <= 0:
+                self.state = [0, 0, 0]
+
+            if self.time >= self.max_time or self.burden >= self.threshold_burden or self.burden <= 0:
+                done = True
+                break
+            else:
+                done = False
+
+            # get the reward
+            rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
+            reward += rewards.get_reward(self.state)
+
         info = {}
-
 
         return self.state, reward, done, info
 
@@ -147,7 +153,7 @@ class LV_env(Env):
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
 
-        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
+        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
         self.current_death_rate = [self.death_rate[0],self.death_rate[1]]
 
         return self.state
@@ -179,5 +185,27 @@ class LV_env(Env):
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
                             self.death_rate[i] -
                             self.death_rate_treat[i] * self.state[2])
+        # treatment lasts certain number of tiem steps
+        elif flag == 2:
+            treat = self.state[2]
+            if self.state[2] == 0:
+                if self.time>3 and (self.trajectory[2,self.time-2]==1
+                                    or self.trajectory[2,self.time-3]==1
+                                    or self.trajectory[2,self.time-4]==1):
+                    treat = 1
+                else:
+                    treat = 0
+            elif self.state[2] == 1:
+                if self.time>3 and (self.trajectory[2,self.time-2]==0
+                                    or self.trajectory[2,self.time-3]==0):
+                    treat = 0
+                else:
+                    treat = 1
+
+            new_pop_size = self.state[i] * \
+                           (1 + self.growth_rate[i] *
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
+                            self.death_rate[i] -
+                            self.death_rate_treat[i] * treat)
 
         return new_pop_size

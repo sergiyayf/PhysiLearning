@@ -1,8 +1,8 @@
 #!/bin/bash -l
 
 # Standard output and error:
-#SBATCH -o ./logs/Outtjob.out.%j
-#SBATCH -e ./logs/Errtjob.err.%j
+#SBATCH -o ./logs/OutTrainJob.out.%j
+#SBATCH -e ./logs/ErrTrainJob.err.%j
 # Initial working directory:
 #SBATCH -D ./../
 # Job Name:
@@ -19,6 +19,6 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 #export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 #export LD_LIBRARY_PATH=/u/saif/soft/libzmq/lib:$LD_LIBRARY_PATH
 # for pinning threads correctly:
-#export OMP_PLACES=cores
+#export OMP_PLACES=threads
 # run a programm
-srun python ./src/physilearning/training.py ${SLURM_JOBID}
+srun --ntasks=1 --cpus-per-task=10 --mem-per-cpu=300 python ./src/physilearning/training.py ${SLURM_JOBID}

@@ -66,9 +66,6 @@ if __name__ == '__main__':
         elif env_type == 'LV':
             from physilearning.ODE_environments import LV_env
             env = LV_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
-        elif env_type == 'jonaLVenv':
-            from physilearning.jonaLVenv import jonaLVenv
-            env = jonaLVenv()
         else:
             raise ValueError('Environment type not recognized')
 
@@ -93,6 +90,8 @@ if __name__ == '__main__':
             model = PPO.load(most_recent_file, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
     else:
         if optimization_algorithm == 'PPO':
+            print('Training agent with PPO algorithm')
+            print(env.state)
             model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
         elif optimization_algorithm == 'RecurrentPPO':
             model = rPPO('MlpLstmPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
