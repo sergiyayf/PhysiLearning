@@ -282,7 +282,7 @@ int main( int argc, char* argv[] )
 				socket.send(zmq::buffer(data), zmq::send_flags::none);
 				
 				
-                		doctor_timer+=60;
+                		doctor_timer+=parameters.ints("treatment_time_step");
 			}
 
                         

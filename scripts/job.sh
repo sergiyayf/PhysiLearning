@@ -21,4 +21,4 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 # for pinning threads correctly:
 #export OMP_PLACES=threads
 # run a programm
-srun --ntasks=1 --cpus-per-task=10 --mem-per-cpu=300 python ./src/physilearning/training.py ${SLURM_JOBID}
+srun --ntasks=1 --cpus-per-task=4 --mem-per-cpu=300 python ./src/physilearning/training.py ${SLURM_JOBID}

@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import sys
 import yaml
 
-def AT(obs,env,threshold = .75):
+def AT(obs,env,threshold = .85):
     """ 
     cycling adaptive therapy strategy
     """
@@ -84,7 +84,7 @@ class Evaluation():
             done = False 
             score = 0
             while not done:
-                action = AT(obs,self.env)
+                action = AT_Zhang_et_at(obs,self.env)
                 #action = 1
                 obs, reward, done, info = self.env.step(action)
                 score += reward
@@ -144,7 +144,7 @@ if __name__ == '__main__':
             evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'], name=model_prefix, path=os.path.join(model_training_path,'Evaluations'))
         else:
             model_name = os.path.join(model_training_path, 'Training', 'SavedModels', model_prefix+general_config['eval']['step_to_load'])
-            evaluation.run_model(model_name,num_episodes=general_config['eval']['num_episodes'],path=os.path.join(model_training_path,'Evaluations'),name='Eval'+model_prefix)
+            evaluation.run_model(model_name,num_episodes=general_config['eval']['num_episodes'],path=os.path.join(model_training_path,'Evaluations'),name=env_type+'Eval'+model_prefix)
 
     else:
         env_type = general_config['eval']['evaluate_on']
@@ -155,7 +155,7 @@ if __name__ == '__main__':
             env = LV_env.from_yaml(config_file)
         evaluation = Evaluation(env)
         if general_config['eval']['fixed_AT_protocol']:
-            evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'], name=save_name)
+            evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'],path='Evaluations', name=save_name)
 
 
 

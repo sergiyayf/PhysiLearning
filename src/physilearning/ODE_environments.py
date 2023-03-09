@@ -205,7 +205,9 @@ class LV_env(Env):
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-                            self.death_rate[i] -
-                            self.death_rate_treat[i] * treat)
+                            self.death_rate[i]) - self.death_rate_treat[i] * treat * self.threshold_burden_in_number/2
+
+            if new_pop_size < 0:
+                new_pop_size = 0
 
         return new_pop_size

@@ -372,6 +372,7 @@
         <enable_chkpt description="" type="bool" units="none">false</enable_chkpt>
         <filename_chkpt description="" type="string" units="none">./../presims/final</filename_chkpt>
         <treatment_death_rate type="double" units="1/min" description="">0.0004</treatment_death_rate>
+        <treatment_time_step type="int" units="min" description="">180</treatment_time_step>
     </user_parameters>
 	
 </PhysiCell_settings>

@@ -39,7 +39,10 @@ if __name__ == '__main__':
     name_prefix = config['learning']['model']['model_save_prefix']
     n_envs = config['learning']['model']['n_envs']
     ent_coef = config['learning']['model']['ent_coef']
+    clip_range = config['learning']['model']['clip_range']
+    learning_rate = config['learning']['model']['learning_rate']
     n_steps = config['learning']['model']['n_steps']
+    policy_kwargs = config['learning']['network']
     total_timesteps = config['learning']['model']['total_timesteps']
     verbose = config['learning']['model']['verbose']
     enable_loading = config['learning']['model']['load']['enable_loading']
@@ -78,7 +81,12 @@ if __name__ == '__main__':
     if enable_loading == 1:
         if load_from_external_file == 1:
             # load from external file
-            model = PPO.load(external_file_name, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
+            if optimization_algorithm == 'PPO':
+                model = PPO.load(external_file_name, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps,
+                                 clip_range=clip_range, learning_rate=learning_rate)
+            elif optimization_algorithm == 'RecurrentPPO':
+                model = rPPO.load(external_file_name, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps,
+                                  clip_range=clip_range, learning_rate=learning_rate, policy_kwargs=policy_kwargs)
         else:
             # find the odldest saved file
             # load
@@ -87,14 +95,17 @@ if __name__ == '__main__':
                    key=os.path.getctime)[-1]
             #model_name = os.path.basename(most_recent_file).split('.')[0]
 
-            model = PPO.load(most_recent_file, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
+            model = PPO.load(most_recent_file, env=env, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps,
+                             clip_range=clip_range, learning_rate=learning_rate)
     else:
         if optimization_algorithm == 'PPO':
             print('Training agent with PPO algorithm')
             print(env.state)
-            model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
+            model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose,
+                        n_steps=n_steps, clip_range=clip_range, learning_rate=learning_rate)
         elif optimization_algorithm == 'RecurrentPPO':
-            model = rPPO('MlpLstmPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose, n_steps=n_steps)
+            model = rPPO('MlpLstmPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose,
+                         n_steps=n_steps, clip_range=clip_range, learning_rate=learning_rate, policy_kwargs=policy_kwargs)
         else:
             raise ValueError('Optimization algorithm not recognized')
     # train model

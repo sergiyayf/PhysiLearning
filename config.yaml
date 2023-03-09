@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 10
+  cpus-per-task: 4
   time: '15:00:00'
   agent_buffer: 1
 
@@ -22,37 +22,42 @@ learning:
     n_steps: 1024
     verbose: 1
     ent_coef: 0.001
-    total_timesteps: 1.e+6
+    clip_range: 0.01
+    learning_rate: 1.e-5
+    total_timesteps: 2.e+6
     save_freq: 1.e+5
-    model_save_prefix: 'LV_improve_nicely'
+    model_save_prefix: '09_03_PPO_with_1_5comp_new_LV_reward_now0_load400k'
     load:
-      enable_loading: 0
-      external_file_loading: 0
-      external_file_name: './data/LV_not_treat_pretrained'
+      enable_loading: 1
+      external_file_loading: 1
+      external_file_name: './Training/SavedModels/09_03_PPO_with_1_5comp_new_LV_reward_now0_400000_steps'
+  network:
+    n_lstm_layers: 2
+    lstm_hidden_size: 64
 # Environment configuration
 env:
   # general env settings
   type: 'LV' #'PhysiCell' # 'LV'
-  threshold_burden: 2000
+  threshold_burden: 3000
   treatment_time_step: 1
   max_time: 1000
-  reward_shaping: 0   # reward shaping flag for some predefined rewards
-  normalize_to: 2000
+  reward_shaping: 0  # reward shaping flag for some predefined rewards
+  normalize_to: 3000
 
   # LV environment settings
   LV:
-    initial_wt: 490
-    initial_mut: 1
-    carrying_capacity: 3500
+    initial_wt: 1490
+    initial_mut: 5
+    carrying_capacity: 4500
     growth_rate_wt: 0.0357 #0.0175
     growth_rate_mut: 0.0275 #0.0175
     death_rate_wt: 0.0036
     death_rate_mut: 0.0036
     treat_death_rate_wt: 0.06 #0.015
     treat_death_rate_mut: 0.00 #0.0
-    competition_wt: 1.2 #2400.0
+    competition_wt: 1.5 #2400.0
     competition_mut: 1.0
-    growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
+    growth_function_flag: 1 # flag for growth function 0 - for delayed death, 1 - for immediate
 
 
   # note this is not yet functional
@@ -62,26 +67,29 @@ env:
         value: 'true'
     number_of_susceptible_cells:
         parent_nodes: ['user_parameters']
-        value: 490
+        value: 1490
     number_of_resistant_cells:
         parent_nodes: ['user_parameters']
-        value: 1
+        value: 5
     enable_chkpt:
         parent_nodes: ['user_parameters']
         value: 'false'
     filename_chkpt:
         parent_nodes: ['user_parameters']
         value: './../presims/patient_1/final'
+    treatment_time_step:
+        parent_nodes: ['user_parameters']
+        value: 60
 
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: 'test_similar_env'
-  fixed_AT_protocol: 1
-  num_episodes: 1
-  step_to_load: '_100000_steps'
-  save_name: 'PC_AT75percent'
-  evaluate_on: 'PhysiCell'
+  model_prefix: '09_03_PPO_with_3comp_new_LV_rew0'
+  fixed_AT_protocol: 0
+  num_episodes: 5
+  step_to_load: '_1000000_steps'
+  save_name: 'LV_'
+  evaluate_on: 'LV'
 
