@@ -812,6 +812,7 @@ void load_minimal_cells_physicell( std::string outputname ) {
         // get cell definition and create a cell
         node1 = labels_node.first_child();
         int index;
+	bool dead = false; 
         while (node1) {
             std::string value = xml_get_my_string_value( node1 );
             std::string index_str = node1.attribute("index").value();
@@ -823,6 +824,7 @@ void load_minimal_cells_physicell( std::string outputname ) {
                 node1 = node1.next_sibling();
             }
         }
+
             Cell_Definition* pCD = cell_definitions_by_index[B[index][i]];
             pC = create_cell( *pCD );
             // go through all saved data
@@ -854,12 +856,9 @@ void load_minimal_cells_physicell( std::string outputname ) {
                 } else if (value == "pressure") {
                     pC->state.simple_pressure =  B[index][i];
                 } else if (value == "dead") {
-                    pC->phenotype.death.dead = B[index][i];
-                    if (pC->phenotype.death.dead == true) {
-                        pC->flag_for_removal();
-                    }
-                }
-                /*
+                    if(B[index][i]) {pC->flag_for_removal();}
+		}
+		    /*
                 else if (value == "cycle_model") {
                     if (B[index][i] == 0) {
                     pC->functions.cycle_model = Ki67_advanced;

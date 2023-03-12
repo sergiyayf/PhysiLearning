@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import sys
 import yaml
 
-def AT(obs,env,threshold = .85):
+def AT(obs,env,threshold = .8):
     """ 
     cycling adaptive therapy strategy
     """
@@ -23,7 +23,7 @@ def AT(obs,env,threshold = .85):
         action = 0 
     return action 
 
-def AT_Zhang_et_at(obs,env,threshold = .50):
+def AT_Zhang_et_al(obs,env,threshold = .50):
     """
     cycling adaptive therapy strategy
     """
@@ -84,7 +84,7 @@ class Evaluation():
             done = False 
             score = 0
             while not done:
-                action = AT_Zhang_et_at(obs,self.env)
+                action = AT_Zhang_et_al(obs,self.env)
                 #action = 1
                 obs, reward, done, info = self.env.step(action)
                 score += reward

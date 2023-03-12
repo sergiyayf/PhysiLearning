@@ -234,7 +234,9 @@ void setup_round_tumoroid( void )
     double Xrange = Xmax - Xmin; 
 	double Yrange = Ymax - Ymin;
 	double Zrange = Zmax - Zmin;
-
+	if (Zmax>30){
+		tumor_radius *=0.3 ;
+	}
 	while( n < resistant_cells)
 	{  
         
@@ -420,12 +422,12 @@ void susceptible_cell_on_off_treatment_rule( Cell* pCell, Phenotype& phenotype, 
 	
 	double multiplier = 1.0;
         double relative_growth_rate = phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index)/pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index);
-	if (relative_growth_rate > 0.5){
+	if (relative_growth_rate > 0.75){
 	    double treatment_death_rate = parameters.doubles("treatment_death_rate");
 	    double random_number = UniformRandom();
 	if( parameters.bools("treatment") )
 	{
-		multiplier = relative_growth_rate-0.5;
+		multiplier = relative_growth_rate-0.75;
 		if (random_number < treatment_death_rate*multiplier) {
             pCell->start_death(apoptosis_model_index);
 	    //pCell->phenotype.death.dead = true;

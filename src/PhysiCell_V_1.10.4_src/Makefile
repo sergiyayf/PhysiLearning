@@ -221,7 +221,7 @@ untar:
 
 # easier animation 
 
-FRAMERATE := 8
+FRAMERATE := 1
 OUTPUT := output
 
 jpeg: 

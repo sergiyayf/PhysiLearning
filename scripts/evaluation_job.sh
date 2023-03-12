@@ -14,13 +14,13 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=6000MB
 #for OpenMP:
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=20
 #
 #SBATCH --mail-type=none
 #SBATCH --mail-user=saif@mpl.mpg.de
 #
 # Wall clock limit:
-#SBATCH --time=01:00:00
+#SBATCH --time=10:00:00
 
 module purge 
 module load anaconda/3/plvenv

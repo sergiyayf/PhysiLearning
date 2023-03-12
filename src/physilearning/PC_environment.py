@@ -13,10 +13,12 @@ from physilearning.reward import Reward
 # create environment
 class PC_env(Env):
     def __init__(self,port='0', job_name='0000000', burden=1000, max_time=30000,
-            initial_wt=45, initial_mut=5, treatment_time_step=60, transport_type='ipc://',transport_address=f'/tmp/0',reward_shaping_flag=0):
+            initial_wt=45, initial_mut=5, treatment_time_step=60, transport_type='ipc://',
+            transport_address=f'/tmp/0',reward_shaping_flag=0, normalize_to=1000):
         # setting up environment
         # set up discrete action space
-        self.threshold_burden = burden
+        self.threshold_burden_in_number = burden
+        self.threshold_burden = normalize_to
         self.action_space = Discrete(2)
         self.observation_space = Box(low=0,high=1,shape=(3,))
 
@@ -26,8 +28,8 @@ class PC_env(Env):
         self.treatment_time_step = treatment_time_step
 
         # set up initial wild type, mutant and treatment decision
-        self.initial_wt = initial_wt
-        self.initial_mut = initial_mut
+        self.initial_wt = initial_wt*self.threshold_burden/self.threshold_burden_in_number
+        self.initial_mut = initial_mut*self.threshold_burden/self.threshold_burden_in_number
         self.initial_drug = 0
 
         # set up initial state
@@ -55,6 +57,7 @@ class PC_env(Env):
         with open(yaml_file,'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
         burden = config['env']['threshold_burden']
+        normalize_to = config['env']['normalize_to']
         max_time = config['env']['max_time']
         initial_wt = config['env']['PC']['number_of_susceptible_cells']['value']
         timestep = config['env']['treatment_time_step']
@@ -70,7 +73,7 @@ class PC_env(Env):
         
         return cls(port=port, job_name=job_name, burden=burden, max_time=max_time,
                 initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut, transport_type=transport_type,
-                transport_address=transport_address, reward_shaping_flag=reward_shaping_flag)
+                transport_address=transport_address, reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to)
 
 
     def step(self, action):
@@ -81,9 +84,9 @@ class PC_env(Env):
         message = str(self.socket.recv(),'utf-8')
          
         type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
-        self.state[0] = int(type0[0])
+        self.state[0] = int(type0[0])*self.threshold_burden/self.threshold_burden_in_number
         type1 = re.findall(r'%s(\d+)' % "Type 1:", message)
-        self.state[1] = int(type1[0])
+        self.state[1] = int(type1[0])*self.threshold_burden/self.threshold_burden_in_number
         # do action (apply treatment or not)
         self.state[2] = action
 
