@@ -19,18 +19,18 @@ learning:
   model:
     name: 'PPO' #'RecurrentPPO' # 'PPO'
     n_envs: 1
-    n_steps: 1024
+    n_steps: 516
     verbose: 1
-    ent_coef: 0.02
-    clip_range: 0.3
-    learning_rate: 5.e-3
-    total_timesteps: 5.e+6
-    save_freq: 2.e+5
-    model_save_prefix: '11_PPO_LV_fitted_like_test'
+    ent_coef: 0.005
+    clip_range: 0.001
+    learning_rate: 2.e-5
+    total_timesteps: 1.e+6
+    save_freq: 5.e+4
+    model_save_prefix: '12_PPO_LV_tra_dont_treat_long_try_2'
     load:
       enable_loading: 1
       external_file_loading: 1
-      external_file_name: './Training/SavedModels/09_03_PPO_with_1_5comp_new_LV_reward_now0_400000_steps'
+      external_file_name: './Training/SavedModels/12_PPO_LV_tra_dont_treat_3_load_survive_2200000_steps'
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64
@@ -38,22 +38,22 @@ learning:
 env:
   # general env settings
   type: 'LV' #'PhysiCell' # 'LV'
-  threshold_burden: 6000
-  treatment_time_step: 1
+  threshold_burden: 5000
+  treatment_time_step: 1 
   max_time: 1000
-  reward_shaping: 0  # reward shaping flag for some predefined rewards
+  reward_shaping: 6  # reward shaping flag for some predefined rewards
   normalize_to: 1000
 
   # LV environment settings
   LV:
     initial_wt: 2490
     initial_mut: 10
-    carrying_capacity: 8500
+    carrying_capacity: 7500
     growth_rate_wt: 0.0357 #0.0175
     growth_rate_mut: 0.0275 #0.0175
     death_rate_wt: 0.0036
     death_rate_mut: 0.0036
-    treat_death_rate_wt: 0.018 #0.015
+    treat_death_rate_wt: 0.02 #0.015
     treat_death_rate_mut: 0.00 #0.0
     competition_wt: 2.5 #2400.0
     competition_mut: 1.0
@@ -64,7 +64,7 @@ env:
   PC:
     use_2D:
         parent_nodes: ['domain']
-        value: 'false'
+        value: 'true'
     number_of_susceptible_cells:
         parent_nodes: ['user_parameters']
         value: 5997
@@ -76,10 +76,10 @@ env:
         value: 'true'
     filename_chkpt:
         parent_nodes: ['user_parameters']
-        value: './../presims/3D_patient/output00000006'
+        value: './../presims/test_patient/output00000003'
     treatment_time_step:
         parent_nodes: ['user_parameters']
-        value: 60
+        value: 240
     treatment_death_rate:
         parent_nodes: ['user_parameters']
         value: 0.00225
@@ -87,12 +87,12 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0 
+  from_file: 1 
   path: './'
-  model_prefix: '09_03_PPO_with_3comp_new_LV_rew0'
-  fixed_AT_protocol: 1
-  num_episodes: 1
-  step_to_load: '_1000000_steps'
-  save_name: 'Zhang11_PC_3D_test'
+  model_prefix: '12_PPO_LV_tra_dont_treat_long'
+  fixed_AT_protocol: 0
+  num_episodes: 10
+  step_to_load: '_1200000_steps'
+  save_name: '12_policy_LV_before_training_check'
   evaluate_on: 'PhysiCell'
 

@@ -33,7 +33,7 @@ def AT_Zhang_et_al(obs,env,threshold = .50):
     if tumor_size > ini_tumor_size:
         action = 1
     else:
-        if env.trajectory[2,int(env.time/env.treatment_time_step)-1] == 1 and tumor_size > threshold*ini_tumor_size:
+        if env.trajectory[2,int(env.time)-1] == 1 and tumor_size > threshold*ini_tumor_size:
             action = 1
         else:
             action = 0

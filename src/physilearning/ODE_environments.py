@@ -15,7 +15,7 @@ class LV_env(Env):
         # setting up environment
         # set up discrete action space
         self.action_space = Discrete(2)
-        self.observation_space = Box(low=0,high=normalize_to,shape=(3,))
+        self.observation_space = Box(low=0,high=normalize_to,shape=(1,))
         self.time = 0
         self.treatment_time_step = treatment_time_step
         self.max_time = max_time
@@ -128,11 +128,11 @@ class LV_env(Env):
 
             # get the reward
             rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
-            reward += rewards.get_reward(self.state)
+            reward += rewards.get_reward(self.state, self.time/self.max_time)
 
         info = {}
 
-        return self.state, reward, done, info
+        return [np.sum(self.state[0:2])], reward, done, info
 
     def render(self):
         pass
@@ -156,7 +156,7 @@ class LV_env(Env):
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
         self.current_death_rate = [self.death_rate[0],self.death_rate[1]]
 
-        return self.state
+        return [np.sum(self.state[0:2])]
 
     def grow(self, i, j, flag):  # i index of growing type, j: index of competing type
 
@@ -205,7 +205,7 @@ class LV_env(Env):
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-                            self.death_rate[i]) - self.death_rate_treat[i] * treat * self.threshold_burden_in_number/2
+                            self.death_rate[i]) - self.death_rate_treat[i] * treat * self.threshold_burden
 
             if new_pop_size < 0:
                 new_pop_size = 0

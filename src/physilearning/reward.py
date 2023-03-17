@@ -6,7 +6,7 @@ class Reward:
         self.reward_shaping_flag = reward_shaping_flag
         self.normalization = normalization
 
-    def get_reward(self, obs):
+    def get_reward(self, obs, time_normalized):
         # +1 for each time step
         if self.reward_shaping_flag == 0:
             reward = 1
@@ -32,7 +32,17 @@ class Reward:
                 reward = 1 - 0.1*np.sum(obs[0:2]) / self.normalization - 0.5*obs[2]
             else:
                 reward = 10
-
+        elif self.reward_shaping_flag == 6:
+            if time_normalized < 0.5:
+                reward = 1
+            elif time_normalized < 0.75:
+                reward = 2 
+            elif time_normalized < 0.9:
+                reward = 5
+            elif time_normalized > 0.9:
+                reward = 10 
+            else: 
+                reward = 0
         # 1 - number of sensitive cells - 10 * number of resistant cells
         else:
             if np.sum(obs[0:2]) > 0:

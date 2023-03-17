@@ -20,7 +20,7 @@ class PC_env(Env):
         self.threshold_burden_in_number = burden
         self.threshold_burden = normalize_to
         self.action_space = Discrete(2)
-        self.observation_space = Box(low=0,high=1,shape=(3,))
+        self.observation_space = Box(low=0,high=1,shape=(1,))
 
         # set up timer
         self.time = 0
@@ -94,7 +94,7 @@ class PC_env(Env):
         self.trajectory[:,int(self.time/self.treatment_time_step) - 1] = self.state
         # get the reward
         rewards = Reward(self.reward_shaping_flag)
-        reward = rewards.get_reward(self.state)
+        reward = rewards.get_reward(self.state,self.time/self.max_time)
 
         if self.time >= self.max_time or np.sum(self.state[0:2])>=self.threshold_burden:
             done = True
@@ -111,7 +111,7 @@ class PC_env(Env):
         
         info = {}
 
-        return self.state, reward, done, info
+        return [np.sum(self.state[0:2])], reward, done, info
 
     def render(self):
         pass
@@ -129,7 +129,7 @@ class PC_env(Env):
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
            
         self.socket.send(b"Start simulation")
-        return self.state
+        return [np.sum(self.state[0:2])]
 
     
 if __name__ == '__main__':
