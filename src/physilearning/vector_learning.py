@@ -1,9 +1,9 @@
 # imports
 import os
 import sys
-from PC_environment import PC_env
+from physilearning.envs.PC_environment import PC_env
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.callbacks import CheckpointCallback 
 import multiprocessing as mp

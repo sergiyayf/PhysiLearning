@@ -11,7 +11,7 @@ import warnings
 from physilearning.reward import Reward
 
 # create environment
-class PC_env(Env):
+class PcEnv(Env):
     def __init__(self,port='0', job_name='0000000', burden=1000, max_time=30000,
             initial_wt=45, initial_mut=5, treatment_time_step=60, transport_type='ipc://',
             transport_address=f'/tmp/0',reward_shaping_flag=0, normalize_to=1000):
@@ -133,7 +133,7 @@ class PC_env(Env):
 
     
 if __name__ == '__main__':
-    env = PC_env.from_yaml('./../../config.yaml')
+    env = PC_env.from_yaml('../../../config.yaml')
     #env.reset()
     print(env.reward_shaping_flag)
 

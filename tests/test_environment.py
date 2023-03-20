@@ -1,7 +1,5 @@
-import stable_baselines3
-from physilearning.PC_environment import PC_env
-from physilearning.ODE_environments import LV_env
-import pytest
+from physilearning.envs.PC_environment import PC_env
+
 
 def test_PC_env_constructuion():
     env = PC_env()

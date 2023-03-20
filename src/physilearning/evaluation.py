@@ -1,7 +1,8 @@
 # imports
 import os
-from physilearning.PC_environment import PC_env
-from physilearning.ODE_environments import LV_env
+from physilearning.envs.pc import PcEnv
+from physilearning.envs.lv import LvEnv
+from physilearning.envs.grid_env import GridEnv
 
 from stable_baselines3 import PPO
 import numpy as np

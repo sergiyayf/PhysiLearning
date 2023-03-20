@@ -73,10 +73,10 @@ class Trainer():
         if self.n_envs == 1:
             print('Training agent on one environment')
             if self.env_type == 'PhysiCell':
-                from physilearning.PC_environment import PC_env
+                from physilearning.envs.PC_environment import PC_env
                 self.env = PC_env.from_yaml(self.config_file,port='0',job_name=sys.argv[1])
             elif self.env_type == 'LV':
-                from physilearning.ODE_environments import LV_env
+                from physilearning.envs.ODE_environments import LV_env
                 self.env = LV_env.from_yaml(self.config_file,port='0',job_name=sys.argv[1])
             elif self.env_type == 'jonaLVenv':
                 from physilearning.jonaLVenv import jonaLVenv

@@ -1,13 +1,7 @@
 # imports
-import os
-from physilearning.PC_environment import PC_env
-from physilearning.ODE_environments import LV_env
-from stable_baselines3 import PPO
+from physilearning.envs.PC_environment import PC_env
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import sys
-import yaml
 import click
 
 def AT(obs, env, threshold=.60):

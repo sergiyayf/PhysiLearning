@@ -3,10 +3,11 @@ import yaml
 from gym import Env
 from gym.spaces import Discrete, Box
 import numpy as np
+from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
 
 # create environment
-class LV_env(Env):
+class LvEnv(BaseEnv):
     def __init__(self, burden=1000, max_time=3000, carrying_capacity=1500,
             initial_wt=45, initial_mut=5, growth_rate_wt=0.0175, growth_rate_mut=0.0175,
             death_rate_wt=0.001, death_rate_mut=0.001, treat_death_rate_wt=0.15,

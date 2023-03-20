@@ -2,12 +2,11 @@
 import os
 import sys
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.callbacks import CheckpointCallback
 from sb3_contrib import RecurrentPPO as rPPO
 from physilearning.callbacks import CustomCallback
-import multiprocessing as mp
 import yaml
 
 def make_env(port, rank, job_name = '000000', config_file='config.yaml', seed=0):
@@ -18,13 +17,36 @@ def make_env(port, rank, job_name = '000000', config_file='config.yaml', seed=0)
             :param seed: (int) the inital seed for RNG
             :param rank: (int) index of the subprocess
         """
-        from physilearning.PC_environment import PC_env
+        from physilearning.envs.pc import PcEnv
         def _init():
             env = PC_env.from_yaml(config_file,port=str(port),job_name = job_name)
             env.seed(seed + rank)
             return env
         set_random_seed(seed)
         return _init
+
+class Trainer():
+    """ Trainer class for reinforcement learning agents
+    Returns
+    -------
+
+    """
+    def __init__(self, config_file: str = 'config.yaml')->None:
+        with open(config_file, 'r') as f:
+            self.config = yaml.load(f, Loader=yaml.FullLoader)
+
+    def setup_env(self):
+        """ Setup the environment for training
+
+        Returns
+        -------
+        env: environment object to train the agent on
+        """
+        if self.config['learning']['model']['n_envs'] == 1:
+            print('Training on single environment')
+
+
+
 
 if __name__ == '__main__':
     config_file = f'config_{sys.argv[1]}.yaml'
@@ -64,11 +86,11 @@ if __name__ == '__main__':
     if n_envs == 1: 
         print('Training agent on one environment')
         if env_type == 'PhysiCell':
-            from physilearning.PC_environment import PC_env
-            env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+            from physilearning.envs.pc import PcEnv
+            env = PcEnv.from_yaml(config_file,port='0',job_name=sys.argv[1])
         elif env_type == 'LV':
-            from physilearning.ODE_environments import LV_env
-            env = LV_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+            from physilearning.envs.lv import LvEnv
+            env = LvEnv.from_yaml(config_file,port='0',job_name=sys.argv[1])
         else:
             raise ValueError('Environment type not recognized')
 
