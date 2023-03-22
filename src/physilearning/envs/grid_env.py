@@ -9,6 +9,7 @@ import numpy as np
 from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
 import matplotlib.animation as animation
+from stable_baselines3.common.env_checker import check_env
 
 # Lattice based tumor growth simulation environment for reinforcement learning
 # with two populations of cancerous cells, wild type and mutant. Wild type cells
@@ -18,14 +19,14 @@ class GridEnv(BaseEnv):
     def __init__(self):
         super().__init__()
         # Configuration
-        self.grid_size = 32
+        self.grid_size = 36
 
         # Spaces
         self.type = 'GridEnv'
         self.action_type = 'discrete'
         self.action_space = Discrete(2)
         self.observation_type = 'box'
-        self.observation_space = Box(low=0, high=1, shape=(self.grid_size,self.grid_size))
+        self.observation_space = Box(low=0, high=255, shape=(self.grid_size,self.grid_size,1), dtype=np.uint8)
 
         # Environment parameters
         self.normalize = False
@@ -34,7 +35,7 @@ class GridEnv(BaseEnv):
         self.max_time = 1000
         self.reward_shaping_flag = 0
 
-        self.grid = np.zeros((self.grid_size,self.grid_size))
+        self.grid = np.zeros((self.grid_size,self.grid_size,1), dtype=np.uint8)
         self.trajectory = np.zeros((self.grid_size,self.grid_size,self.max_time))
         self.num_wt = 2
         self.num_mut = 1
@@ -85,7 +86,7 @@ class GridEnv(BaseEnv):
         self.apply_treatment_action(action)
         self.grid = self.grow_tumor(self.grid)
         # update state
-        self.state = self.grid
+        self.state = self.grid[:,:,0]
         # update time
         self.time += 1
         # update trajectory
@@ -96,7 +97,7 @@ class GridEnv(BaseEnv):
         # check if done
         self.done = self.check_done(self.state)
         # return state, reward, done, info
-        return self.state, reward, self.done, {}
+        return self.grid, reward, self.done, {}
 
     def grow_tumor(self, grid):
         # grow tumor
@@ -192,7 +193,7 @@ class GridEnv(BaseEnv):
         # reset time
         self.time = 0
         # reset state
-        self.grid = np.zeros((self.grid_size, self.grid_size))
+        self.grid = np.zeros((self.grid_size, self.grid_size, 1), dtype=np.uint8)
         self.place_cells(positioning=self.positioning)
         # put up to 10 wild type cells in random locations
 
@@ -204,7 +205,7 @@ class GridEnv(BaseEnv):
         # reset reward
         self.reward = 0
         # return state
-        return self.state
+        return self.grid
 
     def render(self, mode='human'):
         # render state
@@ -238,5 +239,5 @@ if __name__ == "__main__":
     anim = env.render()
     env.close()
     plt.show()
-
+    check_env(env, warn=True)
 

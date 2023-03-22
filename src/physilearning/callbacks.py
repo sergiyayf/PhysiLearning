@@ -1,13 +1,13 @@
 from stable_baselines3.common.callbacks import BaseCallback
 import os
-class CustomCallback(BaseCallback):
+class CopyConfigCallback(BaseCallback):
     """
     A custom callback that derives from ``BaseCallback``.
 
     :param verbose: Verbosity level: 0 for no output, 1 for info messages, 2 for debug messages
     """
     def __init__(self, config_file='config.yaml', logname = 'config', verbose=0):
-        super(CustomCallback, self).__init__(verbose)
+        super(CopyConfigCallback, self).__init__(verbose)
         self.logname = logname
         self.config_file = config_file
         # Those variables will be accessible in the callback
