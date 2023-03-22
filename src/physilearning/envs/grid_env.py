@@ -16,16 +16,22 @@ import matplotlib.animation as animation
 
 class GridEnv(BaseEnv):
     def __init__(self):
+        super().__init__()
+        # Configuration
+        self.grid_size = 32
+
+        # Spaces
         self.type = 'GridEnv'
         self.action_type = 'discrete'
         self.action_space = Discrete(2)
         self.observation_type = 'box'
-        self.grid_size = 32
         self.observation_space = Box(low=0, high=1, shape=(self.grid_size,self.grid_size))
+
+        # Environment parameters
         self.normalize = False
         self.normalize_to = 1000
-        self.max_tumor_size = 1000
-        self.max_time = 300
+        self.max_tumor_size = self.grid_size**2-50
+        self.max_time = 1000
         self.reward_shaping_flag = 0
 
         self.grid = np.zeros((self.grid_size,self.grid_size))
@@ -83,13 +89,14 @@ class GridEnv(BaseEnv):
         # update time
         self.time += 1
         # update trajectory
-        self.trajectory[:,:,self.time] = self.state
+        self.trajectory[:,:,self.time-1] = self.state
         # calculate reward
-        self.reward = 1
+        rewards = Reward(self.reward_shaping_flag, normalization=100)
+        reward = rewards.get_reward(self.state, self.time/self.max_time)
         # check if done
         self.done = self.check_done(self.state)
         # return state, reward, done, info
-        return self.state, self.reward, self.done, {}
+        return self.state, reward, self.done, {}
 
     def grow_tumor(self, grid):
         # grow tumor
@@ -157,7 +164,7 @@ class GridEnv(BaseEnv):
 
     def check_done(self, state):
         # check if done
-        if np.sum(state) > self.max_tumor_size:
+        if np.sum(state) > self.max_tumor_size or self.time >= self.max_time:
             return True
         else:
             return False

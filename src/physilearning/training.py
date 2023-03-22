@@ -37,14 +37,31 @@ class Trainer():
 
     def setup_env(self):
         """ Setup the environment for training
+        Option 1 - Single environment
+        Option 2 - Dummy Vectorized environment
+        Option 3 - Subprocess Vectorized environment
+        Option 4 - Stacked Vectorized environment
 
         Returns
         -------
         env: environment object to train the agent on
         """
+        # option 1 - single environment
         if self.config['learning']['model']['n_envs'] == 1:
             print('Training on single environment')
+            if env_type == 'PhysiCell':
+                from physilearning.envs.pc import PcEnv
+                env = PcEnv.from_yaml(config_file, port='0', job_name=sys.argv[1])
+            elif env_type == 'LV':
+                from physilearning.envs.lv import LvEnv
+                env = LvEnv.from_yaml(config_file, port='0', job_name=sys.argv[1])
+            elif env_type == 'LatticeBased':
+                from physilearning.envs.grid_env import GridEnv
+                env = GridEnv.from_yaml(config_file)
+            else:
+                raise ValueError('Environment type not recognized')
 
+        return env
 
 
 
@@ -91,6 +108,9 @@ if __name__ == '__main__':
         elif env_type == 'LV':
             from physilearning.envs.lv import LvEnv
             env = LvEnv.from_yaml(config_file,port='0',job_name=sys.argv[1])
+        elif env_type == 'LatticeBased':
+            from physilearning.envs.grid_env import GridEnv
+            env = GridEnv()
         else:
             raise ValueError('Environment type not recognized')
 

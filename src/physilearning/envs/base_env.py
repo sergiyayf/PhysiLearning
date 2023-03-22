@@ -61,7 +61,20 @@ class BaseEnv(Env):
         -------
 
         """
-        raise NotImplementedError
+        pass
+
+    def configure(self, config: dict) -> None:
+        """
+        Configure environment
+        Parameters
+        ----------
+        config
+
+        Returns
+        -------
+
+        """
+        pass
     def step(self, action):
         raise NotImplementedError
 

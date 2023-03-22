@@ -32,6 +32,7 @@ class Reward:
                 reward = 1 - 0.1*np.sum(obs[0:2]) / self.normalization - 0.5*obs[2]
             else:
                 reward = 10
+        # increase reward for longer survival
         elif self.reward_shaping_flag == 6:
             if time_normalized < 0.5:
                 reward = 1

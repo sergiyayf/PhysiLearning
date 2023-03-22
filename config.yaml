@@ -19,17 +19,21 @@ learning:
   model:
     name: 'PPO' #'RecurrentPPO' # 'PPO'
     n_envs: 1
+    wrappers:
+      vec_dummy: 0
+      vec_multiprocess: 0
+      stack_frames: 0
     n_steps: 516
     verbose: 1
     ent_coef: 0.005
     clip_range: 0.001
     learning_rate: 2.e-5
-    total_timesteps: 1.e+6
-    save_freq: 5.e+4
-    model_save_prefix: '12_PPO_LV_tra_dont_treat_long_try_2'
+    total_timesteps: 2.e+6
+    save_freq: 5.e+5
+    model_save_prefix: 'LatticeBased_32_test'
     load:
-      enable_loading: 1
-      external_file_loading: 1
+      enable_loading: 0
+      external_file_loading: 0
       external_file_name: './Training/SavedModels/12_PPO_LV_tra_dont_treat_3_load_survive_2200000_steps'
   network:
     n_lstm_layers: 2
@@ -37,7 +41,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LV' #'PhysiCell' # 'LV'
+  type: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
   threshold_burden: 5000
   treatment_time_step: 1 
   max_time: 1000
