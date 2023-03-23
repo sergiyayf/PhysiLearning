@@ -18,6 +18,7 @@ learning:
   # Model options 
   model:
     name: 'PPO' #'RecurrentPPO' # 'PPO'
+    policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
       n_steps: 516
       verbose: 1
@@ -37,7 +38,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
+  type: 'LV' #'PhysiCell' # 'LV' # 'LatticeBased'
   n_envs: 1
   wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack'
