@@ -18,16 +18,16 @@ learning:
   # Model options 
   model:
     name: 'PPO' #'RecurrentPPO' # 'PPO'
-    policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
+    policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 516
+      n_steps: 1024
       verbose: 1
       ent_coef: 0.005
-      clip_range: 0.001
-      learning_rate: 2.e-5
-    total_timesteps: 2.e+6
-    save_freq: 5.e+5
-    model_save_prefix: 'LatticeBased_32_test'
+      clip_range: 0.02
+      learning_rate: 5.e-4
+    total_timesteps: 1.e+6
+    save_freq: 1.e+5
+    model_save_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
     load:
       enable_loading: 0
       last_model: 0
@@ -35,20 +35,23 @@ learning:
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64
+
 # Environment configuration
 env:
   # general env settings
-  type: 'LV' #'PhysiCell' # 'LV' # 'LatticeBased'
+  type: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
   n_envs: 1
   wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack'
   wrapper_kwargs: #
-    n_stack: 1
-    channels_order: 'channels_first'
+    n_stack: 2
+    channels_order: 'first'
+  reward_shaping: 7  # reward shaping flag for some predefined rewards
+
+  # general simulation settings
   threshold_burden: 5000
   treatment_time_step: 1 
   max_time: 1000
-  reward_shaping: 6  # reward shaping flag for some predefined rewards
   normalize_to: 1000
 
   # LV environment settings
@@ -65,7 +68,6 @@ env:
     competition_wt: 2.5 #2400.0
     competition_mut: 1.0
     growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
-
 
   # note this is not yet functional
   PC:
@@ -91,15 +93,23 @@ env:
         parent_nodes: ['user_parameters']
         value: 0.00225
 
+  # LatticeBased environment settings
+  LB:
+    lattice_size: 100
+    lattice_type: 'square' # 'square' # 'hexagonal'
+    lattice_shape: 'square' # 'square' # 'hexagonal'
+    lattice_shape_kwargs:
+      radius: 1
+    lattice_kwargs:
 # evaluation configuration
 eval:
   most_recent: 0
   from_file: 1 
   path: './'
-  model_prefix: '12_PPO_LV_tra_dont_treat_long'
+  model_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
   fixed_AT_protocol: 0
-  num_episodes: 10
-  step_to_load: '_1200000_steps'
+  num_episodes: 1
+  step_to_load: '_500000_steps'
   save_name: '12_policy_LV_before_training_check'
-  evaluate_on: 'PhysiCell'
+  evaluate_on: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
 

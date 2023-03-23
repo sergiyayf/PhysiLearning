@@ -10,13 +10,18 @@ from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
 import matplotlib.animation as animation
 from stable_baselines3.common.env_checker import check_env
+from typing import Dict, List, Tuple, Union, Optional, Any
 
 # Lattice based tumor growth simulation environment for reinforcement learning
 # with two populations of cancerous cells, wild type and mutant. Wild type cells
 # can be treated with a drug to kill them. Mutant cells are resistant to the drug.
 
 class GridEnv(BaseEnv):
-    def __init__(self):
+    """
+    Lattice based tumor growth simulation environment for reinforcement learning
+    """
+
+    def __init__(self, config_file: str = 'config.yaml'):
         super().__init__()
         # Configuration
         self.grid_size = 36
@@ -31,18 +36,19 @@ class GridEnv(BaseEnv):
         # Environment parameters
         self.normalize = False
         self.normalize_to = 1000
-        self.max_tumor_size = self.grid_size**2-50
-        self.max_time = 1000
-        self.reward_shaping_flag = 0
+        self.max_tumor_size = 0.75*self.grid_size**2
+        self.max_time = 10000
+        self.reward_shaping_flag = 7
+        self.done = False
 
         self.grid = np.zeros((self.grid_size,self.grid_size,1), dtype=np.uint8)
         self.trajectory = np.zeros((self.grid_size,self.grid_size,self.max_time))
         self.num_wt = 2
         self.num_mut = 1
         self.wt_growth_rate = 0.1
-        self.mut_growth_rate = 0.01
-        self.reference_wt_death_rate = 0.005
-        self.reference_mut_death_rate = 0.005
+        self.mut_growth_rate = 0.02
+        self.reference_wt_death_rate = 0.002
+        self.reference_mut_death_rate = 0.002
         self.wt_death_rate = self.reference_wt_death_rate
         self.mut_death_rate = self.reference_mut_death_rate
         self.wt_drug_death_rate = 0.1
@@ -52,7 +58,22 @@ class GridEnv(BaseEnv):
         self.place_cells(positioning=self.positioning)
         self.fig, self.ax = plt.subplots()
 
-    def place_cells(self, positioning='random'):
+    @classmethod
+    def from_yaml(cls, config_file: str = 'config.yaml') -> object:
+        """
+        Create an environment from a yaml file
+        :param config_file: (str) path to the config file
+        :return: (object) the environment
+        """
+        with open(config_file, 'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+        return cls(config)
+
+    def place_cells(self, positioning: str = 'random') -> None:
+        """
+        Place cells on the grid
+        :param positioning: (str) 'random' or 'surround'
+        """
         if positioning == 'random':
             # put up to 10 wild type cells in random locations
             for i in range(self.num_wt):
@@ -81,7 +102,12 @@ class GridEnv(BaseEnv):
                 self.grid[neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = 1
 
 
-    def step(self, action):
+    def step(self, action: int) -> Tuple[np.ndarray, float, bool, Dict[str, Any]]:
+        """
+        Take a step in the environment
+        :param action: (int) the action to
+        :return: (np.ndarray, float, bool, Dict[str, Any]) the next state, the reward, if the episode is done, and additional info
+        """
         # grow tumor
         self.apply_treatment_action(action)
         self.grid = self.grow_tumor(self.grid)
@@ -96,17 +122,19 @@ class GridEnv(BaseEnv):
         reward = rewards.get_reward(self.state, self.time/self.max_time)
         # check if done
         self.done = self.check_done(self.state)
+
         # return state, reward, done, info
         return self.grid, reward, self.done, {}
 
-    def grow_tumor(self, grid):
-        # grow tumor
-        # check for cancerous cells
-        # if cancerous cell, check for neighbors
-        # with probability of growth rate, grow wt cancer cells
-        # with probability of growth rate, grow mut cancer cells
-        # if no neighbors, do nothing
+    def grow_tumor(self, grid: np.ndarray) -> np.ndarray:
+        """
+        Grow the tumor, check for cancerous check for cancerous cells
+        if cancerous cell, check for neighbors with probability of growth rate, grow wt cancer cells
+        with probability of growth rate, grow mut cancer cells if no neighbors, do nothing
 
+        :param grid: (np.ndarray) the grid
+        :return: (np.ndarray) the updated grid
+        """
         wt_cells = np.where(grid == 1)
         mut_cells = np.where(grid == 2)
 
@@ -132,8 +160,6 @@ class GridEnv(BaseEnv):
                 # grow tumor
                 grid[neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = grid[wt_cells[0][i], wt_cells[1][i]]
 
-
-
         # grow mutant cells
         for i in range(len(mut_cells[0])):
             # check for neighbors
@@ -149,8 +175,6 @@ class GridEnv(BaseEnv):
                 # grow tumor
                 grid[neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = grid[mut_cells[0][i], mut_cells[1][i]]
 
-
-
         return grid
 
     def apply_treatment_action(self, action):
@@ -163,14 +187,26 @@ class GridEnv(BaseEnv):
         return
 
 
-    def check_done(self, state):
+    def check_done(self, state: np.ndarray) -> bool:
+        """
+        Check if the episode is done
+        :param state: (np.ndarray) the state
+        :return: (bool) if the episode is done
+        """
         # check if done
         if np.sum(state) > self.max_tumor_size or self.time >= self.max_time:
             return True
         else:
             return False
 
-    def check_neighbors(self, x, y, grid):
+    def check_neighbors(self, x: np.uint8 , y: np.uint8, grid: np.ndarray) -> List[np.ndarray]:
+        """
+        Check for neighbors
+        :param x: (np.uint8) the x coordinate
+        :param y: (np.uint8) the y coordinate
+        :param grid: (np.ndarray) the grid
+        :return: (List[np.ndarray]) the list of neighbors
+        """
         # check for neighbors
         neighbors = []
         # check for neighbors
@@ -189,7 +225,11 @@ class GridEnv(BaseEnv):
         return neighbors
 
 
-    def reset(self):
+    def reset(self) -> np.ndarray:
+        """
+        Reset the environment
+        :return: (np.ndarray) the initial state
+        """
         # reset time
         self.time = 0
         # reset state
@@ -207,7 +247,7 @@ class GridEnv(BaseEnv):
         # return state
         return self.grid
 
-    def render(self, mode='human'):
+    def render(self, mode: str = 'human'):
         # render state
         # plot it on the grid with different colors for wt and mut
         # animate simulation with matplotlib animation
@@ -216,14 +256,13 @@ class GridEnv(BaseEnv):
         for i in range(self.time):
             im = self.ax.imshow(self.trajectory[:,:,i], animated=True)
             ims.append([im])
-        ani = animation.ArtistAnimation(self.fig, ims, interval=5, blit=True, repeat_delay=1000)
+        ani = animation.ArtistAnimation(self.fig, ims, interval=0.1, blit=True, repeat_delay=1000)
 
         return ani
 
-
-
     def close(self):
         pass
+
 
 if __name__ == "__main__":
     env = GridEnv()
@@ -232,12 +271,13 @@ if __name__ == "__main__":
     #env.render()
     for i in range(200):
         env.step(0)
-    for i in range(50):
-        env.step(1)
 
+    while not env.done:
+        action = env.action_space.sample()
+        env.step(action)
+        print(env.time)
 
     anim = env.render()
-    env.close()
     plt.show()
     check_env(env, warn=True)
 

@@ -1,7 +1,5 @@
 # imports
 import os
-import warnings
-
 from physilearning.envs.pc import PcEnv
 from physilearning.envs.lv import LvEnv
 from physilearning.envs.grid_env import GridEnv
@@ -41,6 +39,7 @@ def AT_Zhang_et_al(obs,env,threshold = .50):
         else:
             action = 0
     return action
+
 class Evaluation():
 
     def __init__(self,env):
@@ -117,7 +116,6 @@ class Evaluation():
         return
 
 if __name__ == '__main__':
-    warnings.warn('This script is deprecated. Please use evaluate instead', DeprecationWarning)
     #configure evaluation
     config_file = 'config.yaml'
     with open(config_file, 'r') as f:

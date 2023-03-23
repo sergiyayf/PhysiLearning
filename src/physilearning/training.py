@@ -1,6 +1,8 @@
 # imports
 import os
 import sys
+import warnings
+
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv
 from stable_baselines3.common.utils import set_random_seed
@@ -67,6 +69,7 @@ class Trainer():
 
 
 if __name__ == '__main__':
+    warnings.warn('This script is deprecated. Please use the train.py script instead', DeprecationWarning)
     config_file = f'config_{sys.argv[1]}.yaml'
     with open(config_file,'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)

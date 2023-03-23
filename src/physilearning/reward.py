@@ -44,6 +44,12 @@ class Reward:
                 reward = 10 
             else: 
                 reward = 0
+        elif self.reward_shaping_flag == 7:
+            if np.sum(obs) > 1e-5:
+                reward = 0.1
+            else:
+                reward = 2
+
         # 1 - number of sensitive cells - 10 * number of resistant cells
         else:
             if np.sum(obs[0:2]) > 0:
