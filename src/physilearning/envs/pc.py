@@ -17,6 +17,7 @@ class PcEnv(Env):
             transport_address=f'/tmp/0',reward_shaping_flag=0, normalize_to=1000):
         # setting up environment
         # set up discrete action space
+        self.name = 'PcEnv'
         self.threshold_burden_in_number = burden
         self.threshold_burden = normalize_to
         self.action_space = Discrete(2)

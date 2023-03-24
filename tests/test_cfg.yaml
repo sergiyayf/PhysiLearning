@@ -10,7 +10,7 @@ job:
   ntasks: 1
   mem-per-task: 300
   cpus-per-task: 4
-  time: '15:00:00'
+  time: '00:10:00'
   agent_buffer: 1
 
 # Reinforcement learning configuration
@@ -20,12 +20,12 @@ learning:
     name: 'PPO' #'RecurrentPPO' # 'PPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 1024
+      n_steps: 128
       verbose: 1
       ent_coef: 0.005
       clip_range: 0.02
       learning_rate: 5.e-4
-    total_timesteps: 1.e+6
+    total_timesteps: 256
     save_freq: 1.e+5
     model_save_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
     load:
@@ -39,9 +39,9 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'GridEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
+  type: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
   n_envs: 1
-  wrap: 1
+  wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack'
   wrapper_kwargs: #
     n_stack: 2

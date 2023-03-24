@@ -4,8 +4,10 @@ import yaml
 import time
 import importlib
 
-from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv, VecNormalize
 from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 
 from physilearning.callbacks import CopyConfigCallback
 from physilearning.envs.base_env import BaseEnv
@@ -69,15 +71,15 @@ class Trainer():
         """
         # import environment class
         env_type = self.env_type
-        if env_type == 'PhysiCell':
+        if env_type == 'PcEnv':
             EnvClass = getattr(importlib.import_module('physilearning.envs.pc'), 'PcEnv')
             env_kwargs = {'port': '0', 'job_name': sys.argv[1]}
 
-        elif env_type == 'LV':
+        elif env_type == 'LvEnv':
             EnvClass = getattr(importlib.import_module('physilearning.envs.lv'), 'LvEnv')
             env_kwargs = {'port': '0', 'job_name': sys.argv[1]}
 
-        elif env_type == 'LatticeBased':
+        elif env_type == 'GridEnv':
             EnvClass = getattr(importlib.import_module('physilearning.envs.grid_env'), 'GridEnv')
             env_kwargs = {}
 
@@ -91,13 +93,17 @@ class Trainer():
                 if self.wrapper == 'VecFrameStack':
                     env = DummyVecEnv([make_env(EnvClass, **env_kwargs)])
                     self.env = VecFrameStack(env, **self.wrapper_kwargs)
+                    self.env = VecMonitor(self.env)
+
                 elif self.wrapper == 'DummyVecEnv':
                     raise NotImplementedError('DummyVecEnv wrapper not properly implemented yet')
                     self.env = DummyVecEnv(EnvClass, n_envs=1, **self.wrapper_kwargs)
+                    self.env = VecMonitor(self.env)
                 else:
                     raise ValueError('Wrapper not recognized')
             else:
                 self.env = EnvClass(self.config_file, **env_kwargs)
+                self.env = Monitor(self.env)
 
         # VecEnv with n_envs > 1
         elif self.n_envs > 1:
@@ -115,6 +121,7 @@ class Trainer():
                     raise ValueError('Wrapper not recognized')
             else:
                 raise ValueError('Vector environment must be wrapped')
+            self.env = VecMonitor(self.env)
 
     def setup_model(self) -> None:
         """ Set up the model for training"""

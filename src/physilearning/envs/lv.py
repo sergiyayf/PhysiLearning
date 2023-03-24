@@ -15,6 +15,7 @@ class LvEnv(BaseEnv):
             treatment_time_step=60, reward_shaping_flag=0, growth_function_flag=0,normalize_to=1000):
         # setting up environment
         # set up discrete action space
+        self.name = 'LvEnv'
         self.action_space = Discrete(2)
         self.observation_space = Box(low=0,high=normalize_to,shape=(1,))
         self.time = 0

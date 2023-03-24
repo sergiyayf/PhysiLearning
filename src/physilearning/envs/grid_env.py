@@ -27,24 +27,26 @@ class GridEnv(BaseEnv):
         self.grid_size = 36
 
         # Spaces
-        self.type = 'GridEnv'
+        self.name = 'GridEnv'
         self.action_type = 'discrete'
         self.action_space = Discrete(2)
         self.observation_type = 'box'
-        self.observation_space = Box(low=0, high=255, shape=(self.grid_size,self.grid_size,1), dtype=np.uint8)
+        self.observation_space = Box(low=0, high=255, shape=(1,self.grid_size,self.grid_size), dtype=np.uint8)
 
         # Environment parameters
         self.normalize = False
         self.normalize_to = 1000
         self.max_tumor_size = 0.75*self.grid_size**2
-        self.max_time = 10000
+        self.max_time = 1000
         self.reward_shaping_flag = 7
         self.done = False
 
-        self.grid = np.zeros((self.grid_size,self.grid_size,1), dtype=np.uint8)
+        self.grid = np.zeros((1,self.grid_size,self.grid_size), dtype=np.uint8)
         self.trajectory = np.zeros((self.grid_size,self.grid_size,self.max_time))
         self.num_wt = 2
         self.num_mut = 1
+        self.wt_color = 128
+        self.mut_color = 255
         self.wt_growth_rate = 0.1
         self.mut_growth_rate = 0.02
         self.reference_wt_death_rate = 0.002
@@ -77,29 +79,31 @@ class GridEnv(BaseEnv):
         if positioning == 'random':
             # put up to 10 wild type cells in random locations
             for i in range(self.num_wt):
-                self.grid[np.random.randint(0,self.grid_size), np.random.randint(0,self.grid_size)] = 1
+                self.grid[0, np.random.randint(0,self.grid_size), np.random.randint(0,self.grid_size)] = self.wt_color
 
             # put 1 mutant cell in random location, check if it is on top of a wild type cell
             for j in range(self.num_mut):
                 pos_x = np.random.randint(0,10)
                 pos_y = np.random.randint(0,10)
-                while self.grid[pos_x, pos_y] == 1:
+                while self.grid[0, pos_x, pos_y] == self.wt_color:
                     pos_x = np.random.randint(0,10)
                     pos_y = np.random.randint(0,10)
-                self.grid[pos_x, pos_y] = 2
+                self.grid[0, pos_x, pos_y] = self.mut_color
 
         elif positioning == 'surround':
             for i in range(self.num_mut):
-                pos_x = np.random.randint(0, 10)
-                pos_y = np.random.randint(0, 10)
-                while self.grid[pos_x, pos_y] != 0:
-                    pos_x = np.random.randint(0, 10)
-                    pos_y = np.random.randint(0, 10)
-                self.grid[pos_x, pos_y] = 2
+                pos_x = self.grid_size//2
+                pos_y = self.grid_size//2
+                while self.grid[0, pos_x, pos_y] != 0:
+                    pos_x += np.random.randint(0, 2)
+                    pos_y += np.random.randint(0, 2)
+                self.grid[0, pos_x, pos_y] = self.mut_color
             neighbors = self.check_neighbors(pos_x, pos_y, self.grid)
             for i in range(self.num_wt):
                 rand_neighbor = np.random.randint(0, len(neighbors))
-                self.grid[neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = 1
+                while self.grid[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] != 0:
+                    rand_neighbor = np.random.randint(0, len(neighbors))
+                self.grid[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = self.wt_color
 
 
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, Dict[str, Any]]:
@@ -112,7 +116,7 @@ class GridEnv(BaseEnv):
         self.apply_treatment_action(action)
         self.grid = self.grow_tumor(self.grid)
         # update state
-        self.state = self.grid[:,:,0]
+        self.state = self.grid[0,:,:]
         # update time
         self.time += 1
         # update trajectory
@@ -135,9 +139,8 @@ class GridEnv(BaseEnv):
         :param grid: (np.ndarray) the grid
         :return: (np.ndarray) the updated grid
         """
-        wt_cells = np.where(grid == 1)
-        mut_cells = np.where(grid == 2)
-
+        wt_cells = np.where(grid == self.wt_color)[1:]
+        mut_cells = np.where(grid == self.mut_color)[1:]
         # grow wild type cells
         for i in range(len(wt_cells[0])):
             wt_rand = np.random.rand(len(wt_cells[0]))
@@ -146,19 +149,19 @@ class GridEnv(BaseEnv):
             # kill cells first
             if self.wt_death_rate == self.reference_wt_death_rate:
                 if wt_rand[i] < self.wt_death_rate:
-                    grid[wt_cells[0][i], wt_cells[1][i]] = 0
+                    grid[0, wt_cells[0][i], wt_cells[1][i]] = 0
             if self.wt_death_rate == self.wt_drug_death_rate:
                 if wt_rand[i] < self.reference_wt_death_rate:
-                    grid[wt_cells[0][i], wt_cells[1][i]] = 0
+                    grid[0, wt_cells[0][i], wt_cells[1][i]] = 0
                 if neighbors and wt_rand[i] < self.wt_drug_death_rate:
-                    grid[wt_cells[0][i], wt_cells[1][i]] = 0
+                    grid[0, wt_cells[0][i], wt_cells[1][i]] = 0
 
             # if neighbors and random number is less than growth rate, grow tumor
             if neighbors and wt_rand[i] < self.wt_growth_rate:
                 # choose random neighbor
                 rand_neighbor = np.random.randint(0,len(neighbors))
                 # grow tumor
-                grid[neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = grid[wt_cells[0][i], wt_cells[1][i]]
+                grid[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = grid[0, wt_cells[0][i], wt_cells[1][i]]
 
         # grow mutant cells
         for i in range(len(mut_cells[0])):
@@ -166,14 +169,14 @@ class GridEnv(BaseEnv):
             mut_rand = np.random.rand(len(mut_cells[0]))
             # kill cells first
             if mut_rand[i] < self.mut_death_rate:
-                grid[mut_cells[0][i], mut_cells[1][i]] = 0
+                grid[0, mut_cells[0][i], mut_cells[1][i]] = 0
             neighbors = self.check_neighbors(mut_cells[0][i], mut_cells[1][i], grid)
             # if neighbors and random number is less than growth rate, grow tumor
             if neighbors and mut_rand[i] < self.mut_growth_rate:
                 # choose random neighbor
                 rand_neighbor = np.random.randint(0,len(neighbors))
                 # grow tumor
-                grid[neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = grid[mut_cells[0][i], mut_cells[1][i]]
+                grid[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = grid[0, mut_cells[0][i], mut_cells[1][i]]
 
         return grid
 
@@ -211,16 +214,16 @@ class GridEnv(BaseEnv):
         neighbors = []
         # check for neighbors
         if x > 0:
-            if grid[x-1,y] == 0:
+            if grid[0, x-1,y] == 0:
                 neighbors.append([x-1,y])
         if x < self.grid_size-1:
-            if grid[x+1,y] == 0:
+            if grid[0, x+1,y] == 0:
                 neighbors.append([x+1,y])
         if y > 0:
-            if grid[x,y-1] == 0:
+            if grid[0, x,y-1] == 0:
                 neighbors.append([x,y-1])
         if y < self.grid_size-1:
-            if grid[x,y+1] == 0:
+            if grid[0, x,y+1] == 0:
                 neighbors.append([x,y+1])
         return neighbors
 
@@ -233,7 +236,7 @@ class GridEnv(BaseEnv):
         # reset time
         self.time = 0
         # reset state
-        self.grid = np.zeros((self.grid_size, self.grid_size, 1), dtype=np.uint8)
+        self.grid = np.zeros((1, self.grid_size, self.grid_size), dtype=np.uint8)
         self.place_cells(positioning=self.positioning)
         # put up to 10 wild type cells in random locations
 
@@ -252,9 +255,9 @@ class GridEnv(BaseEnv):
         # plot it on the grid with different colors for wt and mut
         # animate simulation with matplotlib animation
         ims = []
-        #color_map = mpl.colors.ListedColormap(['white', 'blue', 'yellow', 'red', 'green'])
+
         for i in range(self.time):
-            im = self.ax.imshow(self.trajectory[:,:,i], animated=True)
+            im = self.ax.imshow(self.trajectory[:,:,i], animated=True, cmap='viridis', vmin=0, vmax=255)
             ims.append([im])
         ani = animation.ArtistAnimation(self.fig, ims, interval=0.1, blit=True, repeat_delay=1000)
 
@@ -268,7 +271,9 @@ if __name__ == "__main__":
     env = GridEnv()
     print(env.action_space)
     env.reset()
-    #env.render()
+    print(env.state)
+    grid = env.grid
+
     for i in range(200):
         env.step(0)
 
