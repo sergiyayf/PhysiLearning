@@ -27,7 +27,7 @@ learning:
       learning_rate: 5.e-4
     total_timesteps: 1.e+6
     save_freq: 1.e+5
-    model_save_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
+    model_save_prefix: 'LatticeBased_24_03_CNN_1_env_4_stacked_mela'
     load:
       enable_loading: 0
       last_model: 0
@@ -41,10 +41,10 @@ env:
   # general env settings
   type: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
   n_envs: 1
-  wrap: 0
+  wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack'
   wrapper_kwargs: #
-    n_stack: 2
+    n_stack: 4
     channels_order: 'first'
   reward_shaping: 7  # reward shaping flag for some predefined rewards
 
