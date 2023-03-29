@@ -125,12 +125,17 @@ class Trainer():
 
     def setup_model(self) -> None:
         """ Set up the model for training"""
-        # check if rPPO
-        if self.model_name == 'RecurrentPPO':
-            Algorithm = getattr(importlib.import_module('sb3_contrib'),
-                                self.model_name)
-        else:
+        # try to import model from stable_baselines3 first and then from sb3_contrib
+        try:
             Algorithm = getattr(importlib.import_module('stable_baselines3'), self.model_name)
+        except:
+            print('rPPO not found in stable_baselines3. Trying sb3_contrib...')
+            try:
+                Algorithm = getattr(importlib.import_module('sb3_contrib'), self.model_name)
+            except:
+                raise ValueError('Model not found in stable_baselines3 or sb3_contrib')
+        else:
+            print('rPPO found in stable_baselines3. Using it...')
 
         # check if environment is set up
         if self.env is None:

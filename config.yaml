@@ -1,7 +1,7 @@
 # global configuration
 global:
-  transport_type: 'ipc://'
-  transport_address: '/tmp/' # for raven use '/ptmp/saif/'
+  transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
+  transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
   evaluate_after: 0
 
 # job configuration
@@ -17,13 +17,13 @@ job:
 learning:
   # Model options 
   model:
-    name: 'PPO' #'RecurrentPPO' # 'PPO'
+    name: 'QRDQN' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 1024
+      #n_steps: 1024
       verbose: 1
-      ent_coef: 0.005
-      clip_range: 0.02
+      #ent_coef: 0.005
+      #clip_range: 0.02
       learning_rate: 5.e-4
     total_timesteps: 1.e+6
     save_freq: 1.e+5
@@ -52,6 +52,7 @@ env:
   threshold_burden: 5000
   treatment_time_step: 1 
   max_time: 1000
+  normalize: 1
   normalize_to: 1000
 
   # LV environment settings
@@ -94,22 +95,30 @@ env:
         value: 0.00225
 
   # LatticeBased environment settings
-  LB:
-    lattice_size: 100
-    lattice_type: 'square' # 'square' # 'hexagonal'
-    lattice_shape: 'square' # 'square' # 'hexagonal'
-    lattice_shape_kwargs:
-      radius: 1
-    lattice_kwargs:
+  GridEnv:
+    grid_size: 36
+    observation_type: 'image'
+    action_type: 'discrete'
+    num_wt: 1
+    num_mut: 1
+    wt_growth_rate: 0.1
+    mut_growth_rate: 0.02
+    wt_death_rate: 0.002
+    mut_death_rate: 0.002
+    wt_treat_death_rate: 0.02
+    mut_treat_death_rate: 0.00
+    cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random'
+
+
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1 
+  from_file: 0
   path: './'
   model_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
-  fixed_AT_protocol: 0
+  fixed_AT_protocol: 1
   num_episodes: 1
   step_to_load: '_500000_steps'
   save_name: '12_policy_LV_before_training_check'
-  evaluate_on: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
+  evaluate_on: 'PhysiCell' #'PhysiCell' # 'LV' # 'LatticeBased'
 
