@@ -1,49 +1,85 @@
-# imports
 import yaml
-from gym import Env
 from gym.spaces import Discrete, Box
 import numpy as np
 from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
+from typing import Optional, Tuple, Union
 
-# create environment
+
 class LvEnv(BaseEnv):
-    def __init__(self, burden=1000, max_time=3000, carrying_capacity=1500,
-            initial_wt=45, initial_mut=5, growth_rate_wt=0.0175, growth_rate_mut=0.0175,
-            death_rate_wt=0.001, death_rate_mut=0.001, treat_death_rate_wt=0.15,
-            treat_death_rate_mut=0.0, competition_wt=2.4e3, competition_mut=1.0,
-            treatment_time_step=60, reward_shaping_flag=0, growth_function_flag=0,normalize_to=1000):
-        # setting up environment
-        # set up discrete action space
+    """
+    Environment for Lottka-Volterra tumor growth model
+
+    :param max_tumor_size: (float) maximum tumor size in number of cells
+    :param max_time: (int) maximum time in days
+    :param carrying_capacity: (float) carrying capacity of the tumor
+    :param initial_wt: (float) initial number of wild type cells
+    :param initial_mut: (float) initial number of mutant cells
+    :param growth_rate_wt: (float) growth rate of wild type cells
+    :param growth_rate_mut: (float) growth rate of mutant cells
+    :param death_rate_wt: (float) death rate of wild type cells
+    :param death_rate_mut: (float) death rate of mutant cells
+    :param treat_death_rate_wt: (float) death rate of wild type cells under treatment
+    :param treat_death_rate_mut: (float) death rate of mutant cells under treatment
+    :param competition_wt: (float) competition coefficient of wild type cells
+    :param competition_mut: (float) competition coefficient of mutant cells
+    :param treatment_time_step: (int) time step for treatment
+    :param reward_shaping_flag: (int) flag for reward shaping
+    :param growth_function_flag: (int) flag for growth function
+    :param normalize: (bool) flag for normalization
+    :param normalize_to: (float) normalization factor for reward
+    """
+
+    def __init__(
+        self,
+        max_tumor_size: float = 1000,
+        max_time: int = 3000,
+        carrying_capacity: float = 1500,
+        initial_wt: float = 45,
+        initial_mut: float = 5,
+        growth_rate_wt: float = 0.0175,
+        growth_rate_mut: float = 0.0175,
+        death_rate_wt: float = 0.001,
+        death_rate_mut: float = 0.001,
+        treat_death_rate_wt: float = 0.15,
+        treat_death_rate_mut: float = 0.0,
+        competition_wt: float = 2.4e3,
+        competition_mut: float = 1.0,
+        treatment_time_step: int = 60,
+        reward_shaping_flag: int = 0,
+        growth_function_flag: int = 0,
+        normalize:  bool = 1,
+        normalize_to: float = 1000
+    ) -> None:
+        # Spaces
+        self.name = 'LvEnv'
         self.action_space = Discrete(2)
         self.observation_space = Box(low=0,high=normalize_to,shape=(1,))
+
+        # Parameters
         self.time = 0
         self.treatment_time_step = treatment_time_step
         self.max_time = max_time
-        self.threshold_burden_in_number = burden
+        self.threshold_burden_in_number = max_tumor_size
         self.threshold_burden = normalize_to
         self.wt_random = isinstance(initial_wt, str)
         if self.wt_random:
             self.initial_wt = np.random.random_integers(low=0, high=self.threshold_burden_in_number, size=1)[0]
             self.initial_wt = self.initial_wt*self.threshold_burden/self.threshold_burden_in_number
         else:
-            self.initial_wt = initial_wt*normalize_to/burden
+            self.initial_wt = initial_wt*normalize_to/max_tumor_size
         self.mut_random = isinstance(initial_mut, str)
         if self.mut_random:
             self.initial_mut = np.random.random_integers(low=0, high=0.01*self.threshold_burden_in_number, size=1)[0]
             self.initial_mut = self.initial_mut*self.threshold_burden/self.threshold_burden_in_number
         else:
-            self.initial_mut = initial_mut*normalize_to/burden
+            self.initial_mut = initial_mut*normalize_to/max_tumor_size
         self.initial_drug = 0
         self.burden = self.initial_mut+self.initial_wt
-        # self.state = [self.initial_wt/self.threshold_burden,
-        #               self.initial_mut/self.threshold_burden,
-        #               self.initial_drug]
-        # self.capacity = carrying_capacity / self.threshold_burden
         self.state = [self.initial_wt,
                       self.initial_mut,
                       self.initial_drug]
-        self.capacity = carrying_capacity*normalize_to/burden
+        self.capacity = carrying_capacity*normalize_to/max_tumor_size
         # 1 - wt, 2 - resistant
         self.growth_rate = [growth_rate_wt,growth_rate_mut]
         self.death_rate = [death_rate_wt,death_rate_mut]
@@ -58,65 +94,46 @@ class LvEnv(BaseEnv):
         self.reward_shaping_flag = reward_shaping_flag
 
     @classmethod
-    def from_yaml(cls, yaml_file, port='0', job_name='000000'):
+    def from_yaml(cls, yaml_file: str):
         with open(yaml_file, 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
 
-        # general env settings
-        burden = config['env']['threshold_burden']
-        max_time = config['env']['max_time']
-        timestep = config['env']['treatment_time_step']
-        reward_shaping_flag = config['env']['reward_shaping']
-        normalize_to = config['env']['normalize_to']
+        return cls(max_tumor_size=config['env']['threshold_burden'],
+                   max_time=config['env']['max_time'],
+                   initial_wt=config['env']['LV']['initial_wt'],
+                   treatment_time_step=config['env']['treatment_time_step'],
+                   initial_mut=config['env']['LV']['initial_mut'],
+                   reward_shaping_flag=config['env']['reward_shaping'],
+                   carrying_capacity=config['env']['LV']['carrying_capacity'],
+                   growth_rate_wt=config['env']['LV']['growth_rate_wt'],
+                   growth_rate_mut=config['env']['LV']['growth_rate_mut'],
+                   death_rate_wt=config['env']['LV']['death_rate_wt'],
+                   death_rate_mut=config['env']['LV']['death_rate_mut'],
+                   competition_wt=config['env']['LV']['competition_wt'],
+                   competition_mut=config['env']['LV']['competition_mut'],
+                   treat_death_rate_wt=config['env']['LV']['treat_death_rate_wt'],
+                   treat_death_rate_mut=config['env']['LV']['treat_death_rate_mut'],
+                   growth_function_flag=config['env']['LV']['growth_function_flag'],
+                   normalize=config['env']['normalize'],
+                   normalize_to=config['env']['normalize_to'])
 
-        # LV specific settings
-        initial_wt = config['env']['LV']['initial_wt']
-        initial_mut = config['env']['LV']['initial_mut']
-        carrying_capacity = config['env']['LV']['carrying_capacity']
-        growth_rate_wt = config['env']['LV']['growth_rate_wt']
-        growth_rate_mut = config['env']['LV']['growth_rate_mut']
-        death_rate_wt = config['env']['LV']['death_rate_wt']
-        death_rate_mut = config['env']['LV']['death_rate_mut']
-        treat_death_rate_wt = config['env']['LV']['treat_death_rate_wt']
-        treat_death_rate_mut = config['env']['LV']['treat_death_rate_mut']
-        competition_wt = config['env']['LV']['competition_wt']
-        competition_mut = config['env']['LV']['competition_mut']
-        growth_function_flag = config['env']['LV']['growth_function_flag']
-
-        # global settings
-        transport_type = config['global']['transport_type']
-        transport_address = config['global']['transport_address']
-        if transport_type == 'ipc://':
-            transport_address = f'{transport_address}{job_name}{port}'
-        else:
-            warnings.warn('Transport type is different from ipc, please check the config file if everything is correct')
-            transport_address = f'{transport_address}:{port}'
-
-        return cls(burden=burden, max_time=max_time,
-                   initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
-                   reward_shaping_flag=reward_shaping_flag, carrying_capacity=carrying_capacity,
-                   growth_rate_wt=growth_rate_wt, growth_rate_mut=growth_rate_mut,
-                   death_rate_wt=death_rate_wt, death_rate_mut=death_rate_mut,
-                   competition_wt=competition_wt, competition_mut=competition_mut,
-                   treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
-                   growth_function_flag=growth_function_flag, normalize_to=normalize_to)
-    def step(self, action):
-        # do action (apply treatment or not)
+    def step(self, action: int) -> Tuple[np.ndarray, float, bool, dict]:
+        """
+        Step in the environment that simulates tumor growth and treatment
+        :param action: 0 - no treatment, 1 - treatment
+        """
         self.state[2] = action
         # grow_tumor
         reward = 0
         for t in range(0,self.treatment_time_step):
             #step time
             self.time += 1
-
             self.state[0] = self.grow(0,1,self.growth_function_flag)
             self.state[1] = self.grow(1,0,self.growth_function_flag)
-
             self.burden = np.sum(self.state[0:2])
 
             # record trajectory
             self.trajectory[:,self.time-1] = self.state
-
             # check if done
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
@@ -159,7 +176,7 @@ class LvEnv(BaseEnv):
 
         return [np.sum(self.state[0:2])]
 
-    def grow(self, i, j, flag):  # i index of growing type, j: index of competing type
+    def grow(self, i: int, j: int , flag: int) -> float:
 
         # adapted death model, with delay in death rate
         if flag == 0:

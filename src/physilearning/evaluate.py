@@ -136,9 +136,9 @@ if __name__ == '__main__':
         #env_type = 'PhysiCell'
         env_type = general_config['eval']['evaluate_on']
         if env_type == 'PhysiCell':
-            env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+            env = PcEnv.from_yaml(config_file,port='0',job_name=sys.argv[1])
         elif env_type == 'LV':
-            env = LV_env.from_yaml(model_config_file)
+            env = LvEnv.from_yaml(model_config_file)
         elif env_type == 'LatticeBased':
             env = GridEnv.from_yaml(model_config_file)
 
@@ -154,9 +154,9 @@ if __name__ == '__main__':
         env_type = general_config['eval']['evaluate_on']
         save_name = general_config['eval']['save_name']
         if env_type == 'PhysiCell':
-            env = PC_env.from_yaml(config_file,port='0',job_name=sys.argv[1])
+            env = PcEnv.from_yaml(config_file,port='0',job_name=sys.argv[1])
         elif env_type == 'LV':
-            env = LV_env.from_yaml(config_file)
+            env = LvEnv.from_yaml(config_file)
         evaluation = Evaluation(env)
         if general_config['eval']['fixed_AT_protocol']:
             evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'],path='Evaluations', name=save_name)

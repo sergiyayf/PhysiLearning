@@ -1,4 +1,3 @@
-# imports
 from gym import Env
 from gym.spaces import Discrete, Box
 import numpy as np
@@ -9,20 +8,47 @@ import time
 import yaml
 import warnings
 from physilearning.reward import Reward
+import platform
 
-# create environment
+
 class PcEnv(Env):
-    def __init__(self,port='0', job_name='0000000', burden=1000, max_time=30000,
-            initial_wt=45, initial_mut=5, treatment_time_step=60, transport_type='ipc://',
-            transport_address=f'/tmp/0',reward_shaping_flag=0, normalize_to=1000):
-        # setting up environment
-        # set up discrete action space
+    """
+    PhysiCell environment
+
+    :param port: port number for zmq communication
+    :param job_name: job name for zmq communication
+    :param burden: burden threshold in number of cells
+    :param max_time: maximum time steps
+    :param initial_wt: initial number of wild type cells
+    :param initial_mut: initial number of mutant cells
+    :param treatment_time_step: time step at which treatment is applied
+    :param transport_type: transport type for zmq communication
+    :param transport_address: transport address for zmq communication
+    :param reward_shaping_flag: flag to enable reward shaping
+    :param normalize_to: normalization factor for reward shaping
+    """
+    def __init__(
+        self,
+        port: str = '0',
+        job_name: str = '0000000',
+        burden: float = 1000,
+        max_time: int = 30000,
+        initial_wt: int = 45,
+        initial_mut: int = 5,
+        treatment_time_step: int = 60,
+        transport_type: str = 'ipc://',
+        transport_address: str = f'/tmp/0',
+        reward_shaping_flag: int = 0,
+        normalize_to: float = 1000
+    ) -> None:
+        # Space
+        self.name = 'PcEnv'
         self.threshold_burden_in_number = burden
         self.threshold_burden = normalize_to
         self.action_space = Discrete(2)
         self.observation_space = Box(low=0,high=1,shape=(1,))
 
-        # set up timer
+        # Timer
         self.time = 0
         self.max_time = max_time
         self.treatment_time_step = treatment_time_step
@@ -40,20 +66,29 @@ class PcEnv(Env):
         # trajectory for plotting
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
 
-        # socket
+        # Socket
         self.job_name = job_name
         self.port = port
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.transport_type = transport_type
         self.transport_address = transport_address
-        self.socket.connect(f'{self.transport_type}{self.transport_address}')
-        
+        if transport_type == 'ipc://':
+            self.socket.connect(f'{self.transport_type}{self.transport_address}')
+        elif transport_type == 'tcp://':
+            try:
+                self.socket.connect(f'{self.transport_type}localhost:{self.transport_address}')
+            except:
+                print("Connection failed. Double check the transport type and address. Trying with the default address")
+                self.socket.connect(f'{self.transport_type}localhost:5555')
+                self.transport_address = '5555'
+
+
         # reward shaping flag
         self.reward_shaping_flag = reward_shaping_flag
 
     @classmethod
-    def from_yaml(cls,yaml_file,port='0',job_name = '000000'):
+    def from_yaml(cls, yaml_file: str, port: str = '0', job_name: str = '000000') -> object:
         with open(yaml_file,'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
         burden = config['env']['threshold_burden']
@@ -75,8 +110,7 @@ class PcEnv(Env):
                 initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut, transport_type=transport_type,
                 transport_address=transport_address, reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to)
 
-
-    def step(self, action):
+    def step(self, action: int) -> tuple:
         # update timer
         self.time += self.treatment_time_step
         # get tumor updated state
@@ -118,9 +152,19 @@ class PcEnv(Env):
 
     def reset(self):
         time.sleep(3.0)
-        port_connection = f"{self.transport_type}{self.transport_address}"
-        command = f"bash ./scripts/run.sh {self.port} {port_connection}"
-        p = subprocess.Popen([command], shell=True)
+        if self.transport_type == 'ipc://':
+            port_connection = f"{self.transport_type}{self.transport_address}"
+        elif self.transport_type == 'tcp://':
+            port_connection = f"{self.transport_type}*:{self.transport_address}"
+
+        if platform.system() == 'Windows':
+            raise NotImplementedError('Windows is not supported yet')
+            command = f"conda deactivate && bash ./scripts/run.sh {self.port} {port_connection}"
+            p = subprocess.Popen(["start", "cmd", "/K", command], shell=True)
+
+        else:
+            command = f"bash ./scripts/run.sh {self.port} {port_connection}"
+            p = subprocess.Popen([command], shell=True)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(f'{self.transport_type}{self.transport_address}')
@@ -133,7 +177,7 @@ class PcEnv(Env):
 
     
 if __name__ == '__main__':
-    env = PC_env.from_yaml('../../../config.yaml')
+    env = PcEnv.from_yaml('../../../config.yaml')
     #env.reset()
     print(env.reward_shaping_flag)
 

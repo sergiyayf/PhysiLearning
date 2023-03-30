@@ -23,7 +23,7 @@ class BaseEnv(Env):
         self.observation_space = None
 
         # Simulation
-        self.type = 'BaseEnv'
+        self.name = 'BaseEnv'
         self.normalize = False
         self.normalize_to = None
         self.trajectory = None
