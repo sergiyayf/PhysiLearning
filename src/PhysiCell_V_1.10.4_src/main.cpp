@@ -263,19 +263,27 @@ int main( int argc, char* argv[] )
 				
 				// try to change cell position to string;
 				std::string data{"Type 0:"};
+				std::string positions0{"Pos 0:"};
+				std::string positions1{"Pos 1:"};
 				int type_0_counter = 0;
 				int type_1_counter = 0;
 					for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) { 
 						if ((*all_cells)[cells_it]->type == 0) {
 					       type_0_counter++;
+					       std::string x_pos = std::to_string((*all_cells)[cells_it]->position[0]);
+					       positions0.append(x_pos);
 					} else if ((*all_cells)[cells_it]->type == 1 ) {
 				 		type_1_counter++;
+						std::string x_pos1 = std::to_string((*all_cells)[cells_it]->position[0]); 
+						positions1.append(x_pos1);
 					}
 				}
 				
 				data.append(std::to_string(type_0_counter));
 				data.append(" Type 1:");
 				data.append(std::to_string(type_1_counter));
+				data.append(positions0);
+				data.append(positions1);
 						
 				
 				// send the reply to the client 

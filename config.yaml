@@ -71,13 +71,13 @@ env:
         value: 'true'
     number_of_susceptible_cells:
         parent_nodes: ['user_parameters']
-        value: 5997
+        value: 5
     number_of_resistant_cells:
         parent_nodes: ['user_parameters']
         value: 3
     enable_chkpt:
         parent_nodes: ['user_parameters']
-        value: 'true'
+        value: 'false'
     filename_chkpt:
         parent_nodes: ['user_parameters']
         value: './../presims/test_patient/output00000003'
@@ -91,11 +91,11 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1 
+  from_file: 0 
   path: './'
   model_prefix: '12_PPO_LV_tra_dont_treat_long'
-  fixed_AT_protocol: 0
-  num_episodes: 10
+  fixed_AT_protocol: 1
+  num_episodes: 1
   step_to_load: '_1200000_steps'
   save_name: '12_policy_LV_before_training_check'
   evaluate_on: 'PhysiCell'

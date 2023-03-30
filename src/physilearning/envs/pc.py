@@ -82,7 +82,7 @@ class PcEnv(Env):
         # get tumor updated state
 
         message = str(self.socket.recv(),'utf-8')
-         
+        print(message) 
         type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
         self.state[0] = int(type0[0])*self.threshold_burden/self.threshold_burden_in_number
         type1 = re.findall(r'%s(\d+)' % "Type 1:", message)
