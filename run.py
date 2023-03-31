@@ -91,7 +91,7 @@ def evaluate():
     # read config
     with open('config.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-    n_envs = config['learning']['model']['n_envs']
+    n_envs = config['env']['n_envs']
     # prepare PhysiCell simulations for job submission
     if config['eval']['evaluate_on'] == 'PhysiCell':
         PC_conf = config['env']['PC']

@@ -86,12 +86,15 @@ class Evaluation():
             done = False 
             score = 0
             while not done:
-                action = AT_Zhang_et_al(obs,self.env)
-                #action = 1
+                #action = AT_Zhang_et_al(obs,self.env)
+                action = 0
                 obs, reward, done, info = self.env.step(action)
                 score += reward
             filename = os.path.join(path, '{1}_{0}.csv'.format(name,episode))
-            self.save_trajectory(filename)
+            if self.env.observation_type == 'image':
+                np.save(f'trajectory_{name}_numpy', self.env.trajectory)
+            else:
+                self.save_trajectory(filename)
 
     def save_trajectory(self,name):
         """

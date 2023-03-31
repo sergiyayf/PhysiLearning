@@ -51,7 +51,7 @@ env:
   # general simulation settings
   threshold_burden: 5000
   treatment_time_step: 1 
-  max_time: 1000
+  max_time: 100
   normalize: 1
   normalize_to: 1000
 
@@ -77,13 +77,13 @@ env:
         value: 'true'
     number_of_susceptible_cells:
         parent_nodes: ['user_parameters']
-        value: 5997
+        value: 5
     number_of_resistant_cells:
         parent_nodes: ['user_parameters']
         value: 3
     enable_chkpt:
         parent_nodes: ['user_parameters']
-        value: 'true'
+        value: 'false'
     filename_chkpt:
         parent_nodes: ['user_parameters']
         value: './../presims/test_patient/output00000003'
