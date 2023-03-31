@@ -53,7 +53,9 @@ class PcEnv(Env):
         if self.observation_type == 'number':
             self.observation_space = Box(low=0,high=1,shape=(1,))
         elif self.observation_type == 'image':
-            self.observation_space = Box(low=0,high=1,shape=(1,self.image_size,self.image_size))
+            self.observation_space = Box(low=0, high=255,
+                                         shape=(1,self.image_size,self.image_size),
+                                         dtype=np.uint8)
         elif self.observation_type == 'multiobs':
             raise NotImplementedError
         # Timer
@@ -128,11 +130,11 @@ class PcEnv(Env):
         self.time += self.treatment_time_step
         # get tumor updated state
         message = str(self.socket.recv(),'utf-8')
-        print(message)
+
         # get from the string comma separated values from t0_x to t0_y
         if self.observation_type == 'image':
             self.image = self._get_image_obs(message)
-            print(self.image)
+
             self.trajectory[:,:,int(self.time/self.treatment_time_step) - 1] = self.image[0,:,:]
             obs = self.image
             done = self._check_done(self.image[0,:,:])
@@ -216,8 +218,6 @@ class PcEnv(Env):
         t1_y = message[t1_end_index+len('t1_y:'):-1].split(',')
         t1_y = np.array([float(y)+self.domain_size/2 for y in t1_y[0:-1]])
 
-        # create the image
-        image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
         # normalize the coordinates to the image size
         t0_x = np.round(t0_x*self.image_size/self.domain_size)
         t0_y = np.round(t0_y*self.image_size/self.domain_size)
@@ -225,11 +225,11 @@ class PcEnv(Env):
         t1_y = np.round(t1_y*self.image_size/self.domain_size)
 
         for x,y in zip(t0_x,t0_y):
-            image[0, int(x), int(y)] = self.wt_color
+            self.image[0, int(x), int(y)] = self.wt_color
         for x,y in zip(t1_x,t1_y):
-            image[0, int(x), int(y)] = self.mut_color
+            self.image[0, int(x), int(y)] = self.mut_color
 
-        return image
+        return self.image
 
 
     def reset(self):
@@ -252,6 +252,11 @@ class PcEnv(Env):
         self.socket.connect(f'{self.transport_type}{self.transport_address}')
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
+        self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
+        if self.observation_type == 'number':
+            obs = [np.sum(self.state[0:2])]
+        elif self.observation_type == 'image':
+            obs = self.image
         if self.observation_type == 'number':
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
         elif self.observation_type == 'image':
@@ -259,7 +264,7 @@ class PcEnv(Env):
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)))
            
         self.socket.send(b"Start simulation")
-        return [np.sum(self.state[0:2])]
+        return obs
 
 
 def render(trajectory: np.ndarray, time: int, fig , ax):
