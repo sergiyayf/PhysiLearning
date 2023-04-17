@@ -37,8 +37,14 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/quickstart.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../sec_reinforcement_learning.html">Reinforcement Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../sec_code_reference.html">Code reference</a></li>
 </ul>
 
@@ -76,7 +82,7 @@
 
 
 <div class="viewcode-block" id="LvEnv"><a class="viewcode-back" href="../../../sec_code_reference.html#physilearning.envs.lv.LvEnv">[docs]</a><span class="k">class</span> <span class="nc">LvEnv</span><span class="p">(</span><span class="n">BaseEnv</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Environment for Lottka-Volterra tumor growth model</span>
 
 <span class="sd">    :param max_tumor_size: (float) maximum tumor size in number of cells</span>
@@ -187,7 +193,7 @@
                    <span class="n">normalize_to</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;normalize_to&#39;</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Step in the environment that simulates tumor growth and treatment</span>
 <span class="sd">        :param action: 0 - no treatment, 1 - treatment</span>
 <span class="sd">        &quot;&quot;&quot;</span>

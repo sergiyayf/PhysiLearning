@@ -49,7 +49,7 @@ def train():
         print('Warning: Too few CPUs allocated for the job')
 
     # prepare PhysiCell simulations for job submission
-    if config['env']['type'] == 'PhysiCell':
+    if config['env']['type'] == 'PcEnv':
         PC_conf = config['env']['PC']
         change_PC_config(PC_conf, n_envs)
 
@@ -72,7 +72,7 @@ def train():
     # run evaluation_job submission script with dependency to run after RL job is finished
     if config['global']['evaluate_after']:
         eval_command = 'cd ./scripts && sbatch --dependency=afterany:{0} evaluation_job.sh'.format(jobid)
-        p_eval.subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
+        p_eval = subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
         (out, err) = p_eval.communicate()
         print('Evaluation job: ', str(out, 'utf-8'))
 

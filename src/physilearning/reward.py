@@ -50,6 +50,12 @@ class Reward:
             else:
                 reward = 2
 
+        # keep constant cell number
+        elif self.reward_shaping_flag == 8:
+            if abs(np.sum(obs)-500) < 50:
+                reward = 1
+            else:
+                reward = 0
         # 1 - number of sensitive cells - 10 * number of resistant cells
         else:
             if np.sum(obs[0:2]) > 0:

@@ -10,7 +10,7 @@ job:
   ntasks: 1
   mem-per-task: 300
   cpus-per-task: 10
-  time: '15:00:00'
+  time: '10:00:00'
   agent_buffer: 1
 
 # Reinforcement learning configuration
@@ -25,9 +25,9 @@ learning:
       #ent_coef: 0.005
       #clip_range: 0.02
       learning_rate: 5.e-4
-    total_timesteps: 1000
-    save_freq: 1.e+5
-    model_save_prefix: 'imagePC_test'
+    total_timesteps: 1.e+6
+    save_freq: 5.e+4
+    model_save_prefix: '0417_stacked_image_PC_test'
     load:
       enable_loading: 0
       last_model: 0
@@ -46,12 +46,12 @@ env:
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
-  reward_shaping: 7  # reward shaping flag for some predefined rewards
+  reward_shaping: 8  # reward shaping flag for some predefined rewards
 
   # general simulation settings
-  threshold_burden: 5000
+  threshold_burden: 1000
   treatment_time_step: 1 
-  max_time: 100
+  max_time: 1000
   normalize: 1
   normalize_to: 1000
 
@@ -77,10 +77,10 @@ env:
         value: 'true'
     number_of_susceptible_cells:
         parent_nodes: ['user_parameters']
-        value: 5
+        value: 99
     number_of_resistant_cells:
         parent_nodes: ['user_parameters']
-        value: 3
+        value: 1
     enable_chkpt:
         parent_nodes: ['user_parameters']
         value: 'false'
@@ -89,7 +89,7 @@ env:
         value: './../presims/test_patient/output00000003'
     treatment_time_step:
         parent_nodes: ['user_parameters']
-        value: 240
+        value: 60
     treatment_death_rate:
         parent_nodes: ['user_parameters']
         value: 0.00225
@@ -119,6 +119,6 @@ eval:
   fixed_AT_protocol: 1
   num_episodes: 1
   step_to_load: '_500000_steps'
-  save_name: '12_policy_LV_before_training_check'
+  save_name: '0417_PC_image_trajectory_save_test'
   evaluate_on: 'PhysiCell' #'PhysiCell' # 'LV' # 'LatticeBased'
 

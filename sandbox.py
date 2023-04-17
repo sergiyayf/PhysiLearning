@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import animation
+from physilearning.envs import PcEnv
 
 import sys
 import yaml
@@ -33,7 +34,7 @@ def grid_env_sand():
 
 
 if __name__ == '__main__':
-    filename = 'trajectory_12_policy_LV_before_training_check_numpy.npy'
+    filename = 'trajectory_0417_PC_image_trajectory_save_test_numpy.npy'
     trajectory = np.load(filename)
     fig, ax = plt.subplots()
     ims = []

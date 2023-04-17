@@ -137,7 +137,11 @@ class PcEnv(Env):
             self.trajectory[:,:,int(self.time/self.treatment_time_step) - 1] = self.image[0,:,:]
             obs = self.image
             done = self._check_done(self.image[0,:,:])
-            reward = 1
+            num_wt_cells, num_mut_cells = self._calculate_cell_number(self.image[0,:,:])
+
+            rewards = Reward(self.reward_shaping_flag)
+            reward = rewards.get_reward(num_wt_cells,num_mut_cells)
+
             if done:
                 print('Done')
                 self.socket.send(b"End simulation")
@@ -184,8 +188,8 @@ class PcEnv(Env):
     def _check_done(self, state: np.ndarray) -> bool:
         """
         Check if the episode is done: if the tumor is too big or the time is too long
-        :param state: (np.ndarray) the state
-        :return: (bool) if the episode is done
+        :param state: the state
+        :return: if the episode is done
         """
         # check if done
         num_wt_cells = np.sum(state == self.wt_color)
@@ -195,6 +199,17 @@ class PcEnv(Env):
             return True
         else:
             return False
+
+    def _calculate_cell_number(self, state: np.ndarray) -> tuple:
+        """
+        Calculate the number of wt and mut cells in the state
+        :param state: the state
+        :return: number of wt and mut cells
+        """
+        num_wt_cells = np.sum(state == self.wt_color)
+        num_mut_cells = np.sum(state == self.mut_color)
+        return num_wt_cells, num_mut_cells
+
     def _get_image_obs(self, message: str) -> np.ndarray:
         """
         Get the image observation from the message received from the socket
