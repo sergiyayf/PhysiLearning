@@ -91,7 +91,7 @@ class Trainer():
             print('Training on single environment')
             if self.wrap:
                 if self.wrapper == 'VecFrameStack':
-                    env = DummyVecEnv([make_env(EnvClass, **env_kwargs)])
+                    env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs)])
                     self.env = VecFrameStack(env, **self.wrapper_kwargs)
                     self.env = VecMonitor(self.env)
 
@@ -102,7 +102,7 @@ class Trainer():
                 else:
                     raise ValueError('Wrapper not recognized')
             else:
-                self.env = EnvClass(self.config_file, **env_kwargs)
+                self.env = EnvClass.from_yaml(self.config_file, **env_kwargs)
                 self.env = Monitor(self.env)
 
         # VecEnv with n_envs > 1
@@ -129,13 +129,13 @@ class Trainer():
         try:
             Algorithm = getattr(importlib.import_module('stable_baselines3'), self.model_name)
         except:
-            print('rPPO not found in stable_baselines3. Trying sb3_contrib...')
+            print('Algorithm not found in stable_baselines3. Trying sb3_contrib...')
             try:
                 Algorithm = getattr(importlib.import_module('sb3_contrib'), self.model_name)
             except:
                 raise ValueError('Model not found in stable_baselines3 or sb3_contrib')
         else:
-            print('rPPO found in stable_baselines3. Using it...')
+            print('Algorithm found in stable_baselines3. Using it...')
 
         # check if environment is set up
         if self.env is None:

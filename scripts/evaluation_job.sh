@@ -12,9 +12,9 @@
 # Number of nodes and MPI tasks per node:
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem=6000MB
+#SBATCH --mem=4000MB
 #for OpenMP:
-#SBATCH --cpus-per-task=20
+#SBATCH --cpus-per-task=10
 #
 #SBATCH --mail-type=none
 #SBATCH --mail-user=saif@mpl.mpg.de
@@ -30,4 +30,4 @@ export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # for pinning threads correctly:
 export OMP_PLACES=cores
 
-srun --ntasks=1 --cpus-per-task=1 --mem-per-cpu=500 python3 ./src/physilearning/evaluation.py ${SLURM_JOBID}
+srun --ntasks=1 --cpus-per-task=1 --mem-per-cpu=500 python3 ./src/physilearning/evaluate.py ${SLURM_JOBID}

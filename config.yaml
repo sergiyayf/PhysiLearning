@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 4
+  cpus-per-task: 10
   time: '15:00:00'
   agent_buffer: 1
 
@@ -17,17 +17,17 @@ job:
 learning:
   # Model options 
   model:
-    name: 'QRDQN' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
+    name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      #n_steps: 1024
+      n_steps: 100
       verbose: 1
       #ent_coef: 0.005
       #clip_range: 0.02
       learning_rate: 5.e-4
-    total_timesteps: 1.e+6
+    total_timesteps: 1000
     save_freq: 1.e+5
-    model_save_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
+    model_save_prefix: 'imagePC_test'
     load:
       enable_loading: 0
       last_model: 0
@@ -39,19 +39,19 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'GridEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
   n_envs: 1
   wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack'
   wrapper_kwargs: #
-    n_stack: 2
+    n_stack: 4
     channels_order: 'first'
   reward_shaping: 7  # reward shaping flag for some predefined rewards
 
   # general simulation settings
   threshold_burden: 5000
   treatment_time_step: 1 
-  max_time: 1000
+  max_time: 100
   normalize: 1
   normalize_to: 1000
 
@@ -77,13 +77,13 @@ env:
         value: 'true'
     number_of_susceptible_cells:
         parent_nodes: ['user_parameters']
-        value: 5997
+        value: 5
     number_of_resistant_cells:
         parent_nodes: ['user_parameters']
         value: 3
     enable_chkpt:
         parent_nodes: ['user_parameters']
-        value: 'true'
+        value: 'false'
     filename_chkpt:
         parent_nodes: ['user_parameters']
         value: './../presims/test_patient/output00000003'

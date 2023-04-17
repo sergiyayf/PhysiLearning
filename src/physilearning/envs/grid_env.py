@@ -196,8 +196,14 @@ class GridEnv(BaseEnv):
         # update trajectory
         self.trajectory[:,:,self.time-1] = self.state
         # calculate reward
-        rewards = Reward(self.reward_shaping_flag, normalization=100)
-        reward = rewards.get_reward(self.state, self.time/self.max_time)
+        #rewards = Reward(self.reward_shaping_flag, normalization=100)
+        #reward = rewards.get_reward(self.state, self.time/self.max_time)
+        if action: 
+            reward = 0
+        elif action==0 and np.sum(self.state)<1.e-3: 
+            reward = 10
+        else:
+            reward = 1 
         # check if done
         self.done = self.check_done(self.state)
 
