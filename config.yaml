@@ -1,7 +1,7 @@
 # global configuration
 global:
-  transport_type: 'ipc://'
-  transport_address: '/tmp/' # for raven use '/ptmp/saif/'
+  transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
+  transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
   evaluate_after: 0
 
 # job configuration
@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 4
+  cpus-per-task: 10
   time: '15:00:00'
   agent_buffer: 1
 
@@ -17,35 +17,42 @@ job:
 learning:
   # Model options 
   model:
-    name: 'PPO' #'RecurrentPPO' # 'PPO'
-    n_envs: 1
-    wrappers:
-      vec_dummy: 0
-      vec_multiprocess: 0
-      stack_frames: 0
-    n_steps: 516
-    verbose: 1
-    ent_coef: 0.005
-    clip_range: 0.001
-    learning_rate: 2.e-5
-    total_timesteps: 2.e+6
-    save_freq: 5.e+5
-    model_save_prefix: 'LatticeBased_32_test'
+    name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
+    policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
+    model_kwargs:
+      n_steps: 100
+      verbose: 1
+      #ent_coef: 0.005
+      #clip_range: 0.02
+      learning_rate: 5.e-4
+    total_timesteps: 1000
+    save_freq: 1.e+5
+    model_save_prefix: 'imagePC_test'
     load:
       enable_loading: 0
-      external_file_loading: 0
-      external_file_name: './Training/SavedModels/12_PPO_LV_tra_dont_treat_3_load_survive_2200000_steps'
+      last_model: 0
+      saved_model_name: './Training/SavedModels/12_PPO_LV_tra_dont_treat_3_load_survive_2200000_steps'
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64
+
 # Environment configuration
 env:
   # general env settings
-  type: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
+  type: 'PcEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
+  n_envs: 1
+  wrap: 1
+  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack'
+  wrapper_kwargs: #
+    n_stack: 4
+    channels_order: 'first'
+  reward_shaping: 7  # reward shaping flag for some predefined rewards
+
+  # general simulation settings
   threshold_burden: 5000
   treatment_time_step: 1 
-  max_time: 1000
-  reward_shaping: 6  # reward shaping flag for some predefined rewards
+  max_time: 100
+  normalize: 1
   normalize_to: 1000
 
   # LV environment settings
@@ -62,7 +69,6 @@ env:
     competition_wt: 2.5 #2400.0
     competition_mut: 1.0
     growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
-
 
   # note this is not yet functional
   PC:
@@ -88,15 +94,31 @@ env:
         parent_nodes: ['user_parameters']
         value: 0.00225
 
+  # LatticeBased environment settings
+  GridEnv:
+    grid_size: 36
+    observation_type: 'image'
+    action_type: 'discrete'
+    num_wt: 1
+    num_mut: 1
+    wt_growth_rate: 0.1
+    mut_growth_rate: 0.02
+    wt_death_rate: 0.002
+    mut_death_rate: 0.002
+    wt_treat_death_rate: 0.02
+    mut_treat_death_rate: 0.00
+    cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random'
+
+
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0 
+  from_file: 0
   path: './'
-  model_prefix: '12_PPO_LV_tra_dont_treat_long'
+  model_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
   fixed_AT_protocol: 1
   num_episodes: 1
-  step_to_load: '_1200000_steps'
+  step_to_load: '_500000_steps'
   save_name: '12_policy_LV_before_training_check'
-  evaluate_on: 'PhysiCell'
+  evaluate_on: 'PhysiCell' #'PhysiCell' # 'LV' # 'LatticeBased'
 

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>physilearning.envs.lv &mdash; PhysiLearning  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PhysiLearning
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../sec_code_reference.html">Code reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PhysiLearning</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">physilearning.envs.lv</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for physilearning.envs.lv</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">gym.spaces</span> <span class="kn">import</span> <span class="n">Discrete</span><span class="p">,</span> <span class="n">Box</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">physilearning.envs.base_env</span> <span class="kn">import</span> <span class="n">BaseEnv</span>
+<span class="kn">from</span> <span class="nn">physilearning.reward</span> <span class="kn">import</span> <span class="n">Reward</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+
+<div class="viewcode-block" id="LvEnv"><a class="viewcode-back" href="../../../sec_code_reference.html#physilearning.envs.lv.LvEnv">[docs]</a><span class="k">class</span> <span class="nc">LvEnv</span><span class="p">(</span><span class="n">BaseEnv</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Environment for Lottka-Volterra tumor growth model</span>
+
+<span class="sd">    :param max_tumor_size: (float) maximum tumor size in number of cells</span>
+<span class="sd">    :param max_time: (int) maximum time in days</span>
+<span class="sd">    :param carrying_capacity: (float) carrying capacity of the tumor</span>
+<span class="sd">    :param initial_wt: (float) initial number of wild type cells</span>
+<span class="sd">    :param initial_mut: (float) initial number of mutant cells</span>
+<span class="sd">    :param growth_rate_wt: (float) growth rate of wild type cells</span>
+<span class="sd">    :param growth_rate_mut: (float) growth rate of mutant cells</span>
+<span class="sd">    :param death_rate_wt: (float) death rate of wild type cells</span>
+<span class="sd">    :param death_rate_mut: (float) death rate of mutant cells</span>
+<span class="sd">    :param treat_death_rate_wt: (float) death rate of wild type cells under treatment</span>
+<span class="sd">    :param treat_death_rate_mut: (float) death rate of mutant cells under treatment</span>
+<span class="sd">    :param competition_wt: (float) competition coefficient of wild type cells</span>
+<span class="sd">    :param competition_mut: (float) competition coefficient of mutant cells</span>
+<span class="sd">    :param treatment_time_step: (int) time step for treatment</span>
+<span class="sd">    :param reward_shaping_flag: (int) flag for reward shaping</span>
+<span class="sd">    :param growth_function_flag: (int) flag for growth function</span>
+<span class="sd">    :param normalize: (bool) flag for normalization</span>
+<span class="sd">    :param normalize_to: (float) normalization factor for reward</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">max_tumor_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="n">max_time</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3000</span><span class="p">,</span>
+        <span class="n">carrying_capacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1500</span><span class="p">,</span>
+        <span class="n">initial_wt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">45</span><span class="p">,</span>
+        <span class="n">initial_mut</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">growth_rate_wt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0175</span><span class="p">,</span>
+        <span class="n">growth_rate_mut</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0175</span><span class="p">,</span>
+        <span class="n">death_rate_wt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span>
+        <span class="n">death_rate_mut</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span>
+        <span class="n">treat_death_rate_wt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span>
+        <span class="n">treat_death_rate_mut</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">competition_wt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.4e3</span><span class="p">,</span>
+        <span class="n">competition_mut</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">treatment_time_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="n">reward_shaping_flag</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">growth_function_flag</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="p">:</span>  <span class="nb">bool</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">normalize_to</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Spaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;LvEnv&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">Discrete</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">Box</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">high</span><span class="o">=</span><span class="n">normalize_to</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+
+        <span class="c1"># Parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatment_time_step</span> <span class="o">=</span> <span class="n">treatment_time_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">max_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden_in_number</span> <span class="o">=</span> <span class="n">max_tumor_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden</span> <span class="o">=</span> <span class="n">normalize_to</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wt_random</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initial_wt</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wt_random</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_integers</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden_in_number</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden_in_number</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span> <span class="o">=</span> <span class="n">initial_wt</span><span class="o">*</span><span class="n">normalize_to</span><span class="o">/</span><span class="n">max_tumor_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mut_random</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initial_mut</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mut_random</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_integers</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">0.01</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden_in_number</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden_in_number</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span> <span class="o">=</span> <span class="n">initial_mut</span><span class="o">*</span><span class="n">normalize_to</span><span class="o">/</span><span class="n">max_tumor_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_drug</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">burden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span><span class="p">,</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span><span class="p">,</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">initial_drug</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">carrying_capacity</span><span class="o">*</span><span class="n">normalize_to</span><span class="o">/</span><span class="n">max_tumor_size</span>
+        <span class="c1"># 1 - wt, 2 - resistant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">growth_rate</span> <span class="o">=</span> <span class="p">[</span><span class="n">growth_rate_wt</span><span class="p">,</span><span class="n">growth_rate_mut</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">death_rate</span> <span class="o">=</span> <span class="p">[</span><span class="n">death_rate_wt</span><span class="p">,</span><span class="n">death_rate_mut</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span> <span class="o">=</span> <span class="p">[</span><span class="n">death_rate_wt</span><span class="p">,</span><span class="n">death_rate_mut</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">death_rate_treat</span> <span class="o">=</span> <span class="p">[</span><span class="n">treat_death_rate_wt</span><span class="p">,</span><span class="n">treat_death_rate_mut</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">competition</span> <span class="o">=</span> <span class="p">[</span><span class="n">competition_wt</span><span class="p">,</span><span class="n">competition_mut</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">growth_function_flag</span> <span class="o">=</span> <span class="n">growth_function_flag</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_time</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">real_step_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_shaping_flag</span> <span class="o">=</span> <span class="n">reward_shaping_flag</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_yaml</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">yaml_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yaml_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">max_tumor_size</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;threshold_burden&#39;</span><span class="p">],</span>
+                   <span class="n">max_time</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;max_time&#39;</span><span class="p">],</span>
+                   <span class="n">initial_wt</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;initial_wt&#39;</span><span class="p">],</span>
+                   <span class="n">treatment_time_step</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;treatment_time_step&#39;</span><span class="p">],</span>
+                   <span class="n">initial_mut</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;initial_mut&#39;</span><span class="p">],</span>
+                   <span class="n">reward_shaping_flag</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;reward_shaping&#39;</span><span class="p">],</span>
+                   <span class="n">carrying_capacity</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;carrying_capacity&#39;</span><span class="p">],</span>
+                   <span class="n">growth_rate_wt</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;growth_rate_wt&#39;</span><span class="p">],</span>
+                   <span class="n">growth_rate_mut</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;growth_rate_mut&#39;</span><span class="p">],</span>
+                   <span class="n">death_rate_wt</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;death_rate_wt&#39;</span><span class="p">],</span>
+                   <span class="n">death_rate_mut</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;death_rate_mut&#39;</span><span class="p">],</span>
+                   <span class="n">competition_wt</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;competition_wt&#39;</span><span class="p">],</span>
+                   <span class="n">competition_mut</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;competition_mut&#39;</span><span class="p">],</span>
+                   <span class="n">treat_death_rate_wt</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;treat_death_rate_wt&#39;</span><span class="p">],</span>
+                   <span class="n">treat_death_rate_mut</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;treat_death_rate_mut&#39;</span><span class="p">],</span>
+                   <span class="n">growth_function_flag</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;growth_function_flag&#39;</span><span class="p">],</span>
+                   <span class="n">normalize</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;normalize&#39;</span><span class="p">],</span>
+                   <span class="n">normalize_to</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;normalize_to&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Step in the environment that simulates tumor growth and treatment</span>
+<span class="sd">        :param action: 0 - no treatment, 1 - treatment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="c1"># grow_tumor</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">treatment_time_step</span><span class="p">):</span>
+            <span class="c1">#step time</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grow</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">growth_function_flag</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grow</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">growth_function_flag</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">burden</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+
+            <span class="c1"># record trajectory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+            <span class="c1"># check if done</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">burden</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">burden</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># get the reward</span>
+            <span class="n">rewards</span> <span class="o">=</span> <span class="n">Reward</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_shaping_flag</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden</span><span class="p">)</span>
+            <span class="n">reward</span> <span class="o">+=</span> <span class="n">rewards</span><span class="o">.</span><span class="n">get_reward</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">max_time</span><span class="p">)</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])],</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">real_step_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1">#self.state = [self.initial_wt/self.threshold_burden, self.initial_mut/self.threshold_burden, self.initial_drug]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wt_random</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_integers</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden_in_number</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden_in_number</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mut_random</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_integers</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">0.01</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden_in_number</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden_in_number</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_wt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_mut</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_drug</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_time</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">death_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">death_rate</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])]</span>
+
+    <span class="k">def</span> <span class="nf">grow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span> <span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+
+        <span class="c1"># adapted death model, with delay in death rate</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">death_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*=</span><span class="mf">0.80</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">death_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">death_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">death_rate</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+                <span class="n">new_pop_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> \
+                               <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">growth_rate</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">competition</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span> <span class="o">-</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">new_pop_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">new_pop_size</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">new_pop_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> \
+                               <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">growth_rate</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">competition</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span> <span class="o">-</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">current_death_rate</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">new_pop_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">new_pop_size</span><span class="p">])</span>
+        <span class="c1"># instantaneous death rate increase by drug application</span>
+        <span class="k">elif</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">new_pop_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> \
+                           <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">growth_rate</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span>
+                            <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">competition</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span> <span class="o">-</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">death_rate</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">death_rate_treat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="c1"># treatment lasts certain number of tiem steps</span>
+        <span class="k">elif</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">treat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">&gt;</span><span class="mi">3</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span>
+                                    <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span>
+                                    <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">treat</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">treat</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">&gt;</span><span class="mi">3</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span>
+                                    <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+                    <span class="n">treat</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">treat</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="n">new_pop_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> \
+                           <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">growth_rate</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span>
+                            <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">competition</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span> <span class="o">-</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">death_rate</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">death_rate_treat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">treat</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold_burden</span>
+
+            <span class="k">if</span> <span class="n">new_pop_size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">new_pop_size</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">new_pop_size</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Serhii Aif.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

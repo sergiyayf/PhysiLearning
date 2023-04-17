@@ -1,13 +1,16 @@
 # imports
 import os
 import sys
+import warnings
+
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.callbacks import CheckpointCallback
 from sb3_contrib import RecurrentPPO as rPPO
 from physilearning.callbacks import CustomCallback
 import yaml
+from stable_baselines3.common.env_util import make_vec_env
 
 def make_env(port, rank, job_name = '000000', config_file='config.yaml', seed=0):
         """
@@ -19,7 +22,7 @@ def make_env(port, rank, job_name = '000000', config_file='config.yaml', seed=0)
         """
         from physilearning.envs.pc import PcEnv
         def _init():
-            env = PC_env.from_yaml(config_file,port=str(port),job_name = job_name)
+            env = GridEnv()
             env.seed(seed + rank)
             return env
         set_random_seed(seed)
@@ -66,6 +69,7 @@ class Trainer():
 
 
 if __name__ == '__main__':
+    warnings.warn('This script is deprecated. Please use the train.py script instead', DeprecationWarning)
     config_file = f'config_{sys.argv[1]}.yaml'
     with open(config_file,'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
@@ -110,7 +114,12 @@ if __name__ == '__main__':
             env = LvEnv.from_yaml(config_file,port='0',job_name=sys.argv[1])
         elif env_type == 'LatticeBased':
             from physilearning.envs.grid_env import GridEnv
-            env = GridEnv()
+            env = make_vec_env(GridEnv, n_envs=1)
+            print('hi there')
+            print(env.num_envs)
+            stack_frames = True
+            if stack_frames:
+                env = VecFrameStack(env, n_stack=4, channels_order='last')
         else:
             raise ValueError('Environment type not recognized')
 
@@ -142,7 +151,7 @@ if __name__ == '__main__':
     else:
         if optimization_algorithm == 'PPO':
             print('Training agent with PPO algorithm')
-            print(env.state)
+
             model = PPO('MlpPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose,
                         n_steps=n_steps, clip_range=clip_range, learning_rate=learning_rate)
         elif optimization_algorithm == 'RecurrentPPO':
@@ -152,6 +161,9 @@ if __name__ == '__main__':
             raise ValueError('Optimization algorithm not recognized')
     # train model
 
+    if env_type == 'LatticeBased':
+        model = PPO('CnnPolicy', env=env, tensorboard_log=log_path, ent_coef=ent_coef, verbose=verbose,
+                    n_steps=n_steps, clip_range=clip_range, learning_rate=learning_rate)
     model.learn(total_timesteps=int(total_timesteps), callback=[checkpoint_callback,copy_config_callback], tb_log_name=logname)
     model.save(os.path.join(model_path, logname+'_final'))
     env.close()

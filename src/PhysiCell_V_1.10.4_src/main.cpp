@@ -263,28 +263,54 @@ int main( int argc, char* argv[] )
 				
 				// try to change cell position to string;
 				std::string data{"Type 0:"};
-				std::string positions0{"Pos 0:"};
-				std::string positions1{"Pos 1:"};
+				std::string t0_pos_x{""};
+				std::string t0_pos_y{""};
+				std::string t0_pos_z{""};
+				std::string t1_pos_x{""};
+				std::string t1_pos_y{""};
+				std::string t1_pos_z{""};
+
 				int type_0_counter = 0;
 				int type_1_counter = 0;
 					for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) { 
 						if ((*all_cells)[cells_it]->type == 0) {
-					       type_0_counter++;
-					       std::string x_pos = std::to_string((*all_cells)[cells_it]->position[0]);
-					       positions0.append(x_pos);
-					} else if ((*all_cells)[cells_it]->type == 1 ) {
-				 		type_1_counter++;
-						std::string x_pos1 = std::to_string((*all_cells)[cells_it]->position[0]); 
-						positions1.append(x_pos1);
+
+					        type_0_counter++;
+					        t0_pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
+					        t0_pos_x.append(",");
+					        t0_pos_y.append(std::to_string((*all_cells)[cells_it]->position[1]));
+					        t0_pos_y.append(",");
+					        t0_pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
+					        t0_pos_z.append(",");
+					    }else if ((*all_cells)[cells_it]->type == 1 ) {
+				 		    type_1_counter++;
+                            t1_pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
+                            t1_pos_x.append(",");
+                            t1_pos_y.append(std::to_string((*all_cells)[cells_it]->position[1]));
+                            t1_pos_y.append(",");
+                            t1_pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
+                            t1_pos_z.append(",");
+
 					}
 				}
 				
 				data.append(std::to_string(type_0_counter));
 				data.append(" Type 1:");
 				data.append(std::to_string(type_1_counter));
-				data.append(positions0);
-				data.append(positions1);
-						
+
+				data.append(" t0_x: ");
+				data.append(t0_pos_x);
+				data.append(" t0_y: ");
+				data.append(t0_pos_y);
+				//data.append(" z: ");
+				//data.append(t0_pos_z);
+				data.append(" t1_x: ");
+				data.append(t1_pos_x);
+				data.append(" t1_y: ");
+				data.append(t1_pos_y);
+				//data.append(" z: ");
+				//data.append(t1_pos_z);
+
 				
 				// send the reply to the client 
 				socket.send(zmq::buffer(data), zmq::send_flags::none);

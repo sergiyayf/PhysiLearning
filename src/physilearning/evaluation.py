@@ -1,5 +1,7 @@
 # imports
 import os
+import warnings
+
 from physilearning.envs.pc import PcEnv
 from physilearning.envs.lv import LvEnv
 from physilearning.envs.grid_env import GridEnv
@@ -115,6 +117,7 @@ class Evaluation():
         return
 
 if __name__ == '__main__':
+    warnings.warn('This script is deprecated. Please use evaluate instead', DeprecationWarning)
     #configure evaluation
     config_file = 'config.yaml'
     with open(config_file, 'r') as f:
@@ -138,7 +141,8 @@ if __name__ == '__main__':
             env = PcEnv.from_yaml(config_file,port='0',job_name=sys.argv[1])
         elif env_type == 'LV':
             env = LvEnv.from_yaml(model_config_file)
-
+        elif env_type == 'LatticeBased':
+            env = GridEnv.from_yaml(model_config_file)
         evaluation = Evaluation(env)
 
         if general_config['eval']['fixed_AT_protocol']:

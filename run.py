@@ -42,7 +42,7 @@ def train():
     mem_per_task = config['job']['mem-per-task']
     mem = mem_per_task * cpus_per_task
     wall_clock_time = config['job']['time']
-    n_envs = config['learning']['model']['n_envs']
+    n_envs = config['env']['n_envs']
     agent_buffer = config['job']['agent_buffer']
 
     if cpus_per_task < agent_buffer + n_envs:
@@ -91,7 +91,7 @@ def evaluate():
     # read config
     with open('config.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-    n_envs = config['learning']['model']['n_envs']
+    n_envs = config['env']['n_envs']
     # prepare PhysiCell simulations for job submission
     if config['eval']['evaluate_on'] == 'PhysiCell':
         PC_conf = config['env']['PC']
