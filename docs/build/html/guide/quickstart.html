@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview: module code &mdash; PhysiLearning  documentation</title>
+  <title>Getting Started &mdash; PhysiLearning  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -15,7 +16,9 @@
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Reinforcement Learning" href="../algorithms/rl.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,9 +41,12 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../guide/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guide/quickstart.html">Getting Started</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#run.train"><code class="docutils literal notranslate"><span class="pre">train()</span></code></a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">RL Algorithms:</span></p>
 <ul>
@@ -70,8 +76,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Overview: module code</li>
+      <li class="breadcrumb-item active">Getting Started</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/guide/quickstart.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -79,14 +86,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="click/core.html">click.core</a></li>
-<li><a href="physilearning/envs/lv.html">physilearning.envs.lv</a></li>
-</ul>
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
+<p>To train the agent open the <cite>config.yaml</cite> and configuire the <cite>env</cite> and <cite>agent</cite> parameters.
+Then run the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python run.py train
+</pre></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="run.train">
+<span class="sig-prename descclassname"><span class="pre">run.</span></span><span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run.train" title="Permalink to this definition"></a></dt>
+<dd><p>Submit a training job. The job specs are defined in the config.yaml
+under the job section. These define the number of nodes, max time of the job
+etc.</p>
+<section id="job-specs">
+<h2>Job specs:<a class="headerlink" href="#job-specs" title="Permalink to this heading"></a></h2>
+<p>nodes: number of nodes to use
+ntasks: number of tasks to run
+cpus-per-task: number of cpus per task
+mem-per-task: memory per task in MB
+time: wall clock time</p>
+<p>Environment type, their number are defined under the env section.</p>
+<p>This function will call the scripts/job.sh script to submit the SLURM job
+that will execute the physilearning.train.train function.</p>
+</section>
+</dd></dl>
+
+<p>To evaluate the agent, configure the evaluation block in the <cite>config.yaml</cite> and run the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python run.py evaluate
+</pre></div>
+</div>
+</section>
+
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../algorithms/rl.html" class="btn btn-neutral float-right" title="Reinforcement Learning" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

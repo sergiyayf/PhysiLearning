@@ -50,9 +50,9 @@ class Reward:
             else:
                 reward = 2
 
-        # keep constant cell number
+        # keep cell number below a threshold
         elif self.reward_shaping_flag == 8:
-            if abs(np.sum(obs)-500) < 50:
+            if abs(obs-500) < 100:
                 reward = 1
             else:
                 reward = 0

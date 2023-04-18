@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 10
+  cpus-per-task: 8
   time: '10:00:00'
   agent_buffer: 1
 
@@ -20,14 +20,14 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 100
+      n_steps: 512
       verbose: 1
-      #ent_coef: 0.005
-      #clip_range: 0.02
-      learning_rate: 5.e-4
+      ent_coef: 0.005
+      clip_range: 0.02
+      learning_rate: 1.e-4
     total_timesteps: 1.e+6
     save_freq: 5.e+4
-    model_save_prefix: '0417_stacked_image_PC_test'
+    model_save_prefix: '0418_stacked_image_PC_test'
     load:
       enable_loading: 0
       last_model: 0
@@ -46,7 +46,7 @@ env:
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
-  reward_shaping: 8  # reward shaping flag for some predefined rewards
+  reward_shaping: 0  # reward shaping flag for some predefined rewards
 
   # general simulation settings
   threshold_burden: 1000
@@ -115,10 +115,10 @@ eval:
   most_recent: 0
   from_file: 0
   path: './'
-  model_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
+  model_prefix: '0417_stacked_image_PC_test'
   fixed_AT_protocol: 1
   num_episodes: 1
-  step_to_load: '_500000_steps'
-  save_name: '0417_PC_image_trajectory_save_test'
+  step_to_load: '_200000_steps'
+  save_name: '0417_trained_PC_on_images_stacked'
   evaluate_on: 'PhysiCell' #'PhysiCell' # 'LV' # 'LatticeBased'
 

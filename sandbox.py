@@ -34,7 +34,7 @@ def grid_env_sand():
 
 
 if __name__ == '__main__':
-    filename = 'trajectory_0417_PC_image_trajectory_save_test_numpy.npy'
+    filename = 'trajectory_0417_trained_PC_on_images_stacked_numpy.npy'
     trajectory = np.load(filename)
     fig, ax = plt.subplots()
     ims = []

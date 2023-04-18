@@ -126,7 +126,13 @@ class PcEnv(Env):
                 transport_address=transport_address, reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to)
 
     def step(self, action: int) -> tuple:
-        # update timer
+        """
+        Receive a message from the PhysiCell simulation and
+        send the action to the simulation
+
+        param: action: value of the action to be sent to the simulation
+        return: observation, reward, done, info
+        """
         self.time += self.treatment_time_step
         # get tumor updated state
         message = str(self.socket.recv(),'utf-8')
@@ -136,11 +142,11 @@ class PcEnv(Env):
 
             self.trajectory[:,:,int(self.time/self.treatment_time_step) - 1] = self.image[0,:,:]
             obs = self.image
-            done = self._check_done(self.image[0,:,:])
-            num_wt_cells, num_mut_cells = self._calculate_cell_number(self.image[0,:,:])
+            num_wt_cells, num_mut_cells = self._get_cell_number(message)
+            done = self._check_done(burden_type = 'number', total_cell_number=num_wt_cells+num_mut_cells)
 
             rewards = Reward(self.reward_shaping_flag)
-            reward = rewards.get_reward(num_wt_cells,num_mut_cells)
+            reward = rewards.get_reward(num_wt_cells+num_mut_cells, self.time/self.max_time)
 
             if done:
                 print('Done')
@@ -185,67 +191,6 @@ class PcEnv(Env):
 
         return obs, reward, done, info
 
-    def _check_done(self, state: np.ndarray) -> bool:
-        """
-        Check if the episode is done: if the tumor is too big or the time is too long
-        :param state: the state
-        :return: if the episode is done
-        """
-        # check if done
-        num_wt_cells = np.sum(state == self.wt_color)
-        num_mut_cells = np.sum(state == self.mut_color)
-        total_cell_number = num_wt_cells + num_mut_cells
-        if total_cell_number > self.threshold_burden or self.time >= self.max_time:
-            return True
-        else:
-            return False
-
-    def _calculate_cell_number(self, state: np.ndarray) -> tuple:
-        """
-        Calculate the number of wt and mut cells in the state
-        :param state: the state
-        :return: number of wt and mut cells
-        """
-        num_wt_cells = np.sum(state == self.wt_color)
-        num_mut_cells = np.sum(state == self.mut_color)
-        return num_wt_cells, num_mut_cells
-
-    def _get_image_obs(self, message: str) -> np.ndarray:
-        """
-        Get the image observation from the message received from the socket
-        Look for the string ti_x: and ti_y: to get the coordinates of the type i cells
-
-        :param message: message received from the PhysiCell simulation
-        :return: image observation
-        """
-        t0_start_index = message.find('t0_x:')+len('t0_x:')
-        t0_end_index = message.find('t0_y:')
-        t0_x = message[t0_start_index:t0_end_index].split(',')
-        t0_x = np.array([float(x)+self.domain_size/2 for x in t0_x[0:-1]])
-        t0_y = message[t0_end_index+len('t0_y:'):message.find('t1_x:')].split(',')
-        t0_y = np.array([float(y)+self.domain_size/2 for y in t0_y[0:-1]])
-
-        t1_start_index = message.find('t1_x:')+len('t1_x:')
-        t1_end_index = message.find('t1_y:')
-        t1_x = message[t1_start_index:t1_end_index].split(',')
-        t1_x = np.array([float(x)+self.domain_size/2 for x in t1_x[0:-1]])
-        t1_y = message[t1_end_index+len('t1_y:'):-1].split(',')
-        t1_y = np.array([float(y)+self.domain_size/2 for y in t1_y[0:-1]])
-
-        # normalize the coordinates to the image size
-        t0_x = np.round(t0_x*self.image_size/self.domain_size)
-        t0_y = np.round(t0_y*self.image_size/self.domain_size)
-        t1_x = np.round(t1_x*self.image_size/self.domain_size)
-        t1_y = np.round(t1_y*self.image_size/self.domain_size)
-
-        for x,y in zip(t0_x,t0_y):
-            self.image[0, int(x), int(y)] = self.wt_color
-        for x,y in zip(t1_x,t1_y):
-            self.image[0, int(x), int(y)] = self.mut_color
-
-        return self.image
-
-
     def reset(self):
         time.sleep(3.0)
         if self.transport_type == 'ipc://':
@@ -279,6 +224,82 @@ class PcEnv(Env):
            
         self.socket.send(b"Start simulation")
         return obs
+
+    def _check_done(self, burden_type: str, **kwargs) -> bool:
+        """
+        Check if the episode is done: if the tumor is too big or the time is too long
+        :param burden_type: type of burden to check
+        :return: if the episode is done
+        """
+
+        if burden_type == 'number':
+            total_cell_number = kwargs['total_cell_number']
+        else:
+            num_wt_cells = np.sum(kwargs['image'] == self.wt_color)
+            num_mut_cells = np.sum(kwargs['image'] == self.mut_color)
+            total_cell_number = num_wt_cells + num_mut_cells
+
+        if total_cell_number > self.threshold_burden or self.time >= self.max_time:
+            return True
+        else:
+            return False
+
+    def _get_tumor_volume_from_image(self, state: np.ndarray) -> tuple:
+        """
+        Calculate the number of wt and mut cells in the state
+        :param state: the state
+        :return: number of wt and mut cells
+        """
+        num_wt_cells = np.sum(state == self.wt_color)
+        num_mut_cells = np.sum(state == self.mut_color)
+        return num_wt_cells, num_mut_cells
+
+    def _get_cell_number(self, message: str) -> tuple:
+        """
+        Get the number of cells from the message received from the socket
+        Look for the string Type 0: and Type 1: to get the number of cells
+
+        :param message: message received from the PhysiCell simulation
+        :return: number of wt and mut cells
+        """
+        type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
+        type1 = re.findall(r'%s(\d+)' % "Type 1:", message)
+        return int(type0[0]), int(type1[0])
+
+    def _get_image_obs(self, message: str) -> np.ndarray:
+        """
+        Get the image observation from the message received from the socket
+        Look for the string ti_x: and ti_y: to get the coordinates of the type i cells
+
+        :param message: message received from the PhysiCell simulation
+        :return: image observation
+        """
+        t0_start_index = message.find('t0_x:') + len('t0_x:')
+        t0_end_index = message.find('t0_y:')
+        t0_x = message[t0_start_index:t0_end_index].split(',')
+        t0_x = np.array([float(x) + self.domain_size / 2 for x in t0_x[0:-1]])
+        t0_y = message[t0_end_index + len('t0_y:'):message.find('t1_x:')].split(',')
+        t0_y = np.array([float(y) + self.domain_size / 2 for y in t0_y[0:-1]])
+
+        t1_start_index = message.find('t1_x:') + len('t1_x:')
+        t1_end_index = message.find('t1_y:')
+        t1_x = message[t1_start_index:t1_end_index].split(',')
+        t1_x = np.array([float(x) + self.domain_size / 2 for x in t1_x[0:-1]])
+        t1_y = message[t1_end_index + len('t1_y:'):-1].split(',')
+        t1_y = np.array([float(y) + self.domain_size / 2 for y in t1_y[0:-1]])
+
+        # normalize the coordinates to the image size
+        t0_x = np.round(t0_x * self.image_size / self.domain_size)
+        t0_y = np.round(t0_y * self.image_size / self.domain_size)
+        t1_x = np.round(t1_x * self.image_size / self.domain_size)
+        t1_y = np.round(t1_y * self.image_size / self.domain_size)
+
+        for x, y in zip(t0_x, t0_y):
+            self.image[0, int(x), int(y)] = self.wt_color
+        for x, y in zip(t1_x, t1_y):
+            self.image[0, int(x), int(y)] = self.mut_color
+
+        return self.image
 
 
 def render(trajectory: np.ndarray, time: int, fig , ax):

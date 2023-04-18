@@ -28,7 +28,22 @@ def cli():
 
 @cli.command()
 def train():
-    """Submit a training job
+    """Submit a training job. The job specs are defined in the config.yaml
+    under the job section. These define the number of nodes, max time of the job
+    etc.
+
+    Job specs:
+    ~~~~~~~~~~
+    nodes: number of nodes to use
+    ntasks: number of tasks to run
+    cpus-per-task: number of cpus per task
+    mem-per-task: memory per task in MB
+    time: wall clock time
+
+    Environment type, their number are defined under the env section.
+
+    This function will call the scripts/job.sh script to submit the SLURM job
+    that will execute the physilearning.train.train function.
     """
 
     # read config
