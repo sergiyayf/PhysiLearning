@@ -3,7 +3,7 @@ from gym.spaces import Discrete, Box
 import numpy as np
 from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
-from typing import Optional, Tuple, Union
+from typing import Tuple
 
 
 class LvEnv(BaseEnv):

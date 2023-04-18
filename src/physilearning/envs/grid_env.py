@@ -7,7 +7,6 @@ import yaml
 from gym.spaces import Discrete, Box
 import numpy as np
 from physilearning.envs.base_env import BaseEnv
-from physilearning.reward import Reward
 from stable_baselines3.common.env_checker import check_env
 from typing import Dict, List, Tuple, Any
 

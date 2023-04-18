@@ -1,7 +1,7 @@
 # Test of the environments
 import importlib
 import pytest
-from physilearning.envs import PcEnv, LvEnv, GridEnv
+from physilearning.envs import PcEnv, GridEnv
 import yaml
 
 
@@ -84,7 +84,7 @@ def test_grid_env_from_yaml():
     Test environment creation from yaml file.
     """
     with open('test_cfg.yaml', 'r') as f:
-        config = yaml.safe_load(f)
+        yaml.safe_load(f)
     env = GridEnv.from_yaml('test_cfg.yaml')
     assert env is not None
 

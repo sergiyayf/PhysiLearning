@@ -1,10 +1,7 @@
 # Base environment class for all environments
 import yaml
 from gym import Env
-from gym.spaces import Discrete, Box, Dict
 from typing import Optional
-import numpy as np
-from physilearning.reward import Reward
 
 class BaseEnv(Env):
     def __init__(self, config: dict = None, render_mode: Optional[str] = None) -> None:

@@ -1,24 +1,19 @@
-import sys
 import os
-import time
 import xml.etree.ElementTree as ET  # https://docs.python.org/2/library/xml.etree.elementtree.html
 from pathlib import Path
 # from ipywidgets import Layout, Label, Text, Checkbox, Button, BoundedIntText, HBox, VBox, Box, \
     # FloatText, Dropdown, SelectMultiple, RadioButtons, interactive
 # import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
-from matplotlib.collections import LineCollection
-from matplotlib.patches import Circle, Ellipse, Rectangle
+from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import matplotlib.colors as mplc
-from matplotlib import gridspec
 from collections import deque
 
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QFrame,QApplication,QWidget,QTabWidget,QFormLayout,QLineEdit, QHBoxLayout,QVBoxLayout, \
-    QRadioButton,QLabel,QCheckBox,QComboBox,QScrollArea,  QMainWindow,QGridLayout, QPushButton, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QWidget,QLineEdit, QHBoxLayout,QVBoxLayout, \
+    QLabel,QCheckBox,QComboBox,QScrollArea,  QPushButton, QFileDialog, QMessageBox
 
 import math
 import numpy as np
@@ -26,7 +21,6 @@ import scipy.io  # .io.loadmat(full_fname, info_dict)
 import matplotlib
 matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # from PyQt5 import QtCore, QtWidgets
 
@@ -104,11 +98,6 @@ class Vis(QWidget):
         self.customized_output_freq = False
 
         #-------------------------------------------
-        label_width = 110
-        domain_value_width = 100
-        value_width = 60
-        label_height = 20
-        units_width = 70
 
         # self.create_figure()
 
@@ -895,7 +884,7 @@ class Vis(QWidget):
                 info_dict = {}
                 scipy.io.loadmat(full_fname, info_dict)
                 M = info_dict['multiscale_microenvironment']
-                f = M[self.field_index, :]   # 4=tumor cells field, 5=blood vessel density, 6=growth substrate
+                M[self.field_index, :]   # 4=tumor cells field, 5=blood vessel density, 6=growth substrate
 
                 try:
                     print("numx, numy = ",self.numx, self.numy)
@@ -943,7 +932,7 @@ class Vis(QWidget):
                     # cbar = self.figure.colorbar(substrate_plot, ax=self.ax0)
                     # cbar = self.figure.colorbar(substrate_plot, cax=self.ax0)
                     # cbar = self.figure.colorbar(substrate_plot, cax=self.ax0, orientation='horizontal')
-                    if self.cbar == None:  # if we always do this, it creates an additional colorbar!
+                    if self.cbar is None:  # if we always do this, it creates an additional colorbar!
                         # cbar = plt.colorbar(my_plot)
                         # self.cbar = self.ax0.colorbar(substrate_plot)
                         self.cbar = self.figure.colorbar(substrate_plot)

@@ -2,7 +2,6 @@
 import os
 from PC_environment import PC_env
 from stable_baselines3 import PPO
-from stable_baselines3.common.evaluation import evaluate_policy
 
 # define paths
 log_path = os.path.join('Training', 'Logs')

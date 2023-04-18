@@ -4,7 +4,7 @@ import yaml
 import time
 import importlib
 
-from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv, VecNormalize
+from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
@@ -114,9 +114,11 @@ class Trainer():
                     env = DummyVecEnv([make_env(EnvClass, ) for _ in range(self.n_envs)])
                     self.env = VecFrameStack(env, self.wrapper_kwargs)
                 elif self.wrapper == 'DummyVecEnv':
-                    self.env = make_vec_env(env, n_envs=self.n_envs, seed=time.time(), vec_env_cls=DummyVecEnv, vec_env_kwargs=self.wrapper_kwargs)
+                    self.env = make_vec_env(env, n_envs=self.n_envs, seed=time.time(),
+                                            vec_env_cls=DummyVecEnv, vec_env_kwargs=self.wrapper_kwargs)
                 elif self.wrapper == 'SubprocVecEnv':
-                    self.env = make_vec_env(env, n_envs=self.n_envs, seed=time.time(), vec_env_cls=SubprocVecEnv, vec_env_kwargs=self.wrapper_kwargs)
+                    self.env = make_vec_env(env, n_envs=self.n_envs, seed=time.time(),
+                                            vec_env_cls=SubprocVecEnv, vec_env_kwargs=self.wrapper_kwargs)
                 else:
                     raise ValueError('Wrapper not recognized')
             else:
@@ -128,11 +130,11 @@ class Trainer():
         # try to import model from stable_baselines3 first and then from sb3_contrib
         try:
             Algorithm = getattr(importlib.import_module('stable_baselines3'), self.model_name)
-        except:
+        except ModuleNotFoundError:
             print('Algorithm not found in stable_baselines3. Trying sb3_contrib...')
             try:
                 Algorithm = getattr(importlib.import_module('sb3_contrib'), self.model_name)
-            except:
+            except ModuleNotFoundError:
                 raise ValueError('Model not found in stable_baselines3 or sb3_contrib')
         else:
             print('Algorithm found in stable_baselines3. Using it...')
@@ -165,7 +167,9 @@ class Trainer():
     def setup_callbacks(self) -> List:
         """ Set up checkpoints for training"""
         # Create the checkpoint callback
-        checkpoint_callback = CheckpointCallback(save_freq=self.save_freq, save_path=os.path.join('Training', 'SavedModels'), name_prefix=self.model_save_prefix)
+        checkpoint_callback = CheckpointCallback(save_freq=self.save_freq,
+                                                 save_path=os.path.join('Training', 'SavedModels'),
+                                                 name_prefix=self.model_save_prefix)
         # Create copy config callback
         copy_config_callback = CopyConfigCallback(self.config_file, self.model_save_prefix)
 

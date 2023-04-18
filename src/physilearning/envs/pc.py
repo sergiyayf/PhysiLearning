@@ -37,7 +37,7 @@ class PcEnv(Env):
         initial_mut: int = 5,
         treatment_time_step: int = 60,
         transport_type: str = 'ipc://',
-        transport_address: str = f'/tmp/0',
+        transport_address: str = '/tmp/0',
         reward_shaping_flag: int = 0,
         normalize_to: float = 1000
     ) -> None:
@@ -51,10 +51,10 @@ class PcEnv(Env):
         self.domain_size = 1000
         self.observation_type = 'image'
         if self.observation_type == 'number':
-            self.observation_space = Box(low=0,high=1,shape=(1,))
+            self.observation_space = Box(low=0, high=1, shape=(1,))
         elif self.observation_type == 'image':
             self.observation_space = Box(low=0, high=255,
-                                         shape=(1,self.image_size,self.image_size),
+                                         shape=(1, self.image_size, self.image_size),
                                          dtype=np.uint8)
         elif self.observation_type == 'multiobs':
             raise NotImplementedError
@@ -77,9 +77,9 @@ class PcEnv(Env):
 
         # trajectory for plotting
         if self.observation_type == 'number':
-            self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time/self.treatment_time_step)))
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
         elif self.observation_type == 'image':
-            self.trajectory = np.zeros((self.image_size,self.image_size,int(self.max_time/self.treatment_time_step)))
+            self.trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)))
         # Socket
         self.job_name = job_name
         self.port = port
@@ -92,19 +92,16 @@ class PcEnv(Env):
         elif transport_type == 'tcp://':
             try:
                 self.socket.connect(f'{self.transport_type}localhost:{self.transport_address}')
-            except:
+            except zmq.error.ZMQError:
                 print("Connection failed. Double check the transport type and address. Trying with the default address")
                 self.socket.connect(f'{self.transport_type}localhost:5555')
                 self.transport_address = '5555'
-
-
         # reward shaping flag
         self.reward_shaping_flag = reward_shaping_flag
 
-
     @classmethod
     def from_yaml(cls, yaml_file: str, port: str = '0', job_name: str = '000000') -> object:
-        with open(yaml_file,'r') as f:
+        with open(yaml_file, 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
         burden = config['env']['threshold_burden']
         normalize_to = config['env']['normalize_to']
@@ -117,13 +114,14 @@ class PcEnv(Env):
         transport_address = config['global']['transport_address']
         if transport_type == 'ipc://':
             transport_address = f'{transport_address}{job_name}{port}'
-        else :
+        else:
             warnings.warn('Transport type is different from ipc, please check the config file if everything is correct')
             transport_address = f'{transport_address}:{port}'
         
         return cls(port=port, job_name=job_name, burden=burden, max_time=max_time,
-                initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut, transport_type=transport_type,
-                transport_address=transport_address, reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to)
+                   initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
+                   transport_type=transport_type, transport_address=transport_address,
+                   reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to)
 
     def step(self, action: int) -> tuple:
         """
@@ -135,15 +133,15 @@ class PcEnv(Env):
         """
         self.time += self.treatment_time_step
         # get tumor updated state
-        message = str(self.socket.recv(),'utf-8')
+        message = str(self.socket.recv(), 'utf-8')
         # get from the string comma separated values from t0_x to t0_y
         if self.observation_type == 'image':
             self.image = self._get_image_obs(message)
 
-            self.trajectory[:,:,int(self.time/self.treatment_time_step) - 1] = self.image[0,:,:]
+            self.trajectory[:, :, int(self.time/self.treatment_time_step) - 1] = self.image[0, :, :]
             obs = self.image
             num_wt_cells, num_mut_cells = self._get_cell_number(message)
-            done = self._check_done(burden_type = 'number', total_cell_number=num_wt_cells+num_mut_cells)
+            done = self._check_done(burden_type='number', total_cell_number=num_wt_cells+num_mut_cells)
 
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(num_wt_cells+num_mut_cells, self.time/self.max_time)
@@ -168,13 +166,14 @@ class PcEnv(Env):
             self.state[2] = action
 
             # record trajectory
-            self.trajectory[:,int(self.time/self.treatment_time_step) - 1] = self.state
+            self.trajectory[:, int(self.time/self.treatment_time_step) - 1] = self.state
             # get the reward
-            rewards = Reward(self.reward_shaping_flag)
-            #reward = rewards.get_reward(self.state,self.time/self.max_time)
+            # rewards = Reward(self.reward_shaping_flag)
+            # reward = rewards.get_reward(self.state,self.time/self.max_time)
             reward = 1
+            obs = self.state
 
-            if self.time >= self.max_time or np.sum(self.state[0:2])>=self.threshold_burden:
+            if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
                 done = True
                 self.socket.send(b"End simulation")
                 self.socket.close()
@@ -182,11 +181,13 @@ class PcEnv(Env):
 
             else:
                 done = False
-                if action == 0 :
+                if action == 0:
                     self.socket.send(b"Stop treatment")
                 elif action == 1:
                     self.socket.send(b"Treat")
 
+        else:
+            raise ValueError('Observation type not supported')
         info = {}
 
         return obs, reward, done, info
@@ -197,15 +198,17 @@ class PcEnv(Env):
             port_connection = f"{self.transport_type}{self.transport_address}"
         elif self.transport_type == 'tcp://':
             port_connection = f"{self.transport_type}*:{self.transport_address}"
+        else:
+            raise ValueError('Transport type not supported')
 
         if platform.system() == 'Windows':
             raise NotImplementedError('Windows is not supported yet')
-            command = f"conda deactivate && bash ./scripts/run.sh {self.port} {port_connection}"
-            p = subprocess.Popen(["start", "cmd", "/K", command], shell=True)
+            # command = f"conda deactivate && bash ./scripts/run.sh {self.port} {port_connection}"
+            # p = subprocess.Popen(["start", "cmd", "/K", command], shell=True)
 
         else:
             command = f"bash ./scripts/run.sh {self.port} {port_connection}"
-            p = subprocess.Popen([command], shell=True)
+            subprocess.Popen([command], shell=True)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(f'{self.transport_type}{self.transport_address}')
@@ -216,6 +219,8 @@ class PcEnv(Env):
             obs = [np.sum(self.state[0:2])]
         elif self.observation_type == 'image':
             obs = self.image
+        else:
+            raise ValueError('Observation type not supported')
         if self.observation_type == 'number':
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
         elif self.observation_type == 'image':
@@ -254,7 +259,8 @@ class PcEnv(Env):
         num_mut_cells = np.sum(state == self.mut_color)
         return num_wt_cells, num_mut_cells
 
-    def _get_cell_number(self, message: str) -> tuple:
+    @staticmethod
+    def _get_cell_number(message: str) -> tuple:
         """
         Get the number of cells from the message received from the socket
         Look for the string Type 0: and Type 1: to get the number of cells
@@ -302,7 +308,7 @@ class PcEnv(Env):
         return self.image
 
 
-def render(trajectory: np.ndarray, time: int, fig , ax):
+def render(trajectory: np.ndarray, time: int, fig, ax):
     # render state
     # plot it on the grid with different colors for wt and mut
     # animate simulation with matplotlib animation
@@ -315,11 +321,7 @@ def render(trajectory: np.ndarray, time: int, fig , ax):
 
     return ani
 
+
 if __name__ == '__main__':
     env = PcEnv.from_yaml('../../../config.yaml')
-    #env.reset()
-    print(env.reward_shaping_flag)
-
-
-
-
+    # env.reset()

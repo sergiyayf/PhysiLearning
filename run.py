@@ -97,7 +97,7 @@ def simulate_patients():
     """
     click.echo('Simulating patients')
     eval_command = 'cd ./scripts && sbatch simulate_patients_job.sh'
-    p_eval = subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
+    subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
 @cli.command()
 def evaluate():
@@ -113,7 +113,7 @@ def evaluate():
         change_PC_config(PC_conf, n_envs)
     click.echo('Evaluating')
     eval_command = 'cd ./scripts && sbatch evaluation_job.sh'
-    p_eval = subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
+    subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
 if __name__=='__main__':
     cli()

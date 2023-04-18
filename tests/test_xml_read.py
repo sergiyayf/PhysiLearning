@@ -1,5 +1,4 @@
 from physilearning.tools.xml_reader import CfgRead
-import pytest
 
 def test_XML_read():
 

@@ -1,5 +1,4 @@
 # imports
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 class Plotter:

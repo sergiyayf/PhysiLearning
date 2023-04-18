@@ -25,7 +25,7 @@ join_our_list = "(Join/ask questions at https://groups.google.com/forum/#!forum/
 try:
   import matplotlib
   import matplotlib.colors as mplc
-  from matplotlib.patches import Circle, Ellipse, Rectangle
+  from matplotlib.patches import Circle
   from matplotlib.collections import PatchCollection
 except:
   print("\n---Error: cannot import matplotlib")
@@ -207,7 +207,7 @@ def circles(x, y, s, c='b', vmin=None, vmax=None, **kwargs):
 def plot_svg():
   global current_idx, axes_max
   fname = "snapshot%08d.svg" % current_idx
-  if (os.path.isfile(fname) == False):
+  if (os.path.isfile(fname) is False):
     print("File does not exist: ",fname)
     return
 

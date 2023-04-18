@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 from physilearning.tools.odemodel import ODEModel
 from physilearning.tools.bayes import ODEBayesianFitter
-import arviz as az
 
 plt.rcParams.update({'font.size': 20,
                          'font.weight': 'normal',
@@ -15,7 +14,7 @@ mpl.rcParams['pdf.fonttype'] = 42  # to make text editable in pdf output
 
 
 df = pd.read_csv(
-    f'./../../0_AT_fixedAT.csv',
+    './../../0_AT_fixedAT.csv',
     index_col=[0])
 
 data = pd.DataFrame(dict(

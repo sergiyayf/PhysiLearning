@@ -1,3 +1,2 @@
 # imports
-import pytest
 

@@ -54,7 +54,7 @@ class pyMCDS:
             Contains arrays of voxel center coordinates as meshgrid with shape 
             [nx_voxel, ny_voxel, nz_voxel] or [nx_voxel, ny_voxel] if flat=True.
         """
-        if flat == True:
+        if flat is True:
             xx = self.data['mesh']['x_coordinates'][:, :, 0]
             yy = self.data['mesh']['y_coordinates'][:, :, 0]
 

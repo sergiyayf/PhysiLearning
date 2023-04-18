@@ -85,7 +85,6 @@ class CfgRead:
 
         # Find child node of interest and rewrite it
         node = current_node.find(parameter)
-        node_value = node.text
         #print("node value before = ",node_value)
         node.text = str(value)
         #print("new node value = ", node.text)

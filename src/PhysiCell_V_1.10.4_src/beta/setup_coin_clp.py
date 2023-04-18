@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-import sys, os
+import os
 import json
 import argparse
 
 import requests
-import hashlib
 import tarfile
 import zipfile
 

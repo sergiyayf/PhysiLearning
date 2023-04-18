@@ -9,7 +9,6 @@ import urllib.request
 import os
 import sys
 import tarfile
-import zipfile
 
 if os.path.exists(os.path.join(os.path.dirname(os.path.dirname(__file__)), "addons", "PhysiBoSS", "MaBoSS-env-2.0")):
     print('libMaBoSS already installed')

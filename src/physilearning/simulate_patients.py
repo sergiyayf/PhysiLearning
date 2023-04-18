@@ -69,7 +69,6 @@ class Evaluation():
 @click.option('--jobid', default=0, help='ID of the job')
 @click.option('--taskid', default=1, help='ID of the task')
 def main(jobid, taskid):
-    config_file = 'config.yaml'
     # do n Runs of different treatments
     n_full_treatment_runs = 2
     n_no_treatment_runs = 2

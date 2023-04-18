@@ -4,13 +4,9 @@ mpl.use('TkAgg')
 from physilearning.envs.grid_env import GridEnv
 from stable_baselines3 import PPO
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from physilearning.envs import PcEnv
 
-import sys
-import yaml
 
 def grid_env_sand():
     # setup environment
@@ -29,7 +25,7 @@ def grid_env_sand():
         rew+=reward
 
     print('reward: ', rew)
-    anim = env.render()
+    env.render()
     plt.show()
 
 

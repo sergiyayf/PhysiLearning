@@ -38,7 +38,7 @@ class Trainer():
             log_file (file): Log file.
         """
         self.config_file = config_file
-        with open(config_file) as f:
+        with open(config_file):
             self.config = yaml.load(open(config_file),Loader=yaml.FullLoader)
         self.model_path = os.path.join('Training', 'SavedModels')
         self.save_freq = self.config['learning']['model']['save_freq']
@@ -69,7 +69,6 @@ class Trainer():
     def create_env(self):
         """Create the environment.
         """
-        num_cpu = self.n_envs
         if self.n_envs == 1:
             print('Training agent on one environment')
             if self.env_type == 'PhysiCell':

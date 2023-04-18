@@ -64,7 +64,7 @@ class ODEBayesianFitter():
             The priors for the model parameters.
         """
         if prior_dist == "normal":
-            with self.model as m:
+            with self.model:
                 alpha = pm.TruncatedNormal("alpha", mu=self.ode.params[0], sigma=self.ode.params[0], lower=0, initval=self.ode.params[0])
                 beta = pm.TruncatedNormal("beta", mu=self.ode.params[1], sigma=self.ode.params[1], lower=0, initval=self.ode.params[1])
                 gamma = pm.TruncatedNormal("gamma", mu=self.ode.params[2], sigma=self.ode.params[2], lower=0, initval=self.ode.params[2])
@@ -112,7 +112,7 @@ class ODEBayesianFitter():
             The likelihood function for the model.
         """
 
-        with self.model as m:
+        with self.model:
             # define the likelihood
             sigma = priors["sigma"]
 
@@ -136,7 +136,7 @@ class ODEBayesianFitter():
         """
 
         priors = self.set_priors()
-        likelihood = self.likelihood(priors=priors)
+        self.likelihood(priors=priors)
         vars_list = list(self.model.values_to_rvs.keys())[:-1]
         print(vars_list)
         sampler = sampler

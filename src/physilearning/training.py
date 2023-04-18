@@ -4,7 +4,7 @@ import sys
 import warnings
 
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.callbacks import CheckpointCallback
 from sb3_contrib import RecurrentPPO as rPPO
@@ -20,7 +20,6 @@ def make_env(port, rank, job_name = '000000', config_file='config.yaml', seed=0)
             :param seed: (int) the inital seed for RNG
             :param rank: (int) index of the subprocess
         """
-        from physilearning.envs.pc import PcEnv
         def _init():
             env = GridEnv()
             env.seed(seed + rank)

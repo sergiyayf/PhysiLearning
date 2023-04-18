@@ -12,14 +12,11 @@ Author: Randy Heiland
 """
 import sys,pathlib
 import xml.etree.ElementTree as ET
-import os
-import math
 import scipy.io
 import matplotlib
 #import matplotlib.pyplot as plt  # NB! do this AFTER the TkAgg line below!
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
-import numpy as np
 
 
 try:
@@ -129,13 +126,13 @@ def plot_substrate():
     scipy.io.loadmat(fullname, info_dict)
     M = info_dict['multiscale_microenvironment']
     print('plot_substrate: field_idx=',field_idx)
-    f = M[field_idx,:]   # 
+    M[field_idx,:]   # 
 
     print("M.shape = ",M.shape)  # e.g.,  (6, 421875)  (where 421875=75*75*75)
     # numx = int(M.shape[1] ** (1./3) + 1)
     # numy = numx
     print("numx, numy = ",numx, numy )
-    nxny = numx * numy
+    numx * numy
 
     # idx_plane = 37
     # idx0 = idx_plane * nxny
@@ -154,15 +151,13 @@ def plot_substrate():
 #    xvec = grid2D[0,:]
     #xvec.size
     #xvec.shape
-    num_contours = 30
-    num_contours = 10
 #    vmin = 30.
 #    vmax = 38.
 
     levels = MaxNLocator(nbins=30).tick_values(vmin, vmax)
 #    cmap = plt.get_cmap('PiYG')
     cmap = plt.get_cmap('viridis')
-    norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+    BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 
 #    my_plot = plt.contourf(xvec,xvec,M[field_idx,:].reshape(N,N), num_contours, cmap='viridis') #'viridis'
     if fix_cmap > 0:
@@ -172,7 +167,7 @@ def plot_substrate():
       # my_plot = plt.contourf(xvec,xvec,M[field_idx,:].reshape(N,N), cmap=cmap)
       my_plot = plt.contourf(xgrid, ygrid, M[field_idx, :].reshape(numy, numx), cmap=cmap)
 
-    if cbar == None:  # if we always do this, it creates an additional colorbar!
+    if cbar is None:  # if we always do this, it creates an additional colorbar!
 #      cbar = plt.colorbar(my_plot, boundaries=np.arange(vmin, vmax, 1.0))
       cbar = plt.colorbar(my_plot)
     else:
