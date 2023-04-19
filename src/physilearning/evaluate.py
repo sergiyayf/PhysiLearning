@@ -22,7 +22,7 @@ def fixed_at(obs: np.ndarray, environment: LvEnv or PcEnv or GridEnv,
     """
     if environment.observation_space == 'image':
         warnings.warn('Fixed adaptive therapy for image observation space might not work as expected')
-        
+
     tumor_size = np.sum(obs[0:2])
     if at_type == 'zhang_et_al':
         ini_tumor_size = environment.trajectory[0, 0] + environment.trajectory[1, 0]
