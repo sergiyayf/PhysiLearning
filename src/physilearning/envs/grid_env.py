@@ -85,6 +85,7 @@ class GridEnv(BaseEnv):
         # Environment parameters
         self.normalize = normalize
         self.normalize_to = normalize_to
+        self.threshold_burden = normalize_to
         self.max_tumor_size = max_tumor_size
         self.max_time = max_time
         self.reward_shaping_flag = reward_shaping_flag

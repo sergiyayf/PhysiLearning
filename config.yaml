@@ -113,12 +113,12 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: '0417_stacked_image_PC_test'
-  fixed_AT_protocol: 1
+  model_prefix: '0418_stacked_image_PC_test'
+  fixed_AT_protocol: 0
   num_episodes: 1
-  step_to_load: '_200000_steps'
-  save_name: '0417_trained_PC_on_images_stacked'
-  evaluate_on: 'PhysiCell' #'PhysiCell' # 'LV' # 'LatticeBased'
+  step_to_load: '_300000_steps'
+  save_name: '0418_trained_PC_on_images_stacked'
+  evaluate_on: 'PcEnv' #'PhysiCell' # 'LV' # 'LatticeBased'
 

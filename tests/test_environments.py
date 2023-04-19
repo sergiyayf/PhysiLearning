@@ -1,4 +1,3 @@
-# Test of the environments
 import importlib
 import pytest
 from physilearning.envs import PcEnv, GridEnv

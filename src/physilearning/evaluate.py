@@ -1,44 +1,50 @@
-# imports
 import os
-from physilearning.envs.pc import PcEnv
-from physilearning.envs.lv import LvEnv
-from physilearning.envs.grid_env import GridEnv
+from physilearning.envs import PcEnv, LvEnv, GridEnv
 from stable_baselines3 import PPO
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 import yaml
+import warnings
 
 
-def AT(obs,env,threshold = .8):
+def fixed_at(obs: np.ndarray, environment: LvEnv or PcEnv or GridEnv,
+             threshold: float = .8, at_type: str = 'zhang_et_al') -> int:
     """ 
-    cycling adaptive therapy strategy
-    """
-    tumor_size = np.sum(obs[0:2])
-    print(tumor_size)
-    if tumor_size > threshold*env.threshold_burden:
-    #if tumor_size > threshold:
-        action = 1
-    else:
-        action = 0 
-    return action 
+    Cycling adaptive therapy strategy, applies treatment only if the tumor burden is above a threshold
 
-def AT_Zhang_et_al(obs,env,threshold = .50):
+    :param obs: observation from the environment
+    :param environment: environment
+    :param threshold: threshold for the tumor burden
+    :param at_type: type of adaptive therapy strategy
+    :return: action
     """
-    cycling adaptive therapy strategy
-    """
+    if environment.observation_space == 'image':
+        warnings.warn('Fixed adaptive therapy for image observation space might not work as expected')
+        
     tumor_size = np.sum(obs[0:2])
-    ini_tumor_size = env.trajectory[0,0]+env.trajectory[1,0]
-    action = 0
-    if tumor_size > ini_tumor_size:
-        action = 1
-    else:
-        if env.trajectory[2,int(env.time)-1] == 1 and tumor_size > threshold*ini_tumor_size:
+    if at_type == 'zhang_et_al':
+        ini_tumor_size = environment.trajectory[0, 0] + environment.trajectory[1, 0]
+        if tumor_size > ini_tumor_size:
+            action = 1
+        else:
+            if env.trajectory[2, int(env.time) - 1] == 1 and tumor_size > threshold * ini_tumor_size:
+                action = 1
+            else:
+                action = 0
+    elif at_type == 'fixed':
+        if tumor_size > threshold*environment.threshold_burden:
             action = 1
         else:
             action = 0
-    return action
+    elif at_type == 'mtd':
+        action = 1
+    else:
+        action = 0
+
+    return action 
+
 
 class Evaluation():
 
@@ -86,7 +92,7 @@ class Evaluation():
             done = False 
             score = 0
             while not done:
-                #action = AT_Zhang_et_al(obs,self.env)
+                #action = at_Zhang_et_al(obs,self.env)
                 action = 0
                 obs, reward, done, info = self.env.step(action)
                 score += reward
@@ -96,15 +102,11 @@ class Evaluation():
             else:
                 self.save_trajectory(filename)
 
-    def save_trajectory(self,name):
+    def save_trajectory(self,name: str):
         """
         Save the trajectory to a csv file
-        Parameters
-        ----------
-        episode
 
-        Returns
-        -------
+        param: name: name of the file to save the trajectory
 
         """
         df = pd.DataFrame(np.transpose(self.env.trajectory),columns=['Type 0', 'Type 1', 'Treatment'])
@@ -138,12 +140,14 @@ if __name__ == '__main__':
 
         #env_type = 'PhysiCell'
         env_type = general_config['eval']['evaluate_on']
-        if env_type == 'PhysiCell':
-            env = PcEnv.from_yaml(config_file,port='0',job_name=sys.argv[1])
-        elif env_type == 'LV':
+        if env_type == 'PcEnv':
+            env = PcEnv.from_yaml(model_config_file,port='0',job_name=sys.argv[1])
+        elif env_type == 'LvEnv':
             env = LvEnv.from_yaml(model_config_file)
-        elif env_type == 'LatticeBased':
+        elif env_type == 'GridEnv':
             env = GridEnv.from_yaml(model_config_file)
+        else:
+            raise Exception('Environment not recognized')
 
         evaluation = Evaluation(env)
 
@@ -156,10 +160,15 @@ if __name__ == '__main__':
     else:
         env_type = general_config['eval']['evaluate_on']
         save_name = general_config['eval']['save_name']
-        if env_type == 'PhysiCell':
+        if env_type == 'PcEnv':
             env = PcEnv.from_yaml(config_file,port='0',job_name=sys.argv[1])
         elif env_type == 'LV':
             env = LvEnv.from_yaml(config_file)
+        elif env_type == 'GridEnv':
+            env = GridEnv.from_yaml(config_file)
+        else:
+            raise Exception('Environment not recognized')
+
         evaluation = Evaluation(env)
         if general_config['eval']['fixed_AT_protocol']:
             evaluation.run_AT(num_episodes=general_config['eval']['num_episodes'],path='Evaluations', name=save_name)
