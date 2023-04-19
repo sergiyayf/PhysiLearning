@@ -19,3 +19,6 @@ To evaluate the agent, configure the evaluation block in the `config.yaml` and r
 
     python run.py evaluate
 
+.. py:currentmodule:: run
+.. autofunction:: evaluate
+

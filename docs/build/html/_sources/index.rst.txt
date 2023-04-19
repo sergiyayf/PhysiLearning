@@ -30,6 +30,7 @@ learning and PhysiCell for cancer simulations.
    :maxdepth: 2
    :caption: API Reference:
 
+   modules/evaluation
    modules/sec_reinforcement_learning
    modules/sec_code_reference
 

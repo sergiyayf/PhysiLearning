@@ -51,8 +51,8 @@ class GridEnv(BaseEnv):
         max_tumor_size: int = 600,
         max_time: int = 1000,
         reward_shaping_flag: int = 0,
-        num_wt: int = 2,
-        num_mut: int = 1,
+        initial_wt: int = 2,
+        initial_mut: int = 1,
         wt_growth_rate: float = 0.1,
         mut_growth_rate: float = 0.02,
         wt_death_rate: float = 0.002,
@@ -93,8 +93,8 @@ class GridEnv(BaseEnv):
 
         self.grid = np.zeros((1, self.grid_size, self.grid_size), dtype=np.uint8)
         self.trajectory = np.zeros((self.grid_size, self.grid_size, self.max_time))
-        self.num_wt = num_wt
-        self.num_mut = num_mut
+        self.initial_wt = initial_wt
+        self.initial_mut = initial_mut
         self.wt_color = 128
         self.mut_color = 255
         self.wt_growth_rate = wt_growth_rate
@@ -128,8 +128,8 @@ class GridEnv(BaseEnv):
                    max_tumor_size=config['env']['threshold_burden'],
                    max_time=config['env']['max_time'],
                    reward_shaping_flag=config['env']['reward_shaping'],
-                   num_wt=config['env']['GridEnv']['num_wt'],
-                   num_mut=config['env']['GridEnv']['num_mut'],
+                   initial_wt=config['env']['GridEnv']['initial_wt'],
+                   initial_mut=config['env']['GridEnv']['initial_mut'],
                    wt_growth_rate=config['env']['GridEnv']['wt_growth_rate'],
                    mut_growth_rate=config['env']['GridEnv']['mut_growth_rate'],
                    wt_death_rate=config['env']['GridEnv']['wt_death_rate'],
@@ -146,7 +146,7 @@ class GridEnv(BaseEnv):
         """
         if positioning == 'random':
             # put up to 10 wild type cells in random locations
-            for i in range(self.num_wt):
+            for i in range(self.initial_wt):
                 self.grid[0, np.random.randint(0,self.grid_size),
                           np.random.randint(0,self.grid_size)] = self.wt_color
 
@@ -160,7 +160,7 @@ class GridEnv(BaseEnv):
                 self.grid[0, pos_x, pos_y] = self.mut_color
 
         elif positioning == 'surround_mutant':
-            for i in range(self.num_mut):
+            for i in range(self.initial_mut):
                 pos_x = self.grid_size//2
                 pos_y = self.grid_size//2
                 while self.grid[0, pos_x, pos_y] != 0:
@@ -168,7 +168,7 @@ class GridEnv(BaseEnv):
                     pos_y += np.random.randint(0, 2)
                 self.grid[0, pos_x, pos_y] = self.mut_color
             neighbors = self.check_neighbors(pos_x, pos_y, self.grid)
-            for i in range(self.num_wt):
+            for i in range(self.initial_wt):
                 rand_neighbor = np.random.randint(0, len(neighbors))
                 while self.grid[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] != 0:
                     rand_neighbor = np.random.randint(0, len(neighbors))
