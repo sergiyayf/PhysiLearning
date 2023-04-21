@@ -54,6 +54,7 @@ class LvEnv(BaseEnv):
         # Spaces
         self.name = 'LvEnv'
         self.action_space = Discrete(2)
+        self.observation_type = 'number'
         self.observation_space = Box(low=0,high=normalize_to,shape=(1,))
 
         # Parameters

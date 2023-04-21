@@ -51,7 +51,7 @@ env:
   # general simulation settings
   threshold_burden: 1000
   treatment_time_step: 1 
-  max_time: 1000
+  max_time: 10
   normalize: 1
   normalize_to: 1000
 
@@ -119,6 +119,6 @@ eval:
   fixed_AT_protocol: 0
   num_episodes: 1
   step_to_load: '_300000_steps'
-  save_name: '0418_trained_PC_on_images_stacked'
-  evaluate_on: 'PcEnv' #'PhysiCell' # 'LV' # 'LatticeBased'
+  save_name: '0418_test_from_file'
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

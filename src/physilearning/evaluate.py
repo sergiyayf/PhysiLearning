@@ -7,10 +7,12 @@ import yaml
 import warnings
 import importlib
 from typing import Dict, Optional, Any
+from physilearning.train import Trainer
+from stable_baselines3.common.vec_env import VecMonitor
 
 
 def fixed_at(obs: np.ndarray, environment: LvEnv or PcEnv or GridEnv,
-             threshold: float = .8, at_type: str = 'zhang_et_al') -> int:
+             threshold: float = .8, at_type: str = 'fixed') -> int:
     """ 
     Cycling adaptive therapy strategy, applies treatment only if the tumor burden is above a threshold
 
@@ -58,12 +60,20 @@ class Evaluation:
         """
 
         self.env = env
+        if self._is_venv():
+            self.trajectory = self.env.get_attr('trajectory')[0]
+        else:
+            self.trajectory = self.env.trajectory
+
         with open(config_file, 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
 
+    def _is_venv(self):
+        return isinstance(self.env, VecMonitor)
+
     def run_environment(
         self,
-        model_name: str = '',
+        model_name: str = ' ',
         num_episodes: int = 1,
         save_path: str = './',
         save_name: str = 'model',
@@ -81,6 +91,9 @@ class Evaluation:
         :param fixed_therapy_kwargs: keyword arguments for fixed adaptive therapy
 
         """
+        if fixed_therapy_kwargs is None:
+            fixed_therapy_kwargs = {}
+
         if not fixed_therapy:
             algorithm_name = self.config['learning']['model']['name']
             try:
@@ -111,6 +124,11 @@ class Evaluation:
                     action = fixed_at(obs, self.env, **fixed_therapy_kwargs)
                 else:
                     action, _state = model.predict(obs)
+                if self._is_venv():
+                    self.trajectory = self.env.get_attr('trajectory')
+                else:
+                    self.trajectory = self.env.trajectory
+                print(np.sum(self.trajectory))
                 obs, reward, done, info = self.env.step(action)
                 score += reward
 
@@ -123,18 +141,27 @@ class Evaluation:
 
     def save_trajectory(self, save_name: str) -> None:
         """
-        Save the trajectory to a csv file
+        Save the trajectory to a csv file or numpy file
 
         param: save_name: name of the file to save the trajectory
         """
-        if self.env.observation_type == 'image':
-            np.save(f'trajectory_{save_name}_numpy', self.env.trajectory)
+        if self._is_venv():
+            observation_type = self.env.get_attr('observation_type')[0]
+            print(observation_type)
+            print('Im here')
         else:
-            df = pd.DataFrame(np.transpose(self.env.trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
+            observation_type = self.env.observation_type
+
+
+        if observation_type == 'image':
+            np.save(f'{save_name}_numpy', self.trajectory)
+        else:
+            df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
             df.to_csv(save_name)
         return None
 
-    def plot_trajectory(self, episode: int = 0) -> None:
+    @staticmethod
+    def plot_trajectory(episode: int = 0) -> None:
         """
         Plot the trajectory
 
@@ -166,9 +193,10 @@ def evaluate() -> None:
         model_config_file = os.path.join(model_training_path, 'Training', 'Configs', model_prefix + '.yaml')
 
         env_type = general_config['eval']['evaluate_on']
-        EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
-        env = EnvClass.from_yaml(model_config_file)
-        evaluation = Evaluation(env)
+        train = Trainer(model_config_file)
+        train.env_type = env_type
+        train.setup_env()
+        evaluation = Evaluation(train.env)
 
         model_name = os.path.join(model_training_path, 'Training', 'SavedModels',
                                   model_prefix + general_config['eval']['step_to_load'])
@@ -180,9 +208,10 @@ def evaluate() -> None:
     else:
         env_type = general_config['eval']['evaluate_on']
         save_name = general_config['eval']['save_name']
-        EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
-        env = EnvClass.from_yaml(config_file)
-        evaluation = Evaluation(env)
+        train = Trainer(config_file)
+        train.env_type = env_type
+        train.setup_env()
+        evaluation = Evaluation(train.env)
 
         fixed = general_config['eval']['fixed_AT_protocol']
         evaluation.run_environment(model_name='None', num_episodes=general_config['eval']['num_episodes'],

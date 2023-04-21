@@ -12,23 +12,35 @@ from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 from physilearning.callbacks import CopyConfigCallback
 from physilearning.envs.base_env import BaseEnv
 
-from typing import List, Callable
+from typing import List, Callable, Optional, Dict, Any
 
 
-def make_env(EnvClass: Callable = BaseEnv, *, config_file: str = 'config.yaml', env_kwargs: dict = {}):
+def make_env(
+    EnvClass: Callable = BaseEnv,
+    *,
+    config_file: str = 'config.yaml',
+    env_kwargs: Optional[Dict[str, Any]] = None
+) -> Callable:
     """
-        Utility function for multiprocessed env.
-        :param EnvClass: (Callable) the environment class
-        :param config_file: (str) path to the config file.
-        :param env_kwargs: (dict) keyword arguments to pass to the environment
+        Utility function for env needed for wrappers.
+        :param EnvClass: the environment class
+        :param config_file: path to the config file.
+        :param env_kwargs: keyword arguments to pass to the environment
     """
+    if env_kwargs is None:
+        env_kwargs = {}
     def _init():
         env = EnvClass.from_yaml(config_file, **env_kwargs)
         return env
 
     return _init
 
-class Trainer():
+
+def make_vec_env():
+    pass
+
+
+class Trainer:
     """ Trainer class for reinforcement learning agents
 
     :param config_file: (str) path to the config file.
@@ -77,7 +89,7 @@ class Trainer():
 
         elif env_type == 'LvEnv':
             EnvClass = getattr(importlib.import_module('physilearning.envs.lv'), 'LvEnv')
-            env_kwargs = {'port': '0', 'job_name': sys.argv[1]}
+            env_kwargs = {}
 
         elif env_type == 'GridEnv':
             EnvClass = getattr(importlib.import_module('physilearning.envs.grid_env'), 'GridEnv')
@@ -198,4 +210,3 @@ def train() -> None:
 
 if __name__ == '__main__':
     train()
-

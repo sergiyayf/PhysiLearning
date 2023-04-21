@@ -108,7 +108,7 @@ def evaluate():
         config = yaml.load(f, Loader=yaml.FullLoader)
     n_envs = config['env']['n_envs']
     # prepare PhysiCell simulations for job submission
-    if config['eval']['evaluate_on'] == 'PhysiCell':
+    if config['eval']['evaluate_on'] == 'PcEnv':
         PC_conf = config['env']['PC']
         change_PC_config(PC_conf, n_envs)
     click.echo('Evaluating')
