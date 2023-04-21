@@ -51,7 +51,7 @@ env:
   # general simulation settings
   threshold_burden: 1000
   treatment_time_step: 1 
-  max_time: 10
+  max_time: 1000
   normalize: 1
   normalize_to: 1000
 

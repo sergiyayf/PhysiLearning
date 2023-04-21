@@ -1,7 +1,7 @@
 # global configuration
 global:
-  transport_type: 'ipc://'
-  transport_address: '/tmp/' # for raven use '/ptmp/saif/'
+  transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
+  transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
   evaluate_after: 0
 
 # job configuration
@@ -9,25 +9,25 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 4
-  time: '00:10:00'
+  cpus-per-task: 8
+  time: '10:00:00'
   agent_buffer: 1
 
 # Reinforcement learning configuration
 learning:
-  # Model options 
+  # Model options
   model:
-    name: 'PPO' #'RecurrentPPO' # 'PPO'
+    name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 128
+      n_steps: 512
       verbose: 1
       ent_coef: 0.005
       clip_range: 0.02
-      learning_rate: 5.e-4
-    total_timesteps: 256
-    save_freq: 1.e+5
-    model_save_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
+      learning_rate: 1.e-4
+    total_timesteps: 1.e+6
+    save_freq: 5.e+4
+    model_save_prefix: '0418_stacked_image_PC_test'
     load:
       enable_loading: 0
       last_model: 0
@@ -39,19 +39,20 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
+  type: 'GridEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 0
+  wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack'
   wrapper_kwargs: #
-    n_stack: 2
+    n_stack: 4
     channels_order: 'first'
-  reward_shaping: 7  # reward shaping flag for some predefined rewards
+  reward_shaping: 0  # reward shaping flag for some predefined rewards
 
   # general simulation settings
-  threshold_burden: 5000
-  treatment_time_step: 1 
+  threshold_burden: 1000
+  treatment_time_step: 1
   max_time: 1000
+  normalize: 1
   normalize_to: 1000
 
   # LV environment settings
@@ -76,40 +77,48 @@ env:
         value: 'true'
     number_of_susceptible_cells:
         parent_nodes: ['user_parameters']
-        value: 5997
+        value: 99
     number_of_resistant_cells:
         parent_nodes: ['user_parameters']
-        value: 3
+        value: 1
     enable_chkpt:
         parent_nodes: ['user_parameters']
-        value: 'true'
+        value: 'false'
     filename_chkpt:
         parent_nodes: ['user_parameters']
         value: './../presims/test_patient/output00000003'
     treatment_time_step:
         parent_nodes: ['user_parameters']
-        value: 240
+        value: 60
     treatment_death_rate:
         parent_nodes: ['user_parameters']
         value: 0.00225
 
   # LatticeBased environment settings
-  LB:
-    lattice_size: 100
-    lattice_type: 'square' # 'square' # 'hexagonal'
-    lattice_shape: 'square' # 'square' # 'hexagonal'
-    lattice_shape_kwargs:
-      radius: 1
-    lattice_kwargs:
+  GridEnv:
+    grid_size: 36
+    observation_type: 'image'
+    action_type: 'discrete'
+    initial_wt: 1
+    initial_mut: 1
+    wt_growth_rate: 0.1
+    mut_growth_rate: 0.02
+    wt_death_rate: 0.002
+    mut_death_rate: 0.002
+    wt_treat_death_rate: 0.02
+    mut_treat_death_rate: 0.00
+    cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random'
+
+
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1 
+  from_file: 1
   path: './'
-  model_prefix: 'LatticeBased_23_03_CNN_1_env_not_stacked'
+  model_prefix: '0418_stacked_image_PC_test'
   fixed_AT_protocol: 0
   num_episodes: 1
-  step_to_load: '_500000_steps'
-  save_name: '12_policy_LV_before_training_check'
-  evaluate_on: 'LatticeBased' #'PhysiCell' # 'LV' # 'LatticeBased'
+  step_to_load: '_300000_steps'
+  save_name: '0418_test_from_file'
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

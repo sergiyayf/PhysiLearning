@@ -3,10 +3,16 @@ import subprocess
 import re
 from physilearning.tools.xml_reader import CfgRead
 import click
+from typing import Dict
 
-def change_PC_config(PC_conf = None, n_envs = 1):
-    """Change the PhysiCell settings file to run multiple simulations in parallel
+
+def change_pc_config(pc_conf: Dict, n_envs: int = 1):
+    """
+    Change the PhysiCell settings file to run multiple simulations in parallel
     for now only works for 1 environment
+
+    :param pc_conf: dictionary with the parameters to change
+    :param n_envs: number of environments to run in parallel
     """
     clean_sims = 'bash ./scripts/cleanup_simulations.sh'
     subprocess.call([clean_sims], shell=True)
@@ -15,16 +21,18 @@ def change_PC_config(PC_conf = None, n_envs = 1):
     subprocess.call([copy_PhysiCell], shell=True)
     xml_reader = CfgRead('./simulations/PhysiCell_V_1.10.4_0/config/PhysiCell_settings.xml')
 
-    for key in PC_conf:
-        print('Changing {0} to {1}'.format(key, PC_conf[key]['value']))
-        xml_reader.write_new_param(parent_nodes=PC_conf[key]['parent_nodes'], parameter=key,
-                                   value=PC_conf[key]['value'])
+    for key in pc_conf:
+        print('Changing {0} to {1}'.format(key, pc_conf[key]['value']))
+        xml_reader.write_new_param(parent_nodes=pc_conf[key]['parent_nodes'], parameter=key,
+                                   value=pc_conf[key]['value'])
 
     # xml_reader.write_new_param(parent_nodes=['save', 'full_data'], parameter="enable", value='true')
+
 
 @click.group()
 def cli():
     pass
+
 
 @cli.command()
 def train():
@@ -65,9 +73,8 @@ def train():
 
     # prepare PhysiCell simulations for job submission
     if config['env']['type'] == 'PcEnv':
-        PC_conf = config['env']['PC']
-        change_PC_config(PC_conf, n_envs)
-
+        pc_conf = config['env']['PC']
+        change_pc_config(pc_conf, n_envs)
 
     # construct a command to run by shell
     command = 'cd ./scripts && sbatch --nodes={0} --ntasks={1} --mem={2}MB --cpus-per-task={3} \
@@ -91,6 +98,7 @@ def train():
         (out, err) = p_eval.communicate()
         print('Evaluation job: ', str(out, 'utf-8'))
 
+
 @cli.command()
 def simulate_patients():
     """Submit a job to simulate virtual patients patients
@@ -98,6 +106,7 @@ def simulate_patients():
     click.echo('Simulating patients')
     eval_command = 'cd ./scripts && sbatch simulate_patients_job.sh'
     subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
+
 
 @cli.command()
 def evaluate():
@@ -109,13 +118,14 @@ def evaluate():
     n_envs = config['env']['n_envs']
     # prepare PhysiCell simulations for job submission
     if config['eval']['evaluate_on'] == 'PcEnv':
-        PC_conf = config['env']['PC']
-        change_PC_config(PC_conf, n_envs)
+        pc_conf = config['env']['PC']
+        change_pc_config(pc_conf, n_envs)
     click.echo('Evaluating')
     eval_command = 'cd ./scripts && sbatch evaluation_job.sh'
     subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     cli()
 
     

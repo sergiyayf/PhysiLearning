@@ -8,9 +8,12 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, Dummy
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
+from stable_baselines3.common.utils import set_random_seed
+from stable_baselines3.common.env_util import make_vec_env
 
 from physilearning.callbacks import CopyConfigCallback
 from physilearning.envs.base_env import BaseEnv
+
 
 from typing import List, Callable, Optional, Dict, Any
 
@@ -19,7 +22,9 @@ def make_env(
     EnvClass: Callable = BaseEnv,
     *,
     config_file: str = 'config.yaml',
-    env_kwargs: Optional[Dict[str, Any]] = None
+    env_kwargs: Optional[Dict[str, Any]] = None,
+    rank: int = 0,
+    seed: int = 0,
 ) -> Callable:
     """
         Utility function for env needed for wrappers.
@@ -29,15 +34,14 @@ def make_env(
     """
     if env_kwargs is None:
         env_kwargs = {}
+
     def _init():
         env = EnvClass.from_yaml(config_file, **env_kwargs)
+        env.seed(seed+rank)
         return env
 
+    set_random_seed(seed)
     return _init
-
-
-def make_vec_env():
-    pass
 
 
 class Trainer:
@@ -83,33 +87,23 @@ class Trainer:
         """
         # import environment class
         env_type = self.env_type
+        EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
         if env_type == 'PcEnv':
-            EnvClass = getattr(importlib.import_module('physilearning.envs.pc'), 'PcEnv')
             env_kwargs = {'port': '0', 'job_name': sys.argv[1]}
-
-        elif env_type == 'LvEnv':
-            EnvClass = getattr(importlib.import_module('physilearning.envs.lv'), 'LvEnv')
-            env_kwargs = {}
-
-        elif env_type == 'GridEnv':
-            EnvClass = getattr(importlib.import_module('physilearning.envs.grid_env'), 'GridEnv')
-            env_kwargs = {}
-
         else:
-            raise ValueError('Environment type not recognized')
+            env_kwargs = {}
 
         # Single environment
         if self.n_envs == 1:
             print('Training on single environment')
             if self.wrap:
                 if self.wrapper == 'VecFrameStack':
-                    env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs)])
+                    env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)])
                     self.env = VecFrameStack(env, **self.wrapper_kwargs)
                     self.env = VecMonitor(self.env)
 
                 elif self.wrapper == 'DummyVecEnv':
-                    raise NotImplementedError('DummyVecEnv wrapper not properly implemented yet')
-                    self.env = DummyVecEnv(EnvClass, n_envs=1, **self.wrapper_kwargs)
+                    self.env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)])
                     self.env = VecMonitor(self.env)
                 else:
                     raise ValueError('Wrapper not recognized')
@@ -119,15 +113,15 @@ class Trainer:
 
         # VecEnv with n_envs > 1
         elif self.n_envs > 1:
-            raise NotImplementedError('Vector environment not properly implemented yet')
             print('Training on {0} environments'.format(self.config['env']['n_envs']))
             if self.wrap:
                 if self.wrapper == 'VecFrameStack':
-                    env = DummyVecEnv([make_env(EnvClass, ) for _ in range(self.n_envs)])
-                    self.env = VecFrameStack(env, self.wrapper_kwargs)
+                    env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)
+                                       for i in range(self.n_envs)])
+                    self.env = VecFrameStack(env, **self.wrapper_kwargs)
                 elif self.wrapper == 'DummyVecEnv':
-                    self.env = make_vec_env(env, n_envs=self.n_envs, seed=time.time(),
-                                            vec_env_cls=DummyVecEnv, vec_env_kwargs=self.wrapper_kwargs)
+                    self.env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)
+                                       for _ in range(self.n_envs)])
                 elif self.wrapper == 'SubprocVecEnv':
                     self.env = make_vec_env(env, n_envs=self.n_envs, seed=time.time(),
                                             vec_env_cls=SubprocVecEnv, vec_env_kwargs=self.wrapper_kwargs)

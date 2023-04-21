@@ -13,6 +13,8 @@ by the `config.yaml` file, fixed_at utility function and the Evaluate class.
 
 .. autofunction:: physilearning.evaluate.fixed_at
 
+.. autofunction:: physilearning.evaluate.evaluate
+
 .. note::
 
    Fixed adaptive therapy may not work as expected with image observations.

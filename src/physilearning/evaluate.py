@@ -152,7 +152,6 @@ class Evaluation:
         else:
             observation_type = self.env.observation_type
 
-
         if observation_type == 'image':
             np.save(f'{save_name}_numpy', self.trajectory)
         else:
