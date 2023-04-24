@@ -9,7 +9,6 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 from stable_baselines3.common.utils import set_random_seed
-from stable_baselines3.common.env_util import make_vec_env
 
 from physilearning.callbacks import CopyConfigCallback
 from physilearning.envs.base_env import BaseEnv
@@ -23,7 +22,6 @@ def make_env(
     *,
     config_file: str = 'config.yaml',
     env_kwargs: Optional[Dict[str, Any]] = None,
-    rank: int = 0,
     seed: int = 0,
 ) -> Callable:
     """
@@ -32,12 +30,14 @@ def make_env(
         :param config_file: path to the config file.
         :param env_kwargs: keyword arguments to pass to the environment
     """
+    print('kwargs: ', env_kwargs)
     if env_kwargs is None:
         env_kwargs = {}
-
+    print(env_kwargs)
     def _init():
         env = EnvClass.from_yaml(config_file, **env_kwargs)
-        env.seed(seed+rank)
+        # env.seed(seed+rank) # Seed in the env not implemented, This shouldn't be needed
+        # as I am setting the random seed later
         return env
 
     set_random_seed(seed)
@@ -123,8 +123,11 @@ class Trainer:
                     self.env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)
                                        for _ in range(self.n_envs)])
                 elif self.wrapper == 'SubprocVecEnv':
-                    self.env = make_vec_env(env, n_envs=self.n_envs, seed=time.time(),
-                                            vec_env_cls=SubprocVecEnv, vec_env_kwargs=self.wrapper_kwargs)
+                    env = SubprocVecEnv([make_env(EnvClass, config_file=self.config_file,
+                                       env_kwargs={'port': str(env_number), 'job_name': sys.argv[1]})
+                                       for env_number in range(self.n_envs)])
+                    self.env = VecFrameStack(env, **self.wrapper_kwargs)
+
                 else:
                     raise ValueError('Wrapper not recognized')
             else:

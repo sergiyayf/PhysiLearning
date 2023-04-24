@@ -19,12 +19,13 @@ def change_pc_config(pc_conf: Dict, n_envs: int = 1):
 
     copy_PhysiCell = 'bash ./scripts/create_dirs.sh {0}'.format(n_envs - 1)
     subprocess.call([copy_PhysiCell], shell=True)
-    xml_reader = CfgRead('./simulations/PhysiCell_V_1.10.4_0/config/PhysiCell_settings.xml')
+    for i in range(n_envs):
+        xml_reader = CfgRead(f'./simulations/PhysiCell_V_1.10.4_{i}/config/PhysiCell_settings.xml')
 
-    for key in pc_conf:
-        print('Changing {0} to {1}'.format(key, pc_conf[key]['value']))
-        xml_reader.write_new_param(parent_nodes=pc_conf[key]['parent_nodes'], parameter=key,
-                                   value=pc_conf[key]['value'])
+        for key in pc_conf:
+            print('Changing {0} to {1}'.format(key, pc_conf[key]['value']))
+            xml_reader.write_new_param(parent_nodes=pc_conf[key]['parent_nodes'], parameter=key,
+                                       value=pc_conf[key]['value'])
 
     # xml_reader.write_new_param(parent_nodes=['save', 'full_data'], parameter="enable", value='true')
 

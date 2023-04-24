@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 8
+  cpus-per-task: 20
   time: '10:00:00'
   agent_buffer: 1
 
@@ -25,9 +25,9 @@ learning:
       ent_coef: 0.005
       clip_range: 0.02
       learning_rate: 1.e-4
-    total_timesteps: 1.e+6
+    total_timesteps: 1.e+3
     save_freq: 5.e+4
-    model_save_prefix: '0418_stacked_image_PC_test'
+    model_save_prefix: '0424_subproc_test'
     load:
       enable_loading: 0
       last_model: 0
@@ -42,7 +42,7 @@ env:
   type: 'PcEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
   n_envs: 1
   wrap: 1
-  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack'
+  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
@@ -51,7 +51,7 @@ env:
   # general simulation settings
   threshold_burden: 1000
   treatment_time_step: 1 
-  max_time: 1000
+  max_time: 100
   normalize: 1
   normalize_to: 1000
 

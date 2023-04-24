@@ -33,3 +33,13 @@ def test_vector_envs(wrapper):
     trainer.n_envs = 2
     trainer.setup_env()
     assert trainer.env is not None
+
+
+def test_subprocess_vec_env():
+    trainer = train.Trainer(config_file='test_cfg.yaml')
+    trainer.env_type = "PcEnv"
+    trainer.wrap = True
+    trainer.wrapper = "SubprocVecEnv"
+    trainer.n_envs = 2
+    trainer.setup_env()
+    assert trainer.env is not None
