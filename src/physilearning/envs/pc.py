@@ -80,6 +80,7 @@ class PcEnv(Env):
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
         elif self.observation_type == 'image':
             self.trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)))
+            self.number_trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
         # Socket
         self.job_name = job_name
         self.port = port
@@ -134,15 +135,17 @@ class PcEnv(Env):
         self.time += self.treatment_time_step
         # get tumor updated state
         message = str(self.socket.recv(), 'utf-8')
+        num_wt_cells, num_mut_cells = self._get_cell_number(message)
+        self.state[0] = num_wt_cells * self.threshold_burden / self.threshold_burden_in_number
+        self.state[1] = num_mut_cells * self.threshold_burden / self.threshold_burden_in_number
+        self.state[2] = action
         # get from the string comma separated values from t0_x to t0_y
         if self.observation_type == 'image':
             self.image = self._get_image_obs(message)
-
             self.trajectory[:, :, int(self.time/self.treatment_time_step) - 1] = self.image[0, :, :]
             obs = self.image
-            num_wt_cells, num_mut_cells = self._get_cell_number(message)
             done = self._check_done(burden_type='number', total_cell_number=num_wt_cells+num_mut_cells)
-
+            self.number_trajectory[:, int(self.time/self.treatment_time_step) - 1] = self.state
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(num_wt_cells+num_mut_cells, self.time/self.max_time)
 
@@ -158,13 +161,6 @@ class PcEnv(Env):
                     self.socket.send(b"Treat")
 
         elif self.observation_type == 'number':
-            type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
-            self.state[0] = int(type0[0])*self.threshold_burden/self.threshold_burden_in_number
-            type1 = re.findall(r'%s(\d+)' % "Type 1:", message)
-            self.state[1] = int(type1[0])*self.threshold_burden/self.threshold_burden_in_number
-            # do action (apply treatment or not)
-            self.state[2] = action
-
             # record trajectory
             self.trajectory[:, int(self.time/self.treatment_time_step) - 1] = self.state
             # get the reward
@@ -226,7 +222,8 @@ class PcEnv(Env):
         elif self.observation_type == 'image':
             self.trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)))
-           
+            self.number_trajectory = np.zeros(
+                (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
         self.socket.send(b"Start simulation")
         return obs
 

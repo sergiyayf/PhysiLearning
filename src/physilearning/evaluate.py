@@ -22,10 +22,9 @@ def fixed_at(obs: np.ndarray, environment: LvEnv or PcEnv or GridEnv,
     :param at_type: type of adaptive therapy strategy
     :return: action
     """
-    if environment.observation_space == 'image':
-        warnings.warn('Fixed adaptive therapy for image observation space might not work as expected')
 
-    tumor_size = np.sum(obs[0:2])
+    tumor_size = environment.state[0]+environment.state[1]
+
     if at_type == 'zhang_et_al':
         ini_tumor_size = environment.initial_wt + environment.initial_mut
         if tumor_size > ini_tumor_size:
@@ -128,13 +127,12 @@ class Evaluation:
                     self.trajectory = self.env.get_attr('trajectory')
                 else:
                     self.trajectory = self.env.trajectory
-                print(np.sum(self.trajectory))
                 obs, reward, done, info = self.env.step(action)
                 score += reward
 
             final_score[episode] = score
             print(f'Episode {episode} - Score: {score}')
-            filename = os.path.join(save_path, '{1}_{0}.csv'.format(save_name, episode))
+            filename = os.path.join(save_path, '{1}_{0}'.format(save_name, episode))
             self.save_trajectory(filename)
 
         return
@@ -147,16 +145,20 @@ class Evaluation:
         """
         if self._is_venv():
             observation_type = self.env.get_attr('observation_type')[0]
-            print(observation_type)
-            print('Im here')
         else:
             observation_type = self.env.observation_type
 
         if observation_type == 'image':
-            np.save(f'{save_name}_numpy', self.trajectory)
+            np.save(f'{save_name}_image_trajectory', self.trajectory)
+            if self._is_venv():
+                number_trajectory = self.env.get_attr('number_trajectory')[0]
+            else:
+                number_trajectory = self.env.number_trajectory
+            df = pd.DataFrame(np.transpose(number_trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
+            df.to_csv(f'{save_name}_number_trajectory.csv')
         else:
             df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
-            df.to_csv(save_name)
+            df.to_csv(f'{save_name}.csv')
         return None
 
     @staticmethod
@@ -200,9 +202,11 @@ def evaluate() -> None:
         model_name = os.path.join(model_training_path, 'Training', 'SavedModels',
                                   model_prefix + general_config['eval']['step_to_load'])
         fixed = general_config['eval']['fixed_AT_protocol']
+        at_type = general_config['eval']['at_type']
         evaluation.run_environment(model_name, num_episodes=general_config['eval']['num_episodes'],
                                    save_path=os.path.join(model_training_path, 'Evaluations'),
-                                   save_name=env_type + 'Eval' + model_prefix, fixed_therapy=fixed)
+                                   save_name=env_type + 'Eval' + model_prefix, fixed_therapy=fixed,
+                                   fixed_therapy_kwargs={'at_type': at_type})
 
     else:
         env_type = general_config['eval']['evaluate_on']
@@ -213,9 +217,11 @@ def evaluate() -> None:
         evaluation = Evaluation(train.env)
 
         fixed = general_config['eval']['fixed_AT_protocol']
+        at_type = general_config['eval']['at_type']
         evaluation.run_environment(model_name='None', num_episodes=general_config['eval']['num_episodes'],
                                    save_path=os.path.join('.', 'Evaluations'),
-                                   save_name=env_type+'Eval'+save_name, fixed_therapy=fixed)
+                                   save_name=env_type+'Eval'+save_name, fixed_therapy=fixed,
+                                   fixed_therapy_kwargs={'at_type': at_type})
     return
 
 

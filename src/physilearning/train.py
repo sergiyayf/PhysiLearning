@@ -40,7 +40,7 @@ def make_env(
         # as I am setting the random seed later
         return env
 
-    set_random_seed(seed)
+    set_random_seed(seed+int(env_kwargs['port']))
     return _init
 
 

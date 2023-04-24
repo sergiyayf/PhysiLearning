@@ -20,14 +20,14 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 512
+      n_steps: 1024
       verbose: 1
-      ent_coef: 0.005
+      ent_coef: 0.01
       clip_range: 0.02
-      learning_rate: 1.e-4
-    total_timesteps: 1.e+3
-    save_freq: 5.e+4
-    model_save_prefix: '0424_subproc_test'
+      learning_rate: 2.5e-4
+    total_timesteps: 1.e+7
+    save_freq: 1.e+5
+    model_save_prefix: '0424_subprocvec_10_envs'
     load:
       enable_loading: 0
       last_model: 0
@@ -40,9 +40,9 @@ learning:
 env:
   # general env settings
   type: 'PcEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
-  n_envs: 1
+  n_envs: 10
   wrap: 1
-  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
+  wrapper: 'SubprocVecEnv' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
@@ -51,7 +51,7 @@ env:
   # general simulation settings
   threshold_burden: 1000
   treatment_time_step: 1 
-  max_time: 100
+  max_time: 1000
   normalize: 1
   normalize_to: 1000
 
@@ -113,12 +113,13 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
   model_prefix: '0418_stacked_image_PC_test'
-  fixed_AT_protocol: 0
+  fixed_AT_protocol: 1
+  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'
   num_episodes: 1
   step_to_load: '_300000_steps'
-  save_name: '0418_test_from_file'
+  save_name: '0424mtd_test'
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
