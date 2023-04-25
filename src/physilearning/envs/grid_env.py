@@ -111,7 +111,7 @@ class GridEnv(BaseEnv):
         self.fig, self.ax = plt.subplots()
 
     @classmethod
-    def from_yaml(cls, config_file: str = 'config.yaml'):
+    def from_yaml(cls, config_file: str = 'config.yaml', port: str = '0', job_name: str = '000000'):
         """
         Create an environment from a yaml file
         :param config_file: (str) path to the config file

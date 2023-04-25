@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 20
+  cpus-per-task: 6
   time: '10:00:00'
   agent_buffer: 1
 
@@ -20,14 +20,14 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 1024
+      n_steps: 512
       verbose: 1
       ent_coef: 0.01
       clip_range: 0.02
       learning_rate: 2.5e-4
-    total_timesteps: 1.e+7
-    save_freq: 1.e+5
-    model_save_prefix: '0424_subprocvec_10_envs'
+    total_timesteps: 1.e+5
+    save_freq: 1.e+6
+    model_save_prefix: '0425_pcenv'
     load:
       enable_loading: 0
       last_model: 0
@@ -40,9 +40,9 @@ learning:
 env:
   # general env settings
   type: 'PcEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
-  n_envs: 10
+  n_envs: 4
   wrap: 1
-  wrapper: 'SubprocVecEnv' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
+  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'

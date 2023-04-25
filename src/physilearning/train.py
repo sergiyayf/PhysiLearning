@@ -3,6 +3,7 @@ import sys
 import yaml
 import time
 import importlib
+import multiprocessing as mp
 
 from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
@@ -30,17 +31,21 @@ def make_env(
         :param config_file: path to the config file.
         :param env_kwargs: keyword arguments to pass to the environment
     """
-    print('kwargs: ', env_kwargs)
     if env_kwargs is None:
         env_kwargs = {}
-    print(env_kwargs)
+
+    if 'port' not in env_kwargs:
+        port = 0
+    else:
+        port = int(env_kwargs['port'])
     def _init():
         env = EnvClass.from_yaml(config_file, **env_kwargs)
         # env.seed(seed+rank) # Seed in the env not implemented, This shouldn't be needed
         # as I am setting the random seed later
         return env
 
-    set_random_seed(seed+int(env_kwargs['port']))
+
+    set_random_seed(seed+port)
     return _init
 
 
@@ -116,12 +121,14 @@ class Trainer:
             print('Training on {0} environments'.format(self.config['env']['n_envs']))
             if self.wrap:
                 if self.wrapper == 'VecFrameStack':
-                    env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)
-                                       for i in range(self.n_envs)])
+                    env = DummyVecEnv([make_env(EnvClass, config_file=self.config_file,
+                                       env_kwargs={'port': str(env_number), 'job_name': sys.argv[1]})
+                                       for env_number in range(self.n_envs)])
                     self.env = VecFrameStack(env, **self.wrapper_kwargs)
                 elif self.wrapper == 'DummyVecEnv':
-                    self.env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)
-                                       for _ in range(self.n_envs)])
+                    self.env = DummyVecEnv([make_env(EnvClass, config_file=self.config_file,
+                                       env_kwargs={'port': str(env_number), 'job_name': sys.argv[1]})
+                                       for env_number in range(self.n_envs)])
                 elif self.wrapper == 'SubprocVecEnv':
                     env = SubprocVecEnv([make_env(EnvClass, config_file=self.config_file,
                                        env_kwargs={'port': str(env_number), 'job_name': sys.argv[1]})
@@ -206,4 +213,5 @@ def train() -> None:
 
 
 if __name__ == '__main__':
+    mp.set_start_method('spawn')
     train()
