@@ -99,6 +99,7 @@ class PcEnv(Env):
                 self.transport_address = '5555'
         # reward shaping flag
         self.reward_shaping_flag = reward_shaping_flag
+        self._start_slurm_physicell_job_step()
 
     @classmethod
     def from_yaml(cls, yaml_file: str, port: str = '0', job_name: str = '000000') -> object:
@@ -123,6 +124,27 @@ class PcEnv(Env):
                    initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
                    transport_type=transport_type, transport_address=transport_address,
                    reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to)
+
+    def _start_slurm_physicell_job_step(self) -> None:
+        """
+        Start the PhysiCell simulation
+        """
+        if self.transport_type == 'ipc://':
+            port_connection = f"{self.transport_type}{self.transport_address}"
+        elif self.transport_type == 'tcp://':
+            port_connection = f"{self.transport_type}*:{self.transport_address}"
+        else:
+            raise ValueError('Transport type not supported')
+
+        if platform.system() == 'Windows':
+            raise NotImplementedError('Windows is not supported yet')
+            # command = f"conda deactivate && bash ./scripts/run.sh {self.port} {port_connection}"
+            # p = subprocess.Popen(["start", "cmd", "/K", command], shell=True)
+
+        else:
+            pc_cpus_per_task = 1
+            command = f"srun --ntasks=1 --exclusive --mem-per-cpu=300 --cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
+            subprocess.Popen([command], shell=True)
 
     def step(self, action: int) -> tuple:
         """
@@ -190,21 +212,6 @@ class PcEnv(Env):
 
     def reset(self):
         time.sleep(3.0)
-        if self.transport_type == 'ipc://':
-            port_connection = f"{self.transport_type}{self.transport_address}"
-        elif self.transport_type == 'tcp://':
-            port_connection = f"{self.transport_type}*:{self.transport_address}"
-        else:
-            raise ValueError('Transport type not supported')
-
-        if platform.system() == 'Windows':
-            raise NotImplementedError('Windows is not supported yet')
-            # command = f"conda deactivate && bash ./scripts/run.sh {self.port} {port_connection}"
-            # p = subprocess.Popen(["start", "cmd", "/K", command], shell=True)
-
-        else:
-            command = f"bash ./scripts/run.sh {self.port} {port_connection}"
-            subprocess.Popen([command], shell=True)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(f'{self.transport_type}{self.transport_address}')

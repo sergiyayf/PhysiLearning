@@ -25,7 +25,7 @@ learning:
       ent_coef: 0.01
       clip_range: 0.02
       learning_rate: 2.5e-4
-    total_timesteps: 1.e+5
+    total_timesteps: 1.e+4
     save_freq: 1.e+6
     model_save_prefix: '0425_pcenv'
     load:
@@ -40,9 +40,9 @@ learning:
 env:
   # general env settings
   type: 'PcEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
-  n_envs: 4
+  n_envs: 8
   wrap: 1
-  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
+  wrapper: 'SubprocVecEnv' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
