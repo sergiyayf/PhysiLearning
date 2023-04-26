@@ -39,17 +39,19 @@ class PcEnv(Env):
         transport_type: str = 'ipc://',
         transport_address: str = '/tmp/0',
         reward_shaping_flag: int = 0,
-        normalize_to: float = 1000
+        normalize_to: float = 1000,
+        observation_type: str = 'image',
+        image_size: int = 128,
     ) -> None:
         # Space
         self.name = 'PcEnv'
         self.threshold_burden_in_number = burden
         self.threshold_burden = normalize_to
         self.action_space = Discrete(2)
-        self.image_size = 128
+        self.image_size = image_size
         self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
         self.domain_size = 1000
-        self.observation_type = 'image'
+        self.observation_type = observation_type
         if self.observation_type == 'number':
             self.observation_space = Box(low=0, high=1, shape=(1,))
         elif self.observation_type == 'image':
@@ -112,6 +114,8 @@ class PcEnv(Env):
         timestep = config['env']['treatment_time_step']
         initial_mut = config['env']['PC']['number_of_resistant_cells']['value']
         reward_shaping_flag = config['env']['reward_shaping']
+        observation_type = config['env']['observation_type']
+        image_size = config['env']['image_size']
         transport_type = config['global']['transport_type']
         transport_address = config['global']['transport_address']
         if transport_type == 'ipc://':
@@ -123,7 +127,8 @@ class PcEnv(Env):
         return cls(port=port, job_name=job_name, burden=burden, max_time=max_time,
                    initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
                    transport_type=transport_type, transport_address=transport_address,
-                   reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to)
+                   reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to,
+                   observation_type=observation_type, image_size=image_size)
 
     def _start_slurm_physicell_job_step(self) -> None:
         """
@@ -143,7 +148,8 @@ class PcEnv(Env):
 
         else:
             pc_cpus_per_task = 1
-            command = f"srun --ntasks=1 --exclusive --mem-per-cpu=300 --cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
+            command = f"srun --ntasks=1 --exclusive --mem-per-cpu=300 " \
+                      f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
     def step(self, action: int) -> tuple:
@@ -163,13 +169,13 @@ class PcEnv(Env):
         self.state[2] = action
         # get from the string comma separated values from t0_x to t0_y
         if self.observation_type == 'image':
-            self.image = self._get_image_obs(message)
+            self.image = self._get_image_obs(message, action)
             self.trajectory[:, :, int(self.time/self.treatment_time_step) - 1] = self.image[0, :, :]
             obs = self.image
             done = self._check_done(burden_type='number', total_cell_number=num_wt_cells+num_mut_cells)
             self.number_trajectory[:, int(self.time/self.treatment_time_step) - 1] = self.state
             rewards = Reward(self.reward_shaping_flag)
-            reward = rewards.get_reward(num_wt_cells+num_mut_cells, self.time/self.max_time)
+            reward = rewards.get_reward(self.state, self.time/self.max_time)
 
             if done:
                 print('Done')
@@ -186,9 +192,9 @@ class PcEnv(Env):
             # record trajectory
             self.trajectory[:, int(self.time/self.treatment_time_step) - 1] = self.state
             # get the reward
-            # rewards = Reward(self.reward_shaping_flag)
-            # reward = rewards.get_reward(self.state,self.time/self.max_time)
-            reward = 1
+            rewards = Reward(self.reward_shaping_flag)
+            reward = rewards.get_reward(self.state,self.time/self.max_time)
+
             obs = self.state
 
             if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
@@ -276,7 +282,7 @@ class PcEnv(Env):
         type1 = re.findall(r'%s(\d+)' % "Type 1:", message)
         return int(type0[0]), int(type1[0])
 
-    def _get_image_obs(self, message: str) -> np.ndarray:
+    def _get_image_obs(self, message: str, action: int) -> np.ndarray:
         """
         Get the image observation from the message received from the socket
         Look for the string ti_x: and ti_y: to get the coordinates of the type i cells
@@ -295,7 +301,7 @@ class PcEnv(Env):
         t1_end_index = message.find('t1_y:')
         t1_x = message[t1_start_index:t1_end_index].split(',')
         t1_x = np.array([float(x) + self.domain_size / 2 for x in t1_x[0:-1]])
-        t1_y = message[t1_end_index + len('t1_y:'):-1].split(',')
+        t1_y = message[t1_end_index + len('t1_y:'):].split(',')
         t1_y = np.array([float(y) + self.domain_size / 2 for y in t1_y[0:-1]])
 
         # normalize the coordinates to the image size
@@ -303,6 +309,11 @@ class PcEnv(Env):
         t0_y = np.round(t0_y * self.image_size / self.domain_size)
         t1_x = np.round(t1_x * self.image_size / self.domain_size)
         t1_y = np.round(t1_y * self.image_size / self.domain_size)
+        # clean the image and make the new one
+        if action:
+            self.image = 20*np.ones((1, self.image_size, self.image_size), dtype=np.uint8)
+        else:
+            self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
 
         for x, y in zip(t0_x, t0_y):
             self.image[0, int(x), int(y)] = self.wt_color
@@ -312,13 +323,13 @@ class PcEnv(Env):
         return self.image
 
 
-def render(trajectory: np.ndarray, time: int, fig, ax):
+def render(trajectory: np.ndarray, timestep: int, fig, ax):
     # render state
     # plot it on the grid with different colors for wt and mut
     # animate simulation with matplotlib animation
     import matplotlib.animation as animation
     ims = []
-    for i in range(time):
+    for i in range(timestep):
         im = ax.imshow(trajectory[:, :, i], animated=True, cmap='viridis', vmin=0, vmax=255)
         ims.append([im])
     ani = animation.ArtistAnimation(fig, ims, interval=0.1, blit=True, repeat_delay=1000)

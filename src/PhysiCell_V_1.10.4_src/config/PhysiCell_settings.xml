@@ -23,7 +23,7 @@
 	</overall>
 	
 	<parallel>
-		<omp_num_threads>1</omp_num_threads>
+		<omp_num_threads>20</omp_num_threads>
 	</parallel> 
 	
 	<save>
@@ -31,12 +31,12 @@
 
 		<full_data>
 			<interval units="min">600</interval>
-			<enable>false</enable>
+			<enable>true</enable>
 		</full_data>
 		
 		<SVG>
 			<interval units="min">600</interval>
-			<enable>false</enable>
+			<enable>true</enable>
 		</SVG>
 		
 		<legacy_data>

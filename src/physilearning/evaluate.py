@@ -11,6 +11,10 @@ from physilearning.train import Trainer
 from stable_baselines3.common.vec_env import VecMonitor
 
 
+class DontWrapError(Exception):
+    """Exception raised when the environment is wrapped for fixed adaptive therapy"""
+    pass
+
 def fixed_at(obs: np.ndarray, environment: LvEnv or PcEnv or GridEnv,
              threshold: float = .8, at_type: str = 'fixed') -> int:
     """ 
@@ -22,6 +26,8 @@ def fixed_at(obs: np.ndarray, environment: LvEnv or PcEnv or GridEnv,
     :param at_type: type of adaptive therapy strategy
     :return: action
     """
+    if isinstance(environment, VecMonitor):
+        raise DontWrapError('Do not wrap the environment for fixed adaptive therapy')
 
     tumor_size = environment.state[0]+environment.state[1]
 
