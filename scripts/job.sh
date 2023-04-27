@@ -11,13 +11,6 @@
 #SBATCH --partition=general
 #SBATCH --mail-type=none
 #SBATCH --mail-user=saif@mpl.mpg.de
-#
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=10
-#SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=300
-#
-#SBATCH --time=01:00:00
 
 module purge
 module load gcc/11
@@ -29,4 +22,4 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 # for pinning threads correctly:
 #export OMP_PLACES=threads
 # run a programm
-srun --ntasks=8 --exclusive --cpus-per-task=1 --mem-per-cpu=300 python ./src/physilearning/train.py ${SLURM_JOBID}
+srun --ntasks=1 --exclusive --cpus-per-task=1 --mem-per-cpu=300 python ./src/physilearning/train.py ${SLURM_JOBID}

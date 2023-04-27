@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 6
+  cpus-per-task: 1
   time: '10:00:00'
   agent_buffer: 1
 
@@ -18,7 +18,7 @@ learning:
   # Model options 
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
-    policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
+    policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
       n_steps: 512
       verbose: 1
@@ -26,8 +26,8 @@ learning:
       clip_range: 0.02
       learning_rate: 2.5e-4
     total_timesteps: 1.e+4
-    save_freq: 1.e+6
-    model_save_prefix: '0425_pcenv'
+    save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
+    model_save_prefix: '0427_test_save_best_lv'
     load:
       enable_loading: 0
       last_model: 0
@@ -39,7 +39,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'PcEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -59,7 +59,7 @@ env:
 
   # LV environment settings
   LV:
-    initial_wt: 2490
+    initial_wt: 249
     initial_mut: 10
     carrying_capacity: 7500
     growth_rate_wt: 0.0357 #0.0175

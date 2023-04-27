@@ -82,7 +82,7 @@ class BaseEnv(Env):
         raise NotImplementedError
 
     def close(self):
-        raise NotImplementedError
+        pass
 
     def seed(self, seed=None):
         raise NotImplementedError

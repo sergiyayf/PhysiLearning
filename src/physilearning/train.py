@@ -1,7 +1,6 @@
 import os
 import sys
 import yaml
-import time
 import importlib
 import multiprocessing as mp
 
@@ -11,7 +10,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 from stable_baselines3.common.utils import set_random_seed
 
-from physilearning.callbacks import CopyConfigCallback
+from physilearning.callbacks import CopyConfigCallback, SaveOnBestTrainingRewardCallback
 from physilearning.envs.base_env import BaseEnv
 
 
@@ -30,6 +29,7 @@ def make_env(
         :param EnvClass: the environment class
         :param config_file: path to the config file.
         :param env_kwargs: keyword arguments to pass to the environment
+        :param seed: seed for the environment
     """
     if env_kwargs is None:
         env_kwargs = {}
@@ -38,12 +38,12 @@ def make_env(
         port = 0
     else:
         port = int(env_kwargs['port'])
+
     def _init():
         env = EnvClass.from_yaml(config_file, **env_kwargs)
         # env.seed(seed+rank) # Seed in the env not implemented, This shouldn't be needed
         # as I am setting the random seed later
         return env
-
 
     set_random_seed(seed+port)
     return _init
@@ -114,7 +114,7 @@ class Trainer:
                     raise ValueError('Wrapper not recognized')
             else:
                 self.env = EnvClass.from_yaml(self.config_file, **env_kwargs)
-                self.env = Monitor(self.env)
+                self.env = Monitor(self.env, os.path.join('Training', 'Logs'))
 
         # VecEnv with n_envs > 1
         elif self.n_envs > 1:
@@ -127,12 +127,12 @@ class Trainer:
                     self.env = VecFrameStack(env, **self.wrapper_kwargs)
                 elif self.wrapper == 'DummyVecEnv':
                     self.env = DummyVecEnv([make_env(EnvClass, config_file=self.config_file,
-                                       env_kwargs={'port': str(env_number), 'job_name': sys.argv[1]})
-                                       for env_number in range(self.n_envs)])
+                                            env_kwargs={'port': str(env_number), 'job_name': sys.argv[1]})
+                                            for env_number in range(self.n_envs)])
                 elif self.wrapper == 'SubprocVecEnv':
                     env = SubprocVecEnv([make_env(EnvClass, config_file=self.config_file,
-                                       env_kwargs={'port': str(env_number), 'job_name': sys.argv[1]})
-                                       for env_number in range(self.n_envs)])
+                                         env_kwargs={'port': str(env_number), 'job_name': sys.argv[1]})
+                                         for env_number in range(self.n_envs)])
                     self.env = VecFrameStack(env, **self.wrapper_kwargs)
 
                 else:
@@ -183,11 +183,19 @@ class Trainer:
     def setup_callbacks(self) -> List:
         """ Set up checkpoints for training"""
         # Create the checkpoint callback
-        checkpoint_callback = CheckpointCallback(save_freq=self.save_freq,
-                                                 save_path=os.path.join('Training', 'SavedModels'),
-                                                 name_prefix=self.model_save_prefix)
+        if isinstance(self.save_freq, str):
+            checkpoint_callback = \
+                SaveOnBestTrainingRewardCallback(check_freq=1000,
+                                                 log_dir=os.path.join('Training', 'Logs'),
+                                                 save_dir=os.path.join('Training', 'SavedModels'),
+                                                 save_name=self.model_save_prefix)
+        else:
+            checkpoint_callback = CheckpointCallback(save_freq=self.save_freq,
+                                                     save_path=os.path.join('Training', 'SavedModels'),
+                                                     name_prefix=self.model_save_prefix)
         # Create copy config callback
         copy_config_callback = CopyConfigCallback(self.config_file, self.model_save_prefix)
+
 
         return [checkpoint_callback, copy_config_callback]
 
