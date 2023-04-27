@@ -211,6 +211,12 @@ class GridEnv(BaseEnv):
                     rand_neighbor = np.random.randint(0, len(neighbors))
                 self.image[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = self.wt_color
 
+        elif positioning == 'load':
+            self.image[0] = np.load('./data/grid_env_data/initial_image.npy')
+            print(max(self.image))
+
+        else:
+            raise ValueError('Positioning method not recognized.')
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, Dict[str, Any]]:
         """
         Take a step in the environment simulating simple tumour growth
@@ -331,6 +337,7 @@ class GridEnv(BaseEnv):
         if action == 0:
             self.wt_death_rate = self.reference_wt_death_rate
             self.mut_death_rate = self.reference_mut_death_rate
+
         elif action == 1:
             self.wt_death_rate = self.wt_drug_death_rate
             self.mut_death_rate = self.reference_mut_death_rate

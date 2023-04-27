@@ -52,7 +52,7 @@ env:
   max_tumor_size: 2000
   treatment_time_step: 1 
   max_time: 1000
-  normalize: 1
+  normalize: 0
   normalize_to: 2000
   observation_type: 'image' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
@@ -102,12 +102,12 @@ env:
     initial_wt: 1
     initial_mut: 1
     wt_growth_rate: 0.1
-    mut_growth_rate: 0.02
-    wt_death_rate: 0.002
-    mut_death_rate: 0.002
-    wt_treat_death_rate: 0.02
+    mut_growth_rate: 0.075
+    wt_death_rate: 0.01
+    mut_death_rate: 0.01
+    wt_treat_death_rate: 0.1
     mut_treat_death_rate: 0.00
-    cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random'
+    cell_positioning: 'load' # 'surround_mutant' # 'random' # 'load'
 
 
 # evaluation configuration
@@ -120,6 +120,6 @@ eval:
   at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   num_episodes: 1
   step_to_load: 'none'
-  save_name: '0427_grid_checks'
+  save_name: '0427_check_grid_no_treat'
   evaluate_on: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
