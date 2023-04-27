@@ -49,12 +49,13 @@ env:
   reward_shaping: 4  # reward shaping flag for some predefined rewards
 
   # general simulation settings
-  threshold_burden: 2000
+  max_tumor_size: 2000
   treatment_time_step: 1 
   max_time: 1000
   normalize: 1
   normalize_to: 2000
   observation_type: 'image' # 'image' # 'number'
+  action_type: 'discrete' # 'discrete' # 'continuous'
   image_size: 84
 
   # LV environment settings
@@ -98,9 +99,6 @@ env:
 
   # LatticeBased environment settings
   GridEnv:
-    grid_size: 36
-    observation_type: 'image'
-    action_type: 'discrete'
     initial_wt: 1
     initial_mut: 1
     wt_growth_rate: 0.1
@@ -117,11 +115,11 @@ eval:
   most_recent: 0
   from_file: 0
   path: './'
-  model_prefix: '0418_stacked_image_PC_test'
+  model_prefix: 'none'
   fixed_AT_protocol: 1
   at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   num_episodes: 1
-  step_to_load: '_300000_steps'
-  save_name: '0426mtd_test_load'
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  step_to_load: 'none'
+  save_name: '0427_grid_checks'
+  evaluate_on: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

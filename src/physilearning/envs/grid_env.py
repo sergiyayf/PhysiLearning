@@ -1,14 +1,14 @@
 import matplotlib as mpl
-mpl.use('TkAgg')
 import matplotlib.animation as animation
 from matplotlib import pyplot as plt
-
 import yaml
 from gym.spaces import Discrete, Box
 import numpy as np
 from physilearning.envs.base_env import BaseEnv
+from physilearning.reward import Reward
 from stable_baselines3.common.env_checker import check_env
 from typing import Dict, List, Tuple, Any
+import warnings
 
 
 # Lattice based tumor growth simulation environment for reinforcement learning
@@ -20,7 +20,7 @@ class GridEnv(BaseEnv):
     """
     Lattice based tumor growth simulation environment for reinforcement learning
 
-    :param grid_size: (int) Size of the simulation grid
+    :param image_size: (int) Size of the simulation grid
     :param observation_type: (str) Type of observation space.
      Can be 'image' or 'number' or 'multiobs'
     :param action_type: (str) Type of action space. Can be 'discrete' or 'continuous'
@@ -29,8 +29,8 @@ class GridEnv(BaseEnv):
     :param max_tumor_size: (int) Maximum tumor size
     :param max_time: (int) Maximum time steps
     :param reward_shaping_flag: (int) Flag to use reward shaping
-    :param num_wt: (int) Number of wild type cells
-    :param num_mut: (int) Number of mutant cells
+    :param initial_wt: (int) Number of wild type cells
+    :param initial_mut: (int) Number of mutant cells
     :param wt_growth_rate: (float) Growth rate of wild type cells
     :param mut_growth_rate: (float) Growth rate of mutant cells
     :param wt_death_rate: (float) Death rate of wild type cells
@@ -43,13 +43,14 @@ class GridEnv(BaseEnv):
 
     def __init__(
         self,
-        grid_size: int = 36,
         observation_type: str = 'image',
         action_type: str = 'discrete',
+        image_size: int = 36,
         normalize: bool = True,
         normalize_to: float = 1,
         max_tumor_size: int = 600,
         max_time: int = 1000,
+        treatment_time_step: int = 1,
         reward_shaping_flag: int = 0,
         initial_wt: int = 2,
         initial_mut: int = 1,
@@ -59,12 +60,10 @@ class GridEnv(BaseEnv):
         mut_death_rate: float = 0.002,
         wt_treat_death_rate: float = 0.02,
         mut_treat_death_rate: float = 0.0,
-        cell_positioning = 'surround_mutant'
+        cell_positioning: str = 'surround_mutant',
     ) -> None:
         super().__init__()
-        # Configuration
-        self.grid_size = grid_size
-
+        #################### Todo: move to base class ##################
         # Spaces
         self.name = 'GridEnv'
         self.action_type = action_type
@@ -75,28 +74,55 @@ class GridEnv(BaseEnv):
         self.observation_type = observation_type
         if self.observation_type == 'image':
             self.observation_space = Box(low=0, high=255,
-                                         shape=(1,self.grid_size,self.grid_size),
+                                         shape=(1, image_size, image_size),
                                          dtype=np.uint8)
         elif self.observation_type == 'number':
-            raise NotImplementedError
+            self.observation_space = Box(low=0, high=1, shape=(1,))
         elif self.observation_type == 'multiobs':
             raise NotImplementedError
+        else:
+            raise NotImplementedError
 
-        # Environment parameters
+        # Configurations
+        self.image_size = image_size
         self.normalize = normalize
-        self.normalize_to = normalize_to
-        self.threshold_burden = normalize_to
         self.max_tumor_size = max_tumor_size
-        self.max_time = max_time
+        self.normalization_factor = normalize_to/max_tumor_size
         self.reward_shaping_flag = reward_shaping_flag
-        self.done = False
-
-        self.grid = np.zeros((1, self.grid_size, self.grid_size), dtype=np.uint8)
-        self.trajectory = np.zeros((self.grid_size, self.grid_size, self.max_time))
-        self.initial_wt = initial_wt
-        self.initial_mut = initial_mut
+        self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
+        self.time = 0
+        self.max_time = max_time
+        self.treatment_time_step = treatment_time_step
         self.wt_color = 128
         self.mut_color = 255
+        self.drug_color = 20
+        self.initial_drug = 0
+        self.done = False
+
+        # set up initial conditions
+        if self.normalize:
+            self.threshold_burden = normalize_to
+            self.initial_wt = initial_wt*self.normalization_factor
+            self.initial_mut = initial_mut*self.normalization_factor
+        else:
+            self.threshold_burden = max_tumor_size
+            self.initial_wt = initial_wt
+            self.initial_mut = initial_mut
+
+        # set up initial state
+        self.state = [self.initial_wt,
+                      self.initial_mut,
+                      self.initial_drug]
+
+        # trajectory for plotting
+        if self.observation_type == 'number':
+            self.trajectory = np.zeros((self.max_time, 1))
+        elif self.observation_type == 'image':
+            self.trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)))
+            self.number_trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
+
+        ###############################################
+        # GridEnv specific for now
         self.wt_growth_rate = wt_growth_rate
         self.mut_growth_rate = mut_growth_rate
         self.reference_wt_death_rate = wt_death_rate
@@ -105,7 +131,7 @@ class GridEnv(BaseEnv):
         self.mut_death_rate = self.reference_mut_death_rate
         self.wt_drug_death_rate = wt_treat_death_rate
         self.mut_drug_death_rate = mut_treat_death_rate
-        self.time = 0
+
         self.cell_positioning = cell_positioning
         self.place_cells(positioning=self.cell_positioning)
         self.fig, self.ax = plt.subplots()
@@ -115,17 +141,20 @@ class GridEnv(BaseEnv):
         """
         Create an environment from a yaml file
         :param config_file: (str) path to the config file
+        :param port: (str) port to use for the environment
+        :param job_name: (str) job name
         :return: (object) the environment
+
         """
         with open(config_file, 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
 
-        return cls(grid_size=config['env']['GridEnv']['grid_size'],
-                   observation_type=config['env']['GridEnv']['observation_type'],
-                   action_type=config['env']['GridEnv']['action_type'],
+        return cls(image_size=config['env']['image_size'],
+                   observation_type=config['env']['observation_type'],
+                   action_type=config['env']['action_type'],
                    normalize=config['env']['normalize'],
                    normalize_to=config['env']['normalize_to'],
-                   max_tumor_size=config['env']['threshold_burden'],
+                   max_tumor_size=config['env']['max_tumor_size'],
                    max_time=config['env']['max_time'],
                    reward_shaping_flag=config['env']['reward_shaping'],
                    initial_wt=config['env']['GridEnv']['initial_wt'],
@@ -136,7 +165,8 @@ class GridEnv(BaseEnv):
                    mut_death_rate=config['env']['GridEnv']['mut_death_rate'],
                    wt_treat_death_rate=config['env']['GridEnv']['wt_treat_death_rate'],
                    mut_treat_death_rate=config['env']['GridEnv']['mut_treat_death_rate'],
-                   cell_positioning=config['env']['GridEnv']['cell_positioning']
+                   cell_positioning=config['env']['GridEnv']['cell_positioning'],
+                   treatment_time_step=config['env']['treatment_time_step'],
                    )
 
     def place_cells(self, positioning: str = 'random') -> None:
@@ -144,36 +174,42 @@ class GridEnv(BaseEnv):
         Place cells on the grid
         :param positioning: (str) 'random' or 'surround_mutant'
         """
+        if self.normalize:
+            ini_wt = int(self.initial_wt/self.normalization_factor)
+            ini_mut = int(self.initial_mut/self.normalization_factor)
+        else:
+            ini_wt = self.initial_wt
+            ini_mut = self.initial_mut
+
         if positioning == 'random':
             # put up to 10 wild type cells in random locations
-            for i in range(self.initial_wt):
-                self.grid[0, np.random.randint(0,self.grid_size),
-                          np.random.randint(0,self.grid_size)] = self.wt_color
+            for i in range(ini_wt):
+                self.image[0, np.random.randint(0, self.image_size),
+                           np.random.randint(0, self.image_size)] = self.wt_color
 
             # put 1 mutant cell in random location
-            for j in range(self.num_mut):
-                pos_x = np.random.randint(0,10)
-                pos_y = np.random.randint(0,10)
-                while self.grid[0, pos_x, pos_y] == self.wt_color:
-                    pos_x = np.random.randint(0,10)
-                    pos_y = np.random.randint(0,10)
-                self.grid[0, pos_x, pos_y] = self.mut_color
+            for j in range(ini_mut):
+                pos_x = np.random.randint(0, 10)
+                pos_y = np.random.randint(0, 10)
+                while self.image[0, pos_x, pos_y] == self.wt_color:
+                    pos_x = np.random.randint(0, 10)
+                    pos_y = np.random.randint(0, 10)
+                self.image[0, pos_x, pos_y] = self.mut_color
 
         elif positioning == 'surround_mutant':
-            for i in range(self.initial_mut):
-                pos_x = self.grid_size//2
-                pos_y = self.grid_size//2
-                while self.grid[0, pos_x, pos_y] != 0:
+            for i in range(ini_mut):
+                pos_x = self.image_size//2
+                pos_y = self.image_size//2
+                while self.image[0, pos_x, pos_y] != 0:
                     pos_x += np.random.randint(0, 2)
                     pos_y += np.random.randint(0, 2)
-                self.grid[0, pos_x, pos_y] = self.mut_color
-            neighbors = self.check_neighbors(pos_x, pos_y, self.grid)
-            for i in range(self.initial_wt):
+                self.image[0, pos_x, pos_y] = self.mut_color
+            neighbors = self.check_neighbors(pos_x, pos_y, self.image)
+            for i in range(ini_wt):
                 rand_neighbor = np.random.randint(0, len(neighbors))
-                while self.grid[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] != 0:
+                while self.image[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] != 0:
                     rand_neighbor = np.random.randint(0, len(neighbors))
-                self.grid[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = self.wt_color
-
+                self.image[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = self.wt_color
 
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, Dict[str, Any]]:
         """
@@ -187,28 +223,43 @@ class GridEnv(BaseEnv):
         the next state, the reward, if the episode is done, and additional info
         """
         # grow tumor
+        if self.treatment_time_step != 1:
+            warnings.warn("Treatment time step is not 1. This is not supported yet for grid env.")
+        self.time += self.treatment_time_step
         self.apply_treatment_action(action)
-        self.grid = self.grow_tumor(self.grid)
-        # update state
-        self.state = self.grid[0,:,:]
-        # update time
-        self.time += 1
-        # update trajectory
-        self.trajectory[:,:,self.time-1] = self.state
-        # calculate reward
-        #rewards = Reward(self.reward_shaping_flag, normalization=100)
-        #reward = rewards.get_reward(self.state, self.time/self.max_time)
-        if action: 
-            reward = 0
-        elif action==0 and np.sum(self.state)<1.e-3: 
-            reward = 10
+        self.image = self.grow_tumor(self.image)
+
+        num_wt_cells, num_mut_cells = self._get_tumor_volume_from_image(self.image[0, :, :])
+        if self.normalize:
+            self.state[0] = num_wt_cells * self.normalization_factor
+            self.state[1] = num_mut_cells * self.normalization_factor
         else:
-            reward = 1 
-        # check if done
-        self.done = self.check_done(self.state)
+            self.state[0] = num_wt_cells
+            self.state[1] = num_mut_cells
+        self.state[2] = action
+
+        if self.observation_type == 'image':
+            self.trajectory[:, :, int(self.time / self.treatment_time_step) - 1] = self.image[0, :, :]
+            obs = self.image
+            self.done = self._check_done(burden_type='number', total_cell_number=num_wt_cells+num_mut_cells)
+            self.number_trajectory[:, int(self.time / self.treatment_time_step) - 1] = self.state
+            rewards = Reward(self.reward_shaping_flag)
+            reward = rewards.get_reward(self.state, self.time / self.max_time)
+
+        elif self.observation_type == 'number':
+            self.trajectory[:, int(self.time / self.treatment_time_step) - 1] = self.state
+            rewards = Reward(self.reward_shaping_flag)
+            reward = rewards.get_reward(self.state, self.time / self.max_time)
+            obs = self.state
+            if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
+                self.done = True
+            else:
+                self.done = False
+        else:
+            raise ValueError('Observation type not supported.')
 
         # return state, reward, done, info
-        return self.grid, reward, self.done, {}
+        return obs, reward, self.done, {}
 
     def grow_tumor(self, grid: np.ndarray) -> np.ndarray:
         """
@@ -240,7 +291,7 @@ class GridEnv(BaseEnv):
             # if neighbors and random number is less than growth rate, grow tumor
             if neighbors and wt_rand[i] < self.wt_growth_rate:
                 # choose random neighbor
-                rand_neighbor = np.random.randint(0,len(neighbors))
+                rand_neighbor = np.random.randint(0, len(neighbors))
                 # grow tumor
                 grid[0, neighbors[rand_neighbor][0],
                      neighbors[rand_neighbor][1]] = grid[0, wt_cells[0][i], wt_cells[1][i]]
@@ -256,11 +307,22 @@ class GridEnv(BaseEnv):
             # if neighbors and random number is less than growth rate, grow tumor
             if neighbors and mut_rand[i] < self.mut_growth_rate:
                 # choose random neighbor
-                rand_neighbor = np.random.randint(0,len(neighbors))
+                rand_neighbor = np.random.randint(0, len(neighbors))
                 # grow tumor
-                grid[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] = grid[0, mut_cells[0][i], mut_cells[1][i]]
+                grid[0, neighbors[rand_neighbor][0], neighbors[rand_neighbor][1]] =\
+                    grid[0, mut_cells[0][i], mut_cells[1][i]]
 
         return grid
+
+    def _get_tumor_volume_from_image(self, image: np.ndarray) -> tuple:
+        """
+        Calculate the number of wt and mut cells in the state
+        :param image: the state
+        :return: number of wt and mut cells
+        """
+        num_wt_cells = np.sum(image == self.wt_color)
+        num_mut_cells = np.sum(image == self.mut_color)
+        return num_wt_cells, num_mut_cells
 
     def apply_treatment_action(self, action: int) -> None:
         """
@@ -274,27 +336,31 @@ class GridEnv(BaseEnv):
             self.mut_death_rate = self.reference_mut_death_rate
         return
 
-
-    def check_done(self, state: np.ndarray) -> bool:
+    def _check_done(self, burden_type: str, **kwargs) -> bool:
         """
         Check if the episode is done: if the tumor is too big or the time is too long
-        :param state: (np.ndarray) the state
-        :return: (bool) if the episode is done
+        :param burden_type: type of burden to check
+        :return: if the episode is done
         """
-        # check if done
-        num_wt_cells = np.sum(state == self.wt_color)
-        num_mut_cells = np.sum(state == self.mut_color)
-        total_cell_number = num_wt_cells + num_mut_cells
-        if total_cell_number > self.max_tumor_size or self.time >= self.max_time:
+
+        if burden_type == 'number':
+            total_cell_number = kwargs['total_cell_number']
+        else:
+            num_wt_cells = np.sum(kwargs['image'] == self.wt_color)
+            num_mut_cells = np.sum(kwargs['image'] == self.mut_color)
+            total_cell_number = num_wt_cells + num_mut_cells
+
+        if total_cell_number > self.threshold_burden or self.time >= self.max_time:
             return True
         else:
             return False
 
     def check_neighbors(
         self,
-        x: np.uint8 ,
-        y: np.uint8, grid: np.ndarray
-    ) -> List[np.ndarray]:
+        x: int,
+        y: int,
+        grid: np.ndarray,
+    ) -> List[List[int]]:
         """
         Check for neighbors. Utility function for growing and treating the tumor
         :param x: (np.uint8) the x coordinate
@@ -306,19 +372,18 @@ class GridEnv(BaseEnv):
         neighbors = []
         # check for neighbors
         if x > 0:
-            if grid[0, x-1,y] == 0:
-                neighbors.append([x-1,y])
-        if x < self.grid_size-1:
-            if grid[0, x+1,y] == 0:
-                neighbors.append([x+1,y])
+            if grid[0, x-1, y] == 0:
+                neighbors.append([x-1, y])
+        if x < self.image_size-1:
+            if grid[0, x+1, y] == 0:
+                neighbors.append([x+1, y])
         if y > 0:
-            if grid[0, x,y-1] == 0:
-                neighbors.append([x,y-1])
-        if y < self.grid_size-1:
-            if grid[0, x,y+1] == 0:
-                neighbors.append([x,y+1])
+            if grid[0, x, y-1] == 0:
+                neighbors.append([x, y-1])
+        if y < self.image_size-1:
+            if grid[0, x, y+1] == 0:
+                neighbors.append([x, y+1])
         return neighbors
-
 
     def reset(self) -> np.ndarray:
         """
@@ -328,19 +393,26 @@ class GridEnv(BaseEnv):
         # reset time
         self.time = 0
         # reset state
-        self.grid = np.zeros((1, self.grid_size, self.grid_size), dtype=np.uint8)
+        self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
         self.place_cells(positioning=self.cell_positioning)
         # put up to 10 wild type cells in random locations
 
-        self.state = self.grid
-        # reset trajectory
-        self.trajectory = np.zeros((self.grid_size, self.grid_size, self.max_time))
+        self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         # reset done
         self.done = False
-        # reset reward
-        self.reward = 0
-        # return state
-        return self.grid
+        if self.observation_type == 'number':
+            obs = [np.sum(self.state[0:2])]
+            self.trajectory = np.zeros((self.image_size, self.image_size, self.max_time))
+        elif self.observation_type == 'image':
+            obs = self.image
+            self.trajectory = np.zeros(
+                (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)))
+            self.number_trajectory = np.zeros(
+                (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
+        else:
+            raise ValueError('Observation type not supported')
+
+        return obs
 
     def render(self, mode: str = 'human') -> mpl.animation.ArtistAnimation:
         # render state
@@ -349,7 +421,7 @@ class GridEnv(BaseEnv):
         ims = []
 
         for i in range(self.time):
-            im = self.ax.imshow(self.trajectory[:,:,i], animated=True, cmap='viridis', vmin=0, vmax=255)
+            im = self.ax.imshow(self.trajectory[:, :, i], animated=True, cmap='viridis', vmin=0, vmax=255)
             ims.append([im])
         ani = animation.ArtistAnimation(self.fig, ims, interval=0.1, blit=True, repeat_delay=1000)
 
@@ -362,13 +434,12 @@ class GridEnv(BaseEnv):
 if __name__ == "__main__":
     env = GridEnv.from_yaml("../../../config.yaml")
     env.reset()
-    grid = env.grid
+    grid = env.image
 
     while not env.done:
-        action = 0 #env.action_space.sample()
-        env.step(action)
+        act = 0  # env.action_space.sample()
+        env.step(act)
 
     anim = env.render()
     plt.show()
     check_env(env, warn=True)
-

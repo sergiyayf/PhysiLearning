@@ -29,48 +29,67 @@ class PcEnv(Env):
     """
     def __init__(
         self,
-        port: str = '0',
-        job_name: str = '0000000',
-        burden: float = 1000,
+        observation_type: str = 'image',
+        action_type: str = 'discrete',
+        image_size: int = 128,
+        normalize: bool = False,
+        normalize_to: float = 1000,
+        max_tumor_size: float = 1000,
         max_time: int = 30000,
+        treatment_time_step: int = 60,
+        reward_shaping_flag: int = 0,
         initial_wt: int = 45,
         initial_mut: int = 5,
-        treatment_time_step: int = 60,
         transport_type: str = 'ipc://',
         transport_address: str = '/tmp/0',
-        reward_shaping_flag: int = 0,
-        normalize_to: float = 1000,
-        observation_type: str = 'image',
-        image_size: int = 128,
+        port: str = '0',
+        job_name: str = '0000000',
     ) -> None:
-        # Space
+        #################### Todo: move to base class ##################
+        # Spaces
         self.name = 'PcEnv'
-        self.threshold_burden_in_number = burden
-        self.threshold_burden = normalize_to
-        self.action_space = Discrete(2)
-        self.image_size = image_size
-        self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
-        self.domain_size = 1000
+        self.action_type = action_type
+        if self.action_type == 'discrete':
+            self.action_space = Discrete(2)
+        elif self.action_type == 'continuous':
+            self.action_space = Box(low=0, high=1, shape=(1,), dtype=np.float32)
         self.observation_type = observation_type
         if self.observation_type == 'number':
             self.observation_space = Box(low=0, high=1, shape=(1,))
         elif self.observation_type == 'image':
             self.observation_space = Box(low=0, high=255,
-                                         shape=(1, self.image_size, self.image_size),
+                                         shape=(1, image_size, image_size),
                                          dtype=np.uint8)
         elif self.observation_type == 'multiobs':
             raise NotImplementedError
-        # Timer
+        else:
+            raise NotImplementedError
+
+        # Configurations
+        self.image_size = image_size
+        self.normalize = normalize
+        self.max_tumor_size = max_tumor_size
+        self.normalization_factor = normalize_to/max_tumor_size
+        self.reward_shaping_flag = reward_shaping_flag
+        self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
         self.time = 0
         self.max_time = max_time
         self.treatment_time_step = treatment_time_step
-
-        # set up initial wild type, mutant and treatment decision
-        self.initial_wt = initial_wt*self.threshold_burden/self.threshold_burden_in_number
-        self.initial_mut = initial_mut*self.threshold_burden/self.threshold_burden_in_number
         self.wt_color = 128
         self.mut_color = 255
+        self.drug_color = 20
         self.initial_drug = 0
+        self.done = False
+
+        # set up initial wild type, mutant and treatment decision
+        if self.normalize:
+            self.threshold_burden = normalize_to
+            self.initial_wt = initial_wt*self.normalization_factor
+            self.initial_mut = initial_mut*self.normalization_factor
+        else:
+            self.threshold_burden = max_tumor_size
+            self.initial_wt = initial_wt
+            self.initial_mut = initial_mut
 
         # set up initial state
         self.state = [self.initial_wt,
@@ -83,7 +102,10 @@ class PcEnv(Env):
         elif self.observation_type == 'image':
             self.trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)))
             self.number_trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
-        # Socket
+
+        ######################################################
+        # PhysiCell specific for now
+        self.domain_size = 1000
         self.job_name = job_name
         self.port = port
         self.context = zmq.Context()
@@ -100,14 +122,14 @@ class PcEnv(Env):
                 self.socket.connect(f'{self.transport_type}localhost:5555')
                 self.transport_address = '5555'
         # reward shaping flag
-        self.reward_shaping_flag = reward_shaping_flag
+
         self._start_slurm_physicell_job_step()
 
     @classmethod
     def from_yaml(cls, yaml_file: str, port: str = '0', job_name: str = '000000') -> object:
         with open(yaml_file, 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
-        burden = config['env']['threshold_burden']
+        max_tumor_size = config['env']['max_tumor_size']
         normalize_to = config['env']['normalize_to']
         max_time = config['env']['max_time']
         initial_wt = config['env']['PC']['number_of_susceptible_cells']['value']
@@ -124,7 +146,7 @@ class PcEnv(Env):
             warnings.warn('Transport type is different from ipc, please check the config file if everything is correct')
             transport_address = f'{transport_address}:{port}'
         
-        return cls(port=port, job_name=job_name, burden=burden, max_time=max_time,
+        return cls(port=port, job_name=job_name, max_tumor_size=max_tumor_size, max_time=max_time,
                    initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
                    transport_type=transport_type, transport_address=transport_address,
                    reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to,
@@ -164,8 +186,14 @@ class PcEnv(Env):
         # get tumor updated state
         message = str(self.socket.recv(), 'utf-8')
         num_wt_cells, num_mut_cells = self._get_cell_number(message)
-        self.state[0] = num_wt_cells * self.threshold_burden / self.threshold_burden_in_number
-        self.state[1] = num_mut_cells * self.threshold_burden / self.threshold_burden_in_number
+
+        if self.normalize:
+            self.state[0] = num_wt_cells * self.normalization_factor
+            self.state[1] = num_mut_cells * self.normalization_factor
+        else:
+            self.state[0] = num_wt_cells
+            self.state[1] = num_mut_cells
+
         self.state[2] = action
         # get from the string comma separated values from t0_x to t0_y
         if self.observation_type == 'image':
@@ -193,7 +221,7 @@ class PcEnv(Env):
             self.trajectory[:, int(self.time/self.treatment_time_step) - 1] = self.state
             # get the reward
             rewards = Reward(self.reward_shaping_flag)
-            reward = rewards.get_reward(self.state,self.time/self.max_time)
+            reward = rewards.get_reward(self.state, self.time/self.max_time)
 
             obs = self.state
 
@@ -226,17 +254,16 @@ class PcEnv(Env):
         self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
         if self.observation_type == 'number':
             obs = [np.sum(self.state[0:2])]
-        elif self.observation_type == 'image':
-            obs = self.image
-        else:
-            raise ValueError('Observation type not supported')
-        if self.observation_type == 'number':
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
         elif self.observation_type == 'image':
+            obs = self.image
             self.trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)))
             self.number_trajectory = np.zeros(
                 (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
+        else:
+            raise ValueError('Observation type not supported')
+
         self.socket.send(b"Start simulation")
         return obs
 
@@ -311,7 +338,7 @@ class PcEnv(Env):
         t1_y = np.round(t1_y * self.image_size / self.domain_size)
         # clean the image and make the new one
         if action:
-            self.image = 20*np.ones((1, self.image_size, self.image_size), dtype=np.uint8)
+            self.image = self.drug_color*np.ones((1, self.image_size, self.image_size), dtype=np.uint8)
         else:
             self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
 

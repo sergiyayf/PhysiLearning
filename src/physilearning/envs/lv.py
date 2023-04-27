@@ -99,7 +99,7 @@ class LvEnv(BaseEnv):
         with open(yaml_file, 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
 
-        return cls(max_tumor_size=config['env']['threshold_burden'],
+        return cls(max_tumor_size=config['env']['max_tumor_size'],
                    max_time=config['env']['max_time'],
                    initial_wt=config['env']['LV']['initial_wt'],
                    treatment_time_step=config['env']['treatment_time_step'],
