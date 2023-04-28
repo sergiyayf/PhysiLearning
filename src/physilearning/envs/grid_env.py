@@ -213,7 +213,6 @@ class GridEnv(BaseEnv):
 
         elif positioning == 'load':
             self.image[0] = np.load('./data/grid_env_data/initial_image.npy')
-            print(max(self.image))
 
         else:
             raise ValueError('Positioning method not recognized.')

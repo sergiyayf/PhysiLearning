@@ -67,8 +67,12 @@ class Evaluation:
         self.env = env
         if self._is_venv():
             self.trajectory = self.env.get_attr('trajectory')[0]
+            if self.env.get_attr('observation_type')[0] == 'image':
+                self.number_trajectory = self.env.get_attr('number_trajectory')[0]
         else:
             self.trajectory = self.env.trajectory
+            if self.env.observation_type == 'image':
+                self.number_trajectory = self.env.number_trajectory
 
         with open(config_file, 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
@@ -128,11 +132,16 @@ class Evaluation:
                 if fixed_therapy:
                     action = fixed_at(obs, self.env, **fixed_therapy_kwargs)
                 else:
-                    action, _state = model.predict(obs)
+                    action, _state = model.predict(obs, deterministic=True)
                 if self._is_venv():
-                    self.trajectory = self.env.get_attr('trajectory')
+                    self.trajectory = self.env.get_attr('trajectory')[0]
+                    if self.env.get_attr('observation_type')[0] == 'image':
+                        self.number_trajectory = self.env.get_attr('number_trajectory')[0]
                 else:
                     self.trajectory = self.env.trajectory
+                    if self.env.observation_type == 'image':
+                        self.number_trajectory = self.env.number_trajectory
+
                 obs, reward, done, info = self.env.step(action)
                 score += reward
 
@@ -156,10 +165,7 @@ class Evaluation:
 
         if observation_type == 'image':
             np.save(f'{save_name}_image_trajectory', self.trajectory)
-            if self._is_venv():
-                number_trajectory = self.env.get_attr('number_trajectory')[0]
-            else:
-                number_trajectory = self.env.number_trajectory
+            number_trajectory = self.number_trajectory
             df = pd.DataFrame(np.transpose(number_trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
             df.to_csv(f'{save_name}_number_trajectory.csv')
         else:

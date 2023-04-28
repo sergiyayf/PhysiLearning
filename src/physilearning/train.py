@@ -12,7 +12,7 @@ from stable_baselines3.common.utils import set_random_seed
 
 from physilearning.callbacks import CopyConfigCallback, SaveOnBestTrainingRewardCallback
 from physilearning.envs.base_env import BaseEnv
-
+import time
 
 from typing import List, Callable, Optional, Dict, Any
 
@@ -44,7 +44,8 @@ def make_env(
         # env.seed(seed+rank) # Seed in the env not implemented, This shouldn't be needed
         # as I am setting the random seed later
         return env
-
+    if seed == 0:
+        seed = int(time.time())
     set_random_seed(seed+port)
     return _init
 
@@ -105,11 +106,11 @@ class Trainer:
                 if self.wrapper == 'VecFrameStack':
                     env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)])
                     self.env = VecFrameStack(env, **self.wrapper_kwargs)
-                    self.env = VecMonitor(self.env)
+                    self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
 
                 elif self.wrapper == 'DummyVecEnv':
                     self.env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)])
-                    self.env = VecMonitor(self.env)
+                    self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
                 else:
                     raise ValueError('Wrapper not recognized')
             else:
@@ -139,7 +140,7 @@ class Trainer:
                     raise ValueError('Wrapper not recognized')
             else:
                 raise ValueError('Vector environment must be wrapped')
-            self.env = VecMonitor(self.env)
+            self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
 
     def setup_model(self) -> None:
         """ Set up the model for training"""
@@ -185,7 +186,7 @@ class Trainer:
         # Create the checkpoint callback
         if isinstance(self.save_freq, str):
             checkpoint_callback = \
-                SaveOnBestTrainingRewardCallback(check_freq=1000,
+                SaveOnBestTrainingRewardCallback(check_freq=self.model_kwargs['n_steps'],
                                                  log_dir=os.path.join('Training', 'Logs'),
                                                  save_dir=os.path.join('Training', 'SavedModels'),
                                                  save_name=self.model_save_prefix)
@@ -195,7 +196,6 @@ class Trainer:
                                                      name_prefix=self.model_save_prefix)
         # Create copy config callback
         copy_config_callback = CopyConfigCallback(self.config_file, self.model_save_prefix)
-
 
         return [checkpoint_callback, copy_config_callback]
 

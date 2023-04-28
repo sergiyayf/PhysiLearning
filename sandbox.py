@@ -40,11 +40,11 @@ def animate(filename, fig, ax):
 
 if __name__ == '__main__':
     fig, ax = plt.subplots()
-    filename = 'Evaluations/0_GridEnvEval0427_check_grid_no_treat_image_trajectory.npy'
+    filename = 'Evaluations/0_GridEnvEval0428_rew_0_image_trajectory.npy'
     ani = animate(filename, fig, ax)
 
-    fig2, ax2 = plt.subplots()
-    filename2 = 'Evaluations/0_PcEnvEval0427_check_pc_no_treat_image_trajectory.npy'
-    ani2 = animate(filename2, fig2, ax2)
+    # fig2, ax2 = plt.subplots()
+    # filename2 = 'Evaluations/0_PcEnvEval0427_check_pc_no_treat_image_trajectory.npy'
+    # ani2 = animate(filename2, fig2, ax2)
 
     plt.show()

@@ -9,8 +9,8 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 1
-  time: '10:00:00'
+  cpus-per-task: 20
+  time: '24:00:00'
   agent_buffer: 1
 
 # Reinforcement learning configuration
@@ -18,20 +18,20 @@ learning:
   # Model options 
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
-    policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
+    policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 512
+      n_steps: 1024
       verbose: 1
       ent_coef: 0.01
-      clip_range: 0.02
-      learning_rate: 2.5e-4
-    total_timesteps: 1.e+4
+      clip_range: 0.01
+      learning_rate: 5.e-5
+    total_timesteps: 1.e+9
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '0427_test_save_best_lv'
+    model_save_prefix: '0428_rew_0_cnn_policy'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/12_PPO_LV_tra_dont_treat_3_load_survive_2200000_steps'
+      saved_model_name: './Training/SavedModels/0428_rew_0.zip'
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64
@@ -39,14 +39,14 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 0
+  wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
-  reward_shaping: 4  # reward shaping flag for some predefined rewards
+  reward_shaping: 0  # reward shaping flag for some predefined rewards
 
   # general simulation settings
   max_tumor_size: 2000
@@ -101,11 +101,11 @@ env:
   GridEnv:
     initial_wt: 1
     initial_mut: 1
-    wt_growth_rate: 0.1
-    mut_growth_rate: 0.075
+    wt_growth_rate: 0.25
+    mut_growth_rate: 0.09
     wt_death_rate: 0.01
     mut_death_rate: 0.01
-    wt_treat_death_rate: 0.1
+    wt_treat_death_rate: 0.22
     mut_treat_death_rate: 0.00
     cell_positioning: 'load' # 'surround_mutant' # 'random' # 'load'
 
@@ -113,13 +113,13 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: 'none'
-  fixed_AT_protocol: 1
+  model_prefix: '0428_rew_0'
+  fixed_AT_protocol: 0
   at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   num_episodes: 1
-  step_to_load: 'none'
-  save_name: '0427_check_grid_no_treat'
+  step_to_load: ''
+  save_name: '0428_best'
   evaluate_on: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
