@@ -105,8 +105,8 @@ env:
     wt_growth_rate: 0.25
     mut_growth_rate: 0.09
     wt_death_rate: 0.01
-    mut_death_rate: 0.01
-    wt_treat_death_rate: 0.22
+    mut_death_rate: 0.008
+    wt_treat_death_rate: 0.5
     mut_treat_death_rate: 0.00
     cell_positioning: 'load' # 'surround_mutant' # 'random' # 'load'
 
@@ -119,7 +119,7 @@ eval:
   model_prefix: '0502_load_cnn_ppo'
   fixed_AT_protocol: 0
   at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  num_episodes: 10
+  num_episodes: 1
   step_to_load: '_best_reward'
   save_name: '0428_best'
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'

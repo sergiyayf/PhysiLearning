@@ -344,7 +344,7 @@ class PcEnv(Env):
         else:
             self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
 
-        for x, y in zip(t0_x, t0_y):
+        for x, y in zip(t0_y, t0_x):
             self.image[0, int(x), int(y)] = self.wt_color
         for x, y in zip(t1_x, t1_y):
             self.image[0, int(x), int(y)] = self.mut_color

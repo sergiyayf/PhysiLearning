@@ -197,6 +197,7 @@ class GridEnv(BaseEnv):
                 self.image[0, pos_x, pos_y] = self.mut_color
 
         elif positioning == 'surround_mutant':
+            pos_x, pos_y = 0, 0
             for i in range(ini_mut):
                 pos_x = self.image_size//2
                 pos_y = self.image_size//2
@@ -216,6 +217,7 @@ class GridEnv(BaseEnv):
 
         else:
             raise ValueError('Positioning method not recognized.')
+
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, Dict[str, Any]]:
         """
         Take a step in the environment simulating simple tumour growth
@@ -290,7 +292,7 @@ class GridEnv(BaseEnv):
             if self.wt_death_rate == self.wt_drug_death_rate:
                 if wt_rand[i] < self.reference_wt_death_rate:
                     grid[0, wt_cells[0][i], wt_cells[1][i]] = 0
-                if neighbors and wt_rand[i] < self.wt_drug_death_rate:
+                if len(neighbors) > 1 and wt_rand[i] < self.wt_drug_death_rate:
                     grid[0, wt_cells[0][i], wt_cells[1][i]] = 0
 
             # if neighbors and random number is less than growth rate, grow tumor

@@ -210,7 +210,9 @@ def evaluate() -> None:
             model_config = yaml.load(f, Loader=yaml.FullLoader)
         if env_type == 'same':
             env_type = model_config['env']['type']
-        train = Trainer(model_config_file)
+            train = Trainer(model_config_file)
+        else:
+            train = Trainer(config_file)
         train.env_type = env_type
         train.setup_env()
         evaluation = Evaluation(train.env)

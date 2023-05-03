@@ -42,6 +42,7 @@ if __name__ == '__main__':
     fig, ax = plt.subplots()
     filename = 'Evaluations/0_PcEnvEval0502_load_cnn_ppo_image_trajectory.npy'
     ani = animate(filename, fig, ax)
+    #ani.save('Evaluations/0_GridEnvEval0502_load_cnn_ppo_image_trajectory.mp4', writer='ffmpeg', fps=10)
 
     # fig2, ax2 = plt.subplots()
     # filename2 = 'Evaluations/0_PcEnvEval0427_check_pc_no_treat_image_trajectory.npy'
