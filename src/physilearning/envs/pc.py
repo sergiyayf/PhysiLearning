@@ -346,7 +346,7 @@ class PcEnv(Env):
 
         for x, y in zip(t0_y, t0_x):
             self.image[0, int(x), int(y)] = self.wt_color
-        for x, y in zip(t1_x, t1_y):
+        for x, y in zip(t1_y, t1_x):
             self.image[0, int(x), int(y)] = self.mut_color
 
         return self.image
