@@ -116,11 +116,11 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: '0428_rew_0'
+  model_prefix: '0502_load_cnn_ppo'
   fixed_AT_protocol: 0
   at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  num_episodes: 1
-  step_to_load: ''
+  num_episodes: 10
+  step_to_load: '_best_reward'
   save_name: '0428_best'
   evaluate_on: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
