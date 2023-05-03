@@ -206,6 +206,10 @@ def evaluate() -> None:
         model_config_file = os.path.join(model_training_path, 'Training', 'Configs', model_prefix + '.yaml')
 
         env_type = general_config['eval']['evaluate_on']
+        with open(model_config_file, 'r') as f:
+            model_config = yaml.load(f, Loader=yaml.FullLoader)
+        if env_type == 'same':
+            env_type = model_config['env']['type']
         train = Trainer(model_config_file)
         train.env_type = env_type
         train.setup_env()

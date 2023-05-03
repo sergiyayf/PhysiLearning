@@ -122,5 +122,5 @@ eval:
   num_episodes: 10
   step_to_load: '_best_reward'
   save_name: '0428_best'
-  evaluate_on: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

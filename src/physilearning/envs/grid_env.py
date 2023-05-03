@@ -95,7 +95,7 @@ class GridEnv(BaseEnv):
         self.treatment_time_step = treatment_time_step
         self.wt_color = 128
         self.mut_color = 255
-        self.drug_color = 20
+        self.drug_color = 0
         self.initial_drug = 0
         self.done = False
 

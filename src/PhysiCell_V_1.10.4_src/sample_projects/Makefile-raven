@@ -239,8 +239,8 @@ movie:
 	ffmpeg -r $(FRAMERATE) -f image2 -i $(OUTPUT)/snapshot%08d.jpg -vcodec libx264 -pix_fmt yuv420p -strict -2 -tune animation -crf 15 -acodec none $(OUTPUT)/out.mp4
 
 mela:
-    cp Makefile ./sample_projects/Makefile-raven
-    cp ./sample_projects/Makefile-mela Makefile
+	cp Makefile ./sample_projects/Makefile-raven
+	cp ./sample_projects/Makefile-mela Makefile
 # upgrade rules 
 
 SOURCE := PhysiCell_upgrade.zip 

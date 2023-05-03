@@ -40,7 +40,7 @@ def animate(filename, fig, ax):
 
 if __name__ == '__main__':
     fig, ax = plt.subplots()
-    filename = 'Evaluations/2_GridEnvEval0502_load_cnn_ppo_image_trajectory.npy'
+    filename = 'Evaluations/0_PcEnvEval0502_load_cnn_ppo_image_trajectory.npy'
     ani = animate(filename, fig, ax)
 
     # fig2, ax2 = plt.subplots()

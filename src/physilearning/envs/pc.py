@@ -77,7 +77,7 @@ class PcEnv(Env):
         self.treatment_time_step = treatment_time_step
         self.wt_color = 128
         self.mut_color = 255
-        self.drug_color = 20
+        self.drug_color = 0
         self.initial_drug = 0
         self.done = False
 
@@ -185,7 +185,9 @@ class PcEnv(Env):
         self.time += self.treatment_time_step
         # get tumor updated state
         message = str(self.socket.recv(), 'utf-8')
-        num_wt_cells, num_mut_cells = self._get_cell_number(message)
+        im = self._get_image_obs(message, action)
+        num_wt_cells, num_mut_cells = self._get_tumor_volume_from_image(im)
+        # num_wt_cells, num_mut_cells = self._get_cell_number(message)
 
         if self.normalize:
             self.state[0] = num_wt_cells * self.normalization_factor
