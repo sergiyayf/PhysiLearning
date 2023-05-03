@@ -1,5 +1,6 @@
 # global configuration
 global:
+  machine: 'mela' # 'mela' # 'raven'
   transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
   transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
   evaluate_after: 0
@@ -22,16 +23,16 @@ learning:
     model_kwargs:
       n_steps: 1024
       verbose: 1
-      ent_coef: 0.01
-      clip_range: 0.01
-      learning_rate: 5.e-5
+      ent_coef: 0.001
+      clip_range: 0.05
+      learning_rate: 3.e-5
     total_timesteps: 1.e+9
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '0428_rew_0_cnn_policy'
+    model_save_prefix: '0502_load_cnn_ppo'
     load:
-      enable_loading: 0
+      enable_loading: 1 
       last_model: 0
-      saved_model_name: './Training/SavedModels/0428_rew_0.zip'
+      saved_model_name: './Training/SavedModels/0501_load_cnn_ppo_best_reward'
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64

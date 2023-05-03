@@ -2,7 +2,6 @@ VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
 PROGRAM_NAME := project
 
 CC := g++
-
 # CC := g++-mp-7 # typical macports compiler name
 # CC := g++-7 # typical homebrew compiler name 
 
@@ -33,7 +32,7 @@ ARCH := native # best auto-tuning
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 
-ZMQLIB := -L/usr/lib/x86_64-linux-gnu/ -lzmq
+ZMQLIB := -I/u/saif/soft/libzmq/include/ -L/u/saif/soft/libzmq/lib/ -lzmq -I/u/saif/programm_installs/cppzmq/
 
 ifeq ($(OS),Windows_NT)
 else
@@ -47,7 +46,7 @@ else
 	endif
 endif
 
-COMPILE_COMMAND := $(CC) $(CFLAGS)
+COMPILE_COMMAND := $(CC) $(CFLAGS) $(ZMQLIB)
 
 BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM_solvers.o BioFVM_matlab.o \
 BioFVM_utilities.o BioFVM_basic_agent.o BioFVM_MultiCellDS.o BioFVM_agent_container.o 
@@ -71,7 +70,7 @@ ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS)
 # compile the project 
 
 all: main.cpp $(ALL_OBJECTS) 
-	$(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp $(ZMQLIB)
+	$(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp 
 	make name
 
 name:
@@ -221,29 +220,27 @@ untar:
 
 # easier animation 
 
-FRAMERATE := 1
+FRAMERATE := 24
 OUTPUT := output
 
 jpeg: 
-	identify -format "%h" $(OUTPUT)/initial.svg > __H.txt 
-	identify -format "%w" $(OUTPUT)/initial.svg > __W.txt 
+	@magick identify -format "%h" $(OUTPUT)/initial.svg > __H.txt 
+	@magick identify -format "%w" $(OUTPUT)/initial.svg > __W.txt 
 	@expr 2 \* \( $$(grep . __H.txt) / 2 \) > __H1.txt 
 	@expr 2 \* \( $$(grep . __W.txt) / 2 \) > __W1.txt 
 	@echo "$$(grep . __W1.txt)!x$$(grep . __H1.txt)!" > __resize.txt 
-	mogrify -format jpg -resize $$(grep . __resize.txt) $(OUTPUT)/s*.svg
+	@magick mogrify -format jpg -resize $$(grep . __resize.txt) $(OUTPUT)/s*.svg
 	rm -f __H*.txt __W*.txt __resize.txt 
 	
-povs: 
-	@echo for scene in *.pov; do povray +w640 +h480 +a0.3 -D $scene; done
 gif: 
 	magick convert $(OUTPUT)/s*.svg $(OUTPUT)/out.gif 
 	 
 movie:
 	ffmpeg -r $(FRAMERATE) -f image2 -i $(OUTPUT)/snapshot%08d.jpg -vcodec libx264 -pix_fmt yuv420p -strict -2 -tune animation -crf 15 -acodec none $(OUTPUT)/out.mp4
 
-raven:
-    cp Makefile ./sample_projects/Makefile-mela
-    cp ./sample_projects/Makefile-raven Makefile
+mela:
+    cp Makefile ./sample_projects/Makefile-raven
+    cp ./sample_projects/Makefile-mela Makefile
 # upgrade rules 
 
 SOURCE := PhysiCell_upgrade.zip 
