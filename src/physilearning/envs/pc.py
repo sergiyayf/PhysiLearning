@@ -169,8 +169,8 @@ class PcEnv(Env):
             # p = subprocess.Popen(["start", "cmd", "/K", command], shell=True)
 
         else:
-            pc_cpus_per_task = 1
-            command = f"srun --ntasks=1 --exclusive --mem-per-cpu=300 " \
+            pc_cpus_per_task = 10
+            command = f"srun --ntasks=1 --exclusive --mem-per-cpu=100 " \
                       f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
@@ -344,9 +344,9 @@ class PcEnv(Env):
         else:
             self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
 
-        for x, y in zip(t0_y, t0_x):
+        for x, y in zip(t0_x, t0_y):
             self.image[0, int(x), int(y)] = self.wt_color
-        for x, y in zip(t1_y, t1_x):
+        for x, y in zip(t1_x, t1_y):
             self.image[0, int(x), int(y)] = self.mut_color
 
         return self.image
