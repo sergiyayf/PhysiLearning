@@ -56,9 +56,7 @@ setup(
             "sphinx-autodoc-typehints",
             # Copy button for code snippets
             "sphinx_copybutton",
-        ],
-        "extra": extra_packages,
-        "extra_no_roms": extra_no_roms,
+        ]
     },
     python_requires=">=3.8",
     classifiers=['Operating System :: ubuntu',
