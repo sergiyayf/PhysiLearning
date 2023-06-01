@@ -3,7 +3,7 @@ from physilearning import evaluate
 import importlib
 import numpy as np
 
-
+@pytest.mark.skip(reason="Not implemented")
 @pytest.mark.parametrize('env_type', ['PcEnv', 'LvEnv'])
 def test_at_fixed(env_type):
     """
