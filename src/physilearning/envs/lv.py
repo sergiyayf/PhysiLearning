@@ -1,5 +1,5 @@
 import yaml
-from gym.spaces import Discrete, Box
+from gymnasium.spaces import Discrete, Box
 import numpy as np
 from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
