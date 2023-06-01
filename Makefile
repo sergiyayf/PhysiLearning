@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-LINT_PATHS=src/physilearning tests/ docs/conf.py setup.py
+LINT_PATHS=src/physilearning tests/ docs/source/conf.py setup.py
 
 pytest:
 	./scripts/run_tests.sh
@@ -9,7 +9,7 @@ lint:
 	ruff ${LINT_PATHS} --exit-zero
 
 doc:
-	cd docs/source && make html
+	cd docs && make html
 
 raven:
 	cd ./src/PhysiCell_V_1.10.4_src && make raven && make

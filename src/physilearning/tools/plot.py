@@ -1,5 +1,7 @@
 # imports
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
 class Plotter:
     def __init__(self, env):

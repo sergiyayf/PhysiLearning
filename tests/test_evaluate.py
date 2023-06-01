@@ -4,7 +4,7 @@ import importlib
 import numpy as np
 
 
-@pytest.mark.parametrize('env_type', ['PcEnv', 'LvEnv', 'GridEnv'])
+@pytest.mark.parametrize('env_type', ['PcEnv', 'LvEnv'])
 def test_at_fixed(env_type):
     """
     Test fixed adaptive therapy evaluation

@@ -9,7 +9,7 @@ description = 'A package for reinforcement learning in adaptive therapy'
 name = 'physilearning'
 year = '2023'
 url = ''
-version = '0.0.0'
+version = '0.0.7'
 
 setup(
     name=name,
@@ -25,9 +25,9 @@ setup(
     long_description_content_type="text/markdown",
     install_requires=['numpy>=1.24.0', 'matplotlib>=3.6.2',
                       'pandas>=1.5.2', 'seaborn>=0.12.1',
-                      'gymnasium==0.28.1', 'stable-baselines3[extra]>=1.8.0',
+                      'gymnasium==0.28.1', 'stable-baselines3[extra]>=2.0.0a10',
                       'pyzmq>=24.0.1', 'pyyaml>=5.4.1', 'tensorboard>=2.7.0', 'dvc', 'click',
-                      'scipy', 'pymc>=4.0.1', 'sb3-contrib', 'ruff', 'pytest'
+                      'scipy', 'pymc>=4.0.1', 'sb3-contrib', 'ruff', 'pytest', 'pytest-cov'
                       ],
     python_requires=">=3.9",
     classifiers=['Operating System :: ubuntu',

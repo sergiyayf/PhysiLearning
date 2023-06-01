@@ -52,6 +52,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/evaluation.html">Model Evaluation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/sec_reinforcement_learning.html">Reinforcement Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/sec_code_reference.html">Code reference</a></li>
 </ul>
@@ -137,6 +138,7 @@
         <span class="c1"># Spaces</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;LvEnv&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">Discrete</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_type</span> <span class="o">=</span> <span class="s1">&#39;number&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="n">Box</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">high</span><span class="o">=</span><span class="n">normalize_to</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
 
         <span class="c1"># Parameters</span>
@@ -181,7 +183,7 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yaml_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">max_tumor_size</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;threshold_burden&#39;</span><span class="p">],</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">max_tumor_size</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;max_tumor_size&#39;</span><span class="p">],</span>
                    <span class="n">max_time</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;max_time&#39;</span><span class="p">],</span>
                    <span class="n">initial_wt</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;LV&#39;</span><span class="p">][</span><span class="s1">&#39;initial_wt&#39;</span><span class="p">],</span>
                    <span class="n">treatment_time_step</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">][</span><span class="s1">&#39;treatment_time_step&#39;</span><span class="p">],</span>
