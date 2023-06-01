@@ -1,5 +1,5 @@
 # PhysiLearning
-
+![example workflow](https://github.com/sergiyaf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)
 PhysiLearning is a project on Adaptive Therapy (AT) using reinforcement learning and PhysiCell simulations.
 
 More descriptive docs will come later.
@@ -14,4 +14,3 @@ bin directory contains shell scripts for job submission, and some additional thi
 Use 'single_env_job.sh' for training with one environment, and multiple_env.. for vector environment job. 
 
 Thing will be added to the config.yaml file, so it contains all the necessary configurations for to train the agent. Very likely that PhysiCell simulations will still be configured with the PhysiCell_settings.xml . 
-
