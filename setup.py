@@ -10,7 +10,28 @@ name = 'physilearning'
 year = '2023'
 url = ''
 version = '0.0.0'
+extra_no_roms = [
+    # For render
+    "opencv-python",
+    'pygame; python_version >= "3.8.0"',
+    # See https://github.com/pygame/pygame/issues/3572
+    'pygame>=2.0,<2.1.3; python_version < "3.8.0"',
+    # Tensorboard support
+    "tensorboard>=2.9.1",
+    # Checking memory taken by replay buffer
+    "psutil",
+    # For progress bar callback
+    "tqdm",
+    "rich",
+    # For atari games,
+    "shimmy[atari]~=0.2.1",
+    "pillow",
+]
 
+extra_packages = extra_no_roms + [  # noqa: RUF005
+    # For atari roms,
+    "autorom[accept-rom-license]~=0.6.0",
+]
 setup(
     name=name,
     author=author,
@@ -56,7 +77,9 @@ setup(
             "sphinx-autodoc-typehints",
             # Copy button for code snippets
             "sphinx_copybutton",
-        ]
+        ],
+        "extra": extra_packages,
+        "extra_no_roms": extra_no_roms,
     },
     python_requires=">=3.8",
     classifiers=['Operating System :: ubuntu',
