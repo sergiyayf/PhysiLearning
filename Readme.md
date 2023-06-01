@@ -15,5 +15,3 @@ Use 'single_env_job.sh' for training with one environment, and multiple_env.. fo
 
 Thing will be added to the config.yaml file, so it contains all the necessary configurations for to train the agent. Very likely that PhysiCell simulations will still be configured with the PhysiCell_settings.xml . 
 
-
-

@@ -2,6 +2,10 @@
 .env
 .venv
 .idea
+.coverage
+.pytest_cache
+.ruff_cache
+.coverage.*
 env/
 venv/
 
@@ -17,6 +21,7 @@ images/
 PhysiCell_V_1.10.4/output
 Training/
 Evaluations/
+coverage_html_report/
 
 # SVGs 
 *.svg
