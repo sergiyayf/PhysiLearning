@@ -22,7 +22,7 @@ def test_env_creation(env_type):
     env = EnvClass()
     assert env is not None
 
-
+@pytest.mark.skip(reason="requires pc env run")
 @pytest.mark.parametrize('env_type', ['PcEnv', 'LvEnv', 'GridEnv'])
 def test_env_reset(env_type):
     """
@@ -42,6 +42,7 @@ def test_env_reset(env_type):
     obs = env.reset()
     assert obs is not None
 
+@pytest.mark.skip(reason="requires pc env run")
 @pytest.mark.parametrize('env_type', ['PcEnv', 'LvEnv', 'GridEnv'])
 def test_env_step(env_type):
     """
