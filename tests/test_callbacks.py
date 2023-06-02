@@ -7,7 +7,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 import os
 import pytest
 
-@pytest.skip(reason='Not implemented yet')
+@pytest.mark.skip(reason='Not implemented yet')
 def test_copy_config_callback():
     """
     Test the CopyConfigCallback
