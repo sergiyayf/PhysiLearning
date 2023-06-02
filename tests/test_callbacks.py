@@ -4,6 +4,7 @@ from physilearning.train import Trainer, make_env
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 import os
+from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 import pytest
 
 def test_copy_config_callback():
@@ -32,6 +33,7 @@ def test_save_on_best_training_reward_callback():
     command = f'cp ./tests/test_cfg.yaml ./test_cfg.yaml'
     os.system(command)
     env = DummyVecEnv([make_env(LvEnv, config_file='test_cfg.yaml')])
+    env = VecMonitor(env, './Training/Logs')
     model = PPO('MlpPolicy', env, verbose=1)
     # train the model
     model.learn(total_timesteps=100,
