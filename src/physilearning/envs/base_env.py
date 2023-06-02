@@ -1,6 +1,6 @@
 # Base environment class for all environments
 import yaml
-from gymnasium import Env
+from gym import Env
 from typing import Optional
 
 class BaseEnv(Env):

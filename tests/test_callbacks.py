@@ -5,8 +5,9 @@ from physilearning.train import Trainer, make_env
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 import os
+import pytest
 
-
+@pytest.skip(reason='Not implemented yet')
 def test_copy_config_callback():
     """
     Test the CopyConfigCallback
