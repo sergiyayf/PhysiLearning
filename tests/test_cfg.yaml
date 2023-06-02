@@ -1,5 +1,6 @@
 # global configuration
 global:
+  machine: 'mela' # 'mela' # 'raven'
   transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
   transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
   evaluate_after: 0
@@ -9,29 +10,29 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 8
-  time: '10:00:00'
+  cpus-per-task: 20
+  time: '14:00:00'
   agent_buffer: 1
 
 # Reinforcement learning configuration
 learning:
-  # Model options
+  # Model options 
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 512
+      n_steps: 1024
       verbose: 1
-      ent_coef: 0.005
-      clip_range: 0.02
-      learning_rate: 1.e-4
-    total_timesteps: 1.e+6
-    save_freq: 5.e+4
-    model_save_prefix: '0418_stacked_image_PC_test'
+      ent_coef: 0.002
+      clip_range: 0.005
+      learning_rate: 5.e-5
+    total_timesteps: 100
+    save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
+    model_save_prefix: '0508_gridenv_last_try_to_fix'
     load:
-      enable_loading: 0
+      enable_loading: 1 
       last_model: 0
-      saved_model_name: './Training/SavedModels/12_PPO_LV_tra_dont_treat_3_load_survive_2200000_steps'
+      saved_model_name: './data/gm_cnn_trained/Training/SavedModels/0504_raven_gridenv_best_reward'
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64
@@ -39,25 +40,28 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'GridEnv' # 'PcEnv' # 'LVEnv' # 'GridEnv'
+  type: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 1
-  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack'
+  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
-  reward_shaping: 0  # reward shaping flag for some predefined rewards
+  reward_shaping: 5  # reward shaping flag for some predefined rewards
 
   # general simulation settings
-  threshold_burden: 1000
-  treatment_time_step: 1
+  max_tumor_size: 2000
+  treatment_time_step: 1 
   max_time: 1000
-  normalize: 1
-  normalize_to: 1000
+  normalize: 0
+  normalize_to: 2000
+  observation_type: 'image' # 'image' # 'number'
+  action_type: 'discrete' # 'discrete' # 'continuous'
+  image_size: 84
 
   # LV environment settings
   LV:
-    initial_wt: 2490
+    initial_wt: 249
     initial_mut: 10
     carrying_capacity: 7500
     growth_rate_wt: 0.0357 #0.0175
@@ -77,16 +81,16 @@ env:
         value: 'true'
     number_of_susceptible_cells:
         parent_nodes: ['user_parameters']
-        value: 99
+        value: 995
     number_of_resistant_cells:
         parent_nodes: ['user_parameters']
-        value: 1
+        value: 5
     enable_chkpt:
         parent_nodes: ['user_parameters']
-        value: 'false'
+        value: 'true'
     filename_chkpt:
         parent_nodes: ['user_parameters']
-        value: './../presims/test_patient/output00000003'
+        value: './../presims/long_train_test_patient/final'
     treatment_time_step:
         parent_nodes: ['user_parameters']
         value: 60
@@ -96,18 +100,15 @@ env:
 
   # LatticeBased environment settings
   GridEnv:
-    grid_size: 36
-    observation_type: 'image'
-    action_type: 'discrete'
     initial_wt: 1
     initial_mut: 1
-    wt_growth_rate: 0.1
-    mut_growth_rate: 0.02
-    wt_death_rate: 0.002
-    mut_death_rate: 0.002
-    wt_treat_death_rate: 0.02
+    wt_growth_rate: 0.25
+    mut_growth_rate: 0.09
+    wt_death_rate: 0.01
+    mut_death_rate: 0.004
+    wt_treat_death_rate: 0.5
     mut_treat_death_rate: 0.00
-    cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random'
+    cell_positioning: 'load' # 'surround_mutant' # 'random' # 'load'
 
 
 # evaluation configuration
@@ -115,10 +116,11 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: '0418_stacked_image_PC_test'
+  model_prefix: '0507_gridenv_1env_full_node_rew5'
   fixed_AT_protocol: 0
+  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   num_episodes: 1
-  step_to_load: '_300000_steps'
-  save_name: '0418_test_from_file'
+  step_to_load: '_best_reward'
+  save_name: 'mtd'
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

@@ -1,5 +1,5 @@
-from gymnasium import Env
-from gymnasium.spaces import Discrete, Box
+from gym import Env
+from gym.spaces import Discrete, Box
 import numpy as np
 import subprocess
 import zmq

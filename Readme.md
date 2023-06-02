@@ -1,6 +1,8 @@
 # PhysiLearning
 [![CI](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
+[![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
+![version](https://img.shields.io/badge/version-0.0.7-blue)
+
 PhysiLearning is a project on Adaptive Therapy (AT) using reinforcement learning and PhysiCell simulations.
 
 More descriptive docs will come later.
