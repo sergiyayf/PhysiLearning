@@ -22,8 +22,8 @@ def test_env_creation(env_type):
     env = EnvClass()
     assert env is not None
 
-@pytest.mark.skip(reason="requires pc env run")
-@pytest.mark.parametrize('env_type', ['PcEnv', 'LvEnv', 'GridEnv'])
+
+@pytest.mark.parametrize('env_type', ['LvEnv', 'GridEnv'])
 def test_env_reset(env_type):
     """
     Test environment reset.
@@ -42,8 +42,8 @@ def test_env_reset(env_type):
     obs = env.reset()
     assert obs is not None
 
-@pytest.mark.skip(reason="requires pc env run")
-@pytest.mark.parametrize('env_type', ['PcEnv', 'LvEnv', 'GridEnv'])
+
+@pytest.mark.parametrize('env_type', ['LvEnv', 'GridEnv'])
 def test_env_step(env_type):
     """
     Test environment step.
@@ -66,26 +66,26 @@ def test_env_step(env_type):
     assert reward is not None
     assert done is not None
 
-@pytest.mark.skip(reason="test_cfg fails")
+
 def test_pc_env_from_yaml():
     """
     Test environment creation from yaml file.
     """
-    with open('test_cfg.yaml', 'r') as f:
+    with open('./tests/test_cfg.yaml', 'r') as f:
         config = yaml.safe_load(f)
-    env = PcEnv.from_yaml('test_cfg.yaml')
+    env = PcEnv.from_yaml('./tests/test_cfg.yaml')
     assert env is not None
 
-    assert env.initial_wt == config['envs']['number_of_susceptible_cells']['value']
+    assert env.initial_wt == config['env']['PC']['number_of_susceptible_cells']['value']
 
-@pytest.mark.skip(reason="Not implemented")
+
 def test_grid_env_from_yaml():
     """
     Test environment creation from yaml file.
     """
-    with open('test_cfg.yaml', 'r') as f:
+    with open('./tests/test_cfg.yaml', 'r') as f:
         yaml.safe_load(f)
-    env = GridEnv.from_yaml('test_cfg.yaml')
+    env = GridEnv.from_yaml('./tests/test_cfg.yaml')
     assert env is not None
 
 
