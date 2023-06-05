@@ -15,12 +15,11 @@ class DontWrapError(Exception):
     """Exception raised when the environment is wrapped for fixed adaptive therapy"""
     pass
 
-def fixed_at(obs: np.ndarray, environment: LvEnv or PcEnv or GridEnv,
+def fixed_at(environment: LvEnv or PcEnv or GridEnv,
              threshold: float = .5, at_type: str = 'fixed') -> int:
     """ 
     Cycling adaptive therapy strategy, applies treatment only if the tumor burden is above a threshold
 
-    :param obs: observation from the environment
     :param environment: environment
     :param threshold: threshold for the tumor burden
     :param at_type: type of adaptive therapy strategy
@@ -143,7 +142,7 @@ class Evaluation:
 
             while not done:
                 if fixed_therapy:
-                    action = fixed_at(obs, self.env, **fixed_therapy_kwargs)
+                    action = fixed_at(self.env, **fixed_therapy_kwargs)
                 else:
                     action, _state = model.predict(obs, deterministic=True)
                 if self._is_venv():
@@ -200,13 +199,12 @@ class Evaluation:
         return
 
 
-def evaluate() -> None:
+def evaluate(config_file = 'config.yaml') -> None:
     """
     Evaluate the trained model based on the evaluation specs in the config file
     """
 
     # configure evaluation
-    config_file = 'config.yaml'
     with open(config_file, 'r') as f:
         general_config = yaml.load(f, Loader=yaml.FullLoader)
         # define paths and load others from config
@@ -258,4 +256,4 @@ def evaluate() -> None:
 
 
 if __name__ == '__main__':
-    evaluate()
+    evaluate(config_file = 'config.yaml')

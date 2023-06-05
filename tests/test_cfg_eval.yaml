@@ -42,7 +42,7 @@ env:
   # general env settings
   type: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 1
+  wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -114,13 +114,13 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
-  model_prefix: '0507_gridenv_1env_full_node_rew5'
-  fixed_AT_protocol: 0
+  model_prefix: 'test'
+  fixed_AT_protocol: 1
   at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   num_episodes: 1
   step_to_load: '_best_reward'
-  save_name: 'mtd'
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  save_name: '_test'
+  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

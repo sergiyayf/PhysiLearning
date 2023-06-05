@@ -24,6 +24,7 @@ def test_copy_config_callback():
     #os.system('rm ./Training/Configs/test_cfg.yaml')
     # remove the logs
     os.system('rm -r ./Training/Logs/test*')
+    os.system('rm ./test_cfg.yaml')
 
 def test_save_on_best_training_reward_callback():
     """
@@ -47,4 +48,5 @@ def test_save_on_best_training_reward_callback():
     os.system('rm -r ./Training/Logs/test*')
     # remove the model
     os.system('rm ./Training/Models/test_best_reward.zip')
+    os.system('rm ./test_cfg.yaml')
 

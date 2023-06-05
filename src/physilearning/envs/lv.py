@@ -32,6 +32,7 @@ class LvEnv(BaseEnv):
 
     def __init__(
         self,
+        observation_type: str = 'number',
         max_tumor_size: float = 1000,
         max_time: int = 3000,
         carrying_capacity: float = 1500,
@@ -54,7 +55,10 @@ class LvEnv(BaseEnv):
         # Spaces
         self.name = 'LvEnv'
         self.action_space = Discrete(2)
-        self.observation_type = 'number'
+        if observation_type == 'number':
+            self.observation_type = observation_type
+        else:
+            raise NotImplementedError
         self.observation_space = Box(low=0,high=normalize_to,shape=(1,))
 
         # Parameters

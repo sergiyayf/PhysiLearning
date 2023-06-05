@@ -3,17 +3,40 @@
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
 ![version](https://img.shields.io/badge/version-0.0.7-blue)
 
-PhysiLearning is a project on Adaptive Therapy (AT) using reinforcement learning and PhysiCell simulations.
+PhysiLearning is a project in applying Reinforcement Learning to improve evolution based therapies
+considering physical cell-cell interactions. This repository is mainly build on two great open source platforms:
+PhysiCell - for simulating tumor growth, and Stable Baselines 3 - for reinforcement learning.
 
-More descriptive docs will come later.
+## Installation
+Clone the repository and install the main package with pip
+```bash
+git clone
+cd PhysiLearning
+pip install -e .
+```
 
-Currently code is not cross-platform, and only works on Linux HPC and has a lot of dependecies: stable-baselines 3 and ZMQ. 
-...
+You will also need to install ZMQ cpp library. On Ubuntu:
+```bash
+sudo apt-get install libzmq-dev
+```
 
 ## Usage 
 
-bin directory contains shell scripts for job submission, and some additional things to prep your job
+Usage of the package is aimed to be user-friendly and require minimal coding.
+Most of the configuration is done through the config.yaml file that controls 
+both the environment(simulation) and the agent.
 
-Use 'single_env_job.sh' for training with one environment, and multiple_env.. for vector environment job. 
+See the config.yaml file for more details on the configuration, it should be self-explanatory.
 
-Thing will be added to the config.yaml file, so it contains all the necessary configurations for to train the agent. Very likely that PhysiCell simulations will still be configured with the PhysiCell_settings.xml . 
+### Training
+To train the agent on ubuntu with installed slurm queuing system, run the following command:
+```bash
+python run.py train
+```
+
+### Evaluation
+To evaluate the agent, run the following command:
+```bash
+python run.py evaluate
+```
+

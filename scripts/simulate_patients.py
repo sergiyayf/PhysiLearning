@@ -78,19 +78,19 @@ def main(jobid, taskid):
     for i in range(0, n_full_treatment_runs):
         env = PC_env.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
         evaluation = Evaluation(env)
-        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='./', type='fixed', threshold=.0)
+        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='../src/physilearning/', type='fixed', threshold=.0)
     for i in range(0, n_no_treatment_runs):
         env = PC_env.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
         evaluation = Evaluation(env)
-        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='./', type='fixed', threshold=1.)
+        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='../src/physilearning/', type='fixed', threshold=1.)
     for i in range(0, n_adaptive_runs):
         env = PC_env.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
         evaluation = Evaluation(env)
-        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='./', type='fixed', threshold=.50)
+        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='../src/physilearning/', type='fixed', threshold=.50)
     for i in range(0, n_random_runs):
         env = PC_env.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
         evaluation = Evaluation(env)
-        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='./', type='random', threshold=.05)
+        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='../src/physilearning/', type='random', threshold=.05)
 def test_job_array(jobid, taskid):
     for i in range(1, 3):
         print(f'jobid: {jobid}, taskid: {taskid}, i: {i}')
@@ -98,7 +98,7 @@ def test_job_array(jobid, taskid):
         env = PC_env.from_yaml(config_file, port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
         print('env_job_name: ', env.job_name)
         evaluation = Evaluation(env)
-        evaluation.run_AT(num_episodes=1, name=f'AT_{jobid}_{taskid}_{i}', path='./')
+        evaluation.run_AT(num_episodes=1, name=f'AT_{jobid}_{taskid}_{i}', path='../src/physilearning/')
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ from physilearning.envs import PcEnv, GridEnv
 import yaml
 
 
-@pytest.mark.parametrize('env_type', ['PcEnv', 'LvEnv', 'GridEnv'])
+@pytest.mark.parametrize('env_type', ['LvEnv', 'GridEnv'])
 def test_env_creation(env_type):
     """
     Test environment creation.
@@ -67,6 +67,7 @@ def test_env_step(env_type):
     assert done is not None
 
 
+@pytest.mark.skip(reason="runs physicell")
 def test_pc_env_from_yaml():
     """
     Test environment creation from yaml file.

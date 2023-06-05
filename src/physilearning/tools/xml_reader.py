@@ -92,3 +92,29 @@ class CfgRead:
         tree.write(xml_file)
         return
 
+
+    def read_value(self, parent_nodes = ['save', 'SVG'], parameter="enable"):
+        """
+        Read value of parameter in the xml file
+
+        Parameters
+        ----------
+        parameter: str
+                name of the parameter to be rewritten
+
+        value: str
+                value of the parameter to be written to the xml file
+
+        """
+        xml_file = self._file
+        tree = ET.parse(xml_file)
+
+        current_node = tree.getroot()
+        for node in parent_nodes:
+            current_node = current_node.find(node)
+
+        # Find child node of interest and rewrite it
+        node = current_node.find(parameter)
+        #print("node value before = ",node_value)
+        return node.text
+
