@@ -1,4 +1,3 @@
-# imports
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
@@ -6,44 +5,29 @@ import matplotlib.pyplot as plt
 
 class ODEModel:
     """
-    ODE model class for the Lotka-Volterra equations or other simulatuion models.
+    ODE model class for the Lottka-Volterra equations or other simulatuion models.
 
-    Attributes
-    ----------
-    rhs : function
-        The right-hand side of the ODE system.
-    y0 : list or array-like
-        The initial conditions for the state variables.
-    params : list or array-like
-        The parameter values for the Lotka-Volterra equations.
-    time : array-like
-        The time points at which to evaluate the solution.
-    treatment_schedule : list or array-like
-        The time at which to apply the treatment.
-    dt : float
-        The time step for the ODE solver.
+    :param y0: Initial conditions for the state variables. Array-like of length 2.
+    :param params: Parameter values for the Lotka-Volterra equations. Array-like of length 4.
+    :param tmin: Minimum time value for the simulation. Default is 0.
+    :param tmax: Maximum time value for the simulation. Default is 100.
+    :param dt: Time step for the ODE solver. Default is 0.1.
+    :param treatment_schedule: Time at which to apply the treatment. Default is None.
+    :param time: Time points at which to evaluate the solution. Default is None.
+
+    :ivar rhs: The right-hand side of the ODE system.
+
     """
     def __init__(
             self,
-            y0: list = [0.045, 0.005],
-            params: list = [0.0357, 0.0325, 0.0003, 0.0003],
+            y0: list or np.ndarray or tuple = (0.045, 0.005),
+            params: list or np.ndarray or tuple = (0.0357, 0.0325, 0.0003, 0.0003),
             tmin: int = 0,
             tmax: int = 100,
             dt: float = 0.1,
             treatment_schedule: list = None,
-            time: list = None):
-        """Initialize the ODEModel class.
-
-        Parameters
-        ----------
-
-        y0 : list or array-like
-            The initial conditions for the state variables.
-        params : list or array-like
-            The parameter values for the Lotka-Volterra equations.
-        time : array-like
-            The time points at which to evaluate the solution.
-        """
+            time: list = None
+    ) -> None:
         self.rhs = self.LV
         self.y0 = y0
         self.params = params
@@ -61,15 +45,12 @@ class ODEModel:
         self.const = {'c_x': 1, 'c_y': 1, 'K': 1.5, 'Delta_y': 0, 'Delta_x': 0.15}
 
     def __call__(self, *args):
-        return self.rhs(self.y0, self.time, self.params, *args)
+        return self.rhs(self.y0, self.time, self.params)
 
     def get_treatment_intervals(self):
         """Get treatment intervals from treatment schedule
 
-        Returns
-        -------
-        intervals : array-like
-            The intervals of the treatment schedule.
+        :return: Array of intervals where treatment is applied
         """
         if self.treatment_schedule is None:
             return None
@@ -84,27 +65,17 @@ class ODEModel:
             intervals = np.stack((indices[:-1], indices[1:]), axis=-1)
             return intervals
 
-
     def LV(self, t, X, theta):
         """
         Define the Lotka-Volterra equations.
 
-        Parameters
-        ----------
-        t : float or array-like
-            The current time.
-        X : list or array-like
-            The current values of the state variables.
-        theta : list or array-like
-            The parameter values for the Lotka-Volterra equations.
+        :param t: Time points at which to evaluate the solution.
+        :param X: State variables.
+        :param theta: Parameters for the Lotka-Volterra equations.
+        :return: The right-hand side of the Lotka-Volterra equations.
 
-        Returns
-        -------
-        list
-            The derivatives of the state variables at the current time.
         """
-        # unpack parameters
-        # resistant and susceptible populations
+        # unpack resistant and susceptible populations
         x, y = X
         # growth and death rates
         r_x, r_y, delta_x, delta_y = theta
@@ -127,10 +98,7 @@ class ODEModel:
         """
         Solve the Lotka-Volterra model for the given time points.
 
-        Returns
-        -------
-        array-like
-            The solution to the Lotka-Volterra model at the given time points.
+        :return: The solution to the Lotka-Volterra model at the given time points.
         """
 
         # define solution array to append to
@@ -151,11 +119,11 @@ class ODEModel:
             if treat == 1:
                 self.treatment = 1
                 sol = self.solve(time)
-                solution = np.append(solution,sol[1:],axis=0)
+                solution = np.append(solution, sol[1:], axis=0)
             elif treat == 0:
                 self.treatment = 0
                 sol = self.solve(time)
-                solution = np.append(solution,sol[1:],axis=0)
+                solution = np.append(solution, sol[1:], axis=0)
             self.y0 = solution[-1]
 
         return solution
@@ -164,49 +132,30 @@ class ODEModel:
         """
         Solve the Lotka-Volterra model for the given time points.
 
-        Parameters
-        ----------
-        time : array-like
-            The time points at which to evaluate the solution.
+        :param time: Time points at which to evaluate the solution.
+        :return: The solution to the Lotka-Volterra model at the given time points.
 
-        Returns
-        -------
-        array-like
-            The solution to the Lotka-Volterra model at the given time points.
         """
 
         return solve_ivp(fun=self.rhs,
-            y0=self.y0,
-            t_span=[time[0], time[-1]],
-            args=(self.params,),
-            dense_output=True,
-        ).sol(time).T
+                         y0=self.y0,
+                         t_span=[time[0], time[-1]],
+                         args=(self.params,),
+                         dense_output=True,
+                         ).sol(time).T
 
     def plot_model(self, ax=None, solution=None, alpha=0.8, lw=2, title="Lotka-Volterra Model"):
         """
         Plot the Lotka-Volterra model.
 
-        Parameters
-        ----------
-        ax : matplotlib.axes._subplots.AxesSubplot, optional
-            The axis object to use for the plot. If not provided, a new axis object is created.
-        time : array-like, optional
-            The time points at which to evaluate the solution.
-        alpha : float, optional
-            The alpha value for the plot lines.
-        lw : float, optional
-            The line width for the plot lines.
-        title : str, optional
-            The title of the plot.
-
-        Returns
-        -------
-        matplotlib.axes._subplots.AxesSubplot
-            The axis object used for the plot.
+        :param ax: Axis on which to plot the model.
+        :param solution: Solution to the Lotka-Volterra model.
+        :param alpha: Alpha value for the plot.
+        :param lw: Line width for the plot.
+        :param title: Title for the plot.
+        :return: Axis with the plot.
         """
 
-        import matplotlib as mpl
-        mpl.use('TkAgg')
         if solution is None:
             x_y = self.solve(self.time)
         else:
@@ -218,24 +167,3 @@ class ODEModel:
         ax.legend(fontsize=14, loc="center left", bbox_to_anchor=(1, 0.5))
         ax.set_title(title, fontsize=16)
         return ax
-
-if __name__ == "__main__":
-    # create an instance of the ODEModel class
-
-    # solve the model
-    treatment_schedule = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0])
-    model = ODEModel(tmax=22, treatment_schedule=treatment_schedule,dt=1)
-
-    time = model.time
-    solution = model.solve(model.time)
-    sol2 = model.simulate()
-
-    model.plot_model(solution=solution)
-    model.plot_model(solution=sol2)
-    fig, ax = plt.subplots()
-    model.plot_model(ax=ax, solution=sol2)
-
-    noise = np.random.normal(0, 0.001, size=solution.shape)
-    sol2 += noise
-    ax.scatter(time, sol2[:, 0], label='x')
-    ax.scatter(time, sol2[:, 1], label='y')
