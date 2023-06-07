@@ -1,8 +1,6 @@
 # imports
 import numpy as np
 from scipy.integrate import solve_ivp
-import matplotlib as mpl
-mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
 
@@ -206,6 +204,9 @@ class ODEModel:
         matplotlib.axes._subplots.AxesSubplot
             The axis object used for the plot.
         """
+
+        import matplotlib as mpl
+        mpl.use('TkAgg')
         if solution is None:
             x_y = self.solve(self.time)
         else:
