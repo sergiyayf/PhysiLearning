@@ -7,7 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import seaborn as sns
-
+from physicell_tools import pyMCDS
+import pandas as pd
 
 def grid_env_sand():
     # setup environment
@@ -69,7 +70,7 @@ def boxplots():
     ax.legend()
     fig.savefig('./boxplot_compare_different_strategies.pdf', transparent=True)
 
-if __name__ == '__main__':
+def main():
     fig, ax = plt.subplots()
     filename = 'Evaluations/0_PcEnvEval0507_gridenv_1env_full_node_rew5_image_trajectory.npy'
     ani = animate(filename, fig, ax)
@@ -81,3 +82,14 @@ if __name__ == '__main__':
     # ani2 = animate(filename2, fig2, ax2)
 
     plt.show()
+
+
+if __name__ == '__main__':
+    hdf_file = 'test_file.h5'
+    cells_0 = pd.read_hdf(hdf_file, key='cell_info_00')
+    #
+    # time_frames = range(0, 20, 1)
+    # for t in time_frames:
+    #     pymc = pyMCDS.pyMCDS('output000000{:02d}.xml'.format(t) ,'simulations/PhysiCell_V_1.10.4_0/output')
+    #     cell_info = pymc.get_cell_df()
+    #     cell_info.to_hdf(hdf_file, key='cell_info_{:02d}'.format(t))

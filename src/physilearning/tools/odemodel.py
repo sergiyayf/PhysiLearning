@@ -5,6 +5,7 @@ import matplotlib as mpl
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
+
 class ODEModel:
     """
     ODE model class for the Lotka-Volterra equations or other simulatuion models.
@@ -15,16 +16,24 @@ class ODEModel:
         The right-hand side of the ODE system.
     y0 : list or array-like
         The initial conditions for the state variables.
-    theta : list or array-like
+    params : list or array-like
         The parameter values for the Lotka-Volterra equations.
     time : array-like
         The time points at which to evaluate the solution.
-    treatment_time : float
+    treatment_schedule : list or array-like
         The time at which to apply the treatment.
     dt : float
         The time step for the ODE solver.
     """
-    def __init__(self, y0=[0.045, 0.005], params=[0.0357, 0.0325, 0.0003, 0.0003], tmin=0, tmax=100, dt=0.1, treatment_schedule=None, time=None):
+    def __init__(
+            self,
+            y0: list = [0.045, 0.005],
+            params: list = [0.0357, 0.0325, 0.0003, 0.0003],
+            tmin: int = 0,
+            tmax: int = 100,
+            dt: float = 0.1,
+            treatment_schedule: list = None,
+            time: list = None):
         """Initialize the ODEModel class.
 
         Parameters
@@ -32,7 +41,7 @@ class ODEModel:
 
         y0 : list or array-like
             The initial conditions for the state variables.
-        theta : list or array-like
+        params : list or array-like
             The parameter values for the Lotka-Volterra equations.
         time : array-like
             The time points at which to evaluate the solution.
@@ -76,30 +85,7 @@ class ODEModel:
             # create intervals of consecutive indices
             intervals = np.stack((indices[:-1], indices[1:]), axis=-1)
             return intervals
-    def _LV(self, t, X, theta):
-        """
-        Define the Lotka-Volterra equations.
 
-        Parameters
-        ----------
-        t : float
-            The current time.
-        X : list or array-like
-            The current values of the state variables.
-        theta : list or array-like
-            The parameter values for the Lotka-Volterra equations.
-
-        Returns
-        -------
-        list
-            The derivatives of the state variables at the current time.
-        """
-        x, y = X
-        alpha, beta, gamma, delta = theta
-        # equations
-        dx_dt = alpha * x - beta * x * y
-        dy_dt = -gamma * y + delta * x * y
-        return [dx_dt, dy_dt]
 
     def LV(self, t, X, theta):
         """
