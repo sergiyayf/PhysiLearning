@@ -1,6 +1,6 @@
 #!/bin/bash -l
 # specify the indexes (max. 30000) of the job array elements (max. 300 - the default job submit limit per user)
-#SBATCH --array=1-10
+#SBATCH --array=1-3
 # Standard output and error:
 #SBATCH -o ./logs/Out_job_%A_%a.out        # Standard output, %A = job ID, %a = job array index
 #SBATCH -e ./logs/Err_job_%A_%a.err        # Standard error, %A = job ID, %a = job array index
@@ -30,4 +30,4 @@ module load anaconda/3/plvenv
 #  the environment variable $SLURM_ARRAY_TASK_ID holds the index of the job array and
 #  can be used to discriminate between individual elements of the job array
 
-srun --exclusive --cpus-per-task=10  python3 ./src/physilearning/simulate_patients.py --jobid=${SLURM_JOBID} --taskid=${SLURM_ARRAY_TASK_ID}
+srun --exclusive --cpus-per-task=10  python3 ./scripts/simulate_patients.py --jobid=${SLURM_JOBID} --taskid=${SLURM_ARRAY_TASK_ID}

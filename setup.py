@@ -9,7 +9,7 @@ description = 'A package for reinforcement learning in adaptive therapy'
 name = 'physilearning'
 year = '2023'
 url = ''
-version = '0.0.7'
+version = '0.0.8'
 
 setup(
     name=name,
@@ -34,5 +34,5 @@ setup(
     classifiers=['Operating System :: ubuntu',
                  'Programming Language :: Python :: 3',
                  ],
-    platforms=['ALL'],
+    platforms=['Linux'],
 )

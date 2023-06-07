@@ -42,7 +42,7 @@ env:
   # general env settings
   type: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 1
+  wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -87,7 +87,7 @@ env:
         value: 5
     enable_chkpt:
         parent_nodes: ['user_parameters']
-        value: 'true'
+        value: 'false'
     filename_chkpt:
         parent_nodes: ['user_parameters']
         value: './../presims/long_train_test_patient/final'
@@ -122,5 +122,5 @@ eval:
   num_episodes: 1
   step_to_load: '_best_reward'
   save_name: 'mtd'
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

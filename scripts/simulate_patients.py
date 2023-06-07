@@ -1,5 +1,5 @@
 # imports
-from physilearning.envs.PC_environment import PC_env
+from physilearning.envs import PcEnv
 import numpy as np
 import pandas as pd
 import click
@@ -70,35 +70,13 @@ class Evaluation():
 @click.option('--taskid', default=1, help='ID of the task')
 def main(jobid, taskid):
     # do n Runs of different treatments
-    n_full_treatment_runs = 2
-    n_no_treatment_runs = 2
-    n_adaptive_runs = 2
-    n_random_runs = 2
 
-    for i in range(0, n_full_treatment_runs):
-        env = PC_env.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
-        evaluation = Evaluation(env)
-        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='../src/physilearning/', type='fixed', threshold=.0)
+    n_no_treatment_runs = 1
+
     for i in range(0, n_no_treatment_runs):
-        env = PC_env.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
+        env = PcEnv.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
         evaluation = Evaluation(env)
         evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='../src/physilearning/', type='fixed', threshold=1.)
-    for i in range(0, n_adaptive_runs):
-        env = PC_env.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
-        evaluation = Evaluation(env)
-        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='../src/physilearning/', type='fixed', threshold=.50)
-    for i in range(0, n_random_runs):
-        env = PC_env.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
-        evaluation = Evaluation(env)
-        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='../src/physilearning/', type='random', threshold=.05)
-def test_job_array(jobid, taskid):
-    for i in range(1, 3):
-        print(f'jobid: {jobid}, taskid: {taskid}, i: {i}')
-        config_file = 'config.yaml'
-        env = PC_env.from_yaml(config_file, port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
-        print('env_job_name: ', env.job_name)
-        evaluation = Evaluation(env)
-        evaluation.run_AT(num_episodes=1, name=f'AT_{jobid}_{taskid}_{i}', path='../src/physilearning/')
 
 
 if __name__ == '__main__':

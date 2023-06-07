@@ -1,18 +1,18 @@
 from physilearning.envs import LvEnv
 from physilearning.callbacks import CopyConfigCallback, SaveOnBestTrainingRewardCallback
-from physilearning.train import Trainer, make_env
+from physilearning.train import make_env
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 import os
 from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
-import pytest
+
 
 def test_copy_config_callback():
     """
     Test the CopyConfigCallback
     """
     # create a LvEnv
-    command = f'cp ./tests/test_cfg.yaml ./test_cfg.yaml'
+    command = r'cp ./tests/test_cfg.yaml ./test_cfg.yaml'
     os.system(command)
     env = DummyVecEnv([make_env(LvEnv, config_file='test_cfg.yaml')])
     model = PPO('MlpPolicy', env, verbose=1)
@@ -21,17 +21,18 @@ def test_copy_config_callback():
     # check if the config file is copied to the Training/Configs folder
     assert os.path.exists('./Training/Configs/test_cfg.yaml')
     # remove the copied config file
-    #os.system('rm ./Training/Configs/test_cfg.yaml')
+    # os.system('rm ./Training/Configs/test_cfg.yaml')
     # remove the logs
     os.system('rm -r ./Training/Logs/test*')
     os.system('rm ./test_cfg.yaml')
+
 
 def test_save_on_best_training_reward_callback():
     """
     Test the SaveOnBestTrainingRewardCallback
     """
     # create a LvEnv
-    command = f'cp ./tests/test_cfg.yaml ./test_cfg.yaml'
+    command = r'cp ./tests/test_cfg.yaml ./test_cfg.yaml'
     os.system(command)
     env = DummyVecEnv([make_env(LvEnv, config_file='test_cfg.yaml')])
     env = VecMonitor(env, './Training/Logs')
@@ -49,4 +50,3 @@ def test_save_on_best_training_reward_callback():
     # remove the model
     os.system('rm ./Training/Models/test_best_reward.zip')
     os.system('rm ./test_cfg.yaml')
-
