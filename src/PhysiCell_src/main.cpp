@@ -247,15 +247,15 @@ int main( int argc, char* argv[] )
                 // do treatment or not
                 if (request.to_string() == "Treat") {
 			//std::cout<<"Treating"<<std::endl;
-                    //activate_drug_dc();
-		    treatment_on();
+                    activate_drug_dc();
+		    //treatment_on();
                 } else if (request.to_string() == "Stop treatment") {
 			//std::cout<<"Deactivating treatment"<<std::endl;
-                    //deactivate_drug_dc();
-		    treatment_off();
+                    deactivate_drug_dc();
+		    //treatment_off();
                 } else if (request.to_string() == "Start simulation") {
-                    //deactivate_drug_dc();
-		    treatment_off();
+                    deactivate_drug_dc();
+		    //treatment_off();
                 } else if (request.to_string() == "End simulation") {
 			
 			break;
