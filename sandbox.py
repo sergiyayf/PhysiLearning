@@ -83,13 +83,27 @@ def main():
 
     plt.show()
 
-
-if __name__ == '__main__':
+def physicell_h5_trying():
     hdf_file = 'test_file.h5'
     cells_0 = pd.read_hdf(hdf_file, key='cell_info_00')
     #
-    # time_frames = range(0, 20, 1)
-    # for t in time_frames:
-    #     pymc = pyMCDS.pyMCDS('output000000{:02d}.xml'.format(t) ,'simulations/PhysiCell_V_1.10.4_0/output')
-    #     cell_info = pymc.get_cell_df()
-    #     cell_info.to_hdf(hdf_file, key='cell_info_{:02d}'.format(t))
+    time_frames = range(0, 50, 1)
+    cell_counts = pd.DataFrame()
+    for t in time_frames:
+        #pymc = pyMCDS.pyMCDS('output000000{:02d}.xml'.format(t) ,'simulations/outputs/manual_AT_output')
+        #cell_info = pymc.get_cell_df()
+        cell_info = pd.read_hdf(hdf_file, key='cell_info_{:02d}'.format(t))
+        #cell_info.to_hdf(hdf_file, key='cell_info_{:02d}'.format(t))
+        cell_count_type0 = len(cell_info[cell_info["cell_type"]==0])
+        cell_count_type1 = len(cell_info[cell_info["cell_type"]==1])
+        # add counts to dataframe with time as index
+        cell_counts = pd.concat([cell_counts,
+                                 pd.DataFrame({'type0': cell_count_type0,
+                                               'type1': cell_count_type1}, index=[t])])
+
+    cell_counts.plot(y=['type0', 'type1'])
+    plt.show()
+
+if __name__ == '__main__':
+    pymc = pyMCDS.pyMCDS('output00000{:03d}.xml'.format(108) ,'../models_for_physicell/v12_pc/PhysiCell/output')
+    cell_info = pymc.get_cell_df()

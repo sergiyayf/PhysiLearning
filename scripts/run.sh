@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 SCRIPT_PATH=$(dirname "$0")
-cd ${SCRIPT_PATH}/../simulations/PhysiCell_V_1.10.4_${1} &&
+cd ${SCRIPT_PATH}/../simulations/PhysiCell_${1} &&
 while true
 do
     ./project ${2}
