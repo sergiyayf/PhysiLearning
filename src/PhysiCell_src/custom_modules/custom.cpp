@@ -93,10 +93,10 @@ void create_cell_types( void )
 	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
 	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
 	
- 	cell_defaults.parameters.o2_proliferation_saturation = 30;
-	cell_defaults.parameters.o2_proliferation_threshold = 8;	
-	cell_defaults.parameters.o2_necrosis_threshold = 2; 
-	cell_defaults.parameters.o2_necrosis_max = 0;
+ 	cell_defaults.parameters.o2_proliferation_saturation = 30.0;
+	cell_defaults.parameters.o2_proliferation_threshold = 8.0;
+	cell_defaults.parameters.o2_necrosis_threshold = 2.0;
+	cell_defaults.parameters.o2_necrosis_max = 0.0;
 	/*
 	   This parses the cell definitions in the XML config file. 
 	*/
@@ -134,8 +134,9 @@ void create_cell_types( void )
 	   This builds the map of cell definitions and summarizes the setup. 
 	*/
 	
-	Cell_Definition* pSensitive = find_cell_definition("sensitive"); 
-	pSensitive->functions.update_phenotype = susceptible_cell_phenotype_update_rule;	
+	Cell_Definition* pSensitive = find_cell_definition("sensitive");
+
+	pSensitive->functions.update_phenotype = susceptible_cell_phenotype_update_rule;
 	display_cell_definitions( std::cout ); 
 	
 	return; 
@@ -383,7 +384,7 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 /* Scuceptible cell rule */
 void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, double dt)
 {
-	update_cell_and_death_parameters_O2_based(pCell, phenotype, dt); 
+	update_cell_and_death_parameters_O2_based(pCell, phenotype, dt);
 	if( phenotype.death.dead == true )
 	{return;}
 	
@@ -391,7 +392,7 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 	 
 	if (phenotype.cycle.data.elapsed_time_in_phase < 1 && PhysiCell_globals.current_time > 10 ) {
 		int ind_resistant = 1;
-		if (UniformRandom() < parameters.doubles("mutation_rate")){
+		if (UniformRandom() < parameters.doubles("mutation_rate")/2){
 			pCell->convert_to_cell_definition(*cell_definitions_by_index[ind_resistant]);	
 		}
 	}

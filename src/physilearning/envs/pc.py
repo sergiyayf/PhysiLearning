@@ -44,6 +44,7 @@ class PcEnv(Env):
         transport_address: str = '/tmp/0',
         port: str = '0',
         job_name: str = '0000000',
+        cpu_per_task: int = 1,
     ) -> None:
         #################### Todo: move to base class ##################
         # Spaces
@@ -122,7 +123,7 @@ class PcEnv(Env):
                 self.socket.connect(f'{self.transport_type}localhost:5555')
                 self.transport_address = '5555'
         # reward shaping flag
-
+        self.cpu_per_task = cpu_per_task
         self._start_slurm_physicell_job_step()
 
     @classmethod
@@ -140,6 +141,7 @@ class PcEnv(Env):
         image_size = config['env']['image_size']
         transport_type = config['global']['transport_type']
         transport_address = config['global']['transport_address']
+        cpu_per_task = config['job']['cpus-per-task']
         if transport_type == 'ipc://':
             transport_address = f'{transport_address}{job_name}{port}'
         else:
@@ -150,7 +152,7 @@ class PcEnv(Env):
                    initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
                    transport_type=transport_type, transport_address=transport_address,
                    reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to,
-                   observation_type=observation_type, image_size=image_size)
+                   observation_type=observation_type, image_size=image_size, cpu_per_task=cpu_per_task)
 
     def _start_slurm_physicell_job_step(self) -> None:
         """
@@ -169,7 +171,7 @@ class PcEnv(Env):
             # p = subprocess.Popen(["start", "cmd", "/K", command], shell=True)
 
         else:
-            pc_cpus_per_task = 10
+            pc_cpus_per_task = self.cpu_per_task
             command = f"srun --ntasks=1 --exclusive --mem-per-cpu=100 " \
                       f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)

@@ -100,8 +100,8 @@ class Basic_Agent
 	Microenvironment* get_microenvironment( void ); 
 
 	int ID;
-    int parent_ID;
-    int index; 
+	int parent_ID;
+	int index; 
 	int type;
 	
 	bool assign_position(double x, double y, double z);

@@ -14,7 +14,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem=60MB
 # for OpenMP:
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=20
 #
 #SBATCH --mail-type=none
 #SBATCH --mail-user=serhii.aif@mpl.mpg.de
@@ -30,4 +30,4 @@ module load anaconda/3/plvenv
 #  the environment variable $SLURM_ARRAY_TASK_ID holds the index of the job array and
 #  can be used to discriminate between individual elements of the job array
 
-srun --exclusive --cpus-per-task=10  python3 ./scripts/simulate_patients.py --jobid=${SLURM_JOBID} --taskid=${SLURM_ARRAY_TASK_ID}
+srun --exclusive python3 ./scripts/simulate_patients.py --jobid=${SLURM_JOBID} --taskid=${SLURM_ARRAY_TASK_ID}

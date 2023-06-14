@@ -118,9 +118,9 @@ eval:
   path: './'
   model_prefix: '0507_gridenv_1env_full_node_rew5'
   fixed_AT_protocol: 1
-  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   num_episodes: 1
   step_to_load: '_best_reward'
-  save_name: 'mtd'
+  save_name: 'no_treat_test_v12'
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

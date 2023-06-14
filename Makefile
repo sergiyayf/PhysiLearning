@@ -12,7 +12,7 @@ doc:
 	cd docs && make html
 
 raven:
-	cd ./src/PhysiCell_V_1.10.4_src && make raven && make
+	cd ./src/PhysiCell_src && make raven && make
 
 mela:
-	cd ./src/PhysiCell_V_1.10.4_src && make mela && make
+	cd ./src/PhysiCell_src && make mela && make
