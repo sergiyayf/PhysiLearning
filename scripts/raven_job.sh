@@ -22,4 +22,4 @@ export LD_LIBRARY_PATH=/u/saif/soft/libzmq/lib:$LD_LIBRARY_PATH
 # for pinning threads correctly:
 export OMP_PLACES=threads
 # run a programm
-srun --ntasks=1 --exclusive --cpus-per-task=1 --mem-per-cpu=300 python ./src/physilearning/train.py ${SLURM_JOBID}
+srun --ntasks=1 --exclusive --cpus-per-task=3 --mem-per-cpu=1000 python ./src/physilearning/train.py ${SLURM_JOBID}

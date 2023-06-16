@@ -1,8 +1,8 @@
 # global configuration
 global:
-  machine: 'mela' # 'mela' # 'raven'
+  machine: 'raven' # 'mela' # 'raven'
   transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
-  transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
+  transport_address: '/ptmp/saif/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
   evaluate_after: 0
 
 # job configuration
@@ -10,7 +10,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 20
+  cpus-per-task: 14
   time: '24:00:00'
   agent_buffer: 1
 
@@ -23,16 +23,16 @@ learning:
     model_kwargs:
       n_steps: 1024
       verbose: 1
-      ent_coef: 0.001
-      clip_range: 0.05
-      learning_rate: 3.e-5
-    total_timesteps: 1.e+9
+      ent_coef: 0.02
+      clip_range: 0.04
+      learning_rate: 7.e-5
+    total_timesteps: 1.e+7
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '0502_load_cnn_ppo'
+    model_save_prefix: '0505_pcenv_rew5_2'
     load:
       enable_loading: 1 
       last_model: 0
-      saved_model_name: './Training/SavedModels/0501_load_cnn_ppo_best_reward'
+      saved_model_name: './Training/SavedModels/0505_pcenv_rew5_1_best_reward'
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64
@@ -40,14 +40,14 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
-  reward_shaping: 0  # reward shaping flag for some predefined rewards
+  reward_shaping: 5 # reward shaping flag for some predefined rewards
 
   # general simulation settings
   max_tumor_size: 2000
@@ -114,13 +114,13 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
   model_prefix: '0502_load_cnn_ppo'
-  fixed_AT_protocol: 0
-  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  num_episodes: 1
+  fixed_AT_protocol: 1
+  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  num_episodes: 10
   step_to_load: '_best_reward'
-  save_name: '0428_best'
+  save_name: 'mtd'
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

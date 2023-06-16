@@ -15,12 +15,11 @@ class DontWrapError(Exception):
     """Exception raised when the environment is wrapped for fixed adaptive therapy"""
     pass
 
-def fixed_at(obs: np.ndarray, environment: LvEnv or PcEnv or GridEnv,
-             threshold: float = .8, at_type: str = 'fixed') -> int:
+def fixed_at(environment: LvEnv or PcEnv or GridEnv,
+             threshold: float = .5, at_type: str = 'fixed') -> int:
     """ 
     Cycling adaptive therapy strategy, applies treatment only if the tumor burden is above a threshold
 
-    :param obs: observation from the environment
     :param environment: environment
     :param threshold: threshold for the tumor burden
     :param at_type: type of adaptive therapy strategy
@@ -37,10 +36,19 @@ def fixed_at(obs: np.ndarray, environment: LvEnv or PcEnv or GridEnv,
             action = 1
         else:
             warnings.warn('This implementation is sensitive to the type of observation space, be careful')
-            if environment.trajectory[2, int(environment.time) - 1] == 1 and tumor_size > threshold * ini_tumor_size:
-                action = 1
+            if environment.observation_type == 'number':
+                if environment.trajectory[2, int(environment.time) - 1] == 1 and tumor_size > threshold * ini_tumor_size:
+                    action = 1
+                else:
+                    action = 0
+            elif environment.observation_type == 'image':
+                if environment.number_trajectory[2, int(environment.time) - 1] == 1 and tumor_size > threshold * ini_tumor_size:
+                    action = 1
+                else:
+                    action = 0
             else:
-                action = 0
+                raise NotImplementedError('Observation type not implemented')
+
     elif at_type == 'fixed':
         if tumor_size > threshold*environment.threshold_burden:
             action = 1
@@ -117,7 +125,11 @@ class Evaluation:
                 print('Algorithm found in stable_baselines3. Using it...')
 
             final_score = np.zeros(num_episodes)
-            model = Algorithm.load(model_name)
+            try:
+                model = Algorithm.load(model_name)
+            except KeyError:
+                model = Algorithm.load(model_name, env=self.env, custom_objects =
+                {'observation_space': self.env.observation_space, 'action_space': self.env.action_space})
 
         else:
             final_score = np.zeros(num_episodes)
@@ -130,7 +142,7 @@ class Evaluation:
 
             while not done:
                 if fixed_therapy:
-                    action = fixed_at(obs, self.env, **fixed_therapy_kwargs)
+                    action = fixed_at(self.env, **fixed_therapy_kwargs)
                 else:
                     action, _state = model.predict(obs, deterministic=True)
                 if self._is_venv():
@@ -187,13 +199,12 @@ class Evaluation:
         return
 
 
-def evaluate() -> None:
+def evaluate(config_file = 'config.yaml') -> None:
     """
     Evaluate the trained model based on the evaluation specs in the config file
     """
 
     # configure evaluation
-    config_file = 'config.yaml'
     with open(config_file, 'r') as f:
         general_config = yaml.load(f, Loader=yaml.FullLoader)
         # define paths and load others from config
@@ -221,6 +232,7 @@ def evaluate() -> None:
                                   model_prefix + general_config['eval']['step_to_load'])
         fixed = general_config['eval']['fixed_AT_protocol']
         at_type = general_config['eval']['at_type']
+        print(model_name)
         evaluation.run_environment(model_name, num_episodes=general_config['eval']['num_episodes'],
                                    save_path=os.path.join(model_training_path, 'Evaluations'),
                                    save_name=env_type + 'Eval' + model_prefix, fixed_therapy=fixed,
@@ -244,4 +256,4 @@ def evaluate() -> None:
 
 
 if __name__ == '__main__':
-    evaluate()
+    evaluate(config_file = 'config.yaml')

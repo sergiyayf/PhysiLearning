@@ -127,7 +127,7 @@ def evaluate():
         pc_conf = config['env']['PC']
         change_pc_config(pc_conf, n_envs)
     click.echo('Evaluating')
-    eval_command = 'cd ./scripts && sbatch evaluation_job.sh'
+    eval_command = 'cd ./scripts && sbatch raven_evaluation_job.sh'
     subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
 

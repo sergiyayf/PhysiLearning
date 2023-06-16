@@ -28,8 +28,8 @@ class Reward:
 
         # +1-normalized_cell_count-treatment_on
         elif self.reward_shaping_flag == 5:
-            if np.sum(obs[0:2]) > 1e-6:
-                reward = 1 - 0.1*np.sum(obs[0:2]) / self.normalization - 0.5*obs[2]
+            if np.sum(obs[0:2]) > 1e-3:
+                reward = 1 - 0.1*np.sum(obs[0:2]) / 2000 - 0.1*obs[2]
             else:
                 reward = 10
         # increase reward for longer survival
@@ -45,10 +45,12 @@ class Reward:
             else: 
                 reward = 0
         elif self.reward_shaping_flag == 7:
-            if np.sum(obs) > 1e-5:
-                reward = 0.1
+            if np.sum(obs[0:2]) > 1e-3 and np.sum(obs[0:2]) < 1950:
+                reward = 1 - 0.1*np.sum(obs[0:2])/2000 - 0.1*obs[2]
+            elif np.sum(obs[0:2]) > 1950:
+                reward = -500
             else:
-                reward = 2
+                reward = 10
 
         # keep cell number below a threshold
         elif self.reward_shaping_flag == 8:

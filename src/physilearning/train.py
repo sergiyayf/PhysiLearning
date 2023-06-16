@@ -173,9 +173,12 @@ class Trainer:
 
                 else:
                     print('Loading model {0}'.format(self.saved_model_name))
-                    self.model = Algorithm.load(self.saved_model_name, env=self.env,
-                                                tensorboard_log=os.path.join('Training', 'Logs'), **self.model_kwargs)
-
+                    try:
+                        self.model = Algorithm.load(self.saved_model_name, env=self.env,
+                                                    tensorboard_log=os.path.join('Training', 'Logs'), **self.model_kwargs)
+                    except KeyError:
+                        self.model = Algorithm.load(self.saved_model_name, env=self.env, custom_objects=
+                        {'observation_space': self.env.observation_space, 'action_space': self.env.action_space})
             else:
                 self.model = Algorithm(self.policy, env=self.env,
                                        tensorboard_log=os.path.join('Training', 'Logs'),
