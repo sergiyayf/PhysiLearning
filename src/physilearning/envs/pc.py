@@ -124,13 +124,14 @@ class PcEnv(Env):
                 self.transport_address = '5555'
         # reward shaping flag
         self.cpu_per_task = cpu_per_task
-        self._start_slurm_physicell_job_step()
+        self.running = False
 
     @classmethod
     def from_yaml(cls, yaml_file: str, port: str = '0', job_name: str = '000000') -> object:
         with open(yaml_file, 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
         max_tumor_size = config['env']['max_tumor_size']
+        normalize = config['env']['normalize']
         normalize_to = config['env']['normalize_to']
         max_time = config['env']['max_time']
         initial_wt = config['env']['PC']['number_of_susceptible_cells']['value']
@@ -151,8 +152,9 @@ class PcEnv(Env):
         return cls(port=port, job_name=job_name, max_tumor_size=max_tumor_size, max_time=max_time,
                    initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
                    transport_type=transport_type, transport_address=transport_address,
-                   reward_shaping_flag=reward_shaping_flag, normalize_to=normalize_to,
-                   observation_type=observation_type, image_size=image_size, cpu_per_task=cpu_per_task)
+                   reward_shaping_flag=reward_shaping_flag, normalize=normalize,
+                   normalize_to=normalize_to, observation_type=observation_type,
+                   image_size=image_size, cpu_per_task=cpu_per_task)
 
     def _start_slurm_physicell_job_step(self) -> None:
         """
@@ -176,6 +178,22 @@ class PcEnv(Env):
                       f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
+    def _send_message(self, message: str) -> None:
+        """
+        Send a message to the PhysiCell simulation
+
+        param: message: message to be sent to the simulation
+        """
+        self.socket.send(bytes(message, 'utf-8'))
+
+    def _receive_message(self) -> str:
+        """
+        Receive a message from the PhysiCell simulation
+
+        return: message received from the simulation
+        """
+        raise NotImplementedError
+
     def step(self, action: int) -> tuple:
         """
         Receive a message from the PhysiCell simulation and
@@ -184,6 +202,12 @@ class PcEnv(Env):
         param: action: value of the action to be sent to the simulation
         return: observation, reward, done, info
         """
+
+        # check if the simulation is running or not, if not start physicell for testing
+        if not self.running:
+            self._start_slurm_physicell_job_step()
+            self.running = True
+
         self.time += self.treatment_time_step
         # get tumor updated state
         message = str(self.socket.recv(), 'utf-8')
@@ -268,7 +292,7 @@ class PcEnv(Env):
         else:
             raise ValueError('Observation type not supported')
 
-        self.socket.send(b"Start simulation")
+        self._send_message('Start simulation')
         return obs
 
     def _check_done(self, burden_type: str, **kwargs) -> bool:

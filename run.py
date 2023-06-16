@@ -110,7 +110,7 @@ def simulate_patients():
     """Submit a job to simulate virtual patients patients
     """
     click.echo('Simulating patients')
-    eval_command = 'cd ./scripts && sbatch simulate_patients_job.sh'
+    eval_command = 'cd ./scripts && sbatch --nodes=1 --cpus-per-task=10 --ntasks=1 simulate_patients_job.sh'
     subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
 

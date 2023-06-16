@@ -2,7 +2,10 @@
 
 SCRIPT_PATH=$(dirname "$0")
 cd ${SCRIPT_PATH}/../simulations/PhysiCell_${1} &&
-while true
+
+./project ${2}
+
+while false
 do
     ./project ${2}
 

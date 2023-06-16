@@ -10,7 +10,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 20
+  cpus-per-task: 2
   time: '14:00:00'
   agent_buffer: 1
 
@@ -40,7 +40,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -52,10 +52,10 @@ env:
   # general simulation settings
   max_tumor_size: 2000
   treatment_time_step: 1 
-  max_time: 1000
-  normalize: 0
-  normalize_to: 2000
-  observation_type: 'image' # 'image' # 'number'
+  max_time: 10
+  normalize: 1
+  normalize_to: 1
+  observation_type: 'number' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
   image_size: 84
 

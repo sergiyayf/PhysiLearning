@@ -26,6 +26,9 @@ class Evaluation():
 
     def therapy(self, obs, type='fixed', threshold=.50):
         tumor_size = np.sum(obs[0:2])
+        print(f'{tumor_size=}')
+        print(f'{threshold=}')
+        print(f'{self.env.state=}')
         if type == 'fixed':
             if tumor_size > threshold:
                 action = 1
@@ -67,16 +70,16 @@ class Evaluation():
 
 @click.command()
 @click.option('--jobid', default=0, help='ID of the job')
-@click.option('--taskid', default=1, help='ID of the task')
-def main(jobid, taskid):
+@click.option('--port', default=0, help='ID of the task')
+def main(jobid, port):
     # do n Runs of different treatments
 
     n_no_treatment_runs = 1
 
     for i in range(0, n_no_treatment_runs):
-        env = PcEnv.from_yaml('config.yaml', port=str(taskid), job_name=str(jobid) + str(taskid) + str(i))
+        env = PcEnv.from_yaml('config.yaml', port=str(port), job_name=str(jobid) + str(i))
         evaluation = Evaluation(env)
-        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{taskid}', run=i, path='../src/physilearning/', type='fixed', threshold=1.)
+        evaluation.run(num_episodes=1, name=f'patient_{jobid}_{port}', run=i, path='../src/physilearning/', type='fixed', threshold=1.)
 
 
 if __name__ == '__main__':
