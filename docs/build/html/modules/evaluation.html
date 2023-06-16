@@ -11,6 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -154,12 +156,11 @@ by the <cite>config.yaml</cite> file, fixed_at utility function and the Evaluate
 
 <dl class="py function">
 <dt class="sig sig-object py" id="physilearning.evaluate.fixed_at">
-<span class="sig-prename descclassname"><span class="pre">physilearning.evaluate.</span></span><span class="sig-name descname"><span class="pre">fixed_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fixed'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/physilearning/evaluate.html#fixed_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#physilearning.evaluate.fixed_at" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">physilearning.evaluate.</span></span><span class="sig-name descname"><span class="pre">fixed_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fixed'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/physilearning/evaluate.html#fixed_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#physilearning.evaluate.fixed_at" title="Permalink to this definition"></a></dt>
 <dd><p>Cycling adaptive therapy strategy, applies treatment only if the tumor burden is above a threshold</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>obs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – observation from the environment</p></li>
 <li><p><strong>environment</strong> (<a class="reference internal" href="sec_code_reference.html#physilearning.envs.lv.LvEnv" title="physilearning.envs.lv.LvEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">LvEnv</span></code></a>) – environment</p></li>
 <li><p><strong>threshold</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – threshold for the tumor burden</p></li>
 <li><p><strong>at_type</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – type of adaptive therapy strategy</p></li>
@@ -176,7 +177,7 @@ by the <cite>config.yaml</cite> file, fixed_at utility function and the Evaluate
 
 <dl class="py function">
 <dt class="sig sig-object py" id="physilearning.evaluate.evaluate">
-<span class="sig-prename descclassname"><span class="pre">physilearning.evaluate.</span></span><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/physilearning/evaluate.html#evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#physilearning.evaluate.evaluate" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">physilearning.evaluate.</span></span><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'config.yaml'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/physilearning/evaluate.html#evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#physilearning.evaluate.evaluate" title="Permalink to this definition"></a></dt>
 <dd><p>Evaluate the trained model based on the evaluation specs in the config file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
