@@ -169,13 +169,21 @@ void add_PhysiCell_cells_to_open_xml_pugi( pugi::xml_document& xml_dom, std::str
 			// ID,parent_ID,x,y,z,total volume
 			node_temp1 = node_temp1.append_child( "label" ); 
 			node_temp1.append_child( pugi::node_pcdata ).set_value( "ID" );
-		        node_temp1.append_child( pugi::node_pcdata ).set_value( "parent_ID" );	
 			attrib = node_temp1.append_attribute( "index" ); 
 			attrib.set_value( index ); 
 			attrib = node_temp1.append_attribute( "size" ); 
 			attrib.set_value( size ); 
 			node_temp1 = node_temp1.parent(); 
-			index += size; 
+			index += size;
+
+			node_temp1 = node_temp1.append_child( "label" );
+			node_temp1.append_child( pugi::node_pcdata ).set_value( "parent_ID" );
+			attrib = node_temp1.append_attribute( "index" );
+			attrib.set_value( index );
+			attrib = node_temp1.append_attribute( "size" );
+			attrib.set_value( size );
+			node_temp1 = node_temp1.parent();
+			index += size;
 
 			size = 3; 
 			node_temp1 = node_temp1.append_child( "label" );
@@ -310,7 +318,17 @@ void add_PhysiCell_cells_to_open_xml_pugi( pugi::xml_document& xml_dom, std::str
 			attrib = node_temp1.append_attribute( "size" ); 
 			attrib.set_value( size ); 
 			node_temp1 = node_temp1.parent(); 
-			index += size; 
+			index += size;
+
+			size = 1;
+			node_temp1 = node_temp1.append_child( "label" );
+			node_temp1.append_child( pugi::node_pcdata ).set_value( "clone_ID" );
+			attrib = node_temp1.append_attribute( "index" );
+			attrib.set_value( index );
+			attrib = node_temp1.append_attribute( "size" );
+			attrib.set_value( size );
+			node_temp1 = node_temp1.parent();
+			index += size;
 			// motility 
 			
 			size = 1; 
@@ -543,7 +561,7 @@ void add_PhysiCell_cells_to_open_xml_pugi( pugi::xml_document& xml_dom, std::str
 		int size_of_each_datum = 1 + 1 + 3 + 1  // ID, parent_ID, x,y,z, total_volume 
 			+1+1+1+1 // cycle information 
 			+1+1+1+1 // volume information 
-			+3+1+1 // orientation, polarity, transition_rate; 
+			+3+1+1+1 // orientation, polarity, transition_rate, clone_ID;
 			+1+3+1+3+1+1; // motility 
 
 		// figure out size of 2022 phenotype items 
@@ -631,13 +649,15 @@ void add_PhysiCell_cells_to_open_xml_pugi( pugi::xml_document& xml_dom, std::str
 
 			fwrite( (char*) &( pCell->phenotype.volume.calcified_fraction ) , sizeof(double) , 1 , fp );  // calcified fraction 
 			
-			// orientation, polarity, transition_rate; 
+			// orientation, polarity, transition_rate, clone_ID;
 			fwrite( (char*) &( pCell->state.orientation[0] ) , sizeof(double) , 1 , fp ); 
 			fwrite( (char*) &( pCell->state.orientation[1] ) , sizeof(double) , 1 , fp ); 
 			fwrite( (char*) &( pCell->state.orientation[2] ) , sizeof(double) , 1 , fp ); 
 			fwrite( (char*) &( pCell->phenotype.geometry.polarity ) , sizeof(double) , 1 , fp ); 
 			
 			fwrite( (char*) &( pCell->phenotype.cycle.data.transition_rate(0,1)), sizeof(double), 1, fp);
+			double clone_ID_temp = (double) (*all_cells)[i]->clone_ID;
+			fwrite( (char*) &( clone_ID_temp), sizeof(double), 1, fp);
 			
 			// motility information 
 			fwrite( (char*) &( pCell->phenotype.motility.migration_speed ) , sizeof(double) , 1 , fp ); // speed
@@ -905,7 +925,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 		name = "parent_ID";
 		size = 1;
 		units = "none";
-	        data_names.push_back( name );
+	    data_names.push_back( name );
 		data_units.push_back(units);
 		data_sizes.push_back( size );
 		data_start_indices.push_back( index );
@@ -1038,6 +1058,16 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 		data_names.push_back( name );
 		data_units.push_back(units);
 		data_sizes.push_back( size ); 
+		data_start_indices.push_back( index );
+		cell_data_size += size;
+		index += size;
+        //					<label index="19" size="1">clone_ID</label>
+		name = "clone_ID";
+		units = "none";
+		size = 1;
+		data_names.push_back( name );
+		data_units.push_back(units);
+		data_sizes.push_back( size );
 		data_start_indices.push_back( index );
 		cell_data_size += size;
 		index += size;
@@ -1789,7 +1819,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 		dTemp = (double) pCell->parent_ID;
 		std::fwrite( &( dTemp ) , sizeof(double) , 1 , fp ); 
 		// name = "position";    NOTE very different syntax for writing vectors!
-        	std::fwrite( pCell->position.data() , sizeof(double) , 3 , fp );
+        std::fwrite( pCell->position.data() , sizeof(double) , 3 , fp );
 		// name = "total_volume"; 
 		std::fwrite( &( pCell->phenotype.volume.total ) , sizeof(double) , 1 , fp ); 
 		// name = "cell_type"; 
@@ -1817,6 +1847,9 @@ void add_PhysiCell_cells_to_open_xml_pugi_v2( pugi::xml_document& xml_dom, std::
 		std::fwrite( &( pCell->phenotype.geometry.polarity ) , sizeof(double) , 1 , fp ); 
 		// name = "transition_rate"; 
 		std::fwrite( &( pCell->phenotype.cycle.data.transition_rate(0,1) ), sizeof(double), 1, fp);
+		// name = "clone_ID";
+		dTemp = (double) pCell->clone_ID;
+		std::fwrite( &( dTemp ) , sizeof(double) , 1 , fp );
  /* state variables to save */ 
 // state
 		// name = "velocity"; 

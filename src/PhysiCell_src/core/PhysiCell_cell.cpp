@@ -139,6 +139,7 @@ Cell_Definition::Cell_Definition()
 		
 	type = 0; 
 	parent_ID = -1;
+	clone_ID = 0;
 	name = "unnamed"; 
 
 	is_movable = true;
@@ -184,6 +185,7 @@ Cell_Definition::Cell_Definition( Cell_Definition& cd )
 	type = cd.type; 
 	name = cd.name; 
 	parent_ID = cd.parent_ID;
+	clone_ID = cd.clone_ID;
 	 
 	parameters = cd.parameters;
 	custom_data = cd.custom_data; 
@@ -209,6 +211,7 @@ Cell_Definition& Cell_Definition::operator=( const Cell_Definition& cd )
 	type = cd.type; 
 	name = cd.name; 
 	parent_ID = cd.parent_ID;
+	clone_ID = cd.clone_ID;
 	 
 	parameters = cd.parameters;
 	custom_data = cd.custom_data; 
@@ -395,7 +398,8 @@ Cell::Cell()
 	
 	type = cell_defaults.type; 
 	type_name = cell_defaults.name;
-        parent_ID = cell_defaults.parent_ID;	
+    parent_ID = cell_defaults.parent_ID;
+    clone_ID = cell_defaults.clone_ID;
 	
 	custom_data = cell_defaults.custom_data; 
 	parameters = cell_defaults.parameters; 
@@ -629,6 +633,8 @@ Cell* Cell::divide( )
 	// child->set_phenotype( phenotype ); 
 	child->phenotype = phenotype; 
 	child->parent_ID = this->ID;
+	child->clone_ID = this->clone_ID;
+
 
     if (child->phenotype.intracellular){
         child->phenotype.intracellular->start();

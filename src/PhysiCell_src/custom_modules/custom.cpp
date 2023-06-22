@@ -389,11 +389,14 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 	{return;}
 	
 	bool div = pCell->phenotype.cycle.pCycle_Model->phases[0].division_at_phase_exit;
-	 
+
+	// mutation
 	if (phenotype.cycle.data.elapsed_time_in_phase < 1 && PhysiCell_globals.current_time > 10 ) {
 		int ind_resistant = 1;
 		if (UniformRandom() < parameters.doubles("mutation_rate")/2){
-			pCell->convert_to_cell_definition(*cell_definitions_by_index[ind_resistant]);	
+			pCell->convert_to_cell_definition(*cell_definitions_by_index[ind_resistant]);
+			parameters.ints("number_of_denovo_mutations") += 1;
+			pCell->clone_ID = parameters.ints("number_of_denovo_mutations");
 		}
 	}
 	

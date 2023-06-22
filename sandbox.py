@@ -9,6 +9,9 @@ from matplotlib import animation
 import seaborn as sns
 from physicell_tools import pyMCDS
 import pandas as pd
+from physicell_tools.get_perifery import front_cells
+from physicell_tools.leastsquares import leastsq_circle, plot_data_circle
+import seaborn as sns
 
 def grid_env_sand():
     # setup environment
@@ -105,5 +108,48 @@ def physicell_h5_trying():
     plt.show()
 
 if __name__ == '__main__':
-    pymc = pyMCDS.pyMCDS('output00000{:03d}.xml'.format(108) ,'../models_for_physicell/v12_pc/PhysiCell/output')
+    pymc = pyMCDS.pyMCDS('output00000{:03d}.xml'.format(28) ,'./data/raven_1606_patients_sims/PhysiCell_0/output')
     cell_info = pymc.get_cell_df()
+    fig, ax = plt.subplots()
+    ax.scatter(cell_info['position_x'], cell_info['position_y'], c=cell_info['cell_type'])
+    fig.tight_layout()
+
+    # get cells of type 1
+    type_1_cells = cell_info[cell_info['cell_type']==1]
+    # calculate distance to center
+    type_1_cells['distance_to_center'] = np.sqrt((type_1_cells['position_x'])**2 + (type_1_cells['position_y'])**2)
+    # plot histogram
+    fig2, ax2 = plt.subplots()
+    ax2.hist(type_1_cells['distance_to_center'], bins=50)
+
+    # loop over all files and gather statistics for distance to center
+    sims = range(0, 100, 1)
+    distance_to_center = []
+    distance_to_front =  []
+    for sim in sims:
+        pymc = pyMCDS.pyMCDS('output00000{:03d}.xml'.format(27) ,f'./data/raven_1606_patients_sims/PhysiCell_{sim}/output')
+        cell_info = pymc.get_cell_df()
+        # get cells of type 1
+        type_1_cells = cell_info[cell_info['cell_type']==1]
+        # calculate distance to center
+        type_1_cells['distance_to_center'] = np.sqrt((type_1_cells['position_x'])**2 + (type_1_cells['position_y'])**2)
+        # add to dataframe
+        distance_to_center.append(type_1_cells['distance_to_center'])
+        # calculate distance to front
+        positions, types = front_cells(cell_info)
+        xc, yc, R, residu = leastsq_circle(positions[:, 0], positions[:, 1])
+        dists = ((np.sqrt((type_1_cells['position_x']-xc)**2 + (type_1_cells['position_y']-yc)**2)).values - R).tolist()
+        distance_to_front += dists
+    # plot histogram
+    fig3, ax3 = plt.subplots()
+    ax3.hist(distance_to_center, bins=10)
+
+    positions, types = front_cells(cell_info)
+    xc, yc, R, residu = leastsq_circle(positions[:, 0], positions[:, 1])
+    fig4, ax4 = plt.subplots()
+    sns.kdeplot(distance_to_front, ax=ax4)
+
+    #plot_data_circle(positions[:, 0], positions[:, 1], xc, yc, R)
+
+
+    plt.show()

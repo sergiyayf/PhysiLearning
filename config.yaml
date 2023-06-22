@@ -52,7 +52,7 @@ env:
   # general simulation settings
   max_tumor_size: 2000
   treatment_time_step: 1 
-  max_time: 10
+  max_time: 1000
   normalize: 1
   normalize_to: 1
   observation_type: 'number' # 'image' # 'number'

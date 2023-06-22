@@ -120,7 +120,8 @@ class Cell_Definition
  private:
  public: 
 	int type;
-        int parent_ID;	
+    int parent_ID;
+    int clone_ID;
 	std::string name; 
 
 	bool is_movable; 

@@ -101,6 +101,7 @@ class Basic_Agent
 
 	int ID;
 	int parent_ID;
+	int clone_ID;
 	int index; 
 	int type;
 	
