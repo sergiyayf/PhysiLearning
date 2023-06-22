@@ -30,7 +30,7 @@ learning:
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
     model_save_prefix: '0508_gridenv_last_try_to_fix'
     load:
-      enable_loading: 1 
+      enable_loading: 0
       last_model: 0
       saved_model_name: './data/gm_cnn_trained/Training/SavedModels/0504_raven_gridenv_best_reward'
   network:
