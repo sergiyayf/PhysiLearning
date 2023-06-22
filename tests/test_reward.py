@@ -23,3 +23,27 @@ def test_rewards():
     rewards = Reward(reward_shaping_flag=4)
     reward = rewards.get_reward([0.5, 0.4, 1], 0.1)
     assert reward-0 < 1e-3
+
+    rewards = Reward(reward_shaping_flag=5)
+    reward = rewards.get_reward([0.5, 0.4, 1], 0.1)
+    assert reward-1 < 1e-3
+
+    rewards = Reward(reward_shaping_flag=5)
+    reward = rewards.get_reward([0.5, 0.4, 1], 0.6)
+    assert reward-2 < 1e-3
+
+    rewards = Reward(reward_shaping_flag=5)
+    reward = rewards.get_reward([0.5, 0.4, 1], 0.8)
+    assert reward-5 < 1e-3
+
+    rewards = Reward(reward_shaping_flag=5)
+    reward = rewards.get_reward([0.5, 0.4, 1], 0.95)
+    assert reward-10 < 1e-3
+
+    rewards = Reward(reward_shaping_flag=6)
+    try:
+        reward = rewards.get_reward([0.5, 0.4, 1], 0.1)
+    except ValueError:
+        assert True
+    else:
+        assert False

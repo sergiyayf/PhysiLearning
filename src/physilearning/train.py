@@ -147,12 +147,12 @@ class Trainer:
         # try to import model from stable_baselines3 first and then from sb3_contrib
         try:
             Algorithm = getattr(importlib.import_module('stable_baselines3'), self.model_name)
-        except ModuleNotFoundError:
+        except AttributeError:
             print('Algorithm not found in stable_baselines3. Trying sb3_contrib...')
             try:
                 Algorithm = getattr(importlib.import_module('sb3_contrib'), self.model_name)
-            except ModuleNotFoundError:
-                raise ValueError('Model not found in stable_baselines3 or sb3_contrib')
+            except AttributeError:
+                raise AttributeError('Model not found in stable_baselines3 or sb3_contrib')
         else:
             print('Algorithm found in stable_baselines3. Using it...')
 

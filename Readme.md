@@ -28,6 +28,19 @@ both the environment(simulation) and the agent.
 
 See the config.yaml file for more details on the configuration, it should be self-explanatory.
 
+### First steps 
+
+To make sure that PhysiCell works on your machine, run the following command:
+```bash
+make raven
+```
+or 
+```bash
+make mela
+```
+depending on where you want to run the simulation. This will recompile PhysiCell with the options that are 
+machine specific. 
+
 ### Training
 To train the agent on ubuntu with installed slurm queuing system, run the following command:
 ```bash
