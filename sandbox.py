@@ -108,38 +108,38 @@ def physicell_h5_trying():
     plt.show()
 
 if __name__ == '__main__':
-    pymc = pyMCDS.pyMCDS('output00000{:03d}.xml'.format(28) ,'./data/raven_1606_patients_sims/PhysiCell_0/output')
-    cell_info = pymc.get_cell_df()
+    pymc = pyMCDS.pyMCDS('final.xml' ,'./data/raven_22_06_patient_sims/PhysiCell_67/output')
+    cell_info_0 = pymc.get_cell_df()
     fig, ax = plt.subplots()
-    ax.scatter(cell_info['position_x'], cell_info['position_y'], c=cell_info['cell_type'])
+    ax.scatter(cell_info_0['position_x'], cell_info_0['position_y'], c=cell_info_0['cell_type'])
     fig.tight_layout()
 
-    # get cells of type 1
-    type_1_cells = cell_info[cell_info['cell_type']==1]
-    # calculate distance to center
-    type_1_cells['distance_to_center'] = np.sqrt((type_1_cells['position_x'])**2 + (type_1_cells['position_y'])**2)
-    # plot histogram
-    fig2, ax2 = plt.subplots()
-    ax2.hist(type_1_cells['distance_to_center'], bins=50)
-
-    # loop over all files and gather statistics for distance to center
     sims = range(0, 100, 1)
     distance_to_center = []
     distance_to_front =  []
     for sim in sims:
-        pymc = pyMCDS.pyMCDS('output00000{:03d}.xml'.format(27) ,f'./data/raven_1606_patients_sims/PhysiCell_{sim}/output')
+        pymc = pyMCDS.pyMCDS('final.xml' ,f'./data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
         cell_info = pymc.get_cell_df()
+
+        positions, types = front_cells(cell_info)
+        xc, yc, R, residu = leastsq_circle(positions[:, 0], positions[:, 1])
         # get cells of type 1
         type_1_cells = cell_info[cell_info['cell_type']==1]
         # calculate distance to center
         type_1_cells['distance_to_center'] = np.sqrt((type_1_cells['position_x'])**2 + (type_1_cells['position_y'])**2)
-        # add to dataframe
-        distance_to_center.append(type_1_cells['distance_to_center'])
-        # calculate distance to front
-        positions, types = front_cells(cell_info)
-        xc, yc, R, residu = leastsq_circle(positions[:, 0], positions[:, 1])
-        dists = ((np.sqrt((type_1_cells['position_x']-xc)**2 + (type_1_cells['position_y']-yc)**2)).values - R).tolist()
-        distance_to_front += dists
+        type_1_cells['distance_to_front'] = (np.sqrt((type_1_cells['position_x']-xc)**2 + (type_1_cells['position_y']-yc)**2)).values - R
+        # get unique clones
+        unique_clones = type_1_cells['clone_ID'].unique()
+        for clone in unique_clones:
+            single_clone = type_1_cells[type_1_cells['clone_ID']==clone]
+            # get average distance to center
+            mean_dist_to_center = single_clone['distance_to_center'].mean()
+            # get average distance to front
+            mean_dist_to_front = single_clone['distance_to_front'].mean()
+            # add to list
+            distance_to_center.append(mean_dist_to_center)
+            distance_to_front.append(mean_dist_to_front)
+
     # plot histogram
     fig3, ax3 = plt.subplots()
     ax3.hist(distance_to_center, bins=10)
@@ -147,9 +147,15 @@ if __name__ == '__main__':
     positions, types = front_cells(cell_info)
     xc, yc, R, residu = leastsq_circle(positions[:, 0], positions[:, 1])
     fig4, ax4 = plt.subplots()
-    sns.kdeplot(distance_to_front, ax=ax4)
-
+    sns.histplot(data=distance_to_front, ax=ax4, bins=20)
+    ax4.set_xlabel('Distance to front')
+    ax4.set_ylabel('Count')
+    ax4.set_title('Distribution of resistant clones after 14 days of growth')
     #plot_data_circle(positions[:, 0], positions[:, 1], xc, yc, R)
+
+    type_1_cell_0 = cell_info_0[cell_info_0['cell_type']==1]
+    type_1_cell_0['distance_to_center'] = np.sqrt((type_1_cell_0['position_x'])**2 + (type_1_cell_0['position_y'])**2)
+    type_1_cell_0['distance_to_front'] = (np.sqrt((type_1_cell_0['position_x']-xc)**2 + (type_1_cell_0['position_y']-yc)**2)).values - R
 
 
     plt.show()

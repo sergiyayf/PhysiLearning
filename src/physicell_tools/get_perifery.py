@@ -67,7 +67,7 @@ def front_cells(cells):
         find_a_cell = cells[cells['position_x'] == Closest_points[k, 0]];
         if len(find_a_cell) > 1:
             find_a_cell = find_a_cell[find_a_cell['position_y'] == Closest_points[k, 1]];
-        cell_type_array[k] = find_a_cell['cell_type'];
+        cell_type_array[k] = float(find_a_cell['cell_type'].iloc[0])
 
         k += 1;
 
@@ -102,7 +102,7 @@ def front_cells(cells):
         find_a_cell = cells[cells['position_x'] == Closest_points[k, 0]];
         if len(find_a_cell) > 1:
             find_a_cell = find_a_cell[find_a_cell['position_y'] == Closest_points[k, 1]];
-        cell_type_array[k] = find_a_cell['cell_type'];
+        cell_type_array[k] = float(find_a_cell['cell_type'].iloc[0])
 
         k += 1;
 

@@ -28,7 +28,8 @@ setup(
                       'gym==0.21', 'stable-baselines3[extra]==1.8.0',
                       'pyzmq>=24.0.1', 'pyyaml>=5.4.1', 'tensorboard>=2.7.0', 'dvc', 'click',
                       'scipy>=1.10.1', 'pymc>=4.0.1', 'sb3-contrib', 'ruff', 'pytest', 'pytest-cov',
-                      'sphinx<7.0.0', 'sphinx_rtd_theme', 'sphinx-autodoc-typehints'
+                      'sphinx<7.0.0', 'sphinx_rtd_theme', 'sphinx-autodoc-typehints',
+                      'mpl-scatter-density'
                       ],
     python_requires=">=3.9",
     classifiers=['Operating System :: ubuntu',
