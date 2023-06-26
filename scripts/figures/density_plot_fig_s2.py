@@ -42,9 +42,11 @@ if __name__ == '__main__':
     counter = 0
     for sim in sims:
         # pymc = pyMCDS.pyMCDS('final.xml' ,f'../../data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
-        cell_info = pd.read_hdf('./../../data/data_2306_presims.h5', key=f'PhysiCell_{sim}')
-        positions, types = front_cells(cell_info)
+        cell_info = pd.read_hdf('./../../data/simplified_data_2306_presims.h5', key=f'PhysiCell_{sim}')
         type_1_cells = cell_info[cell_info['cell_type'] == 1]
+
+        cells_at_front = cell_info[cell_info['is_at_front'] == 1]
+        positions = cells_at_front[['position_x', 'position_y']].values
 
         # concatenate to dataframe
         df = pd.concat([df, type_1_cells])
@@ -57,6 +59,10 @@ if __name__ == '__main__':
 
     ax.set_xlim(-750, 750)
     ax.set_ylim(-750, 750)
+    ax.set_title('Density plot of clones at front')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    fig.savefig('./../../data/figures/fig_s2_density.png')
 
     print("Number of clones: ", counter)
     plt.show()
