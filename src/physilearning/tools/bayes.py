@@ -9,40 +9,26 @@ import matplotlib as mpl
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
+
 class ODEBayesianFitter():
-    def __init__(self, ode=ODEModel(), data=None):
-        """Initialize the ODEBayesianFitter class.
+    """A class for fitting an ODE model to data using Bayesian inference.
 
-        Parameters
-        ----------
-        ode : ODEModel
-            The ODE model to fit.
-        data : array-like
-            The data to fit the model to.
+    :param ode: The ODE model to fit.
+    :param data: The data to fit the model to.
 
-        Attributes
-        ----------
-        model : pymc.Model
-            The PyMC4 model.
-        data : array-like
-            The data to fit the model to.
-        ode : ODEModel
-            The ODE model to fit.
-        trace : pymc.backends.base.MultiTrace
-            The trace of the MCMC sampling.
+    :ivar model: The PyMC4 model.
+    :ivar data: The data to fit the model to.
+    :ivar ode: The ODE model to fit.
+    :ivar trace: The trace of the MCMC sampling.
 
-        Methods
-        -------
-        set_priors(prior_dist="normal", **kwargs)
-            Define the priors for the model parameters.
-        set_likelihood(likelihood_dist="normal", **kwargs)
-            Define the likelihood for the model.
-        fit(n_samples=1000, tune=1000, cores=1, chains=1, **kwargs)
-            Fit the model to the data.
-        plot_trace()
-            Plot the trace of the MCMC sampling.
+    :method set_priors: Define the priors for the model parameters.
+    :method set_likelihood: Define the likelihood for the model.
+    :method fit: Fit the model to the data.
+    :method plot_trace: Plot the trace of the MCMC sampling.
 
-        """
+    """
+
+    def __init__(self, ode: ODEModel = ODEModel(), data: pd.DataFrame = None):
 
         self.model = pm.Model()
         self.data= data
@@ -50,18 +36,11 @@ class ODEBayesianFitter():
         self.trace = None
 
 
-    def set_priors(self, prior_dist="normal"):
+    def set_priors(self, prior_dist: str = "normal") -> dict:
         """Define the priors for the model parameters.
 
-        Parameters
-        ----------
-        prior_dist : str
-            The distribution to use for the priors.
-
-        Returns
-        -------
-        dict
-            The priors for the model parameters.
+        :param prior_dist: The distribution to use for the priors.
+        :return: (dict) The priors for the model parameters.
         """
         if prior_dist == "normal":
             with self.model:
@@ -77,24 +56,18 @@ class ODEBayesianFitter():
 
     @staticmethod
     @as_op(itypes=[pt.dvector, pt.dvector, pt.ivector, pt.dvector], otypes=[pt.dmatrix])
-    def pytensor_matrix_solve(y0,times,treatment_schedule,theta):
+    def pytensor_matrix_solve(y0: pt.dvector, times: pt.dvector,
+                              treatment_schedule: pt.ivector,
+                              theta: pt.dvector) -> pt.dmatrix:
         """Define the ODE with pytensor inputs and outputs.
 
-        Parameters
-        ----------
-        y0 : pt.dvector
-            The initial conditions for the ODE.
-        times : pt.dvector
-            The times to solve the ODE at.
-        treatment_schedule : pt.ivector
-            The treatment schedule for the ODE.
-        theta : pt.dvector
-            The parameters for the ODE.
+        :param y0: The initial conditions for the ODE.
+        :param times: The times to solve the ODE at.
+        :param treatment_schedule: The treatment schedule for the ODE.
+        :param theta: The parameters for the ODE.
 
-        Returns
-        -------
-        solution: pt.dmatrix
-            The solution to the ODE.
+        :return: The solution to the ODE.
+
         """
         return ODEModel(y0=y0, params=theta, time=times, dt=1, treatment_schedule=treatment_schedule).simulate()
 

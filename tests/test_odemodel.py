@@ -64,3 +64,11 @@ def test_simulate():
     diffs = result - np.array([[1, 1], [2.71, 2.71]])
     # assert
     assert np.all(diffs < 1e-2)
+
+
+def test_prep_treatment_schedule():
+    treatment_schedule  = [0, 0, 0, 1, 1, 1, 0, 0, 0]
+    ode = ODEModel(treatment_schedule=treatment_schedule)
+
+    # assert if all are int32
+    assert all(isinstance(x, np.int32) for x in ode.treatment_schedule)

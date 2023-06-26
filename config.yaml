@@ -54,7 +54,7 @@ env:
   treatment_time_step: 1 
   max_time: 1000
   normalize: 1
-  normalize_to: 1
+  normalize_to: 1000
   observation_type: 'number' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
   image_size: 84
@@ -121,6 +121,6 @@ eval:
   at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   num_episodes: 1
   step_to_load: '_best_reward'
-  save_name: 'no_treat_test_v12'
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  save_name: 'no_treat_test_LV'
+  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

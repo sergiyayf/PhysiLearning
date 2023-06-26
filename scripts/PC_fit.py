@@ -14,7 +14,7 @@ mpl.rcParams['pdf.fonttype'] = 42  # to make text editable in pdf output
 
 
 df = pd.read_csv(
-    './../../0_AT_fixedAT.csv',
+    './../Evaluations/older_evals/0_AT_fixedAT_60onPC.csv',
     index_col=[0])
 
 data = pd.DataFrame(dict(
@@ -46,4 +46,4 @@ bayes_fitter = ODEBayesianFitter(model, data)
 # ax.plot(data.time, data.x, color="b", lw=2, marker="o", markersize=5, label="x data")
 # ax.plot(data.time, data.y, color="g", lw=2, marker="+", markersize=5, label="y data")
 
-
+plt.show()

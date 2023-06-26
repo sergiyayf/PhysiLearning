@@ -39,13 +39,20 @@ class ODEModel:
         if treatment_schedule is None:
             self.treatment_schedule = np.zeros(len(self.time))
         else:
-            self.treatment_schedule = treatment_schedule
+            self.treatment_schedule = self._prep_treatment_schedule(treatment_schedule)
         self.intervals = self.get_treatment_intervals()
         self.treatment = 0
         self.const = {'c_x': 1, 'c_y': 1, 'K': 1.5, 'Delta_y': 0, 'Delta_x': 0.15}
 
     def __call__(self, *args):
         return self.rhs(self.y0, self.time, self.params)
+
+
+    def _prep_treatment_schedule(self, treatment_schedule):
+        # check if treatment_schedule items are int32
+        if not all(isinstance(item, np.int32) for item in treatment_schedule):
+            treatment_schedule = [np.int32(i) for i in treatment_schedule]
+        return treatment_schedule
 
     def get_treatment_intervals(self):
         """Get treatment intervals from treatment schedule

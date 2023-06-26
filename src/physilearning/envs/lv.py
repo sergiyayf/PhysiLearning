@@ -61,30 +61,45 @@ class LvEnv(BaseEnv):
             raise NotImplementedError
         self.observation_space = Box(low=0,high=normalize_to,shape=(1,))
 
-        # Parameters
+        #  Time Parameters
         self.time = 0
         self.treatment_time_step = treatment_time_step
         self.max_time = max_time
-        self.threshold_burden_in_number = max_tumor_size
-        self.threshold_burden = normalize_to
+
+        # Normalization
+        self.normalize = normalize
+        self.max_tumor_size = max_tumor_size
+        self.normalization_factor = normalize_to/max_tumor_size
+
+        # Check if initial_wt and initial_mut are random
         self.wt_random = isinstance(initial_wt, str)
         if self.wt_random:
-            self.initial_wt = np.random.random_integers(low=0, high=self.threshold_burden_in_number, size=1)[0]
-            self.initial_wt = self.initial_wt*self.threshold_burden/self.threshold_burden_in_number
+            self.initial_wt = np.random.random_integers(low=0, high=0.99*self.max_tumor_size, size=1)[0]
         else:
-            self.initial_wt = initial_wt*normalize_to/max_tumor_size
+            self.initial_wt = initial_wt
         self.mut_random = isinstance(initial_mut, str)
         if self.mut_random:
-            self.initial_mut = np.random.random_integers(low=0, high=0.01*self.threshold_burden_in_number, size=1)[0]
-            self.initial_mut = self.initial_mut*self.threshold_burden/self.threshold_burden_in_number
+            self.initial_mut = np.random.random_integers(low=0, high=0.01*self.max_tumor_size, size=1)[0]
         else:
-            self.initial_mut = initial_mut*normalize_to/max_tumor_size
+            self.initial_mut = initial_mut
+
+        # Normalizazion
+        if self.normalize:
+            self.initial_wt = self.initial_wt*self.normalization_factor
+            self.initial_mut = self.initial_mut*self.normalization_factor
+            self.threshold_burden = normalize_to
+            self.capacity = carrying_capacity*self.normalization_factor
+        else:
+            self.threshold_burden = max_tumor_size
+            self.capacity = carrying_capacity
+
+
         self.initial_drug = 0
         self.burden = self.initial_mut+self.initial_wt
         self.state = [self.initial_wt,
                       self.initial_mut,
                       self.initial_drug]
-        self.capacity = carrying_capacity*normalize_to/max_tumor_size
+
         # 1 - wt, 2 - resistant
         self.growth_rate = [growth_rate_wt,growth_rate_mut]
         self.death_rate = [death_rate_wt,death_rate_mut]
@@ -166,12 +181,14 @@ class LvEnv(BaseEnv):
         #self.state = [self.initial_wt/self.threshold_burden, self.initial_mut/self.threshold_burden, self.initial_drug]
         if self.wt_random:
             self.initial_wt = \
-            np.random.random_integers(low=0, high=self.threshold_burden_in_number, size=1)[0]
-            self.initial_wt = self.initial_wt*self.threshold_burden/self.threshold_burden_in_number
+            np.random.random_integers(low=0, high=self.max_tumor_size, size=1)[0]
+            if self.normalize:
+                self.initial_wt = self.initial_wt*self.normalization_factor
         if self.mut_random:
             self.initial_mut = \
-            np.random.random_integers(low=0, high=0.01*self.threshold_burden_in_number, size=1)[0]
-            self.initial_mut = self.initial_mut*self.threshold_burden/self.threshold_burden_in_number
+            np.random.random_integers(low=0, high=0.01*self.max_tumor_size, size=1)[0]
+            if self.normalize:
+                self.initial_mut = self.initial_mut*self.normalization_factor
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
@@ -208,7 +225,7 @@ class LvEnv(BaseEnv):
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
                             self.death_rate[i] -
                             self.death_rate_treat[i] * self.state[2])
-        # treatment lasts certain number of tiem steps
+        # treatment lasts certain number of time steps
         elif flag == 2:
             treat = self.state[2]
             if self.state[2] == 0:

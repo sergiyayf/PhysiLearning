@@ -75,7 +75,7 @@ def boxplots():
 
 def main():
     fig, ax = plt.subplots()
-    filename = 'Evaluations/0_PcEnvEval0507_gridenv_1env_full_node_rew5_image_trajectory.npy'
+    filename = 'Evaluations/older_evals/0_PcEnvEval0507_gridenv_1env_full_node_rew5_image_trajectory.npy'
     ani = animate(filename, fig, ax)
 
     ani.save('./data/gm_cnn_trained/movies/grid_deployed_on_pc_same_as_cells.mp4', writer='ffmpeg', fps=10)

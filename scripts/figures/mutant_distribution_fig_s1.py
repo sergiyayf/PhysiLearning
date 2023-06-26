@@ -86,14 +86,14 @@ if __name__ == '__main__':
     ax2.set_title('Distance from the center of the clone to the closest front cell')
     ax2.set_ylabel('Number of clones')
     ax2.set_xlabel('Distance to front cell')
-    fig1.savefig('./../../data/figures/fig_s1b.png')
+    fig2.savefig('./../../data/figures/fig_s1b.png')
 
     fig3, ax3 = plt.subplots()
     sns.histplot(data=min_distance_to_front_cell, ax=ax3, bins=20)
     ax3.set_title('Distance from the outermost cell of a clone to the closest front cell')
     ax3.set_xlabel('Distance to front cell')
     ax3.set_ylabel('Number of clones')
-    fig1.savefig('./../../data/figures/fig_s1c.png')
+    fig3.savefig('./../../data/figures/fig_s1c.png')
 
     plt.show()
 
