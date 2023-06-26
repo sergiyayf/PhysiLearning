@@ -5,9 +5,6 @@ from physilearning.tools.odemodel import ODEModel
 from pytensor.compile.ops import as_op
 import pytensor.tensor as pt
 import pandas as pd
-import matplotlib as mpl
-mpl.use('TkAgg')
-import matplotlib.pyplot as plt
 
 
 class ODEBayesianFitter():
@@ -153,42 +150,3 @@ class ODEBayesianFitter():
 
         return ax
 
-
-# do fitting
-if __name__ == "__main__":
-    #treatment_schedule = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0])
-
-    treatment_schedule = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0])
-    model = ODEModel(tmax=22, treatment_schedule=treatment_schedule, dt=1)
-
-    time = model.time
-    solution = model.solve(model.time)
-    sol2 = model.simulate()
-
-    model.plot_model(solution=solution)
-    model.plot_model(solution=sol2)
-    fig, ax = plt.subplots()
-    model.plot_model(ax=ax, solution=sol2)
-
-    noise = np.random.normal(0, 0.001, size=solution.shape)
-    sol2 += noise
-    ax.scatter(time, sol2[:, 0], label='x')
-    ax.scatter(time, sol2[:, 1], label='y')
-
-    treatment_schedule = [np.int32(i) for i in treatment_schedule]
-    ode_model = ODEModel(tmax=22, treatment_schedule=treatment_schedule, dt=1)
-    x = sol2[:, 0]
-    y = sol2[:, 1]
-    data = pd.DataFrame(dict(
-        time=time,
-        x=x,
-        y=y))
-    bayes_fitter = ODEBayesianFitter(ode_model, data)
-    #likelihood = bayes_fitter.likelihood(bayes_fitter.set_priors())
-    trace = bayes_fitter.sample(draws=10000, chains=8)
-    print(az.summary(trace))
-    fig, ax = plt.subplots(figsize=(7, 4))
-    # plot_inference(ax, trace, num_samples=25)
-    bayes_fitter.plot_inference_trace(ax=ax, num_samples=25, alpha=0.2)
-    ax.plot(data.time, data.x, color="b", lw=2, marker="o", markersize=12, label="x")
-    ax.plot(data.time, data.y, color="g", lw=2, marker="+", markersize=14, label="y")

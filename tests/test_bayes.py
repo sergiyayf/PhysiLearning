@@ -41,8 +41,6 @@ def test_sample():
     time = ode.time
     data = pd.DataFrame(dict(x=[0, 1, 2, 3, 4], y=[0, 1, 2, 3, 4], time = time))
     fitter = ODEBayesianFitter(ode=ode, data=data)
-    priors = fitter.set_priors()
-    likelihood = fitter.likelihood(priors=priors)
-    trace = fitter.sample(likelihood=likelihood, priors=priors, n_samples=1000)
+    trace = fitter.sample(draws=10, chains=8)
 
     assert trace is not None
