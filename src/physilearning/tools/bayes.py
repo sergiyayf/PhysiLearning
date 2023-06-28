@@ -7,7 +7,7 @@ import pytensor.tensor as pt
 import pandas as pd
 
 
-class ODEBayesianFitter():
+class ODEBayesianFitter:
     """A class for fitting an ODE model to data using Bayesian inference.
 
     :param ode: The ODE model to fit.
@@ -28,10 +28,9 @@ class ODEBayesianFitter():
     def __init__(self, ode: ODEModel = ODEModel(), data: pd.DataFrame = None):
 
         self.model = pm.Model()
-        self.data= data
+        self.data = data
         self.ode = ode
         self.trace = None
-
 
     def set_priors(self, prior_dist: str = "normal") -> dict:
         """Define the priors for the model parameters.
@@ -41,12 +40,18 @@ class ODEBayesianFitter():
         """
         if prior_dist == "normal":
             with self.model:
-                alpha = pm.TruncatedNormal("alpha", mu=self.ode.params[0], sigma=self.ode.params[0], lower=0, initval=self.ode.params[0])
-                beta = pm.TruncatedNormal("beta", mu=self.ode.params[1], sigma=self.ode.params[1], lower=0, initval=self.ode.params[1])
-                gamma = pm.TruncatedNormal("gamma", mu=self.ode.params[2], sigma=self.ode.params[2], lower=0, initval=self.ode.params[2])
-                delta = pm.TruncatedNormal("delta", mu=self.ode.params[3], sigma=self.ode.params[3], lower=0, initval=self.ode.params[3])
-                xt0 = pm.TruncatedNormal("xt0", mu=self.ode.y0[0], sigma=self.ode.y0[0], lower=0, initval=self.ode.y0[0])
-                yt0 = pm.TruncatedNormal("yt0", mu=self.ode.y0[1], sigma=self.ode.y0[1], lower=0, initval=self.ode.y0[1])
+                alpha = pm.TruncatedNormal("alpha", mu=self.ode.params[0], sigma=self.ode.params[0],
+                                           lower=0, initval=self.ode.params[0])
+                beta = pm.TruncatedNormal("beta", mu=self.ode.params[1], sigma=self.ode.params[1],
+                                          lower=0, initval=self.ode.params[1])
+                gamma = pm.TruncatedNormal("gamma", mu=self.ode.params[2], sigma=self.ode.params[2],
+                                           lower=0, initval=self.ode.params[2])
+                delta = pm.TruncatedNormal("delta", mu=self.ode.params[3], sigma=self.ode.params[3],
+                                           lower=0, initval=self.ode.params[3])
+                xt0 = pm.TruncatedNormal("xt0", mu=self.ode.y0[0], sigma=self.ode.y0[0],
+                                         lower=0, initval=self.ode.y0[0])
+                yt0 = pm.TruncatedNormal("yt0", mu=self.ode.y0[1], sigma=self.ode.y0[1],
+                                         lower=0, initval=self.ode.y0[1])
                 sigma = pm.TruncatedNormal("sigma", mu=10, sigma=10, lower=0)
 
         return {"alpha": alpha, "beta": beta, "gamma": gamma, "delta": delta, "xt0": xt0, "yt0": yt0, "sigma": sigma}
@@ -90,7 +95,7 @@ class ODEBayesianFitter():
             theta = pm.math.stack([priors["alpha"], priors["beta"], priors["gamma"], priors["delta"]])
             y0 = pm.math.stack([priors["xt0"], priors["yt0"]])
             treatment_schedule = pm.math.stack(self.ode.treatment_schedule)
-            ode_solution = self.pytensor_matrix_solve(y0,times,treatment_schedule,theta)
+            ode_solution = self.pytensor_matrix_solve(y0, times, treatment_schedule, theta)
             likelihood = pm.Normal("likelihood", mu=ode_solution, sigma=sigma, observed=self.data[["x", "y"]].values)
 
         return likelihood

@@ -39,14 +39,14 @@ def pcfit():
     ax.legend()
 
     bayes_fitter = ODEBayesianFitter(model, data)
-    #likelihood = bayes_fitter.likelihood(bayes_fitter.set_priors())
-    # trace = bayes_fitter.sample(draws=5000, chains=8)
-    # print(az.summary(trace))
-    # fig, ax = plt.subplots(figsize=(12, 8))
-    # # plot_inference(ax, trace, num_samples=25)
-    # bayes_fitter.plot_inference_trace(ax=ax, num_samples=25, alpha=0.2)
-    # ax.plot(data.time, data.x, color="b", lw=2, marker="o", markersize=5, label="x data")
-    # ax.plot(data.time, data.y, color="g", lw=2, marker="+", markersize=5, label="y data")
+    # likelihood = bayes_fitter.likelihood(bayes_fitter.set_priors())
+    trace = bayes_fitter.sample(draws=50, chains=8)
+    print(az.summary(trace))
+    fig, ax = plt.subplots(figsize=(12, 8))
+    # plot_inference(ax, trace, num_samples=25)
+    bayes_fitter.plot_inference_trace(ax=ax, num_samples=25, alpha=0.2)
+    ax.plot(data.time, data.x, color="b", lw=2, marker="o", markersize=5, label="x data")
+    ax.plot(data.time, data.y, color="g", lw=2, marker="+", markersize=5, label="y data")
 
     plt.show()
 
@@ -81,7 +81,7 @@ def bayes_main():
         y=y))
     bayes_fitter = ODEBayesianFitter(ode_model, data)
     # likelihood = bayes_fitter.likelihood(bayes_fitter.set_priors())
-    trace = bayes_fitter.sample(draws=100, chains=8)
+    trace = bayes_fitter.sample(draws=100, chains=8, cores=16)
     print(az.summary(trace))
     fig, ax = plt.subplots(figsize=(7, 4))
     # plot_inference(ax, trace, num_samples=25)
@@ -97,4 +97,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    pcfit()

@@ -198,12 +198,25 @@ void setup_microenvironment( void )
 	// initialize BioFVM 
 	
 	initialize_microenvironment(); 	
-	set_circular_boundary_conditions();	
+    // if chechlpointing is available load microenv from the mat file
+    if (parameters.bools("enable_chkpt")){
+        std::cout<<"Loading microenvironment from "<<parameters.strings("filename_chkpt")+"_microenvironment0.mat"<<std::endl;
+        read_microenvironment_from_MultiCellDS_xml(microenvironment, parameters.strings("filename_chkpt"));
+        set_circular_boundary_conditions();
+    } else {
+        set_circular_boundary_conditions();
+    }
+
 	return; 
 }
 
 void setup_round_tumoroid( void )
 {
+    if (parameters.bools("enable_chkpt")){
+        std::cout<<"Loading cell positions from"<<parameters.strings("filename_chkpt")+"_cells.mat"<<std::endl;
+        load_minimal_cells_physicell(parameters.strings("filename_chkpt"));
+    } else {
+
 	// place a cluster of tumor cells at the center 
     double cell_radius = cell_defaults.phenotype.geometry.radius; 
 	double cell_spacing = 0.95 * 2.0 * cell_radius; 
@@ -272,7 +285,7 @@ void setup_round_tumoroid( void )
 		n++; 
 	}  
 	    
-		
+	}
 	
 	return; 
 }
