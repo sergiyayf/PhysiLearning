@@ -64,3 +64,14 @@ def test_get_tumor_volume_from_image():
     image = env._get_image_obs(message, action=0)
     num_cells = env._get_tumor_volume_from_image(image)
     assert num_cells == (2, 2)
+
+
+def test_check_done():
+    env = PcEnv(observation_type='number', normalize=0, max_tumor_size=2)
+    env.state = [0, 0, 0]
+    done = env._check_done(burden_type='number', total_cell_number=0)
+    assert done == False
+
+    env.state = [0, 3, 0]
+    done = env._check_done(burden_type='number', total_cell_number=3)
+    assert done == True

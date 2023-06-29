@@ -246,7 +246,6 @@ int main( int argc, char* argv[] )
 				
                 // do treatment or not
                 if (request.to_string() == "Treat") {
-			        std::cout<<"Treating"<<std::endl;
                     activate_drug_dc();
 		    //treatment_on();
                 } else if (request.to_string() == "Stop treatment") {

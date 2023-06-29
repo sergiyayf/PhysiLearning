@@ -50,14 +50,15 @@ env:
   reward_shaping: 5  # reward shaping flag for some predefined rewards
 
   # general simulation settings
-  max_tumor_size: 2000
+  max_tumor_size: 4000
   treatment_time_step: 1 
-  max_time: 1000
-  normalize: 1
+  max_time: 120
+  normalize: 0
   normalize_to: 1000
   observation_type: 'number' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
   image_size: 84
+  domain_size: 1250
 
   # LV environment settings
   LV:
@@ -87,13 +88,13 @@ env:
         value: 5
     enable_chkpt:
         parent_nodes: ['user_parameters']
-        value: 'false'
+        value: 'true'
     filename_chkpt:
         parent_nodes: ['user_parameters']
-        value: './../presims/long_train_test_patient/final'
+        value: './../paper_presims/patient_18_growth_layer/output/final'
     treatment_time_step:
         parent_nodes: ['user_parameters']
-        value: 60
+        value: 720
     treatment_death_rate:
         parent_nodes: ['user_parameters']
         value: 0.00225
@@ -117,10 +118,12 @@ eval:
   from_file: 0
   path: './'
   model_prefix: '0507_gridenv_1env_full_node_rew5'
-  fixed_AT_protocol: 1
-  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  num_episodes: 1
   step_to_load: '_best_reward'
-  save_name: 'no_treat_test_LV'
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  save_name: 'patient_9_fixed_07'
+  # evaluation settings
+  fixed_AT_protocol: 1
+  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.5
+  num_episodes: 1
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

@@ -1,161 +1,108 @@
-# evaluation of the LatticeBased run
 import matplotlib as mpl
 mpl.use('TkAgg')
-from physilearning.envs.grid_env import GridEnv
-from stable_baselines3 import PPO
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import animation
 import seaborn as sns
 from physicell_tools import pyMCDS
 import pandas as pd
 from physicell_tools.get_perifery import front_cells
-from physicell_tools.leastsquares import leastsq_circle, plot_data_circle
-import seaborn as sns
+from physicell_tools.leastsquares import leastsq_circle
+from scipy import stats
 
-def grid_env_sand():
-    # setup environment
-    env = GridEnv.from_yaml(r'.\Training\Configs\LatticeBased_23_03_CNN_1_env_not_stacked.yaml')
 
-    # load pretrained model
-    model = PPO.load(r'.\data\2403_grid_mela_models\LatticeBased_24_03_CNN_1_env_not_stacked_mela_final', env=env)
+def get_cell_df(pymcds: pyMCDS.pyMCDS):
+    """
+    Get cell_df from pyMCDS object
+    """
+    cell_df = pymcds.get_cell_df()
+    return cell_df
 
-    done = False
-    obs = env.reset()
 
-    rew = 0
-    while not done:
-        action, _states = model.predict(obs, deterministic=True)
-        obs, reward, done, info = env.step(action)
-        rew+=reward
+def calculate_distance_to_front_cell(cells, front):
+    for i in range(len(front)):
+        current_dist = np.sqrt((cells['position_x']-front[i, 0])**2 + (cells['position_y']-front[i, 1])**2)
+        if i == 0:
+            dist = current_dist
+        else:
+            dist = np.minimum(dist, current_dist)
+    return dist
 
-    print('reward: ', rew)
-    env.render()
-    plt.show()
 
-def animate(filename, fig, ax):
-    trajectory = np.load(filename)
+def calculate_distance_to_front(cell_df: pd.DataFrame, front_cell_positions: np.array):
+    """
+    Calculate distance to front for all cells in cell_df
+    and append to the dataset
+    """
+    xc, yc, R, residu = leastsq_circle(front_cell_positions[:, 0], front_cell_positions[:, 1])
+    cell_df = cell_df.copy()
 
-    ims = []
-    for i in range(len(trajectory[0, 0, :])):
-        arr = trajectory[:, :, i]
-        # change x and y axis
-        arr = np.flip(arr, 0)
-        im = ax.imshow(arr, animated=True, cmap='viridis', vmin=0, vmax=255)
-        ims.append([im])
-    ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=100)
-    return ani
+    cell_df['distance_to_front_circle'] = (np.sqrt((cell_df['position_x']-xc)**2 + (cell_df['position_y']-yc)**2)).values - R
+    cell_df['distance_to_front_cell'] = calculate_distance_to_front_cell(cell_df, front_cell_positions)
+    cell_df['distance_to_center'] = np.sqrt((cell_df['position_x'])**2 + (cell_df['position_y'])**2)
 
-def boxplots():
-    eval_pcenv_0505_train_2_rewards = [441.98, 473.3, 436.14, 418.68, 405.69,
-                                       408.44, 446.9, 395.89, 473.58, 481.8]
-    eval_pcenv_0505_train_2_len = [477, 507, 469, 449, 436, 439, 482, 426, 511, 520]
-    eval_pcenv_0505_raven_finding_rewards = [551.9, 530.6, 446.8, 543.8, 456.5,
-                                             491.5, 475.9, 409.3, 491.5, 422.3]
-    eval_pcenv_0505_raven_finding_len = [594, 572, 479, 588, 493,
-                                         530, 529, 513, 443, 455]
-    eval_grid_env_0507_len = [1000, 1000, 1000, 810, 956,
-                              1000, 1000, 924, 1000, 793]
-    eval_grid_env_0507_len_on_pc = [407, 450, 397, 435, 440,
-                                    421, 393, 388, 485, 489]
-    eval_pcenv_AT50 = [641, 450, 655, 481, 527,
-                       563, 576, 497, 501, 445]
-    eval_trained_on_pc_only_job = [490, 832, 500, 468, 468,
-                                   500, 504, 623, 492, 550]
-    eval_mtd = [328, 411, 360, 381, 343,
-                368, 344, 348, 391, 343]
+    return cell_df
 
-    fig, ax = plt.subplots()
-    sns.boxplot(data=[eval_mtd, eval_grid_env_0507_len_on_pc, eval_pcenv_AT50, eval_pcenv_0505_raven_finding_len],
-                ax=ax)
-    # add legends
-    ax.set_xticklabels(['MTD', 'Lattice-based', 'AT50', 'Agent-based'])
-    ax.legend()
-    fig.savefig('./boxplot_compare_different_strategies.pdf', transparent=True)
-
-def main():
-    fig, ax = plt.subplots()
-    filename = 'Evaluations/older_evals/0_PcEnvEval0507_gridenv_1env_full_node_rew5_image_trajectory.npy'
-    ani = animate(filename, fig, ax)
-
-    ani.save('./data/gm_cnn_trained/movies/grid_deployed_on_pc_same_as_cells.mp4', writer='ffmpeg', fps=10)
-
-    # fig2, ax2 = plt.subplots()
-    # filename2 = 'Evaluations/0_PcEnvEval0427_check_pc_no_treat_image_trajectory.npy'
-    # ani2 = animate(filename2, fig2, ax2)
-
-    plt.show()
-
-def physicell_h5_trying():
-    hdf_file = 'test_file.h5'
-    cells_0 = pd.read_hdf(hdf_file, key='cell_info_00')
-    #
-    time_frames = range(0, 50, 1)
-    cell_counts = pd.DataFrame()
-    for t in time_frames:
-        #pymc = pyMCDS.pyMCDS('output000000{:02d}.xml'.format(t) ,'simulations/outputs/manual_AT_output')
-        #cell_info = pymc.get_cell_df()
-        cell_info = pd.read_hdf(hdf_file, key='cell_info_{:02d}'.format(t))
-        #cell_info.to_hdf(hdf_file, key='cell_info_{:02d}'.format(t))
-        cell_count_type0 = len(cell_info[cell_info["cell_type"]==0])
-        cell_count_type1 = len(cell_info[cell_info["cell_type"]==1])
-        # add counts to dataframe with time as index
-        cell_counts = pd.concat([cell_counts,
-                                 pd.DataFrame({'type0': cell_count_type0,
-                                               'type1': cell_count_type1}, index=[t])])
-
-    cell_counts.plot(y=['type0', 'type1'])
-    plt.show()
 
 if __name__ == '__main__':
-    pymc = pyMCDS.pyMCDS('final.xml' ,'./data/raven_22_06_patient_sims/PhysiCell_67/output')
-    cell_info_0 = pymc.get_cell_df()
-    fig, ax = plt.subplots()
-    ax.scatter(cell_info_0['position_x'], cell_info_0['position_y'], c=cell_info_0['cell_type'])
-    fig.tight_layout()
 
-    sims = range(0, 100, 1)
-    distance_to_center = []
-    distance_to_front =  []
+    sims = range(0, 1000, 1)
+    distance_to_front_cell =  []
+    distance_to_front_circle = []
+    min_distance_to_front_cell = []
     for sim in sims:
-        pymc = pyMCDS.pyMCDS('final.xml' ,f'./data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
-        cell_info = pymc.get_cell_df()
+        # pymc = pyMCDS.pyMCDS('final.xml' ,f'../../data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
+        cell_info = pd.read_hdf('./data/simplified_data_2306_presims.h5', key=f'PhysiCell_{sim}')
+        type_1_cells = cell_info[cell_info['cell_type'] == 1]
 
-        positions, types = front_cells(cell_info)
-        xc, yc, R, residu = leastsq_circle(positions[:, 0], positions[:, 1])
-        # get cells of type 1
-        type_1_cells = cell_info[cell_info['cell_type']==1]
-        # calculate distance to center
-        type_1_cells['distance_to_center'] = np.sqrt((type_1_cells['position_x'])**2 + (type_1_cells['position_y'])**2)
-        type_1_cells['distance_to_front'] = (np.sqrt((type_1_cells['position_x']-xc)**2 + (type_1_cells['position_y']-yc)**2)).values - R
-        # get unique clones
+        cells_at_front = cell_info[cell_info['is_at_front'] == 1]
+        positions = cells_at_front[['position_x', 'position_y']].values
+
+        type_1_cells = calculate_distance_to_front(type_1_cells, positions)
+
         unique_clones = type_1_cells['clone_ID'].unique()
         for clone in unique_clones:
             single_clone = type_1_cells[type_1_cells['clone_ID']==clone]
-            # get average distance to center
-            mean_dist_to_center = single_clone['distance_to_center'].mean()
+
             # get average distance to front
-            mean_dist_to_front = single_clone['distance_to_front'].mean()
+            mean_dist_to_front_circle = single_clone['distance_to_front_circle'].mean()
+            mean_dist_to_front_cell = single_clone['distance_to_front_cell'].mean()
+            min_dist_to_front_cell = single_clone['distance_to_front_cell'].min()
+
             # add to list
-            distance_to_center.append(mean_dist_to_center)
-            distance_to_front.append(mean_dist_to_front)
+            distance_to_front_circle.append(mean_dist_to_front_circle)
+            distance_to_front_cell.append(mean_dist_to_front_cell)
+            min_distance_to_front_cell.append(min_dist_to_front_cell)
 
     # plot histogram
+
+    fig1, ax1 = plt.subplots()
+    sns.histplot(data=distance_to_front_circle, ax=ax1, bins=20)
+    ax1.set_title('Distance from the center of the clone to the circle fit to the front cells')
+    ax1.set_xlabel('Distance to front circle')
+    ax1.set_ylabel('Number of clones')
+
+
+    fig2, ax2 = plt.subplots()
+    sns.histplot(data=distance_to_front_cell, ax=ax2, bins=20)
+    ax2.set_title('Distance from the center of the clone to the closest front cell')
+    ax2.set_ylabel('Number of clones')
+    ax2.set_xlabel('Distance to front cell')
+
+
     fig3, ax3 = plt.subplots()
-    ax3.hist(distance_to_center, bins=10)
+    sns.histplot(data=min_distance_to_front_cell, ax=ax3, bins=20)
+    ax3.set_title('Distance from the outermost cell of a clone to the closest front cell')
+    ax3.set_xlabel('Distance to front cell')
+    ax3.set_ylabel('Number of clones')
 
-    positions, types = front_cells(cell_info)
-    xc, yc, R, residu = leastsq_circle(positions[:, 0], positions[:, 1])
-    fig4, ax4 = plt.subplots()
-    sns.histplot(data=distance_to_front, ax=ax4, bins=20)
-    ax4.set_xlabel('Distance to front')
-    ax4.set_ylabel('Count')
-    ax4.set_title('Distribution of resistant clones after 14 days of growth')
-    #plot_data_circle(positions[:, 0], positions[:, 1], xc, yc, R)
+    mode = stats.mode(min_distance_to_front_cell)
+    print(f'Mode: {mode}')
 
-    type_1_cell_0 = cell_info_0[cell_info_0['cell_type']==1]
-    type_1_cell_0['distance_to_center'] = np.sqrt((type_1_cell_0['position_x'])**2 + (type_1_cell_0['position_y'])**2)
-    type_1_cell_0['distance_to_front'] = (np.sqrt((type_1_cell_0['position_x']-xc)**2 + (type_1_cell_0['position_y']-yc)**2)).values - R
+    mean = np.mean(min_distance_to_front_cell)
+    print(f'Mean: {mean}')
 
-
+    median = np.median(min_distance_to_front_cell)
+    print(f'Median: {median}')
+    
     plt.show()
+

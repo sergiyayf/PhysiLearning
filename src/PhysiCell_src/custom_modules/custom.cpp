@@ -212,12 +212,7 @@ void setup_microenvironment( void )
 
 void setup_round_tumoroid( void )
 {
-    if (parameters.bools("enable_chkpt")){
-        std::cout<<"Loading cell positions from"<<parameters.strings("filename_chkpt")+"_cells.mat"<<std::endl;
-        load_minimal_cells_physicell(parameters.strings("filename_chkpt"));
-    } else {
-
-	// place a cluster of tumor cells at the center 
+	// place a cluster of tumor cells at the center
     double cell_radius = cell_defaults.phenotype.geometry.radius; 
 	double cell_spacing = 0.95 * 2.0 * cell_radius; 
 	
@@ -284,14 +279,17 @@ void setup_round_tumoroid( void )
         pCell->assign_position( {x,y,z} );
 		n++; 
 	}  
-	    
-	}
-	
+
 	return; 
 }
 
 void setup_tissue( void )
 {
+    if (parameters.bools("enable_chkpt")){
+        std::cout<<"Loading cell positions from"<<parameters.strings("filename_chkpt")+"_cells.mat"<<std::endl;
+        load_minimal_cells_physicell(parameters.strings("filename_chkpt"));
+    } else {
+
 	double Xmin = microenvironment.mesh.bounding_box[0]; 
 	double Ymin = microenvironment.mesh.bounding_box[1]; 
 	double Zmin = microenvironment.mesh.bounding_box[2]; 
@@ -334,7 +332,7 @@ void setup_tissue( void )
 	// load cells from your CSV file (if enabled)
 	load_cells_from_pugixml(); 	
 	//setup_round_tumoroid();
-	
+	}
 	return; 
 }
 

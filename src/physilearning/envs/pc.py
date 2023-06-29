@@ -45,6 +45,7 @@ class PcEnv(Env):
         port: str = '0',
         job_name: str = '0000000',
         cpu_per_task: int = 1,
+        domain_size: int = 1200,
     ) -> None:
         #################### Todo: move to base class ##################
         # Spaces
@@ -106,7 +107,7 @@ class PcEnv(Env):
 
         ######################################################
         # PhysiCell specific for now
-        self.domain_size = 1000
+        self.domain_size = domain_size
         self.job_name = job_name
         self.port = port
         self.context = zmq.Context()
@@ -143,6 +144,7 @@ class PcEnv(Env):
         transport_type = config['global']['transport_type']
         transport_address = config['global']['transport_address']
         cpu_per_task = config['job']['cpus-per-task']
+        domain_size = config['env']['domain_size']
         if transport_type == 'ipc://':
             transport_address = f'{transport_address}{job_name}{port}'
         else:
@@ -154,7 +156,7 @@ class PcEnv(Env):
                    transport_type=transport_type, transport_address=transport_address,
                    reward_shaping_flag=reward_shaping_flag, normalize=normalize,
                    normalize_to=normalize_to, observation_type=observation_type,
-                   image_size=image_size, cpu_per_task=cpu_per_task)
+                   image_size=image_size, cpu_per_task=cpu_per_task, domain_size=domain_size)
 
     def _start_slurm_physicell_job_step(self) -> None:
         """
@@ -211,8 +213,12 @@ class PcEnv(Env):
         self.time += self.treatment_time_step
         # get tumor updated state
         message = str(self.socket.recv(), 'utf-8')
-        im = self._get_image_obs(message, action)
-        num_wt_cells, num_mut_cells = self._get_tumor_volume_from_image(im)
+        if self.observation_type == 'image':
+            im = self._get_image_obs(message, action)
+            num_wt_cells, num_mut_cells = self._get_tumor_volume_from_image(im)
+        elif self.observation_type == 'number':
+            num_wt_cells, num_mut_cells = self._get_cell_number(message)
+
         # num_wt_cells, num_mut_cells = self._get_cell_number(message)
 
         if self.normalize:
