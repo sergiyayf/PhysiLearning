@@ -38,23 +38,20 @@ class ODEBayesianFitter:
         :param prior_dist: The distribution to use for the priors.
         :return: (dict) The priors for the model parameters.
         """
+        priors_dict = self.ode.params
+        out = {}
         if prior_dist == "normal":
             with self.model:
-                alpha = pm.TruncatedNormal("alpha", mu=self.ode.params[0], sigma=self.ode.params[0],
-                                           lower=0, initval=self.ode.params[0])
-                beta = pm.TruncatedNormal("beta", mu=self.ode.params[1], sigma=self.ode.params[1],
-                                          lower=0, initval=self.ode.params[1])
-                gamma = pm.TruncatedNormal("gamma", mu=self.ode.params[2], sigma=self.ode.params[2],
-                                           lower=0, initval=self.ode.params[2])
-                delta = pm.TruncatedNormal("delta", mu=self.ode.params[3], sigma=self.ode.params[3],
-                                           lower=0, initval=self.ode.params[3])
-                xt0 = pm.TruncatedNormal("xt0", mu=self.ode.y0[0], sigma=self.ode.y0[0],
-                                         lower=0, initval=self.ode.y0[0])
-                yt0 = pm.TruncatedNormal("yt0", mu=self.ode.y0[1], sigma=self.ode.y0[1],
-                                         lower=0, initval=self.ode.y0[1])
-                sigma = pm.TruncatedNormal("sigma", mu=10, sigma=10, lower=0)
+                for key, value in priors_dict.items():
+                    out[key] = pm.TruncatedNormal(key, mu=self.ode.params[key], sigma=self.ode.params[key],
+                                                  lower=0, initval=self.ode.params[key])
 
-        return {"alpha": alpha, "beta": beta, "gamma": gamma, "delta": delta, "xt0": xt0, "yt0": yt0, "sigma": sigma}
+                out['sigma'] = pm.TruncatedNormal("sigma", mu=10, sigma=10, lower=0)
+
+        else:
+            raise NotImplementedError("Only normal priors are currently supported.")
+
+        return out
 
     @staticmethod
     @as_op(itypes=[pt.dvector, pt.dvector, pt.ivector, pt.dvector], otypes=[pt.dmatrix])
@@ -71,7 +68,7 @@ class ODEBayesianFitter:
         :return: The solution to the ODE.
 
         """
-        return ODEModel(y0=y0, params=theta, time=times, dt=1, treatment_schedule=treatment_schedule).simulate()
+        return ODEModel(y0=y0, theta=theta, time=times, dt=1, treatment_schedule=treatment_schedule).simulate()
 
     def likelihood(self, priors):
         """Define the likelihood function for the model.
@@ -92,8 +89,8 @@ class ODEBayesianFitter:
             sigma = priors["sigma"]
 
             times = pm.math.stack([np.float64(t) for t in self.data["time"].values])
-            theta = pm.math.stack([priors["alpha"], priors["beta"], priors["gamma"], priors["delta"]])
-            y0 = pm.math.stack([priors["xt0"], priors["yt0"]])
+            theta = pm.math.stack(list(self.ode.params.values()))
+            y0 = pm.math.stack([self.ode.y0[0], self.ode.y0[1]])
             treatment_schedule = pm.math.stack(self.ode.treatment_schedule)
             ode_solution = self.pytensor_matrix_solve(y0, times, treatment_schedule, theta)
             likelihood = pm.Normal("likelihood", mu=ode_solution, sigma=sigma, observed=self.data[["x", "y"]].values)
@@ -140,13 +137,11 @@ class ODEBayesianFitter:
         combined : bool, optional
             Whether to plot the traces of all the variables on the same axis.
         """
-        cols = ["alpha", "beta", "gamma", "delta", "xt0", "yt0"]
+        cols = self.ode.params.keys()
         trace_df = az.extract(self.trace, num_samples=num_samples).to_dataframe()
         #self.time = np.arange(1900, 1921, 0.01)
         for row_idx in range(num_samples):
-            theta = trace_df.iloc[row_idx, :][cols]
-            self.ode.params = theta[:-2]
-            self.ode.y0 = theta[-2:]
+            self.ode.theta = trace_df.iloc[row_idx, :][cols]
             x_y = self.ode.simulate()
             ax.plot(self.ode.time, x_y[:, 0], color="b", label="x (Model)", **kwargs)
             ax.plot(self.ode.time, x_y[:, 1], color="g", label="y (Model)", **kwargs)

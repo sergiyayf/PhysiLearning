@@ -21,12 +21,14 @@ class ODEModel:
     def __init__(
             self,
             y0: list or np.ndarray or tuple = (0.045, 0.005),
-            params: list or np.ndarray or tuple = (0.0357, 0.0325, 0.0003, 0.0003),
+            params: dict =  {'r_s': 0.03, 'r_r': 0.03, 'delta_s': 0.0003, 'delta_r': 0.0003},
+            consts: dict = {'c_s': 1, 'c_r': 1, 'K': 1.5, 'Delta_r': 0, 'Delta_s': 0.15},
             tmin: int = 0,
             tmax: int = 100,
             dt: float = 0.1,
             treatment_schedule: list = None,
-            time: list = None
+            time: list = None,
+            theta: list = [0.03, 0.03, 0.0003, 0.0003],
     ) -> None:
         self.rhs = self.LV
         self.y0 = y0
@@ -42,7 +44,8 @@ class ODEModel:
             self.treatment_schedule = self._prep_treatment_schedule(treatment_schedule)
         self.intervals = self.get_treatment_intervals()
         self.treatment = 0
-        self.const = {'c_x': 1, 'c_y': 1, 'K': 1.5, 'Delta_y': 0, 'Delta_x': 0.15}
+        self.const = consts
+        self.theta = theta
 
     def __call__(self, *args):
         return self.rhs(self.y0, self.time, self.params)
@@ -83,21 +86,22 @@ class ODEModel:
 
         """
         # unpack resistant and susceptible populations
-        x, y = X
-        # growth and death rates
-        r_x, r_y, delta_x, delta_y = theta
-        # competition parameters
-        c_x = self.const['c_x']
-        c_y = self.const['c_y']
-        # carrying capacity
-        K = self.const['K']
-        # treatment death rates
-        Delta_y = self.const['Delta_y']
-        Delta_x = self.const['Delta_x']
+        s, r = X
+        prm = {}
+        for key, value in zip(self.params.keys(), theta):
+            prm[key] = value
+        for key, value in self.const.items():
+            prm[key] = value
+
+        # check if all parameters are specified in either theta or self.const
+        list_of_all_parameters = ['r_s', 'r_r', 'delta_s', 'delta_r', 'c_s', 'c_r', 'K', 'Delta_s', 'Delta_r']
+        for parameter in list_of_all_parameters:
+            if parameter not in prm:
+                raise ValueError('Parameter {} not found in parameters dictionary'.format(parameter))
 
         # equations
-        dx_dt = x*(r_x*(1-(x+y*c_y)/K)-delta_x-Delta_x*self.treatment)
-        dy_dt = y*(r_y*(1-(y+x*c_x)/K)-delta_y-Delta_y*self.treatment)
+        dx_dt = s*(prm['r_s']*(1-(s+r*prm['c_r'])/prm['K'])-prm['delta_s']-prm['Delta_s']*self.treatment)
+        dy_dt = r*(prm['r_r']*(1-(r+s*prm['c_s'])/prm['K'])-prm['delta_r']-prm['Delta_r']*self.treatment)
 
         return [dx_dt, dy_dt]
 
@@ -147,7 +151,7 @@ class ODEModel:
         return solve_ivp(fun=self.rhs,
                          y0=self.y0,
                          t_span=[time[0], time[-1]],
-                         args=(self.params,),
+                         args=(self.theta,),
                          dense_output=True,
                          ).sol(time).T
 

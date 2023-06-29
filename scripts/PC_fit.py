@@ -29,8 +29,9 @@ def pcfit():
     print(data)
     print(treatment_schedule)
     y0 = [data.x[0], data.y[0]]
-    params = [0.0357, 0.03246, 0.00036, 0.00036]
-    model = ODEModel(time=data.time, treatment_schedule=treatment_schedule, dt=1, y0=y0, params=params)
+    theta = [0.0357, 0.03246, 0.00036, 0.00036]
+    params = {'r_s': theta[0], 'r_r': theta[1], 'delta_s': theta[2], 'delta_r': theta[3]}
+    model = ODEModel(time=data.time, treatment_schedule=treatment_schedule, dt=1, y0=y0, params=params, theta=theta)
     solution = model.simulate()
     fig, ax = plt.subplots(figsize=(12, 8))
     model.plot_model(ax=ax, solution=solution)

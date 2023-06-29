@@ -20,7 +20,7 @@ def test_set_priors():
     data = {'sensitive': [0, 2, 1, 2], 'resistant': [0, 1, 2,]}
     fitter = ODEBayesianFitter(ode=ode, data=data)
     priors = fitter.set_priors()
-    assert len(priors) == 7
+    assert len(priors) == 5
 
 
 def test_likelihood():
