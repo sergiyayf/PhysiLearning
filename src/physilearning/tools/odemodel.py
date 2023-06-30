@@ -27,7 +27,7 @@ class ODEModel:
             tmax: int = 100,
             dt: float = 0.1,
             treatment_schedule: list = None,
-            time: list = None,
+            time: list or np.array = None,
             theta: list = [0.03, 0.03, 0.0003, 0.0003],
     ) -> None:
         self.rhs = self.LV

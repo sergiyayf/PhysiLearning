@@ -120,7 +120,7 @@ class ODEBayesianFitter:
         self.trace = trace
         return trace
 
-    def plot_inference_trace(self, ax=None, num_samples=25, title="DEM inference", **kwargs):
+    def plot_inference_trace(self, ax=None, treatment_schedule=None, num_samples=25, title="DEM inference", **kwargs):
         """
         Plot the trace of the MCMC sampling.
 
@@ -141,7 +141,8 @@ class ODEBayesianFitter:
         trace_df = az.extract(self.trace, num_samples=num_samples).to_dataframe()
         #self.time = np.arange(1900, 1921, 0.01)
         for row_idx in range(num_samples):
-            self.ode.theta = trace_df.iloc[row_idx, :][cols]
+            self.ode = ODEModel(theta=trace_df.iloc[row_idx, :][cols], treatment_schedule=treatment_schedule,
+                                time=np.arange(0,len(treatment_schedule),1), dt =1)
             x_y = self.ode.simulate()
             ax.plot(self.ode.time, x_y[:, 0], color="b", label="x (Model)", **kwargs)
             ax.plot(self.ode.time, x_y[:, 1], color="g", label="y (Model)", **kwargs)

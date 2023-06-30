@@ -38,16 +38,33 @@ def pcfit():
     ax.plot(data.time, data.x, color="b", lw=1, marker="o", markersize=5, label="x data")
     ax.plot(data.time, data.y, color="g", lw=1, marker="+", markersize=5, label="y data")
     ax.legend()
+    ax.set_title('Initial parameters')
 
     bayes_fitter = ODEBayesianFitter(model, data)
     # likelihood = bayes_fitter.likelihood(bayes_fitter.set_priors())
-    trace = bayes_fitter.sample(draws=50, chains=8)
+    trace = bayes_fitter.sample(draws=100000, chains=8)
     print(az.summary(trace))
+    trace_df = az.summary(trace)
     fig, ax = plt.subplots(figsize=(12, 8))
     # plot_inference(ax, trace, num_samples=25)
-    bayes_fitter.plot_inference_trace(ax=ax, num_samples=25, alpha=0.2)
+    bayes_fitter.plot_inference_trace(ax=ax, treatment_schedule=treatment_schedule, num_samples=25, alpha=0.2)
     ax.plot(data.time, data.x, color="b", lw=2, marker="o", markersize=5, label="x data")
     ax.plot(data.time, data.y, color="g", lw=2, marker="+", markersize=5, label="y data")
+    ax.set_title('Draws from posterior distribution')
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+    # plot model with mean parameters
+    params = {'r_s': trace_df.loc['r_s', 'mean'], 'r_r': trace_df.loc['r_r', 'mean'],
+              'delta_s': trace_df.loc['delta_s', 'mean'], 'delta_r': trace_df.loc['delta_r', 'mean']}
+    theta = [params['r_s'], params['r_r'], params['delta_s'], params['delta_r']]
+    model = ODEModel(time=data.time, treatment_schedule=treatment_schedule, dt=1, y0=y0, params=params, theta=theta)
+    solution = model.simulate()
+    model.plot_model(ax=ax, solution=solution)
+    ax.plot(data.time, data.x, color="b", lw=1, marker="o", markersize=5, label="x data")
+    ax.plot(data.time, data.y, color="g", lw=1, marker="+", markersize=5, label="y data")
+    ax.legend()
+    ax.set_title('Mean parameters')
+
 
     plt.show()
 
