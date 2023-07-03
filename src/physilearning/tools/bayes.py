@@ -41,12 +41,19 @@ class ODEBayesianFitter:
         priors_dict = self.ode.params
         out = {}
         if prior_dist == "normal":
-            with self.model:
+            with pm.Model() as self.model:
                 for key, value in priors_dict.items():
-                    out[key] = pm.TruncatedNormal(key, mu=self.ode.params[key], sigma=self.ode.params[key],
+                    out[key] = pm.TruncatedNormal(key, mu=self.ode.params[key], sigma=self.ode.params[key]*0.05,
                                                   lower=0, initval=self.ode.params[key])
 
-                out['sigma'] = pm.TruncatedNormal("sigma", mu=10, sigma=10, lower=0)
+                out['sigma'] = pm.HalfNormal("sigma", 10)
+
+        elif prior_dist == "uniform":
+            with pm.Model() as self.model:
+                for key, value in priors_dict.items():
+                    out[key] = pm.Uniform(key, lower=0, upper=3, initval=self.ode.params[key])
+
+                out['sigma'] = pm.HalfNormal("sigma", 10)
 
         else:
             raise NotImplementedError("Only normal priors are currently supported.")
@@ -68,9 +75,10 @@ class ODEBayesianFitter:
         :return: The solution to the ODE.
 
         """
-        return ODEModel(y0=y0, theta=theta, time=times, dt=1, treatment_schedule=treatment_schedule).simulate()
+        return ODEModel(y0=y0, theta=theta, time=times, dt=1,
+                        treatment_schedule=treatment_schedule).simulate()
 
-    def likelihood(self, priors):
+    def likelihood(self, priors, pytensor_op):
         """Define the likelihood function for the model.
 
         Parameters
@@ -88,16 +96,15 @@ class ODEBayesianFitter:
             # define the likelihood
             sigma = priors["sigma"]
 
-            times = pm.math.stack([np.float64(t) for t in self.data["time"].values])
-            theta = pm.math.stack(list(self.ode.params.values()))
-            y0 = pm.math.stack([self.ode.y0[0], self.ode.y0[1]])
-            treatment_schedule = pm.math.stack(self.ode.treatment_schedule)
-            ode_solution = self.pytensor_matrix_solve(y0, times, treatment_schedule, theta)
-            likelihood = pm.Normal("likelihood", mu=ode_solution, sigma=sigma, observed=self.data[["x", "y"]].values)
+            theta = pm.math.stack([priors[key] for key, value in priors.items() if key != "sigma"])
+
+            ode_solution = pytensor_op(theta)
+
+            likelihood = pm.Normal("likelihood", mu=ode_solution, sigma=sigma, observed=self.data[["y", "x"]].values)
 
         return likelihood
 
-    def sample(self, sampler="DEMetropolis", chains=8, draws=3000, cores=1):
+    def sample(self, pytensor_op: callable, sampler="DEMetropolis", chains=8, draws=3000, cores=1):
         """
         Fit the Lotka-Volterra model to the data using a Bayesian approach.
 
@@ -107,20 +114,22 @@ class ODEBayesianFitter:
             The trace of the MCMC sampling.
         """
 
-        priors = self.set_priors()
-        self.likelihood(priors=priors)
+
+        priors = self.set_priors(prior_dist='normal')
+        self.likelihood(priors=priors, pytensor_op= pytensor_op)
         vars_list = list(self.model.values_to_rvs.keys())[:-1]
         print(vars_list)
         sampler = sampler
         chains = chains
         draws = draws
         with self.model:
-            trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], draws=draws, chains=chains, cores=cores)
+            trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=draws, draws=draws, chains=chains, cores=cores)
         trace = trace_DEM
         self.trace = trace
         return trace
 
-    def plot_inference_trace(self, ax=None, treatment_schedule=None, num_samples=25, title="DEM inference", **kwargs):
+    def plot_inference_trace(self, ax=None, treatment_schedule=None, num_samples=25,
+                             title="DEM inference", consts=None, params=None, **kwargs):
         """
         Plot the trace of the MCMC sampling.
 
@@ -142,7 +151,7 @@ class ODEBayesianFitter:
         #self.time = np.arange(1900, 1921, 0.01)
         for row_idx in range(num_samples):
             self.ode = ODEModel(theta=trace_df.iloc[row_idx, :][cols], treatment_schedule=treatment_schedule,
-                                time=np.arange(0,len(treatment_schedule),1), dt =1)
+                                time=np.arange(0,len(treatment_schedule),1), dt=1, consts=consts, params=params)
             x_y = self.ode.simulate()
             ax.plot(self.ode.time, x_y[:, 0], color="b", label="x (Model)", **kwargs)
             ax.plot(self.ode.time, x_y[:, 1], color="g", label="y (Model)", **kwargs)

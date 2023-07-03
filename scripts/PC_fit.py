@@ -4,17 +4,58 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from physilearning.tools.odemodel import ODEModel
-from physilearning.tools.bayes import ODEBayesianFitter
 import arviz as az
+from pytensor.compile.ops import as_op
+import pytensor.tensor as pt
+import pymc as pm
+from scipy.optimize import least_squares
 
-def pcfit():
-    plt.rcParams.update({'font.size': 20,
-                             'font.weight': 'normal',
-                             'font.family': 'sans-serif'})
-    mpl.rcParams['pdf.fonttype'] = 42  # to make text editable in pdf output
-    #mpl.rcParams['font.sans-serif'] = ['Arial']  # to make it Arial
+@as_op(itypes=[pt.dvector], otypes=[pt.dmatrix])
+def pytensor_forward_model_matrix(theta):
+    return ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
+                    params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
 
+def plot_data(ax, lw=2, title="Initial data"):
+    ax.plot(data.time, data.x, color="b", lw=lw, marker="o", markersize=12, label="X (Data)")
+    ax.plot(data.time, data.y, color="g", lw=lw, marker="+", markersize=14, label="Y (Data)")
+    ax.legend(fontsize=14, loc="center left", bbox_to_anchor=(1, 0.5))
+    ax.set_title(title, fontsize=16)
+    return ax
 
+def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
+    cols = ['r_r', 'r_s']
+    row = trace_df.iloc[row_idx, :][cols].values
+
+    theta = row
+    x_y = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
+                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
+    ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
+                        params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).plot_model(ax, solution=x_y, lw=lw, alpha=alpha)
+
+def plot_inference(
+    ax,
+    trace,
+    num_samples=25,
+    title="Hudson's Bay Company Data and\nInference Model Runs",
+    plot_model_kwargs=dict(lw=1, alpha=0.2),
+):
+    trace_df = az.extract(trace, num_samples=num_samples).to_dataframe()
+    plot_data(ax, lw=0)
+    for row_idx in range(num_samples):
+        plot_model_trace(ax, trace_df, row_idx, **plot_model_kwargs)
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles[:2], labels[:2], loc="center left", bbox_to_anchor=(1, 0.5))
+    ax.set_title(title, fontsize=16)
+
+def ode_model_resid(theta):
+    out = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
+                    params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
+
+    return (data[["x", "y"]] - out).values.flatten()
+
+if __name__ == '__main__':
+
+    # Get data
     df = pd.read_csv(
         './../Evaluations/older_evals/0_AT_fixedAT_60onPC.csv',
         index_col=[0])
@@ -26,93 +67,91 @@ def pcfit():
 
     treatment_schedule = [np.int32(i) for i in np.array(df['Treatment'].values[0:230:1])]
 
-    print(data)
-    print(treatment_schedule)
-    y0 = [data.x[0], data.y[0]]
-    theta = [0.0357, 0.03246, 0.00036, 0.00036]
-    params = {'r_s': theta[0], 'r_r': theta[1], 'delta_s': theta[2], 'delta_r': theta[3]}
-    model = ODEModel(time=data.time, treatment_schedule=treatment_schedule, dt=1, y0=y0, params=params, theta=theta)
-    solution = model.simulate()
-    fig, ax = plt.subplots(figsize=(12, 8))
-    model.plot_model(ax=ax, solution=solution)
-    ax.plot(data.time, data.x, color="b", lw=1, marker="o", markersize=5, label="x data")
-    ax.plot(data.time, data.y, color="g", lw=1, marker="+", markersize=5, label="y data")
+    # Plot data
+    fig, ax = plt.subplots(figsize=(12, 4))
+    plot_data(ax, title="PC raw data")
+
+    consts_fit = {'Delta_s': 0.1, 'Delta_r': 0.0, 'K': 2, 'c_s': 1.5, 'c_r': 1,
+              'delta_r': 0.00036, 'delta_s': 0.00036}
+    params_fit = {'r_r': 0.03, 'r_s': 0.03}
+    theta_fit = list(params_fit.values())
+
+    sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
+                   params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
+    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Initial guess)")
+    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Initial guess)")
+
+    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()))
+    params_fit = {'r_r': initial_conditions.x[0], 'r_s': initial_conditions.x[1]}
+    theta_fit = list(params_fit.values())
+
+    sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
+                    params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
+    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Least squares)")
+    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Least squares)")
     ax.legend()
-    ax.set_title('Initial parameters')
 
-    bayes_fitter = ODEBayesianFitter(model, data)
-    # likelihood = bayes_fitter.likelihood(bayes_fitter.set_priors())
-    trace = bayes_fitter.sample(draws=100000, chains=8)
+    with pm.Model() as model:
+        # Priors
+        # alpha = pm.TruncatedNormal("alpha", mu=theta[0], sigma=0.1, lower=0, initval=theta[0])
+        # r_r = pm.Uniform("r_r", lower=0, upper=1, initval=theta_fit[0])
+        # r_s = pm.Uniform("r_s", lower=0, upper=1, initval=theta_fit[1])
+        r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
+        r_s = pm.TruncatedNormal("r_s", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
+        sigma = pm.HalfNormal("sigma", 10)
+
+        # Ode solution function
+        ode_solution = pytensor_forward_model_matrix(
+            pm.math.stack([r_r, r_s])
+        )
+
+        # Likelihood
+        pm.Normal("Y_obs", mu=ode_solution, sigma=sigma, observed=data[["x", "y"]].values)
+
+    # Variable list to give to the sample step parameter
+    vars_list = list(model.values_to_rvs.keys())[:-1]
+
+    sampler = "DEMetropolis"
+    chains = 8
+    draws = 10000
+    with model:
+        trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
+    trace = trace_DEM
     print(az.summary(trace))
-    trace_df = az.summary(trace)
-    fig, ax = plt.subplots(figsize=(12, 8))
-    # plot_inference(ax, trace, num_samples=25)
-    bayes_fitter.plot_inference_trace(ax=ax, treatment_schedule=treatment_schedule, num_samples=25, alpha=0.2)
-    ax.plot(data.time, data.x, color="b", lw=2, marker="o", markersize=5, label="x data")
-    ax.plot(data.time, data.y, color="g", lw=2, marker="+", markersize=5, label="y data")
-    ax.set_title('Draws from posterior distribution')
+    az.plot_trace(trace, kind="rank_bars")
+    plt.suptitle(f"Trace Plot {sampler}")
+    fig, ax = plt.subplots(figsize=(12, 4))
+    plot_inference(ax, trace, title=f"Data and Inference Model Runs\n{sampler} Sampler")
 
-    fig, ax = plt.subplots(figsize=(12, 8))
-    # plot model with mean parameters
-    params = {'r_s': trace_df.loc['r_s', 'mean'], 'r_r': trace_df.loc['r_r', 'mean'],
-              'delta_s': trace_df.loc['delta_s', 'mean'], 'delta_r': trace_df.loc['delta_r', 'mean']}
-    theta = [params['r_s'], params['r_r'], params['delta_s'], params['delta_r']]
-    model = ODEModel(time=data.time, treatment_schedule=treatment_schedule, dt=1, y0=y0, params=params, theta=theta)
-    solution = model.simulate()
-    model.plot_model(ax=ax, solution=solution)
-    ax.plot(data.time, data.x, color="b", lw=1, marker="o", markersize=5, label="x data")
-    ax.plot(data.time, data.y, color="g", lw=1, marker="+", markersize=5, label="y data")
+    # get mean and median of distribution
+    trace_df = az.summary(trace)
+
+    # plot mean parameters
+    fig, ax = plt.subplots(figsize=(12, 4))
+    plot_data(ax)
+    mean_params = {}
+    for key in params_fit.keys():
+        mean_params[key] = trace_df.loc[key, 'mean']
+    theta = [mean_params[key] for key in params_fit.keys()]
+    sol = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
+                    params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
+    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Mean)")
+    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Mean)")
     ax.legend()
     ax.set_title('Mean parameters')
 
+    # plot median parameters
+
+    median_params = {}
+    for key in params_fit.keys():
+        median_params[key] = trace.get('posterior').to_dataframe()[key].median()
+    theta = [median_params[key] for key in params_fit.keys()]
+    sol = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
+                    params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
+    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Median)")
+    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Median)")
+    ax.legend()
+    ax.set_title('Median parameters')
 
     plt.show()
 
-
-def bayes_main():
-    # treatment_schedule = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0])
-
-    treatment_schedule = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0])
-    model = ODEModel(tmax=22, treatment_schedule=treatment_schedule, dt=1)
-
-    time = model.time
-    solution = model.solve(model.time)
-    sol2 = model.simulate()
-
-    model.plot_model(solution=solution)
-    model.plot_model(solution=sol2)
-    fig, ax = plt.subplots()
-    model.plot_model(ax=ax, solution=sol2)
-
-    noise = np.random.normal(0, 0.001, size=solution.shape)
-    sol2 += noise
-    ax.scatter(time, sol2[:, 0], label='x')
-    ax.scatter(time, sol2[:, 1], label='y')
-
-    treatment_schedule = [np.int32(i) for i in treatment_schedule]
-    ode_model = ODEModel(tmax=22, treatment_schedule=treatment_schedule, dt=1)
-    x = sol2[:, 0]
-    y = sol2[:, 1]
-    data = pd.DataFrame(dict(
-        time=time,
-        x=x,
-        y=y))
-    bayes_fitter = ODEBayesianFitter(ode_model, data)
-    # likelihood = bayes_fitter.likelihood(bayes_fitter.set_priors())
-    trace = bayes_fitter.sample(draws=100, chains=8, cores=16)
-    print(az.summary(trace))
-    fig, ax = plt.subplots(figsize=(7, 4))
-    # plot_inference(ax, trace, num_samples=25)
-    bayes_fitter.plot_inference_trace(ax=ax, num_samples=25, alpha=0.2)
-    ax.plot(data.time, data.x, color="b", lw=2, marker="o", markersize=12, label="x")
-    ax.plot(data.time, data.y, color="g", lw=2, marker="+", markersize=14, label="y")
-
-    plt.show()
-
-
-def main():
-    bayes_main()
-
-
-if __name__ == '__main__':
-    pcfit()
