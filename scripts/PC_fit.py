@@ -56,22 +56,43 @@ def ode_model_resid(theta):
 if __name__ == '__main__':
 
     # Get data
+    # df = pd.read_csv(
+    #     './../Evaluations/older_evals/0_AT_fixedAT_60onPC.csv',
+    #     index_col=[0])
+    #
+    # data = pd.DataFrame(dict(
+    #         time=df.index.values[0:230:1],
+    #         x=df['Type 0'].values[0:230:1],
+    #         y=df['Type 1'].values[0:230:1],))
+    #
+    # treatment_schedule = [np.int32(i) for i in np.array(df['Treatment'].values[0:230:1])]
+
+    # Get data
     df = pd.read_csv(
-        './../Evaluations/older_evals/0_AT_fixedAT_60onPC.csv',
+        './../Evaluations/0_PcEnvEvalpatient_18_fixed_07.csv',
         index_col=[0])
 
     data = pd.DataFrame(dict(
-            time=df.index.values[0:230:1],
-            x=df['Type 0'].values[0:230:1],
-            y=df['Type 1'].values[0:230:1],))
+        time=df.index.values[0:56:1],
+        x=df['Type 0'].values[0:56:1],
+        y=df['Type 1'].values[0:56:1], ))
 
-    treatment_schedule = [np.int32(i) for i in np.array(df['Treatment'].values[0:230:1])]
+    treatment_schedule = np.array(df['Treatment'].values[0:56:1])
+    fig, ax = plt.subplots(figsize=(12, 4))
+    plot_data(ax, title="Original treatment")
+    # append treatmentd schedule with two zeros from the beginning, delete last 2
+    treatment_schedule = [np.int32(i) for i in np.array(df['Treatment'].values[0:56:1])]
+    treatment_schedule = np.array([0] + treatment_schedule[:-1])
+    # find ends of treatment
+    treatment_ends = np.where(np.diff(treatment_schedule) == -1)[0]
+    # replace ends of treatment with 1
+    treatment_schedule[treatment_ends + 1] = 1
 
     # Plot data
     fig, ax = plt.subplots(figsize=(12, 4))
     plot_data(ax, title="PC raw data")
 
-    consts_fit = {'Delta_s': 0.1, 'Delta_r': 0.0, 'K': 2, 'c_s': 1.5, 'c_r': 1,
+    consts_fit = {'Delta_s': 0.25, 'Delta_r': 0.0, 'K': 5000, 'c_s': 1.5, 'c_r': 1,
               'delta_r': 0.00036, 'delta_s': 0.00036}
     params_fit = {'r_r': 0.03, 'r_s': 0.03}
     theta_fit = list(params_fit.values())
@@ -113,7 +134,7 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 10000
+    draws = 5
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
     trace = trace_DEM
