@@ -111,17 +111,17 @@ class PcEnv(Env):
         self.job_name = job_name
         self.port = port
         self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REQ)
+        self.socket = self.context.socket(zmq.REP)
         self.transport_type = transport_type
         self.transport_address = transport_address
         if transport_type == 'ipc://':
-            self.socket.connect(f'{self.transport_type}{self.transport_address}')
+            self.socket.bind(f'{self.transport_type}{self.transport_address}')
         elif transport_type == 'tcp://':
             try:
-                self.socket.connect(f'{self.transport_type}localhost:{self.transport_address}')
+                self.socket.bind(f'{self.transport_type}localhost:{self.transport_address}')
             except zmq.error.ZMQError:
                 print("Connection failed. Double check the transport type and address. Trying with the default address")
-                self.socket.connect(f'{self.transport_type}localhost:5555')
+                self.socket.bind(f'{self.transport_type}localhost:5555')
                 self.transport_address = '5555'
         # reward shaping flag
         self.cpu_per_task = cpu_per_task
@@ -194,7 +194,7 @@ class PcEnv(Env):
 
         return: message received from the simulation
         """
-        raise NotImplementedError
+        return str(self.socket.recv(), 'utf-8')
 
     def step(self, action: int) -> tuple:
         """
@@ -212,7 +212,7 @@ class PcEnv(Env):
 
         self.time += self.treatment_time_step
         # get tumor updated state
-        message = str(self.socket.recv(), 'utf-8')
+        message = self._receive_message()
         if self.observation_type == 'image':
             im = self._get_image_obs(message, action)
             num_wt_cells, num_mut_cells = self._get_tumor_volume_from_image(im)
@@ -281,8 +281,19 @@ class PcEnv(Env):
     def reset(self):
         time.sleep(3.0)
         self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect(f'{self.transport_type}{self.transport_address}')
+        self.socket = self.context.socket(zmq.REP)
+        self.socket.bind(f'{self.transport_type}{self.transport_address}')
+
+        if not self.running:
+            self._start_slurm_physicell_job_step()
+            self.running = True
+
+        message = self._receive_message()
+        self.initial_wt, self.initial_mut = self._get_cell_number(message)
+
+        self._send_message('Start simulation')
+
+
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
         self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
@@ -298,7 +309,7 @@ class PcEnv(Env):
         else:
             raise ValueError('Observation type not supported')
 
-        self._send_message('Start simulation')
+
         return obs
 
     def _check_done(self, burden_type: str, **kwargs) -> bool:

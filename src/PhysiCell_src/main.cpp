@@ -91,16 +91,16 @@ int main( int argc, char* argv[] )
 	char port [1024];
     	
     zmq::context_t context(1);
-	zmq::socket_t socket{context,zmq::socket_type::rep};	
+	zmq::socket_t socket{context,zmq::socket_type::req};
 	if( argc > 1 )
 	{
 	    sprintf( port , argv[1]);
-	    socket.bind(port);
+	    socket.connect(port);
 		std::cout<<"Binding to port: "<<port<<std::endl;
 	}
 	else
 	{
-		socket.bind("ipc:/tmp/1");
+		socket.connect("ipc:/tmp/1");
         std::cout<<"Warning: Port is not specified, reinforcement learning will not work"<<std::endl;
 	}
 
@@ -235,31 +235,9 @@ int main( int argc, char* argv[] )
 			/*
 			  Custom add-ons could potentially go here. 
 			*/
-            
-            		// zmq code block here 
+			// zmq code block here
 			if (fabs (PhysiCell_globals.current_time - doctor_timer)<0.01*diffusion_dt) {
-				
-				
-				zmq::message_t request;
-				// recieve a request from client 
-				socket.recv(request, zmq::recv_flags::none);
-				
-                // do treatment or not
-                if (request.to_string() == "Treat") {
-                    activate_drug_dc();
-		    //treatment_on();
-                } else if (request.to_string() == "Stop treatment") {
-			//std::cout<<"Deactivating treatment"<<std::endl;
-                    deactivate_drug_dc();
-		    //treatment_off();
-                } else if (request.to_string() == "Start simulation") {
-                    deactivate_drug_dc();
-		    //treatment_off();
-                } else if (request.to_string() == "End simulation") {
-			
-			break;
-		}
-				
+
 				// try to change cell position to string;
 				std::string data{"Type 0:"};
 				std::string t0_pos_x{""};
@@ -309,13 +287,35 @@ int main( int argc, char* argv[] )
 				data.append(t1_pos_y);
 				//data.append(" z: ");
 				//data.append(t1_pos_z);
+				
+				// send the request t0 the server
+				zmq::message_t request(data.size());
+				memcpy(request.data(), data.data(), data.size());
+				socket.send(request, zmq::send_flags::none);
+				// socket.send(zmq::buffer(data), zmq::send_flags::none);
+				// receive treatment decision from the client
 
+				zmq::message_t reply;
+
+				// recieve a reply
+				socket.recv(reply, zmq::recv_flags::none);
+                // do treatment or not
+                if (reply.to_string() == "Treat") {
+                    activate_drug_dc();
+		         //treatment_on();
+                } else if (reply.to_string() == "Stop treatment") {
+			        //std::cout<<"Deactivating treatment"<<std::endl;
+                    deactivate_drug_dc();
+		         //treatment_off();
+                } else if (reply.to_string() == "Start simulation") {
+                    deactivate_drug_dc();
+		            //treatment_off();
+                } else if (reply.to_string() == "End simulation") {
+
+                break;
+                }
 				
-				// send the reply to the client 
-				socket.send(zmq::buffer(data), zmq::send_flags::none);
-				
-				
-                		doctor_timer+=parameters.ints("treatment_time_step");
+                doctor_timer+=parameters.ints("treatment_time_step");
 			}
 
                         

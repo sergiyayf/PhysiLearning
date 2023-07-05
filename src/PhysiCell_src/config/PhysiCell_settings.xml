@@ -67,7 +67,7 @@
         <variable name="drug" units="dimensionless" ID="1">
             <physical_parameter_set>
                 <diffusion_coefficient units="micron^2/min">100000.0</diffusion_coefficient>
-                <decay_rate units="1/min">0.1</decay_rate>
+                <decay_rate units="1/min">0.01</decay_rate>
             </physical_parameter_set>
             <initial_condition units="mmHg">0</initial_condition>
             <Dirichlet_boundary_condition units="mmHg" enabled="True">0</Dirichlet_boundary_condition>
@@ -375,8 +375,8 @@
     <user_parameters>
         <random_seed type="int" units="dimensionless" description="">0</random_seed>
         <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">0</number_of_cells>
-        <drug_death_saturation type="double" units="mmHg" description="drug concentration value at which death is at maximum">30</drug_death_saturation>
-        <drug_death_threshold type="double" units="mmHg" description="drug concentration at which death starts">10</drug_death_threshold>
+        <drug_death_saturation type="double" units="mmHg" description="drug concentration value at which death is at maximum">28</drug_death_saturation>
+        <drug_death_threshold type="double" units="mmHg" description="drug concentration at which death starts">20</drug_death_threshold>
         <treatment_start type="int" units="min" description="">20160</treatment_start>
         <treatment_end type="int" units="min" description="">23040</treatment_end>
         <mutation_rate type="double" units="none" description="">0.0</mutation_rate>
@@ -388,6 +388,6 @@
         <treatment_death_rate type="double" units="1/min" description="">0.0004</treatment_death_rate>
         <treatment_time_step type="int" units="min" description="">720</treatment_time_step>
         <number_of_denovo_mutations type="int" units="none" description="">1</number_of_denovo_mutations>
-        <treatment_strength type="double" units="none" description="">4.0e2</treatment_strength>
+        <treatment_strength type="double" units="none" description="">6.0e2</treatment_strength>
     </user_parameters>
 </PhysiCell_settings>

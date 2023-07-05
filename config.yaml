@@ -119,11 +119,11 @@ eval:
   path: './'
   model_prefix: '0507_gridenv_1env_full_node_rew5'
   step_to_load: '_best_reward'
-  save_name: 'patient_18_zhang_reduced_turnover'
+  save_name: 'patient_18_fixed_05'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.75
+  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.5
   num_episodes: 1
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

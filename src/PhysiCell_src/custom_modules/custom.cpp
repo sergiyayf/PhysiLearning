@@ -425,7 +425,7 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 	double multiplier = 1.0;
 
 	// increase apoptosis 
-	if (phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index)>0.5*pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index)){
+	if (phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index)>0.1*pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index)){
 	if( pDrug > treatment_drug_death_threshold )
 	{
 		multiplier = parameters.doubles("treatment_strength")*( pDrug - treatment_drug_death_threshold )
