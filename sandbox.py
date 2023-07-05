@@ -18,20 +18,20 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_csv(
-        './Evaluations/0_PcEnvEvalpatient_18_fixed_06.csv',
+        './Evaluations/0_PcEnvEvalpatient_18_fixed_07_reduced_turnover.csv',
         index_col=[0])
 
     data = pd.DataFrame(dict(
-            time=df.index.values[0:56:1],
-            x=df['Type 0'].values[0:56:1],
-            y=df['Type 1'].values[0:56:1],))
+            time=df.index.values[0:67:1],
+            x=df['Type 0'].values[0:67:1],
+            y=df['Type 1'].values[0:67:1],))
 
 
-    treatment_schedule = np.array(df['Treatment'].values[0:56:1])
+    treatment_schedule = np.array(df['Treatment'].values[0:67:1])
     fig, ax = plt.subplots(figsize=(12, 4))
     plot_data(ax, title="Original treatment")
     # append treatmentd schedule with two zeros from the beginning, delete last 2
-    treatment_schedule = [np.int32(i) for i in np.array(df['Treatment'].values[0:56:1])]
+    treatment_schedule = [np.int32(i) for i in np.array(df['Treatment'].values[0:67:1])]
     treatment_schedule = np.array([0] + treatment_schedule[:-1])
     # find ends of treatment
     treatment_ends = np.where(np.diff(treatment_schedule) == -1)[0]

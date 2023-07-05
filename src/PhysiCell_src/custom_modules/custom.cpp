@@ -428,12 +428,12 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 	if (phenotype.cycle.data.transition_rate(start_phase_index, end_phase_index)>0.5*pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index)){
 	if( pDrug > treatment_drug_death_threshold )
 	{
-		multiplier = 100*( pDrug - treatment_drug_death_threshold )
+		multiplier = parameters.doubles("treatment_strength")*( pDrug - treatment_drug_death_threshold )
 				/ ( treatment_drug_death_saturation - treatment_drug_death_threshold );
 	}
 
 	if (pDrug > treatment_drug_death_saturation) {
-			multiplier = 100.0;
+			multiplier = parameters.doubles("treatment_strength");
 			}
 
 	phenotype.death.rates[apoptosis_model_index] = multiplier * pCell->parameters.pReference_live_phenotype->death.rates[apoptosis_model_index];

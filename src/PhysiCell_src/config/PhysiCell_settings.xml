@@ -102,7 +102,7 @@
                 </cycle>
                 <death>
                     <model code="100" name="apoptosis">
-                        <death_rate units="1/min">5.31667e-05</death_rate>
+                        <death_rate units="1/min">7.2e-06</death_rate>
                         <phase_durations units="min">
                             <duration index="0" fixed_duration="true">61</duration>
                         </phase_durations>
@@ -232,7 +232,7 @@
                 </cycle>
                 <death>
                     <model code="100" name="apoptosis">
-                        <death_rate units="1/min">2.81667e-05</death_rate>
+                        <death_rate units="1/min">7.2e-6</death_rate>
                         <phase_durations units="min">
                             <duration index="0" fixed_duration="true">61</duration>
                         </phase_durations>
@@ -388,5 +388,6 @@
         <treatment_death_rate type="double" units="1/min" description="">0.0004</treatment_death_rate>
         <treatment_time_step type="int" units="min" description="">720</treatment_time_step>
         <number_of_denovo_mutations type="int" units="none" description="">1</number_of_denovo_mutations>
+        <treatment_strength type="double" units="none" description="">4.0e2</treatment_strength>
     </user_parameters>
 </PhysiCell_settings>
