@@ -62,17 +62,17 @@ env:
 
   # LV environment settings
   LV:
-    initial_wt: 249
-    initial_mut: 10
-    carrying_capacity: 7500
-    growth_rate_wt: 0.0357 #0.0175
-    growth_rate_mut: 0.0275 #0.0175
-    death_rate_wt: 0.0036
-    death_rate_mut: 0.0036
-    treat_death_rate_wt: 0.02 #0.015
+    initial_wt: 1950
+    initial_mut: 1
+    carrying_capacity: 6950
+    growth_rate_wt: 0.24 #0.0175
+    growth_rate_mut: 0.475 #0.0175
+    death_rate_wt: 0.0001
+    death_rate_mut: 0.0001
+    treat_death_rate_wt: 0.36 #0.015
     treat_death_rate_mut: 0.00 #0.0
-    competition_wt: 2.5 #2400.0
-    competition_mut: 1.0
+    competition_wt: 1.727 #2400.0
+    competition_mut: 0.0
     growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
 
   # note this is not yet functional
@@ -91,7 +91,7 @@ env:
         value: 'true'
     filename_chkpt:
         parent_nodes: ['user_parameters']
-        value: './../paper_presims/patient_18_growth_layer/output/final'
+        value: './../paper_presims/patient_949_reduced_turnover/final'
     treatment_time_step:
         parent_nodes: ['user_parameters']
         value: 720
@@ -119,11 +119,11 @@ eval:
   path: './'
   model_prefix: '0507_gridenv_1env_full_node_rew5'
   step_to_load: '_best_reward'
-  save_name: 'patient_18_fixed_05'
+  save_name: 'patient_949_fixed_07'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.5
+  threshold: 0.7
   num_episodes: 1
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

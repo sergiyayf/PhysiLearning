@@ -291,6 +291,10 @@ class PcEnv(Env):
         message = self._receive_message()
         self.initial_wt, self.initial_mut = self._get_cell_number(message)
 
+        if self.normalize:
+            self.initial_wt *= self.normalization_factor
+            self.initial_mut *= self.normalization_factor
+
         self._send_message('Start simulation')
 
 

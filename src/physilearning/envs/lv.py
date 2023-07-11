@@ -225,19 +225,16 @@ class LvEnv(BaseEnv):
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
                             self.death_rate[i] -
                             self.death_rate_treat[i] * self.state[2])
-        # treatment lasts certain number of time steps
+        # one time step delay in treatment effect
         elif flag == 2:
             treat = self.state[2]
             if self.state[2] == 0:
-                if self.time>3 and (self.trajectory[2,self.time-2]==1
-                                    or self.trajectory[2,self.time-3]==1
-                                    or self.trajectory[2,self.time-4]==1):
+                if self.time>2 and (self.trajectory[2,self.time-2]==1):
                     treat = 1
                 else:
                     treat = 0
             elif self.state[2] == 1:
-                if self.time>3 and (self.trajectory[2,self.time-2]==0
-                                    or self.trajectory[2,self.time-3]==0):
+                if self.time>2 and (self.trajectory[2,self.time-2]==0):
                     treat = 0
                 else:
                     treat = 1
@@ -245,9 +242,10 @@ class LvEnv(BaseEnv):
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-                            self.death_rate[i]) - self.death_rate_treat[i] * treat * self.threshold_burden
+                            self.death_rate[i] - self.death_rate_treat[i] * treat)
 
             if new_pop_size < 0:
                 new_pop_size = 0
+
 
         return new_pop_size

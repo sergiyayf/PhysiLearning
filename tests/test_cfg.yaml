@@ -58,6 +58,7 @@ env:
   observation_type: 'image' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
   image_size: 84
+  domain_size: 100
 
   # LV environment settings
   LV:

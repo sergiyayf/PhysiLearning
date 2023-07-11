@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_csv(
-        './Evaluations/0_PcEnvEvalpatient_18_no_treatment.csv',
+        './Evaluations/0_LvEnvEvaltest_lv_fixed_07.csv',
         index_col=[0])
 
     # find the index when all of the data is 0

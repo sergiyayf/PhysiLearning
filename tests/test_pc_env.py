@@ -28,17 +28,29 @@ def test_env_reset():
     EnvClass = getattr(importlib.import_module('physilearning.envs'), 'PcEnv')
     env = EnvClass()
 
-    # mock the _send_message method to avoid sending messages to the server
-    with mock.patch.object(env, '_send_message') as mock_send_message:
-        obs = env.reset()
+    # mock the _send_message and _start_slurm_physicell_job_step method to avoid sending messages to the server
+    with (mock.patch.object(env, '_send_message') as mock_send_message,
+            mock.patch.object(env, '_start_slurm_physicell_job_step') as mock_start_slurm_physicell_job_step,
+            mock.patch.object(env, '_receive_message') as mock_receive_message):
+            mock_receive_message.return_value = 'Type 0:20 ,Type 1:23 ,'
+            obs = env.reset()
+
 
     assert obs is not None
     mock_send_message.assert_called_with('Start simulation')
+    mock_start_slurm_physicell_job_step.assert_called_with()
+    mock_receive_message.assert_called_with()
+
+
+
 
 
 def test_normalization():
     env = PcEnv(observation_type='number', normalize=True, normalize_to=100, initial_wt=1, initial_mut=1, max_tumor_size=2)
-    with mock.patch.object(env, '_send_message') as mock_send_message:
+    with (mock.patch.object(env, '_send_message') as mock_send_message,
+            mock.patch.object(env, '_start_slurm_physicell_job_step') as mock_start_slurm_physicell_job_step,
+            mock.patch.object(env, '_receive_message') as mock_receive_message):
+        mock_receive_message.return_value = 'Type 0:1 ,Type 1:1 ,'
         obs = env.reset()
     assert env.state[0] == 50.0
     assert obs[0] == 100.0

@@ -50,7 +50,7 @@ if __name__ == '__main__':
     min_distance_to_front_cell = []
     for sim in sims:
         # pymc = pyMCDS.pyMCDS('final.xml' ,f'../../data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
-        cell_info = pd.read_hdf('./../../data/simplified_data_2306_presims.h5', key=f'PhysiCell_{sim}')
+        cell_info = pd.read_hdf('./../../data/simplified_data_0607_presims.h5', key=f'PhysiCell_{sim}')
         type_1_cells = cell_info[cell_info['cell_type'] == 1]
 
         cells_at_front = cell_info[cell_info['is_at_front'] == 1]
@@ -79,21 +79,21 @@ if __name__ == '__main__':
     ax1.set_title('Distance from the center of the clone to the circle fit to the front cells')
     ax1.set_xlabel('Distance to front circle')
     ax1.set_ylabel('Number of clones')
-    fig1.savefig('./../../data/figures/fig_s1a.png')
+    #fig1.savefig('./../../data/figures/fig_s1a.png')
 
     fig2, ax2 = plt.subplots()
     sns.histplot(data=distance_to_front_cell, ax=ax2, bins=20)
     ax2.set_title('Distance from the center of the clone to the closest front cell')
     ax2.set_ylabel('Number of clones')
     ax2.set_xlabel('Distance to front cell')
-    fig2.savefig('./../../data/figures/fig_s1b.png')
+    #fig2.savefig('./../../data/figures/fig_s1b.png')
 
     fig3, ax3 = plt.subplots()
     sns.histplot(data=min_distance_to_front_cell, ax=ax3, bins=20)
     ax3.set_title('Distance from the outermost cell of a clone to the closest front cell')
     ax3.set_xlabel('Distance to front cell')
     ax3.set_ylabel('Number of clones')
-    fig3.savefig('./../../data/figures/fig_s1c.png')
+    #fig3.savefig('./../../data/figures/fig_s1c.png')
 
     plt.show()
 
