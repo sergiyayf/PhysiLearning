@@ -66,11 +66,19 @@
 */
 
 #include "./custom.h"
+#include <time.h>
 
 void create_cell_types( void )
 {
-	// set the random seed 
-	SeedRandom( parameters.ints("random_seed") );  
+	// set the random seed
+	if (parameters.ints("random_seed") == 99 )
+    {
+        SeedRandom( time(NULL) );
+    }
+    else
+    {
+        SeedRandom( parameters.ints("random_seed") );
+    }
 	
 	/* 
 	   Put any modifications to default cell definition here if you 

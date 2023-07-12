@@ -104,6 +104,21 @@ def train():
         (out, err) = p_eval.communicate()
         print('Evaluation job: ', str(out, 'utf-8'))
 
+    # run recurrent jobs if specified in config
+    if config['job']['recurrent']['enable']:
+        for i in range(config['job']['recurrent']['n_jobs']):
+            recurrent_command = f'cd ./scripts && sbatch --dependency=afterany:{jobid} --nodes={nodes} \
+                                --ntasks={ntasks} \
+                                --mem={mem}MB --cpus-per-task={cpus_per_task} \
+                                --time={wall_clock_time} {job_script}'
+            p_recurrent = subprocess.Popen([recurrent_command], shell=True, stdout=subprocess.PIPE)
+            (out, err) = p_recurrent.communicate()
+            print('Recurrent job: ', str(out, 'utf-8'))
+            jobid = re.findall(r'\d+', str(out, 'utf-8'))[0]
+            copy_command = 'cp config.yaml config_{0}.yaml'.format(jobid)
+            subprocess.call([copy_command], shell=True)
+
+
 
 @cli.command()
 def simulate_patients():
