@@ -5,7 +5,7 @@ cd ${SCRIPT_PATH}/../simulations/PhysiCell_${1} &&
 
 ./project ${2}
 
-while false
+while true
 do
     ./project ${2}
 

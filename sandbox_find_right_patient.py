@@ -47,52 +47,54 @@ if __name__ == '__main__':
 
     sims = range(0, 1000, 1)
     #sims = [116]
-    mutation_rates = [0.000825, 0.00086, 0.00087, 0.00088, 0.0009, 0.001]
-    file_list = ['data/simplified_data_1107_mutation_rate_0825.h5',
-                    'data/simplified_data_1207_mutation_rate_086.h5',
-                    'data/simplified_data_1207_mutation_rate_087.h5',
-                    'data/simplified_data_1207_mutation_rate_088.h5',
-                    'data/simplified_data_1107_mutation_rate_09.h5',
-                    'data/simplified_data_0707_presims.h5']
+    mutation_rates = [0.000825, 0.00086, 0.00087, 0.00088, 0.0009, 0.001, 0.000875]
+    # file_list = ['data/simplified_data_1107_mutation_rate_0825.h5',
+    #                 'data/simplified_data_1207_mutation_rate_086.h5',
+    #                 'data/simplified_data_1207_mutation_rate_087.h5',
+    #                 'data/simplified_data_1207_mutation_rate_088.h5',
+    #                 'data/simplified_data_1107_mutation_rate_09.h5',
+    #                 'data/simplified_data_0707_presims.h5',
+    #                 'data/simplified_data_1207_mutation_rate_0875.h5']
+    file_list = ['data/simplified_data_1307_mutation_rate_0879.h5']
     #
-    # for file in file_list:
-    #     distance_to_front_cell = []
-    #     distance_to_front_circle = []
-    #     min_distance_to_front_cell = []
-    #     distance_to_center = []
-    #     for sim in sims:
-    #         # pymc = pyMCDS.pyMCDS('final.xml' ,f'../../data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
-    #         cell_info = pd.read_hdf(file, key=f'PhysiCell_{sim}')
-    #         type_1_cells = cell_info[cell_info['cell_type'] == 1]
-    #
-    #         cells_at_front = cell_info[cell_info['is_at_front'] == 1]
-    #         positions = cells_at_front[['position_x', 'position_y']].values
-    #
-    #         type_1_cells = calculate_distance_to_front(type_1_cells, positions)
-    #
-    #         unique_clones = type_1_cells['clone_ID'].unique()
-    #         for clone in unique_clones:
-    #             single_clone = type_1_cells[type_1_cells['clone_ID']==clone]
-    #
-    #             # get average distance to front
-    #             mean_dist_to_front_circle = single_clone['distance_to_front_circle'].mean()
-    #             mean_dist_to_front_cell = single_clone['distance_to_front_cell'].mean()
-    #             min_dist_to_front_cell = single_clone['distance_to_front_cell'].min()
-    #             distance_to_center_max = single_clone['distance_to_center'].max()
-    #
-    #             # add to list
-    #             distance_to_front_circle.append(mean_dist_to_front_circle)
-    #             distance_to_front_cell.append(mean_dist_to_front_cell)
-    #             min_distance_to_front_cell.append(min_dist_to_front_cell)
-    #             distance_to_center.append(distance_to_center_max)
-    #
-    #     # save distributions as dataframe to hdf5 file
-    #     df = pd.DataFrame({ 'min_distance_to_front_cell': min_distance_to_front_cell,
-    #                         'distance_to_center': distance_to_center})
-    #     df.to_hdf('distributions.h5', key=file)
+    for file in file_list:
+        distance_to_front_cell = []
+        distance_to_front_circle = []
+        min_distance_to_front_cell = []
+        distance_to_center = []
+        for sim in sims:
+            # pymc = pyMCDS.pyMCDS('final.xml' ,f'../../data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
+            cell_info = pd.read_hdf(file, key=f'PhysiCell_{sim}')
+            type_1_cells = cell_info[cell_info['cell_type'] == 1]
+
+            cells_at_front = cell_info[cell_info['is_at_front'] == 1]
+            positions = cells_at_front[['position_x', 'position_y']].values
+
+            type_1_cells = calculate_distance_to_front(type_1_cells, positions)
+
+            unique_clones = type_1_cells['clone_ID'].unique()
+            for clone in unique_clones:
+                single_clone = type_1_cells[type_1_cells['clone_ID']==clone]
+
+                # get average distance to front
+                mean_dist_to_front_circle = single_clone['distance_to_front_circle'].mean()
+                mean_dist_to_front_cell = single_clone['distance_to_front_cell'].mean()
+                min_dist_to_front_cell = single_clone['distance_to_front_cell'].min()
+                distance_to_center_max = single_clone['distance_to_center'].max()
+
+                # add to list
+                distance_to_front_circle.append(mean_dist_to_front_circle)
+                distance_to_front_cell.append(mean_dist_to_front_cell)
+                min_distance_to_front_cell.append(min_dist_to_front_cell)
+                distance_to_center.append(distance_to_center_max)
+
+        # save distributions as dataframe to hdf5 file
+        df = pd.DataFrame({ 'min_distance_to_front_cell': min_distance_to_front_cell,
+                            'distance_to_center': distance_to_center})
+        df.to_hdf('./data/distributions.h5', key=file)
     #
     # # print statistics, mean, median and 25 and 75 percentiles
-    # print(f'Mean distance to front cell (min): {np.mean(min_distance_to_front_cell)}')
+    print(f'Mean distance to front cell (min): {np.mean(min_distance_to_front_cell)}')
     # print(f'Median distance to front cell (min): {np.median(min_distance_to_front_cell)}')
     # print(f'25 percentile distance to front cell (min): {np.percentile(min_distance_to_front_cell, 25)}')
     # print(f'75 percentile distance to front cell (min): {np.percentile(min_distance_to_front_cell, 75)}')
@@ -125,29 +127,29 @@ if __name__ == '__main__':
 
     # read the distributions from the hdf5 file and plot them in 3d plot
     # with mutation rate on z axis and distribution of min distance over x y
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    fig2 = plt.figure()
-    ax2 = fig2.add_subplot(111, projection='3d')
-    for i, file in enumerate(file_list):
-        df = pd.read_hdf('distributions.h5', key=file)
-        hist, bin_edges = np.histogram(df['distance_to_center'], bins=20)
-        centers = (bin_edges[1:] + bin_edges[:-1])/2
-        hist = hist / (np.pi * centers * 2)
-        ax.bar(centers, hist, zs=mutation_rates[i], zdir='y', alpha=0.8, width=10)
-        ax.set_xlabel('Distance to center')
-        ax.set_ylabel('Mutation rate')
-        ax.set_zlabel('Normalized number of clones')
-
-        # plot the same with smoothed data for better visualization
-        # smooth the data with gaussian kde
-        kde = gaussian_kde(df['distance_to_center'])
-        x = np.linspace(0, 1000, 100)
-        y = kde(x)
-        ax2.plot(x, y, zs=mutation_rates[i], zdir='y', alpha=0.8)
-
-
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    #
+    # fig2 = plt.figure()
+    # ax2 = fig2.add_subplot(111, projection='3d')
+    # for i, file in enumerate(file_list):
+    #     df = pd.read_hdf('./data/distributions.h5', key=file)
+    #     hist, bin_edges = np.histogram(df['distance_to_center'], bins=20)
+    #     centers = (bin_edges[1:] + bin_edges[:-1])/2
+    #     hist = hist / (np.pi * centers * 2)
+    #     ax.bar(centers, hist, zs=mutation_rates[i], zdir='y', alpha=0.8, width=10)
+    #     ax.set_xlabel('Distance to center')
+    #     ax.set_ylabel('Mutation rate')
+    #     ax.set_zlabel('Normalized number of clones')
+    #
+    #     # plot the same with smoothed data for better visualization
+    #     # smooth the data with gaussian kde
+    #     kde = gaussian_kde(df['distance_to_center'])
+    #     x = np.linspace(0, 1000, 100)
+    #     y = kde(x)
+    #     ax2.plot(x, y, zs=mutation_rates[i], zdir='y', alpha=0.8)
+    #
+    #
 
     plt.show()
 

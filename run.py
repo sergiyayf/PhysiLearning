@@ -68,7 +68,7 @@ def train():
     wall_clock_time = config['job']['time']
     n_envs = config['env']['n_envs']
     agent_buffer = config['job']['agent_buffer']
-
+    cpus_per_task+=agent_buffer
     if cpus_per_task < agent_buffer + n_envs:
         print('Warning: Too few CPUs allocated for the job')
 

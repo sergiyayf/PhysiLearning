@@ -143,7 +143,7 @@ class PcEnv(Env):
         image_size = config['env']['image_size']
         transport_type = config['global']['transport_type']
         transport_address = config['global']['transport_address']
-        cpu_per_task = config['job']['cpus-per-task']
+        cpu_per_task = config['job']['cpus-per-task']-config['job']['agent_buffer']
         domain_size = config['env']['domain_size']
         if transport_type == 'ipc://':
             transport_address = f'{transport_address}{job_name}{port}'
@@ -234,7 +234,8 @@ class PcEnv(Env):
             self.image = self._get_image_obs(message, action)
             self.trajectory[:, :, int(self.time/self.treatment_time_step) - 1] = self.image[0, :, :]
             obs = self.image
-            done = self._check_done(burden_type='number', total_cell_number=num_wt_cells+num_mut_cells)
+            done = self._check_done(burden_type='number', total_cell_number=self.state[0] + self.state[1],
+                                    message=message)
             self.number_trajectory[:, int(self.time/self.treatment_time_step) - 1] = self.state
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(self.state, self.time/self.max_time)
@@ -324,7 +325,8 @@ class PcEnv(Env):
         """
 
         if burden_type == 'number':
-            total_cell_number = kwargs['total_cell_number']
+            num_wt_cells, num_mut_cells = self._get_cell_number(kwargs['message'])
+            total_cell_number = num_wt_cells + num_mut_cells
         else:
             num_wt_cells = np.sum(kwargs['image'] == self.wt_color)
             num_mut_cells = np.sum(kwargs['image'] == self.mut_color)

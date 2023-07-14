@@ -79,6 +79,7 @@ def plot_finals():
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Mean)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Mean)")
+    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Mean)")
     ax.legend()
     ax.set_title('Mean parameters')
 
@@ -92,6 +93,7 @@ def plot_finals():
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Median)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Median)")
+    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Median)")
     ax.legend()
     ax.set_title('Median parameters')
 
