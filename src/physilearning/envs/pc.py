@@ -215,7 +215,8 @@ class PcEnv(Env):
         message = self._receive_message()
         if self.observation_type == 'image':
             im = self._get_image_obs(message, action)
-            num_wt_cells, num_mut_cells = self._get_tumor_volume_from_image(im)
+            # num_wt_cells, num_mut_cells = self._get_tumor_volume_from_image(im)
+            num_wt_cells, num_mut_cells = self._get_cell_number(message)
         elif self.observation_type == 'number':
             num_wt_cells, num_mut_cells = self._get_cell_number(message)
 

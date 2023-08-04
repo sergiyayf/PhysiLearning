@@ -45,7 +45,7 @@ env:
   # general env settings
   type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 1
+  wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -58,7 +58,7 @@ env:
   max_time: 120
   normalize: 0
   normalize_to: 1000
-  observation_type: 'image' # 'image' # 'number'
+  observation_type: 'number' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
   image_size: 84
   domain_size: 1250
@@ -122,11 +122,11 @@ eval:
   path: './'
   model_prefix: '0507_gridenv_1env_full_node_rew5'
   step_to_load: '_best_reward'
-  save_name: 'patient_80_no_treatment'
+  save_name: 'patient_80_fixed_cap_70'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.7
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.5
   num_episodes: 1
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

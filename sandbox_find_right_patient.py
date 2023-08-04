@@ -34,6 +34,7 @@ def calculate_distance_to_front(cell_df: pd.DataFrame, front_cell_positions: np.
     and append to the dataset
     """
     xc, yc, R, residu = leastsq_circle(front_cell_positions[:, 0], front_cell_positions[:, 1])
+    print(R)
     cell_df = cell_df.copy()
 
     cell_df['distance_to_front_circle'] = (np.sqrt((cell_df['position_x']-xc)**2 + (cell_df['position_y']-yc)**2)).values - R
@@ -46,7 +47,7 @@ def calculate_distance_to_front(cell_df: pd.DataFrame, front_cell_positions: np.
 if __name__ == '__main__':
 
     sims = range(0, 1000, 1)
-    #sims = [116]
+    #sims = [80]
     mutation_rates = [0.000825, 0.00086, 0.00087, 0.00088, 0.0009, 0.001, 0.000875]
     # file_list = ['data/simplified_data_1107_mutation_rate_0825.h5',
     #                 'data/simplified_data_1207_mutation_rate_086.h5',
@@ -55,7 +56,7 @@ if __name__ == '__main__':
     #                 'data/simplified_data_1107_mutation_rate_09.h5',
     #                 'data/simplified_data_0707_presims.h5',
     #                 'data/simplified_data_1207_mutation_rate_0875.h5']
-    file_list = ['data/simplified_data_1307_mutation_rate_0879.h5']
+    file_list = ['data/simplified_data_1107_mid_mutation_rate.h5']
     #
     for file in file_list:
         distance_to_front_cell = []
@@ -89,13 +90,13 @@ if __name__ == '__main__':
                 distance_to_center.append(distance_to_center_max)
 
         # save distributions as dataframe to hdf5 file
-        df = pd.DataFrame({ 'min_distance_to_front_cell': min_distance_to_front_cell,
-                            'distance_to_center': distance_to_center})
-        df.to_hdf('./data/distributions.h5', key=file)
-    #
-    # # print statistics, mean, median and 25 and 75 percentiles
+        # df = pd.DataFrame({ 'min_distance_to_front_cell': min_distance_to_front_cell,
+        #                     'distance_to_center': distance_to_center})
+        # df.to_hdf('./data/distributions.h5', key=file)
+
+    # print statistics, mean, median and 25 and 75 percentiles
     print(f'Mean distance to front cell (min): {np.mean(min_distance_to_front_cell)}')
-    # print(f'Median distance to front cell (min): {np.median(min_distance_to_front_cell)}')
+    print(f'Median distance to front cell (min): {np.median(min_distance_to_front_cell)}')
     # print(f'25 percentile distance to front cell (min): {np.percentile(min_distance_to_front_cell, 25)}')
     # print(f'75 percentile distance to front cell (min): {np.percentile(min_distance_to_front_cell, 75)}')
     # print(f'95 percentile distance to front cell (min): {np.percentile(min_distance_to_front_cell, 95)}')
