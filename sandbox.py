@@ -10,7 +10,7 @@ def get_ttps(filename, timesteps=100):
     for i in range(timesteps):
         df = pd.read_hdf(filename, key='run_'+str(i))
         # find the largest index with non-zero Type 0 and Type 1
-        nz = df[(df['Type 0'] != 0) & (df['Type 1'] != 0)]
+        nz = df[(df['Type 0'] + df['Type 1'] != 0)]
         if len(nz) > 0:
             ttps.append(nz.index[-1])
         else:
@@ -21,12 +21,18 @@ def get_ttps(filename, timesteps=100):
 ttps_no_treat = get_ttps('Evaluations/PcEnvEvalpatient_80_no_treatment.h5')
 ttps_mtd = get_ttps('Evaluations/PcEnvEvalpatient_80_mtd.h5')
 ttps_random = get_ttps('Evaluations/PcEnvEvalpatient_80_random.h5')
-ttps_at = get_ttps('Evaluations/PcEnvEvalpatient_80_AT_baseline.h5', timesteps=50)
+ttps_at = get_ttps('Evaluations/PcEnvEvalpatient_80_AT_at_baseline.h5')
+ttps_LV_at = get_ttps('Evaluations/LvEnvEvalpatient_80_lv_fixed_cap_test.h5')
+ttps_LV_no_treat = get_ttps('Evaluations/LvEnvEvalno_treatment_test.h5')
+ttps_LV_mtd = get_ttps('Evaluations/LvEnvEvalmtd_test.h5')
+ttps_LV_random = get_ttps('Evaluations/LvEnvEvalrandom_test.h5')
 
-df = pd.DataFrame({'No Treatment': ttps_no_treat[0:50],
-                   'MTD': ttps_mtd[0:50],
+df = pd.DataFrame({'MTD': ttps_mtd,
+                   'LV_MTD': ttps_LV_mtd,
                    'AT': ttps_at,
-                   'Random': ttps_random[0:50],
+                   'LV_AT': ttps_LV_at,
+                   'Random': ttps_random,
+                   'LV_Random': ttps_LV_random
                    } )
 
 # box plot the distribution with scatter using seaborn
@@ -37,7 +43,7 @@ sns.stripplot(data=df, ax=ax, color='black', jitter=0.2, size=2.5)
 ax.scatter(df.mean().index, df.mean().values, marker='o', color='red', s=20)
 
 # plot one trajectory of aT scenario
-df = pd.read_hdf('Evaluations/PcEnvEvalpatient_80_AT_baseline.h5', key='run_40')
+df = pd.read_hdf('Evaluations/PcEnvEvalpatient_80_AT_at_baseline.h5', key='run_40')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'], label='Type 0')
 ax.plot(df.index, df['Type 1'], label='Type 1')

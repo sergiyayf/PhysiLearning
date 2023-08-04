@@ -27,7 +27,7 @@ def plot_data(ax, lw=2, title="Initial data"):
     return ax
 
 def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
-    cols = ['c_s', 'c_r', 'K']
+    cols = ['r_s']
     row = trace_df.iloc[row_idx, :][cols].values
 
     theta = row
@@ -79,7 +79,6 @@ def plot_finals():
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Mean)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Mean)")
-    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Mean)")
     ax.legend()
     ax.set_title('Mean parameters')
 
@@ -93,7 +92,6 @@ def plot_finals():
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Median)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Median)")
-    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Median)")
     ax.legend()
     ax.set_title('Median parameters')
 
@@ -101,21 +99,8 @@ def plot_finals():
 if __name__ == '__main__':
 
     # Get data
-    # df = pd.read_csv(
-    #     './../Evaluations/older_evals/0_AT_fixedAT_60onPC.csv',
-    #     index_col=[0])
-    #
-    # data = pd.DataFrame(dict(
-    #         time=df.index.values[0:230:1],
-    #         x=df['Type 0'].values[0:230:1],
-    #         y=df['Type 1'].values[0:230:1],))
-    #
-    # treatment_schedule = [np.int32(i) for i in np.array(df['Treatment'].values[0:230:1])]
-
-    # Get data
-    df = pd.read_csv(
-        './../../Evaluations/0_PcEnvEvalpatient_18_fixed_07.csv',
-        index_col=[0])
+    df = pd.read_hdf(
+        './../../Evaluations/PcEnvEvalpatient_80_no_treatment.h5', key='run_1')
     # find the index when all of the data is 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
 
@@ -124,23 +109,18 @@ if __name__ == '__main__':
         x=df['Type 0'].values[0:sim_end:1],
         y=df['Type 1'].values[0:sim_end:1], ))
 
-    treatment_schedule = np.array(df['Treatment'].values[0:sim_end:1])
-    fig, ax = plt.subplots(figsize=(12, 4))
-    plot_data(ax, title="Original treatment")
-    # append treatmentd schedule with two zeros from the beginning, delete last 2
+    # get treatment schedule
     treatment_schedule = np.array([np.int32(i) for i in np.array(df['Treatment'].values[0:sim_end:1])])
     # find ends of treatment
     treatment_ends = np.where(np.diff(treatment_schedule) == -1)[0]
-    # replace ends of treatment with 1
-    # treatment_schedule[treatment_ends + 1] = 1
 
     # Plot data
     fig, ax = plt.subplots(figsize=(12, 4))
     plot_data(ax, title="PC raw data")
 
-    consts_fit = {'r_s': 0.24, 'delta_s': 0.0001, 'r_r': 0.475, 'delta_r': 0.0001,
-                  'Delta_r': 0.0, 'Delta_s': 0.36}
-    params_fit = {'c_s': 1.7, 'c_r': 1.0, 'K': 5000}
+    consts_fit = {'Delta_r': 0.0, 'K': 6500, 'delta_r': 0.01, 'delta_s': 0.01,
+                  'c_s': 1.15, 'c_r': 1, 'r_r': 0.38, 'Delta_s': 0.4}
+    params_fit = {'r_s': 0.29}
     theta_fit = list(params_fit.values())
 
     sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
@@ -148,8 +128,8 @@ if __name__ == '__main__':
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Initial guess)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Initial guess)")
 
-    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()), bounds=(1e-4,np.inf))
-    params_fit = {'c_s': initial_conditions.x[0], 'c_r': initial_conditions.x[1], 'K': initial_conditions.x[2]}
+    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()), bounds=(1e-4,1))
+    params_fit = {'r_s': initial_conditions.x[0]}
     theta_fit = list(params_fit.values())
 
     sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
@@ -164,15 +144,13 @@ if __name__ == '__main__':
         # r_r = pm.Uniform("r_r", lower=0, upper=1, initval=theta_fit[0])
         # r_s = pm.Uniform("r_s", lower=0, upper=1, initval=theta_fit[1])
         # r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
-        K = pm.TruncatedNormal("K", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=0, initval=theta_fit[2])
+        r_s = pm.TruncatedNormal("r_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
 
         sigma = pm.HalfNormal("sigma", 10)
 
         # Ode solution function
         ode_solution = pytensor_forward_model_matrix(
-            pm.math.stack([c_s, c_r, K])
+            pm.math.stack([r_s])
         )
 
         # Likelihood
@@ -183,7 +161,7 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 5
+    draws = 5000
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
     trace = trace_DEM

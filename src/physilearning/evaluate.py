@@ -56,6 +56,8 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
             action = 0
     elif at_type == 'mtd':
         action = 1
+    elif at_type == 'random':
+        action = np.random.choice([0, 1])
     else:
         action = 0
 
