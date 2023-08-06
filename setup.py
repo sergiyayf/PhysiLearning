@@ -23,7 +23,7 @@ setup(
     description=description,
     long_description=open('README.md').read() if exists('README.md') else '',
     long_description_content_type="text/markdown",
-    install_requires=['numpy>=1.24.0', 'matplotlib>=3.6.2',
+    install_requires=['numpy==1.23.5', 'matplotlib>=3.6.2',
                       'pandas>=1.5.2', 'tables>=3.5.0', 'seaborn>=0.12.1',
                       'gym==0.21', 'stable-baselines3[extra]==1.8.0',
                       'pyzmq>=24.0.1', 'pyyaml>=5.4.1', 'tensorboard>=2.7.0', 'dvc', 'click',
@@ -31,7 +31,7 @@ setup(
                       'sphinx<7.0.0', 'sphinx_rtd_theme', 'sphinx-autodoc-typehints',
                       'mpl-scatter-density', 'arviz', 'pytensor'
                       ],
-    python_requires=">=3.9",
+    python_requires=">=3.8",
     classifiers=['Operating System :: ubuntu',
                  'Programming Language :: Python :: 3',
                  ],

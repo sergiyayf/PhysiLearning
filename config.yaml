@@ -1,21 +1,21 @@
 # global configuration
 global:
-  machine: 'mela' # 'mela' # 'raven'
+  machine: 'raven' # 'mela' # 'raven'
   transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
-  transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
+  transport_address: '/ptmp/saif/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
   evaluate_after: 0
 
 # job configuration
 job:
   nodes: 1
   ntasks: 1
-  mem-per-task: 300
-  cpus-per-task: 10
-  time: '14:00:00'
-  agent_buffer: 1
+  mem-per-task: 200
+  cpus-per-task: 72
+  time: '24:00:00'
+  agent_buffer: 12
   recurrent:
     enable: 1
-    n_jobs: 5
+    n_jobs: 20
 
 # Reinforcement learning configuration
 learning:
@@ -24,18 +24,18 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 16
+      n_steps: 128
       verbose: 1
-      ent_coef: 0.002
-      clip_range: 0.005
+      ent_coef: 0.01
+      clip_range: 0.01
       learning_rate: 1.e-4
-    total_timesteps: 34
+    total_timesteps: 1.e+6
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'test_PC_train'
+    model_save_prefix: '1407_PC_train'
     load:
       enable_loading: 1
       last_model: 0
-      saved_model_name: './Training/SavedModels/test_PC_train_best_reward'
+      saved_model_name: './Training/SavedModels/1407_PC_train_best_reward'
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64

@@ -159,12 +159,12 @@ class Evaluation:
 
             final_score[episode] = score
             print(f'Episode {episode} - Score: {score}')
-            filename = os.path.join(save_path, '{1}_{0}'.format(save_name, episode))
-            self.save_trajectory(filename)
+            filename = os.path.join(save_path, save_name)
+            self.save_trajectory(filename, episode)
 
         return
 
-    def save_trajectory(self, save_name: str) -> None:
+    def save_trajectory(self, save_name: str, episode: int) -> None:
         """
         Save the trajectory to a csv file or numpy file
 
@@ -179,10 +179,12 @@ class Evaluation:
             np.save(f'{save_name}_image_trajectory', self.trajectory)
             number_trajectory = self.number_trajectory
             df = pd.DataFrame(np.transpose(number_trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
-            df.to_csv(f'{save_name}_number_trajectory.csv')
+            # df.to_csv(f'{save_name}_number_trajectory.csv')
+            df.to_hdf(f'{save_name}.h5', key=f'run_{episode}') 
         else:
             df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
-            df.to_csv(f'{save_name}.csv')
+            # df.to_csv(f'{save_name}.csv')
+            df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
         return None
 
     @staticmethod

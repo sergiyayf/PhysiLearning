@@ -161,13 +161,14 @@ PhysiCell_settings.o: ./modules/PhysiCell_settings.cpp
 	$(COMPILE_COMMAND) -c ./modules/PhysiCell_settings.cpp
 	
 PhysiCell_basic_signaling.o: ./core/PhysiCell_basic_signaling.cpp
-	$(COMPILE_COMMAND) -c ./core/PhysiCell_basic_signaling.cpp
+	$(COMPILE_COMMAND) -c ./core/PhysiCell_basic_signaling.cpp 	
 
 PhysiCell_rules.o: ./core/PhysiCell_rules.cpp
 	$(COMPILE_COMMAND) -c ./core/PhysiCell_rules.cpp
-	
+
 PhysiCell_geometry.o: ./modules/PhysiCell_geometry.cpp
-	$(COMPILE_COMMAND) -c ./modules/PhysiCell_geometry.cpp 
+	$(COMPILE_COMMAND) -c ./modules/PhysiCell_geometry.cpp
+
 	
 # user-defined PhysiCell modules
 
@@ -247,7 +248,6 @@ movie:
 raven:
 	cp Makefile ./sample_projects/Makefile-mela
 	cp ./sample_projects/Makefile-raven Makefile
-
 # upgrade rules 
 
 SOURCE := PhysiCell_upgrade.zip 
