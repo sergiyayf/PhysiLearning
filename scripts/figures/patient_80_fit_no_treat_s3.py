@@ -119,7 +119,7 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'K': 6500, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'c_s': 1.15, 'c_r': 1, 'r_r': 0.38, 'Delta_s': 0.4}
+                  'c_s': 1.13, 'c_r': 0.868, 'r_r': 0.386, 'Delta_s': 0.395}
     params_fit = {'r_s': 0.29}
     theta_fit = list(params_fit.values())
 
@@ -161,10 +161,11 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 5000
+    draws = 10000
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
     trace = trace_DEM
+    trace.to_json('./../../data/SI_data/patient_80_no_treatment_LV_inference_Data.json')
 
     plot_finals()
     plt.show()

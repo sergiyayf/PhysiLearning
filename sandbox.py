@@ -26,13 +26,15 @@ ttps_LV_at = get_ttps('Evaluations/LvEnvEvalpatient_80_lv_fixed_cap_test.h5')
 ttps_LV_no_treat = get_ttps('Evaluations/LvEnvEvalno_treatment_test.h5')
 ttps_LV_mtd = get_ttps('Evaluations/LvEnvEvalmtd_test.h5')
 ttps_LV_random = get_ttps('Evaluations/LvEnvEvalrandom_test.h5')
+ttps_PC_rl = get_ttps('Evaluations/PcEnvEvalpatient_80_RL_training_images_1407.h5')
 
 df = pd.DataFrame({'MTD': ttps_mtd,
                    'LV_MTD': ttps_LV_mtd,
                    'AT': ttps_at,
+                   'RL treat PC': ttps_PC_rl,
                    'LV_AT': ttps_LV_at,
                    'Random': ttps_random,
-                   'LV_Random': ttps_LV_random
+                   'LV_Random': ttps_LV_random,
                    } )
 
 # box plot the distribution with scatter using seaborn
@@ -43,7 +45,7 @@ sns.stripplot(data=df, ax=ax, color='black', jitter=0.2, size=2.5)
 ax.scatter(df.mean().index, df.mean().values, marker='o', color='red', s=20)
 
 # plot one trajectory of aT scenario
-df = pd.read_hdf('Evaluations/PcEnvEvalpatient_80_AT_at_baseline.h5', key='run_40')
+df = pd.read_hdf('Evaluations/PcEnvEvalpatient_80_RL_training_images_1407.h5', key='run_4')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'], label='Type 0')
 ax.plot(df.index, df['Type 1'], label='Type 1')

@@ -68,8 +68,8 @@ env:
     initial_wt: 3000
     initial_mut: 1
     carrying_capacity: 6500
-    growth_rate_wt: 0.29 #0.0175
-    growth_rate_mut: 0.39 #0.0175
+    growth_rate_wt: 0.294 #0.0175
+    growth_rate_mut: 0.386 #0.0175
     death_rate_wt: 0.0029
     death_rate_mut: 0.0039
     treat_death_rate_wt: 0.4 #0.015

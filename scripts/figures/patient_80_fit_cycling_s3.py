@@ -126,8 +126,8 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'K': 6500, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_s': 0.29, 'r_r': 0.38, 'Delta_s': 0.4}
-    params_fit = {'c_s': 1.15, 'c_r': 1.0}
+                  'r_s': 0.294, 'r_r': 0.386, 'Delta_s': 0.395}
+    params_fit = {'c_s': 1.13, 'c_r': 0.868}
 
     theta_fit = list(params_fit.values())
 
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Initial guess)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Initial guess)")
 
-    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()), bounds=(1.0,np.inf))
+    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()), bounds=(0.5,np.inf))
     params_fit = {'c_s': initial_conditions.x[0], 'c_r': initial_conditions.x[1]}
     theta_fit = list(params_fit.values())
 
@@ -170,10 +170,11 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 5000
+    draws = 10
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
     trace = trace_DEM
+    #trace.to_json('./../../data/SI_data/patient_80_cycling_LV_inference_Data.json')
 
     plot_finals()
     plt.show()
