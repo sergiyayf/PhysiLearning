@@ -1,0 +1,133 @@
+# global configuration
+# PhysiLearning Version: 0.1.2
+global:
+  machine: 'raven' # 'mela' # 'raven'
+  transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
+  transport_address: '/ptmp/saif/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
+  evaluate_after: 0
+
+# job configuration
+job:
+  nodes: 1
+  ntasks: 1
+  mem-per-task: 200
+  cpus-per-task: 72
+  time: '24:00:00'
+  agent_buffer: 12
+  recurrent:
+    enable: 1
+    n_jobs: 20
+
+# Reinforcement learning configuration
+learning:
+  # Model options 
+  model:
+    name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
+    policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
+    model_kwargs:
+      n_steps: 128
+      verbose: 1
+      ent_coef: 0.01
+      clip_range: 0.01
+      learning_rate: 1.e-4
+    total_timesteps: 1.e+6
+    save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
+    model_save_prefix: '1407_PC_train'
+    load:
+      enable_loading: 1
+      last_model: 0
+      saved_model_name: './Training/SavedModels/1407_PC_train_best_reward'
+  network:
+    n_lstm_layers: 2
+    lstm_hidden_size: 64
+
+# Environment configuration
+env:
+  # general env settings
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  n_envs: 1
+  wrap: 1
+  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
+  wrapper_kwargs: #
+    n_stack: 4
+    channels_order: 'first'
+  reward_shaping: 4  # reward shaping flag for some predefined rewards
+
+  # general simulation settings
+  max_tumor_size: 4000
+  treatment_time_step: 1 
+  max_time: 120
+  normalize: 0
+  normalize_to: 1000
+  observation_type: 'image' # 'image' # 'number'
+  action_type: 'discrete' # 'discrete' # 'continuous'
+  image_size: 84
+  domain_size: 1250
+
+  # LV environment settings
+  LV:
+    initial_wt: 1950
+    initial_mut: 1
+    carrying_capacity: 6950
+    growth_rate_wt: 0.24 #0.0175
+    growth_rate_mut: 0.475 #0.0175
+    death_rate_wt: 0.0001
+    death_rate_mut: 0.0001
+    treat_death_rate_wt: 0.36 #0.015
+    treat_death_rate_mut: 0.00 #0.0
+    competition_wt: 1.727 #2400.0
+    competition_mut: 0.0
+    growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
+
+  # note this is not yet functional
+  PC:
+    use_2D:
+        parent_nodes: ['domain']
+        value: 'true'
+    number_of_susceptible_cells:
+        parent_nodes: ['user_parameters']
+        value: 2500
+    number_of_resistant_cells:
+        parent_nodes: ['user_parameters']
+        value: 5
+    enable_chkpt:
+        parent_nodes: ['user_parameters']
+        value: 'true'
+    filename_chkpt:
+        parent_nodes: ['user_parameters']
+        value: './../paper_presims/patient_80_new_sims/final'
+    treatment_time_step:
+        parent_nodes: ['user_parameters']
+        value: 720
+    treatment_death_rate:
+        parent_nodes: ['user_parameters']
+        value: 0.00225
+
+  # LatticeBased environment settings
+  GridEnv:
+    initial_wt: 1
+    initial_mut: 1
+    wt_growth_rate: 0.25
+    mut_growth_rate: 0.09
+    wt_death_rate: 0.01
+    mut_death_rate: 0.004
+    wt_treat_death_rate: 0.5
+    mut_treat_death_rate: 0.00
+    cell_positioning: 'load' # 'surround_mutant' # 'random' # 'load'
+
+
+# evaluation configuration
+eval:
+  most_recent: 0
+  from_file: 0
+  path: './'
+  model_prefix: '0507_gridenv_1env_full_node_rew5'
+  step_to_load: '_best_reward'
+  save_name: 'patient_80_no_treatment'
+  # evaluation settings
+  fixed_AT_protocol: 1
+  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.7
+  num_episodes: 1
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+
