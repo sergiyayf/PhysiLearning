@@ -152,9 +152,10 @@ class LvEnv(BaseEnv):
             self.state[0] = self.grow(0,1,self.growth_function_flag)
             self.state[1] = self.grow(1,0,self.growth_function_flag)
             self.burden = np.sum(self.state[0:2])
-            self.state[2] = action
+
             # record trajectory
             self.trajectory[:,self.time] = self.state
+            self.state[2] = action
             # check if done
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
