@@ -50,7 +50,7 @@ env:
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
-  reward_shaping: 4  # reward shaping flag for some predefined rewards
+  reward_shaping: 0  # reward shaping flag for some predefined rewards
 
   # general simulation settings
   max_tumor_size: 4000
@@ -68,14 +68,14 @@ env:
     initial_wt: 3000
     initial_mut: 1
     carrying_capacity: 6500
-    growth_rate_wt: 0.294 #0.0175
-    growth_rate_mut: 0.386 #0.0175
-    death_rate_wt: 0.0029
-    death_rate_mut: 0.0039
-    treat_death_rate_wt: 0.4 #0.015
+    growth_rate_wt: 0.261 #0.0175
+    growth_rate_mut: 0.389 #0.0175
+    death_rate_wt: 0.00261
+    death_rate_mut: 0.00389
+    treat_death_rate_wt: 0.382 #0.015
     treat_death_rate_mut: 0.00 #0.0
-    competition_wt: 1.15 #2400.0
-    competition_mut: 1.0
+    competition_wt: 1.214 #2400.0
+    competition_mut: 0.175
     growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
 
   # note this is not yet functional
@@ -122,11 +122,11 @@ eval:
   path: './'
   model_prefix: '0507_gridenv_1env_full_node_rew5'
   step_to_load: '_best_reward'
-  save_name: 'random_test'
+  save_name: 'high_cap'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'random' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.0
+  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.7
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

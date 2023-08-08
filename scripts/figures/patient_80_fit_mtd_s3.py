@@ -119,8 +119,8 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'K': 6500, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'c_s': 1.13, 'c_r': 0.868, 'r_s': 0.294}
-    params_fit = {'r_r': 0.38, 'Delta_s': 0.41}
+                  'c_s': 1.2, 'c_r': 0.18, 'r_s': 0.27}
+    params_fit = {'r_r': 0.389, 'Delta_s': 0.382}
 
     theta_fit = list(params_fit.values())
 
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Initial guess)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Initial guess)")
 
-    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()), bounds=(1e-4,1))
+    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()), bounds=(1e-4,10))
     params_fit = {'r_r': initial_conditions.x[0], 'Delta_s': initial_conditions.x[1]}
     theta_fit = list(params_fit.values())
 

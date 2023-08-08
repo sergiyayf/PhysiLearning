@@ -161,11 +161,11 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 10000
+    draws = 100
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
     trace = trace_DEM
-    trace.to_json('./../../data/SI_data/patient_80_no_treatment_LV_inference_Data.json')
+    #trace.to_json('./../../data/SI_data/patient_80_no_treatment_LV_inference_Data.json')
 
     plot_finals()
     plt.show()

@@ -45,7 +45,7 @@ sns.stripplot(data=df, ax=ax, color='black', jitter=0.2, size=2.5)
 ax.scatter(df.mean().index, df.mean().values, marker='o', color='red', s=20)
 
 # plot one trajectory of aT scenario
-df = pd.read_hdf('Evaluations/PcEnvEvalpatient_80_RL_training_images_1407.h5', key='run_4')
+df = pd.read_hdf('Evaluations/LvEnvEvalhigh_cap.h5', key='run_6')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'], label='Type 0')
 ax.plot(df.index, df['Type 1'], label='Type 1')
