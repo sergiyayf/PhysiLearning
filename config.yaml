@@ -65,17 +65,17 @@ env:
 
   # LV environment settings
   LV:
-    initial_wt: 3000
+    initial_wt: 2761
     initial_mut: 1
     carrying_capacity: 6500
-    growth_rate_wt: 0.261 #0.0175
-    growth_rate_mut: 0.389 #0.0175
-    death_rate_wt: 0.00261
-    death_rate_mut: 0.00389
-    treat_death_rate_wt: 0.382 #0.015
+    growth_rate_wt: 0.294 #0.0175
+    growth_rate_mut: 0.41 #0.0175
+    death_rate_wt: 0.00294
+    death_rate_mut: 0.0041
+    treat_death_rate_wt: 0.399 #0.015
     treat_death_rate_mut: 0.00 #0.0
-    competition_wt: 1.214 #2400.0
-    competition_mut: 0.175
+    competition_wt: 1.13 #2400.0
+    competition_mut: 0.705
     growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
 
   # note this is not yet functional
@@ -122,10 +122,10 @@ eval:
   path: './'
   model_prefix: '0507_gridenv_1env_full_node_rew5'
   step_to_load: '_best_reward'
-  save_name: 'high_cap'
+  save_name: 'LV-mtd'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.7
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'

@@ -27,7 +27,7 @@ def plot_data(ax, lw=2, title="Initial data"):
     return ax
 
 def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
-    cols = ['r_s', 'delta_s', 'r_r', 'delta_r', 'c_s', 'c_r', 'K', 'Delta_s']
+    cols = ['c_s', 'c_r', 'r_s', 'r_r', 'Delta_s']
     row = trace_df.iloc[row_idx, :][cols].values
 
     theta = row
@@ -79,6 +79,7 @@ def plot_finals():
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Mean)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Mean)")
+    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Mean)")
     ax.legend()
     ax.set_title('Mean parameters')
 
@@ -92,6 +93,7 @@ def plot_finals():
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Median)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Median)")
+    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Median)")
     ax.legend()
     ax.set_title('Median parameters')
 
@@ -99,21 +101,8 @@ def plot_finals():
 if __name__ == '__main__':
 
     # Get data
-    # df = pd.read_csv(
-    #     './../Evaluations/older_evals/0_AT_fixedAT_60onPC.csv',
-    #     index_col=[0])
-    #
-    # data = pd.DataFrame(dict(
-    #         time=df.index.values[0:230:1],
-    #         x=df['Type 0'].values[0:230:1],
-    #         y=df['Type 1'].values[0:230:1],))
-    #
-    # treatment_schedule = [np.int32(i) for i in np.array(df['Treatment'].values[0:230:1])]
-
-    # Get data
-    df = pd.read_csv(
-        './../../Evaluations/0_PcEnvEvalpatient_18_fixed_07.csv',
-        index_col=[0])
+    df = pd.read_hdf(
+        './../../Evaluations/PcEnvEvalpatient_80_AT_at_baseline.h5', key='run_1')
     # find the index when all of the data is 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
 
@@ -136,8 +125,9 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(12, 4))
     plot_data(ax, title="PC raw data")
 
-    consts_fit = {'Delta_r': 0.0}
-    params_fit = {'r_s': 0.24, 'delta_s': 0.0001, 'r_r': 0.475, 'delta_r': 0.0001, 'c_s': 1.727, 'c_r': 0.0001, 'K': 6950.0, 'Delta_s': 0.36}
+    consts_fit = {'Delta_r': 0.0, 'K': 6500, 'delta_r': 0.01, 'delta_s': 0.01}
+    params_fit = {'c_s': 1.66, 'c_r': 0.179, 'r_s': 0.243, 'r_r': 0.468, 'Delta_s': 0.4211}
+
     theta_fit = list(params_fit.values())
 
     sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
@@ -145,11 +135,9 @@ if __name__ == '__main__':
     ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Initial guess)")
     ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Initial guess)")
 
-    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()), bounds=(1e-4,10000))
-    params_fit = {'r_s': initial_conditions.x[0], 'delta_s': initial_conditions.x[1],
-                  'r_r': initial_conditions.x[2], 'delta_r': initial_conditions.x[3],
-                  'c_s': initial_conditions.x[4], 'c_r': initial_conditions.x[5],
-                  'K': initial_conditions.x[6], 'Delta_s': initial_conditions.x[7]}
+    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()), bounds=(0.0,np.inf))
+    params_fit = {'c_s': initial_conditions.x[0], 'c_r': initial_conditions.x[1], 'r_s': initial_conditions.x[2],
+                  'r_r': initial_conditions.x[3], 'Delta_s': initial_conditions.x[4]}
     theta_fit = list(params_fit.values())
 
     sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
@@ -164,20 +152,17 @@ if __name__ == '__main__':
         # r_r = pm.Uniform("r_r", lower=0, upper=1, initval=theta_fit[0])
         # r_s = pm.Uniform("r_s", lower=0, upper=1, initval=theta_fit[1])
         # r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        r_s = pm.TruncatedNormal("r_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        delta_s = pm.TruncatedNormal("delta_s", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
-        r_r = pm.TruncatedNormal("r_r", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=0, initval=theta_fit[2])
-        delta_r = pm.TruncatedNormal("delta_r", mu=theta_fit[3], sigma=0.1*theta_fit[3], lower=0, initval=theta_fit[3])
-        c_s = pm.TruncatedNormal("c_s", mu=theta_fit[4], sigma=0.1*theta_fit[4], lower=0, initval=theta_fit[4])
-        c_r = pm.TruncatedNormal("c_r", mu=theta_fit[5], sigma=0.1*theta_fit[5], lower=0, initval=theta_fit[5])
-        K = pm.TruncatedNormal("K", mu=theta_fit[6], sigma=0.1*theta_fit[6], lower=0, initval=theta_fit[6])
-        Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[7], sigma=0.1*theta_fit[7], lower=0, initval=theta_fit[7])
+        c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
+        c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
+        r_s = pm.TruncatedNormal("r_s", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=0, initval=theta_fit[2])
+        r_r = pm.TruncatedNormal("r_r", mu=theta_fit[3], sigma=0.1*theta_fit[3], lower=0, initval=theta_fit[3])
+        Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[4], sigma=0.1*theta_fit[4], lower=0, initval=theta_fit[4])
 
         sigma = pm.HalfNormal("sigma", 10)
 
         # Ode solution function
         ode_solution = pytensor_forward_model_matrix(
-            pm.math.stack([r_s, delta_s, r_r, delta_r, c_s, c_r, K, Delta_s])
+            pm.math.stack([c_s, c_r, r_s, r_r, Delta_s])
         )
 
         # Likelihood
@@ -188,10 +173,11 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 5
+    draws = 10
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
     trace = trace_DEM
+    #trace.to_json('./../../data/SI_data/patient_80_cycling_LV_inference_Data.json')
 
     plot_finals()
     plt.show()

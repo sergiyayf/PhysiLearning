@@ -154,8 +154,9 @@ class LvEnv(BaseEnv):
             self.burden = np.sum(self.state[0:2])
 
             # record trajectory
-            self.trajectory[:,self.time] = self.state
             self.state[2] = action
+            self.trajectory[:,self.time] = self.state
+
             # check if done
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]

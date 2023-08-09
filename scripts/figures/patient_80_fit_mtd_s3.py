@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        './../../Evaluations/PcEnvEvalpatient_80_mtd.h5', key='run_1')
+        './../../Evaluations/PcEnvEvalpatient_80_mtd.h5', key='run_50')
     # find the index when all of the data is 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
 
@@ -119,8 +119,8 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'K': 6500, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'c_s': 1.2, 'c_r': 0.18, 'r_s': 0.27}
-    params_fit = {'r_r': 0.389, 'Delta_s': 0.382}
+                  'c_s': 1.4, 'c_r': 0.5, 'r_s': 0.294}
+    params_fit = {'r_r': 0.385, 'Delta_s': 0.399}
 
     theta_fit = list(params_fit.values())
 
@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 10000
+    draws = 5000
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
     trace = trace_DEM
