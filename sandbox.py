@@ -23,9 +23,9 @@ ttps_mtd = get_ttps('Evaluations/PcEnvEvalpatient_80_mtd.h5')
 ttps_random = get_ttps('Evaluations/PcEnvEvalpatient_80_random.h5')
 ttps_at = get_ttps('Evaluations/PcEnvEvalpatient_80_AT_at_baseline.h5')
 ttps_LV_at = get_ttps('Evaluations/LvEnvEvalpatient_80_lv_fixed_cap_test.h5')
-ttps_LV_no_treat = get_ttps('Evaluations/LvEnvEvalno_treatment_test.h5')
-ttps_LV_mtd = get_ttps('Evaluations/LvEnvEvalmtd_test.h5')
-ttps_LV_random = get_ttps('Evaluations/LvEnvEvalrandom_test.h5')
+ttps_LV_no_treat = get_ttps('Evaluations/LvEnvEvalLV-no_treat.h5')
+ttps_LV_mtd = get_ttps('Evaluations/LvEnvEvalLV-mtd.h5')
+ttps_LV_random = get_ttps('Evaluations/LvEnvEvalLV-random.h5')
 ttps_PC_rl = get_ttps('Evaluations/PcEnvEvalpatient_80_RL_training_images_1407.h5')
 
 df = pd.DataFrame({'MTD': ttps_mtd,

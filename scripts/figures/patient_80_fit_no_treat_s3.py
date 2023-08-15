@@ -119,8 +119,8 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'K': 6500, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'c_s': 1.4, 'c_r': 0.5, 'r_r': 0.42, 'Delta_s': 0.4}
-    params_fit = {'r_s': 0.24}
+                  'c_s': 1.647, 'c_r': 0.412, 'r_r': 0.424, 'Delta_s': 0.399}
+    params_fit = {'r_s': 0.291}
     theta_fit = list(params_fit.values())
 
     sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 5000
+    draws = 10000
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
     trace = trace_DEM
