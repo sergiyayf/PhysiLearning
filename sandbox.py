@@ -27,11 +27,13 @@ ttps_LV_no_treat = get_ttps('Evaluations/LvEnvEvalLV-no_treat.h5')
 ttps_LV_mtd = get_ttps('Evaluations/LvEnvEvalLV-mtd.h5')
 ttps_LV_random = get_ttps('Evaluations/LvEnvEvalLV-random.h5')
 ttps_PC_rl = get_ttps('Evaluations/PcEnvEvalpatient_80_RL_training_images_1407.h5')
+ttps_PC_rl_new = get_ttps('Evaluations/PcEnvEvalpatient_80_RL_new_1407.h5')
 
 df = pd.DataFrame({'MTD': ttps_mtd,
                    'LV_MTD': ttps_LV_mtd,
                    'AT': ttps_at,
                    'RL treat PC': ttps_PC_rl,
+                   'RL treat PC new': ttps_PC_rl_new,
                    'LV_AT': ttps_LV_at,
                    'Random': ttps_random,
                    'LV_Random': ttps_LV_random,

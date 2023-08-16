@@ -121,6 +121,6 @@ def test_evaluate_run():
     Integration test for evaluation run
     """
     evaluate.evaluate('./tests/test_cfg_eval.yaml')
-    assert os.path.exists('./Evaluations/0_LvEnvEval_test.csv')
-    os.system('rm -r ./Evaluations/0_LvEnvEval_test.csv')
+    assert os.path.exists('./Evaluations/LvEnvEval_test.h5')
+    os.system('rm -r ./Evaluations/LvEnvEval_test.h5')
 
