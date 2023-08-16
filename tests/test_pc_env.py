@@ -81,9 +81,9 @@ def test_get_tumor_volume_from_image():
 def test_check_done():
     env = PcEnv(observation_type='number', normalize=0, max_tumor_size=2)
     env.state = [0, 0, 0]
-    done = env._check_done(burden_type='number', total_cell_number=0)
+    done = env._check_done(burden_type='number', message="Type 0:0, Type 1:0,")
     assert done == False
 
     env.state = [0, 3, 0]
-    done = env._check_done(burden_type='number', total_cell_number=3)
+    done = env._check_done(burden_type='number', message="Type 0:3, Type 1:2,")
     assert done == True

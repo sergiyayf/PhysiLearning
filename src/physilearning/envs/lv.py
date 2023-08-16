@@ -143,7 +143,6 @@ class LvEnv(BaseEnv):
         Step in the environment that simulates tumor growth and treatment
         :param action: 0 - no treatment, 1 - treatment
         """
-        
         # grow_tumor
         reward = 0
         for t in range(0,self.treatment_time_step):
@@ -155,12 +154,13 @@ class LvEnv(BaseEnv):
 
             # record trajectory
             self.state[2] = action
-            self.trajectory[:,self.time-1] = self.state
+            self.trajectory[:,self.time] = self.state
+
             # check if done
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
 
-            if self.time >= self.max_time or self.burden >= self.threshold_burden or self.burden <= 0:
+            if self.time >= self.max_time-1 or self.burden >= self.threshold_burden or self.burden <= 0:
                 done = True
                 break
             else:
@@ -241,7 +241,6 @@ class LvEnv(BaseEnv):
                     treat = 0
                 else:
                     treat = 1
-
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -

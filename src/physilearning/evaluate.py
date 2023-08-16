@@ -56,6 +56,8 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
             action = 0
     elif at_type == 'mtd':
         action = 1
+    elif at_type == 'random':
+        action = np.random.choice([0, 1])
     else:
         action = 0
 
@@ -179,11 +181,9 @@ class Evaluation:
             np.save(f'{save_name}_image_trajectory', self.trajectory)
             number_trajectory = self.number_trajectory
             df = pd.DataFrame(np.transpose(number_trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
-            # df.to_csv(f'{save_name}_number_trajectory.csv')
-            df.to_hdf(f'{save_name}.h5', key=f'run_{episode}') 
+            df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
         else:
             df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
-            # df.to_csv(f'{save_name}.csv')
             df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
         return None
 
