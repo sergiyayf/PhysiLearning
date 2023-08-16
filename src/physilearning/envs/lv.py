@@ -108,7 +108,7 @@ class LvEnv(BaseEnv):
         self.competition = [competition_wt,competition_mut]
         self.growth_function_flag = growth_function_flag
 
-        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
+        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)+1))
         self.trajectory[:,0] = self.state
         self.real_step_count = 0
 
@@ -196,7 +196,7 @@ class LvEnv(BaseEnv):
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
 
-        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
+        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)+1))
         self.trajectory[:,0] = self.state
         self.current_death_rate = [self.death_rate[0],self.death_rate[1]]
 
