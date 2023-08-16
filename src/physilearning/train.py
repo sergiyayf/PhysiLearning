@@ -41,6 +41,7 @@ def make_env(
 
     def _init():
         env = EnvClass.from_yaml(config_file, **env_kwargs)
+        env = Monitor(env, filename=os.path.join('Training', 'Logs'), override_existing=False)
         # env.seed(seed+rank) # Seed in the env not implemented, This shouldn't be needed
         # as I am setting the random seed later
         return env
@@ -106,11 +107,11 @@ class Trainer:
                 if self.wrapper == 'VecFrameStack':
                     env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)])
                     self.env = VecFrameStack(env, **self.wrapper_kwargs)
-                    self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
+                    #self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
 
                 elif self.wrapper == 'DummyVecEnv':
                     self.env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)])
-                    self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
+                    #self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
                 else:
                     raise ValueError('Wrapper not recognized')
             else:
@@ -140,7 +141,7 @@ class Trainer:
                     raise ValueError('Wrapper not recognized')
             else:
                 raise ValueError('Vector environment must be wrapped')
-            self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
+            #self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
 
     def setup_model(self) -> None:
         """ Set up the model for training"""

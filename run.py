@@ -1,4 +1,6 @@
-import yaml 
+import os.path
+
+import yaml
 import subprocess
 import re
 from physilearning.tools.xml_reader import CfgRead
@@ -96,6 +98,14 @@ def train():
     # copy config to file config_jobid.yaml
     copy_command = 'cp config.yaml config_{0}.yaml'.format(jobid)
     subprocess.call([copy_command], shell=True)
+
+    # cleanup monitor
+    monitor_path = os.path.join('Training', 'Logs', 'monitor.csv')
+    clean_monitor = f'rm -f {monitor_path}'
+    subprocess.call([clean_monitor], shell=True)
+    # create monitor file
+    create_monitor = f'cp {os.path.join("Training", "Logs", "empty_monitor.csv")} {monitor_path}'
+    subprocess.call([create_monitor], shell=True)
 
     # run evaluation_job submission script with dependency to run after RL job is finished
     if config['global']['evaluate_after']:

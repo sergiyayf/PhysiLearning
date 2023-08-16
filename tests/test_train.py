@@ -28,8 +28,8 @@ def test_1_env_vecframestack():
     trainer.wrapper = "VecFrameStack"
     trainer.setup_env()
 
-    assert isinstance(trainer.env, VecMonitor)
-    assert isinstance(trainer.env.venv, VecFrameStack)
+    # assert isinstance(trainer.env, VecMonitor)
+    assert isinstance(trainer.env, VecFrameStack)
 
 
 def test_1_env_dummy():
@@ -40,8 +40,8 @@ def test_1_env_dummy():
     trainer.wrapper = "DummyVecEnv"
     trainer.setup_env()
 
-    assert isinstance(trainer.env, VecMonitor)
-    assert isinstance(trainer.env.venv, DummyVecEnv)
+    # assert isinstance(trainer.env, VecMonitor)
+    assert isinstance(trainer.env, DummyVecEnv)
 
 
 def test_not_defined_wrapper():

@@ -14,7 +14,7 @@ job:
   time: '14:00:00'
   agent_buffer: 1
   recurrent:
-    enable: 0
+    enable: 1
     n_jobs: 5
 
 # Reinforcement learning configuration
@@ -24,12 +24,12 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 1024
+      n_steps: 124
       verbose: 1
       ent_coef: 0.02
       clip_range: 0.05
       learning_rate: 1.e-4
-    total_timesteps: 10000
+    total_timesteps: 1000
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
     model_save_prefix: 'Lv_fixing'
     load:
