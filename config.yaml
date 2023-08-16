@@ -1,4 +1,7 @@
 # global configuration
+# PhysiLearning Version: 0.1.2
+# Run 2
+# Modification: reward changed from no treatment to ttp 
 global:
   machine: 'raven' # 'mela' # 'raven'
   transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
@@ -15,7 +18,7 @@ job:
   agent_buffer: 12
   recurrent:
     enable: 1
-    n_jobs: 20
+    n_jobs: 4
 
 # Reinforcement learning configuration
 learning:
@@ -31,11 +34,11 @@ learning:
       learning_rate: 1.e-4
     total_timesteps: 1.e+6
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '1407_PC_train'
+    model_save_prefix: '0708_PC_train_1407load_rew_0'
     load:
       enable_loading: 1
       last_model: 0
-      saved_model_name: './Training/SavedModels/1407_PC_train_best_reward'
+      saved_model_name: './Training/SavedModels/0708_PC_train_1407load_rew_0_best_reward'
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64
@@ -50,7 +53,7 @@ env:
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
-  reward_shaping: 4  # reward shaping flag for some predefined rewards
+  reward_shaping: 0  # reward shaping flag for some predefined rewards
 
   # general simulation settings
   max_tumor_size: 4000

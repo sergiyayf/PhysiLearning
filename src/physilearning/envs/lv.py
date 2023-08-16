@@ -109,6 +109,7 @@ class LvEnv(BaseEnv):
         self.growth_function_flag = growth_function_flag
 
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
+        self.trajectory[:,0] = self.state
         self.real_step_count = 0
 
         self.reward_shaping_flag = reward_shaping_flag
@@ -142,7 +143,7 @@ class LvEnv(BaseEnv):
         Step in the environment that simulates tumor growth and treatment
         :param action: 0 - no treatment, 1 - treatment
         """
-        self.state[2] = action
+        
         # grow_tumor
         reward = 0
         for t in range(0,self.treatment_time_step):
@@ -153,6 +154,7 @@ class LvEnv(BaseEnv):
             self.burden = np.sum(self.state[0:2])
 
             # record trajectory
+            self.state[2] = action
             self.trajectory[:,self.time-1] = self.state
             # check if done
             if self.state[0] <= 0 and self.state[1] <= 0:
@@ -194,6 +196,7 @@ class LvEnv(BaseEnv):
         self.time = 0
 
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
+        self.trajectory[:,0] = self.state
         self.current_death_rate = [self.death_rate[0],self.death_rate[1]]
 
         return [np.sum(self.state[0:2])]
@@ -229,12 +232,12 @@ class LvEnv(BaseEnv):
         elif flag == 2:
             treat = self.state[2]
             if self.state[2] == 0:
-                if self.time>2 and (self.trajectory[2,self.time-2]==1):
+                if self.time>1 and (self.trajectory[2,self.time-1]==1):
                     treat = 1
                 else:
                     treat = 0
             elif self.state[2] == 1:
-                if self.time>2 and (self.trajectory[2,self.time-2]==0):
+                if self.time>1 and (self.trajectory[2,self.time-1]==0):
                     treat = 0
                 else:
                     treat = 1
