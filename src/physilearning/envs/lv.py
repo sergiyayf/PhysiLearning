@@ -59,7 +59,7 @@ class LvEnv(BaseEnv):
             self.observation_type = observation_type
         else:
             raise NotImplementedError
-        self.observation_space = Box(low=0,high=normalize_to,shape=(1,))
+        self.observation_space = Box(low=0,high=normalize_to,shape=(3,))
 
         #  Time Parameters
         self.time = 0
@@ -173,7 +173,7 @@ class LvEnv(BaseEnv):
 
         info = {}
 
-        return [np.sum(self.state[0:2])], reward, done, info
+        return self.state, reward, done, info
 
     def render(self):
         pass
@@ -200,7 +200,7 @@ class LvEnv(BaseEnv):
         self.trajectory[:,0] = self.state
         self.current_death_rate = [self.death_rate[0],self.death_rate[1]]
 
-        return [np.sum(self.state[0:2])]
+        return self.state
 
     def grow(self, i: int, j: int , flag: int) -> float:
 

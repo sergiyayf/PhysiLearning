@@ -8,7 +8,8 @@ import warnings
 import importlib
 from typing import Dict, Optional, Any
 from physilearning.train import Trainer
-from stable_baselines3.common.vec_env import VecMonitor
+from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecFrameStack, SubprocVecEnv
+
 
 
 class DontWrapError(Exception):
@@ -88,7 +89,8 @@ class Evaluation:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
 
     def _is_venv(self):
-        return isinstance(self.env, VecMonitor)
+        return isinstance(self.env, DummyVecEnv) or isinstance(self.env, SubprocVecEnv)\
+            or isinstance(self.env, VecMonitor) or isinstance(self.env, VecFrameStack)
 
     def run_environment(
         self,
