@@ -100,10 +100,10 @@ class PcEnv(Env):
 
         # trajectory for plotting
         if self.observation_type == 'number':
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)+1))
         elif self.observation_type == 'image':
-            self.trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)))
-            self.number_trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
+            self.trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)+1))
+            self.number_trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)+1))
 
         ######################################################
         # PhysiCell specific for now
@@ -176,7 +176,7 @@ class PcEnv(Env):
 
         else:
             pc_cpus_per_task = self.cpu_per_task
-            command = f"srun --ntasks=1 --exclusive --mem-per-cpu=100 " \
+            command = f"srun --ntasks=1 --exclusive --mem-per-cpu=200 " \
                       f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
@@ -305,15 +305,15 @@ class PcEnv(Env):
         self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
         if self.observation_type == 'number':
             obs = [np.sum(self.state[0:2])]
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
             self.trajectory[:, 0] = self.state
         elif self.observation_type == 'image':
             obs = self.image
             self.trajectory = np.zeros(
-                (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)))
+                (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)+1))
             self.trajectory[:, :, 0] = self.image[0, :, :]
             self.number_trajectory = np.zeros(
-                (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
+                (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
             self.number_trajectory[:, 0] = self.state
         else:
             raise ValueError('Observation type not supported')
