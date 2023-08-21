@@ -94,7 +94,15 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         self.log_dir = log_dir
         self.save_path = os.path.join(save_dir)
         self.save_name = save_name
-        self.best_mean_reward = -np.inf
+        try:
+            x, y = ts2xy(load_results(self.log_dir), "timesteps")
+            if len(x) > 0:
+                self.best_mean_reward = np.mean(y[-20:])
+            else:
+                self.best_mean_reward = -np.inf
+
+        except:
+            self.best_mean_reward = -np.inf
 
     def _init_callback(self) -> None:
         # Create folder if needed
@@ -107,8 +115,8 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
             # Retrieve training reward
             x, y = ts2xy(load_results(self.log_dir), "timesteps")
             if len(x) > 0:
-                # Mean training reward over the last 100 episodes
-                mean_reward = np.mean(y[-100:])
+                # Mean training reward over the last 20 episodes
+                mean_reward = np.mean(y[-20:])
                 if self.verbose >= 1:
                     print(f"Num timesteps: {self.num_timesteps}")
                     print(f"Best mean reward: {self.best_mean_reward:.2f} "
