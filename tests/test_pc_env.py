@@ -32,7 +32,7 @@ def test_env_reset():
     with (mock.patch.object(env, '_send_message') as mock_send_message,
             mock.patch.object(env, '_start_slurm_physicell_job_step') as mock_start_slurm_physicell_job_step,
             mock.patch.object(env, '_receive_message') as mock_receive_message):
-            mock_receive_message.return_value = 'Type 0:20 ,Type 1:23 ,'
+            mock_receive_message.return_value = 'Type 0:12 t0_x: -200.0, 200.0, t0_y: -200.0, 200.0, Type 1:22 t1_x: -200.0, 200.0, t1_y: 200.0, -200.0, '
             obs = env.reset()
 
 
@@ -42,15 +42,12 @@ def test_env_reset():
     mock_receive_message.assert_called_with()
 
 
-
-
-
 def test_normalization():
     env = PcEnv(observation_type='number', normalize=True, normalize_to=100, initial_wt=1, initial_mut=1, max_tumor_size=2)
     with (mock.patch.object(env, '_send_message') as mock_send_message,
             mock.patch.object(env, '_start_slurm_physicell_job_step') as mock_start_slurm_physicell_job_step,
             mock.patch.object(env, '_receive_message') as mock_receive_message):
-        mock_receive_message.return_value = 'Type 0:1 ,Type 1:1 ,'
+        mock_receive_message.return_value = 'Type 0:1 t0_x: 0.0, t0_y: 0.0 Type 1:1 t1_x: 10.0, t1_y: 10.0'
         obs = env.reset()
     assert env.state[0] == 50.0
     assert obs[0] == 100.0

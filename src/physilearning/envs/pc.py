@@ -302,7 +302,7 @@ class PcEnv(Env):
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
-        self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
+        self.image = self._get_image_obs(message, 0)
         if self.observation_type == 'number':
             obs = [np.sum(self.state[0:2])]
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
