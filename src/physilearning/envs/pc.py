@@ -261,7 +261,7 @@ class PcEnv(Env):
 
             obs = self.state
 
-            if self.time >= self.max_time-1 or np.sum(self.state[0:2]) >= self.threshold_burden:
+            if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
                 done = True
                 self.socket.send(b"End simulation")
                 self.socket.close()
