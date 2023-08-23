@@ -14,7 +14,7 @@ job:
   time: '14:00:00'
   agent_buffer: 1
   recurrent:
-    enable: 1
+    enable: 0
     n_jobs: 5
 
 # Reinforcement learning configuration
@@ -22,7 +22,7 @@ learning:
   # Model options 
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
-    policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
+    policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
       n_steps: 124
       verbose: 1
@@ -31,7 +31,7 @@ learning:
       learning_rate: 1.e-4
     total_timesteps: 1000
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'Lv_fixing'
+    model_save_prefix: 'Lv_image'
     load:
       enable_loading: 0
       last_model: 0
@@ -58,7 +58,7 @@ env:
   max_time: 120
   normalize: 0
   normalize_to: 1000
-  observation_type: 'number' # 'image' # 'number'
+  observation_type: 'image' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
   image_size: 84
   domain_size: 1250
@@ -77,6 +77,7 @@ env:
     competition_wt: 1.323 #2400.0
     competition_mut: 0.336
     growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
+    image_sampling_type: 'random' # 'dense' # 'random'
 
   # note this is not yet functional
   PC:
@@ -112,7 +113,7 @@ env:
     mut_death_rate: 0.004
     wt_treat_death_rate: 0.5
     mut_treat_death_rate: 0.00
-    cell_positioning: 'load' # 'surround_mutant' # 'random' # 'load'
+    cell_positioning: 'random' # 'surround_mutant' # 'random' # 'load'
 
 
 # evaluation configuration

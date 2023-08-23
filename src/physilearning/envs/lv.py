@@ -4,6 +4,9 @@ import numpy as np
 from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
 from typing import Tuple
+import matplotlib as mpl
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
 
 
 class LvEnv(BaseEnv):
@@ -52,6 +55,7 @@ class LvEnv(BaseEnv):
         normalize:  bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
+        image_sampling_type: str = 'random',
     ) -> None:
         # Spaces
         self.name = 'LvEnv'
@@ -84,12 +88,12 @@ class LvEnv(BaseEnv):
         # Check if initial_wt and initial_mut are random
         self.wt_random = isinstance(initial_wt, str)
         if self.wt_random:
-            self.initial_wt = np.random.random_integers(low=0, high=0.99*self.max_tumor_size, size=1)[0]
+            self.initial_wt = np.random.random_integers(low=0, high=int(0.99*self.max_tumor_size), size=1)[0]
         else:
             self.initial_wt = initial_wt
         self.mut_random = isinstance(initial_mut, str)
         if self.mut_random:
-            self.initial_mut = np.random.random_integers(low=0, high=0.01*self.max_tumor_size, size=1)[0]
+            self.initial_mut = np.random.random_integers(low=0, high=int(0.01*self.max_tumor_size), size=1)[0]
         else:
             self.initial_mut = initial_mut
 
@@ -135,8 +139,11 @@ class LvEnv(BaseEnv):
         self.wt_color = 128
         self.mut_color = 255
         self.drug_color = 0
+        self.done = False
 
         self.reward_shaping_flag = reward_shaping_flag
+        self.fig, self.ax = plt.subplots()
+        self.image_sampling_type = image_sampling_type
 
     @classmethod
     def from_yaml(cls, yaml_file: str):
@@ -161,7 +168,10 @@ class LvEnv(BaseEnv):
                    growth_function_flag=config['env']['LV']['growth_function_flag'],
                    normalize=config['env']['normalize'],
                    normalize_to=config['env']['normalize_to'],
-                   image_size=config['env']['image_size'],)
+                   image_size=config['env']['image_size'],
+                   observation_type=config['env']['observation_type'],
+                   image_sampling_type=config['env']['LV']['image_sampling_type'],
+                   )
 
 
     def _get_image(self, action: int):
@@ -169,20 +179,42 @@ class LvEnv(BaseEnv):
         Randomly sample a tumor inside of the image and return the image
         """
         # estimate the number of cells to sample
-        num_wt_to_sample = self.image_size*self.image_size*\
-                           self.state[0]/(self.capacity*self.normalization_factor)
-        num_mut_to_sample = self.image_size*self.image_size*\
-                            self.state[1]/(self.capacity*self.normalization_factor)
+        num_wt_to_sample = self.image_size * self.image_size * \
+                           self.state[0] / (self.capacity * self.normalization_factor)
+        num_mut_to_sample = self.image_size * self.image_size * \
+                            self.state[1] / (self.capacity * self.normalization_factor)
 
-        # Sample sensitive clones
-        random_indices = np.random.choice(self.image_size*self.image_size,
-                                          int(np.round(num_wt_to_sample)), replace=False)
-        wt_x, wt_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
+        if self.image_sampling_type == 'random':
 
-        # Sample resistant clones
-        random_indices = np.random.choice(self.image_size*self.image_size,
-                                            int(np.round(num_mut_to_sample)), replace=False)
-        mut_x, mut_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
+            # Sample sensitive clones
+            random_indices = np.random.choice(self.image_size*self.image_size,
+                                              int(np.round(num_wt_to_sample)), replace=False)
+            wt_x, wt_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
+
+            # Sample resistant clones
+            random_indices = np.random.choice(self.image_size*self.image_size,
+                                                int(np.round(num_mut_to_sample)), replace=False)
+            mut_x, mut_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
+
+        elif self.image_sampling_type == 'dense':
+
+            wt_x, wt_y = [], []
+            mut_x, mut_y = [], []
+            radius = int(np.sqrt(num_wt_to_sample+num_mut_to_sample)/3)
+
+            while len(wt_x) < num_wt_to_sample:
+                x = np.random.randint(0,self.image_size)
+                y = np.random.randint(0,self.image_size)
+                if np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2) < radius:
+                    wt_x.append(x)
+                    wt_y.append(y)
+
+            while len(mut_x) < num_mut_to_sample:
+                x = np.random.randint(0,self.image_size)
+                y = np.random.randint(0,self.image_size)
+                if np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2) < radius:
+                    mut_x.append(x)
+                    mut_y.append(y)
 
         # populate the image
         # clean the image and make the new one
@@ -197,7 +229,6 @@ class LvEnv(BaseEnv):
             self.image[0, int(x), int(y)] = self.mut_color
 
         return self.image
-
 
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, dict]:
         """
@@ -243,11 +274,10 @@ class LvEnv(BaseEnv):
         else:
             obs = None
             raise NotImplementedError
+        self.done = done
 
         return obs, reward, done, info
 
-    def render(self):
-        pass
 
     def reset(self):
         self.real_step_count += 1
@@ -269,14 +299,14 @@ class LvEnv(BaseEnv):
 
         self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)+1))
         self.trajectory[:,0] = self.state
-        self.image = self._get_image(self.initial_drug)
-        self.image_trajectory = np.zeros(
-            (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
-        self.image_trajectory[:, :, 0] = self.image[0, :, :]
 
         if self.observation_type == 'number':
             obs = self.state
         elif self.observation_type == 'image':
+            self.image = self._get_image(self.initial_drug)
+            self.image_trajectory = np.zeros(
+                (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
+            self.image_trajectory[:, :, 0] = self.image[0, :, :]
             obs = self.image
         else:
             obs = None
@@ -336,3 +366,33 @@ class LvEnv(BaseEnv):
 
 
         return new_pop_size
+
+
+    def render(self, mode: str = 'human') -> mpl.animation.ArtistAnimation:
+        # render state
+        # plot it on the grid with different colors for wt and mut
+        # animate simulation with matplotlib animation
+
+        if self.observation_type == 'number':
+            pass
+        elif self.observation_type == 'image':
+            ims = []
+
+            for i in range(self.time):
+                im = self.ax.imshow(self.image_trajectory[:, :, i], animated=True, cmap='viridis', vmin=0, vmax=255)
+                ims.append([im])
+            ani = animation.ArtistAnimation(self.fig, ims, interval=2.1, blit=True, repeat_delay=1000)
+
+            return ani
+
+
+if __name__ == "__main__":
+    env = LvEnv.from_yaml("../../../config.yaml")
+    env.reset()
+    grid = env.image
+
+    while not env.done:
+        act = 1  # env.action_space.sample()
+        env.step(act)
+
+    anim = env.render()
