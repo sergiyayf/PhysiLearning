@@ -10,17 +10,17 @@ from typing import Dict
 
 def change_pc_config(pc_conf: Dict, n_envs: int = 1):
     """
-    Change the PhysiCell settings file to run multiple simulations in parallel
-    for now only works for 1 environment
+    Change the PhysiCell config file with the parameters specified
+    under the PC env in the config.yaml file.
 
     :param pc_conf: dictionary with the parameters to change
     :param n_envs: number of environments to run in parallel
     """
-    clean_sims = 'bash ./scripts/cleanup_simulations.sh'
-    subprocess.call([clean_sims], shell=True)
+    remove_old_simulation_folders = 'bash ./scripts/cleanup_simulations.sh'
+    subprocess.call([remove_old_simulation_folders], shell=True)
 
-    copy_PhysiCell = 'bash ./scripts/create_dirs.sh {0}'.format(n_envs - 1)
-    subprocess.call([copy_PhysiCell], shell=True)
+    copy_physicell_source = 'bash ./scripts/create_dirs.sh {0}'.format(n_envs - 1)
+    subprocess.call([copy_physicell_source], shell=True)
     for i in range(n_envs):
         xml_reader = CfgRead(f'./simulations/PhysiCell_{i}/config/PhysiCell_settings.xml')
 
@@ -28,8 +28,6 @@ def change_pc_config(pc_conf: Dict, n_envs: int = 1):
             print('Changing {0} to {1}'.format(key, pc_conf[key]['value']))
             xml_reader.write_new_param(parent_nodes=pc_conf[key]['parent_nodes'], parameter=key,
                                        value=pc_conf[key]['value'])
-
-    # xml_reader.write_new_param(parent_nodes=['save', 'full_data'], parameter="enable", value='true')
 
 
 @click.group()
@@ -70,7 +68,7 @@ def train():
     wall_clock_time = config['job']['time']
     n_envs = config['env']['n_envs']
     agent_buffer = config['job']['agent_buffer']
-    cpus_per_task+=agent_buffer
+    cpus_per_task += agent_buffer
     if cpus_per_task < agent_buffer + n_envs:
         print('Warning: Too few CPUs allocated for the job')
 
@@ -84,18 +82,14 @@ def train():
         job_script = 'raven_job.sh'
     else:
         job_script = 'job.sh'
-
     command = f'cd ./scripts && sbatch --nodes={nodes} --ntasks={ntasks} --mem={mem}MB --cpus-per-task={cpus_per_task} \
                 --time={wall_clock_time} {job_script}'
-    #command = 'cd ./scripts && sbatch job.sh'
     p = subprocess.Popen([command], shell=True, stdout=subprocess.PIPE)
     (out, err) = p.communicate()
     print(str(out, 'utf-8'))
     # get submitted job ID in case want to directly evaluate the job after job finishes
-    # jobid = re.findall(r'%s(\d+)' % "job", str(out,'utf-8'))
-    # find a number after "Submitted batch job" in the output
+    # for recurrent jobs, and for communication ports to avoid conflicts with multiple environments
     jobid = re.findall(r'\d+', str(out, 'utf-8'))[0]
-    # copy config to file config_jobid.yaml
     copy_command = 'cp config.yaml config_{0}.yaml'.format(jobid)
     subprocess.call([copy_command], shell=True)
 
@@ -103,7 +97,6 @@ def train():
     monitor_path = os.path.join('Training', 'Logs', 'monitor.csv')
     clean_monitor = f'rm -f {monitor_path}'
     subprocess.call([clean_monitor], shell=True)
-    # create monitor file
     create_monitor = f'cp {os.path.join("Training", "Logs", "empty_monitor.csv")} {monitor_path}'
     subprocess.call([create_monitor], shell=True)
 
@@ -127,7 +120,6 @@ def train():
             jobid = re.findall(r'\d+', str(out, 'utf-8'))[0]
             copy_command = 'cp config.yaml config_{0}.yaml'.format(jobid)
             subprocess.call([copy_command], shell=True)
-
 
 
 @cli.command()
@@ -158,5 +150,3 @@ def evaluate():
 
 if __name__ == '__main__':
     cli()
-
-    
