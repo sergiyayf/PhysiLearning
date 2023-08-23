@@ -63,10 +63,6 @@ def test_zhang_et_al(env_type):
     env.state[0] = 3
     treatment = evaluate.fixed_at(env, at_type='zhang_et_al', threshold=0.5)
     assert treatment == 1
-    env.state[0] = 0
-    env.observation_type = 'mixed'
-    with pytest.raises(NotImplementedError):
-        evaluate.fixed_at(env, at_type='zhang_et_al')
 
 
 @pytest.mark.parametrize('env_type', ['GridEnv'])
@@ -93,12 +89,12 @@ def test_evaluation_class_wrapper_handling_image_observation():
     env = DummyVecEnv([make_env(GridEnv, config_file='./tests/test_cfg.yaml')])
     env = VecMonitor(env)
     eval = evaluate.Evaluation(env, config_file='./tests/test_cfg.yaml')
-    trajectory_dim = eval.trajectory.shape[0]
+    trajectory_dim = eval.image_trajectory.shape[0]
     assert trajectory_dim > 4
 
     env = GridEnv(observation_type='image')
     eval = evaluate.Evaluation(env, config_file='./tests/test_cfg.yaml')
-    trajectory_dim = eval.trajectory.shape[0]
+    trajectory_dim = eval.image_trajectory.shape[0]
     assert trajectory_dim > 4
 
 

@@ -5,7 +5,7 @@
 
 PhysiLearning is a project in applying Reinforcement Learning to improve evolution based therapies
 considering physical cell-cell interactions. This repository is mainly build on two great open source platforms:
-PhysiCell - for simulating tumor growth, and Stable Baselines 3 - for reinforcement learning.
+[PhysiCell](https://github.com/MathCancer/PhysiCell) - for simulating tumor growth, and [Stable Baselines 3](https://github.com/DLR-RM/stable-baselines3) - for reinforcement learning.
 
 ## Installation
 Clone the repository and install the main package with pip
@@ -19,6 +19,7 @@ You will also need to install ZMQ cpp library. On Ubuntu:
 ```bash
 sudo apt-get install libzmq-dev
 ```
+After you installed zmq update ZMQLIB flag in src/PhysiCell_src/Makefile with the path to the library.
 
 ## Usage 
 
@@ -28,8 +29,7 @@ both the environment(simulation) and the agent.
 
 See the config.yaml file for more details on the configuration, it should be self-explanatory.
 
-### First steps 
-
+### First steps  
 To make sure that PhysiCell works on your machine, run the following command:
 ```bash
 make raven
@@ -53,3 +53,21 @@ To evaluate the agent, run the following command:
 python run.py evaluate
 ```
 
+### Run tests 
+
+To run all tests, run the following command:
+```bash
+make pytest
+```
+or run single tests with:
+```bash
+pytest tests/test_evaluate.py
+```
+
+
+### Changelog
+#### 0.1.5 Summary 
+- Added image observation for LV environment
+- Changed trajectory attribute for image observation: now trajectory is always the number_trajectory, and image is in the image_trajectory
+- Updated evaluation.py for new trajectory naming 
+- Added new config parameter: image_sampling_type - can be 'random' or 'dense'

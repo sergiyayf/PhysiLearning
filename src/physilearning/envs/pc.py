@@ -102,8 +102,8 @@ class PcEnv(Env):
         if self.observation_type == 'number':
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)+1))
         elif self.observation_type == 'image':
-            self.trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)+1))
-            self.number_trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)+1))
+            self.image_trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)+1))
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)+1))
 
         ######################################################
         # PhysiCell specific for now
@@ -233,11 +233,11 @@ class PcEnv(Env):
         # get from the string comma separated values from t0_x to t0_y
         if self.observation_type == 'image':
             self.image = self._get_image_obs(message, action)
-            self.trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
+            self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
             obs = self.image
             done = self._check_done(burden_type='number', total_cell_number=self.state[0] + self.state[1],
                                     message=message)
-            self.number_trajectory[:, int(self.time/self.treatment_time_step)] = self.state
+            self.trajectory[:, int(self.time/self.treatment_time_step)] = self.state
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(self.state, self.time/self.max_time)
 
@@ -309,12 +309,12 @@ class PcEnv(Env):
             self.trajectory[:, 0] = self.state
         elif self.observation_type == 'image':
             obs = self.image
-            self.trajectory = np.zeros(
+            self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)+1))
-            self.trajectory[:, :, 0] = self.image[0, :, :]
-            self.number_trajectory = np.zeros(
+            self.image_trajectory[:, :, 0] = self.image[0, :, :]
+            self.trajectory = np.zeros(
                 (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
-            self.number_trajectory[:, 0] = self.state
+            self.trajectory[:, 0] = self.state
         else:
             raise ValueError('Observation type not supported')
 

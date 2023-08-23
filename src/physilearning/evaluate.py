@@ -37,18 +37,11 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
             action = 1
         else:
             warnings.warn('This implementation is sensitive to the type of observation space, be careful')
-            if environment.observation_type == 'number':
-                if environment.trajectory[2, int(environment.time) - 1] == 1 and tumor_size > threshold * ini_tumor_size:
-                    action = 1
-                else:
-                    action = 0
-            elif environment.observation_type == 'image':
-                if environment.number_trajectory[2, int(environment.time) - 1] == 1 and tumor_size > threshold * ini_tumor_size:
-                    action = 1
-                else:
-                    action = 0
+
+            if environment.trajectory[2, int(environment.time) - 1] == 1 and tumor_size > threshold * ini_tumor_size:
+                action = 1
             else:
-                raise NotImplementedError('Observation type not implemented')
+                action = 0
 
     elif at_type == 'fixed':
         if tumor_size > threshold*environment.threshold_burden:
@@ -79,11 +72,11 @@ class Evaluation:
         if self._is_venv():
             self.trajectory = self.env.get_attr('trajectory')[0]
             if self.env.get_attr('observation_type')[0] == 'image':
-                self.number_trajectory = self.env.get_attr('number_trajectory')[0]
+                self.image_trajectory = self.env.get_attr('image_trajectory')[0]
         else:
             self.trajectory = self.env.trajectory
             if self.env.observation_type == 'image':
-                self.number_trajectory = self.env.number_trajectory
+                self.image_trajectory = self.env.image_trajectory
 
         with open(config_file, 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
@@ -152,11 +145,11 @@ class Evaluation:
                 if self._is_venv():
                     self.trajectory = self.env.get_attr('trajectory')[0]
                     if self.env.get_attr('observation_type')[0] == 'image':
-                        self.number_trajectory = self.env.get_attr('number_trajectory')[0]
+                        self.image_trajectory = self.env.get_attr('image_trajectory')[0]
                 else:
                     self.trajectory = self.env.trajectory
                     if self.env.observation_type == 'image':
-                        self.number_trajectory = self.env.number_trajectory
+                        self.image_trajectory = self.env.image_trajectory
 
                 obs, reward, done, info = self.env.step(action)
                 score += reward
@@ -180,8 +173,8 @@ class Evaluation:
             observation_type = self.env.observation_type
 
         if observation_type == 'image':
-            np.save(f'{save_name}_image_trajectory', self.trajectory)
-            number_trajectory = self.number_trajectory
+            np.save(f'{save_name}_image_trajectory', self.image_trajectory)
+            number_trajectory = self.trajectory
             df = pd.DataFrame(np.transpose(number_trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
             df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
         else:

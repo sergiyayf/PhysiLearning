@@ -118,8 +118,8 @@ class GridEnv(BaseEnv):
         if self.observation_type == 'number':
             self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
         elif self.observation_type == 'image':
-            self.trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)))
-            self.number_trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
+            self.image_trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)))
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
 
         ###############################################
         # GridEnv specific for now
@@ -246,10 +246,10 @@ class GridEnv(BaseEnv):
         self.state[2] = action
 
         if self.observation_type == 'image':
-            self.trajectory[:, :, int(self.time / self.treatment_time_step) - 1] = self.image[0, :, :]
+            self.image_trajectory[:, :, int(self.time / self.treatment_time_step) - 1] = self.image[0, :, :]
             obs = self.image
             self.done = self._check_done(burden_type='number', total_cell_number=num_wt_cells+num_mut_cells)
-            self.number_trajectory[:, int(self.time / self.treatment_time_step) - 1] = self.state
+            self.trajectory[:, int(self.time / self.treatment_time_step) - 1] = self.state
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(self.state, self.time / self.max_time)
 
@@ -413,9 +413,9 @@ class GridEnv(BaseEnv):
             self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
         elif self.observation_type == 'image':
             obs = self.image
-            self.trajectory = np.zeros(
+            self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)))
-            self.number_trajectory = np.zeros(
+            self.trajectory = np.zeros(
                 (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
         else:
             raise ValueError('Observation type not supported')
@@ -429,7 +429,7 @@ class GridEnv(BaseEnv):
         ims = []
 
         for i in range(self.time):
-            im = self.ax.imshow(self.trajectory[:, :, i], animated=True, cmap='viridis', vmin=0, vmax=255)
+            im = self.ax.imshow(self.image_trajectory[:, :, i], animated=True, cmap='viridis', vmin=0, vmax=255)
             ims.append([im])
         ani = animation.ArtistAnimation(self.fig, ims, interval=0.1, blit=True, repeat_delay=1000)
 
