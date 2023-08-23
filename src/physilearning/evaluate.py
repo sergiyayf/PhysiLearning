@@ -11,10 +11,10 @@ from physilearning.train import Trainer
 from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecFrameStack, SubprocVecEnv
 
 
-
 class DontWrapError(Exception):
     """Exception raised when the environment is wrapped for fixed adaptive therapy"""
     pass
+
 
 def fixed_at(environment: LvEnv or PcEnv or GridEnv,
              threshold: float = .5, at_type: str = 'fixed') -> int:
@@ -196,7 +196,7 @@ class Evaluation:
         return
 
 
-def evaluate(config_file = 'config.yaml') -> None:
+def evaluate(config_file='config.yaml') -> None:
     """
     Evaluate the trained model based on the evaluation specs in the config file
     """
@@ -254,4 +254,4 @@ def evaluate(config_file = 'config.yaml') -> None:
 
 
 if __name__ == '__main__':
-    evaluate(config_file = 'config.yaml')
+    evaluate(config_file='config.yaml')

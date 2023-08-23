@@ -34,7 +34,7 @@ class BaseEnv(Env):
 
 
     @classmethod
-    def from_yaml(cls, yaml_file):
+    def from_yaml(cls, yaml_file, kwargs=None):
         """
         Load environment from yaml file
         Parameters

@@ -1,6 +1,3 @@
-# reward class
-import numpy as np
-
 
 class Reward:
     def __init__(self, reward_shaping_flag=0, normalization=1):

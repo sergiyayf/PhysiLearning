@@ -116,7 +116,7 @@ class GridEnv(BaseEnv):
 
         # trajectory for plotting
         if self.observation_type == 'number':
-            self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)))
         elif self.observation_type == 'image':
             self.image_trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)))
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
