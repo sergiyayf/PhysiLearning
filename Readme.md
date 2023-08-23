@@ -1,7 +1,7 @@
 # PhysiLearning
 [![CI](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml)
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
-![version](https://img.shields.io/badge/version-0.1.4-blue)
+![version](https://img.shields.io/badge/version-0.1.5-blue)
 
 PhysiLearning is a project in applying Reinforcement Learning to improve evolution based therapies
 considering physical cell-cell interactions. This repository is mainly build on two great open source platforms:
@@ -66,8 +66,10 @@ pytest tests/test_evaluate.py
 
 
 ### Changelog
-#### 0.1.5 Summary 
+#### 0.1.5 Major changes
 - Added image observation for LV environment
 - Changed trajectory attribute for image observation: now trajectory is always the number_trajectory, and image is in the image_trajectory
 - Updated evaluation.py for new trajectory naming 
 - Added new config parameter: image_sampling_type - can be 'random' or 'dense'
+#### 0.1.5 Minor changes
+- Fixed stopping one time step too early for PC env with number observations
