@@ -57,6 +57,8 @@ class LvEnv(BaseEnv):
         image_size: int = 84,
         image_sampling_type: str = 'random',
     ) -> None:
+        super().__init__()
+
         # Spaces
         self.name = 'LvEnv'
         self.action_space = Discrete(2)

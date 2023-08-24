@@ -2,22 +2,36 @@
 import yaml
 from gym import Env
 from typing import Optional
+from gym.spaces import Box
+import numpy as np
+
 
 class BaseEnv(Env):
-    def __init__(self, config: dict = None, render_mode: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        observation_type: str = 'number',
+        image_size: int = 32,
+        normalize_to: int = 1,
 
-        # Configuration
-        if config is None:
-            self.config = self.default_config()
-            self.configure(self.config)
-        else:
-            self.configure(config)
+    ) -> None:
 
         # Spaces
+        self.observation_type = observation_type
+        if self.observation_type == 'number':
+            self.observation_space = Box(low=0, high=normalize_to, shape=(3,))
+        elif self.observation_type == 'image':
+            self.observation_space = Box(low=0, high=255,
+                                         shape=(1, image_size, image_size),
+                                         dtype=np.uint8)
+        elif self.observation_type == 'multiobs':
+            raise NotImplementedError
+        else:
+            raise NotImplementedError
+
+        self.normalize_to = normalize_to
         self.action_type = None
         self.action_space = None
-        self.observation_type = None
-        self.observation_space = None
+
 
         # Simulation
         self.name = 'BaseEnv'

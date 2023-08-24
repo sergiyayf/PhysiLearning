@@ -23,9 +23,12 @@ PC_files_list = ['Evaluations/PcEnvEvalpatient_80_no_treatment.h5',
                     'Evaluations/PcEnvEvalpatient_80_AT75.h5',
                     'Evaluations/PcEnvEvalpatient_80_AT100.h5',
                     'Evaluations/PcEnvEvalpatient_80_random.h5',
+                    'Evaluations/lv_on_pc_2108_combined.h5',
+                    'Evaluations/PcEnvEval_pc_rl_1008_interruption_combined.h5',
                  ]
+
 PC_name_lsit = ['PC No treatment', 'PC MTD',
-                'PC AT50', 'PC AT75', 'PC AT100', 'PC Random']
+                'PC AT50', 'PC AT75', 'PC AT100', 'PC Random', 'PC RL(lv trained)', 'PC RL']
 
 LV_files_list = ['Evaluations/LvEnvEvalLV-no_treat.h5',
                     'Evaluations/LvEnvEvalLV-mtd.h5',
@@ -33,9 +36,11 @@ LV_files_list = ['Evaluations/LvEnvEvalLV-no_treat.h5',
                     'Evaluations/LvEnvEvalLV-AT75.h5',
                     'Evaluations/LvEnvEvalLV-AT100.h5',
                     'Evaluations/LvEnvEvalLV-random.h5',
+                    'Evaluations/LvEnvEvallv_2108_cont_2.h5',
+                    'Evaluations/LvEnvEvallv_2108_cont_2.h5',
                  ]
 LV_name_lsit = ['LV No treatment', 'LV MTD',
-                'LV AT50', 'LV AT75', 'LV AT100', 'LV Random']
+                'LV AT50', 'LV AT75', 'LV AT100', 'LV Random', 'LV RL', 'LV RL']
 
 PC_dict = {}
 LV_dict = {}
@@ -72,6 +77,8 @@ sns.boxplot(data=combined_df, ax=ax)
 sns.stripplot(data=combined_df, ax=ax, color='black', jitter=0.2, size=2.5)
 # show mean as well
 ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
+#fig.savefig('all_treatments.pdf', transparent=True)
+fig.figs
 
 # plot one trajectory of aT scenario
 df = pd.read_hdf('Evaluations/PcEnvEvalpatient_80_AT100.h5', key='run_40')
