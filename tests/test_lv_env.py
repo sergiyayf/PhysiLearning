@@ -84,7 +84,7 @@ def test_get_image():
 
 def test_step_image_obs():
     env = LvEnv(observation_type='image', initial_wt=500, initial_mut=0, max_tumor_size=7000,
-                normalize=False, carrying_capacity=6500, treatment_time_step=1, growth_function_flag=2,
+                normalize=False, carrying_capacity=6500, treatment_time_step=1, growth_function_flag='delayed',
                 growth_rate_wt=0.2, treat_death_rate_wt=0.5)
     env.reset()
     obs, reward, done, info = env.step(0)

@@ -76,7 +76,7 @@ env:
     treat_death_rate_mut: 0.00 #0.0
     competition_wt: 1.323 #2400.0
     competition_mut: 0.336
-    growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
+    growth_function_flag: 'delayed' # flag for growth function 0 - for delayed death, 1 - for immediate
     image_sampling_type: 'random' # 'dense' # 'random'
 
   # note this is not yet functional
