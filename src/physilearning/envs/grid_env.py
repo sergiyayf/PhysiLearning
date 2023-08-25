@@ -43,98 +43,39 @@ class GridEnv(BaseEnv):
 
     def __init__(
         self,
+        name = 'GridEnv',
         observation_type: str = 'image',
         action_type: str = 'discrete',
-        image_size: int = 36,
-        normalize: bool = True,
-        normalize_to: float = 1,
         max_tumor_size: int = 600,
         max_time: int = 1000,
-        treatment_time_step: int = 1,
-        reward_shaping_flag: int = 0,
         initial_wt: int = 2,
         initial_mut: int = 1,
-        wt_growth_rate: float = 0.1,
-        mut_growth_rate: float = 0.02,
-        wt_death_rate: float = 0.002,
-        mut_death_rate: float = 0.002,
-        wt_treat_death_rate: float = 0.02,
-        mut_treat_death_rate: float = 0.0,
+        growth_rate_wt: float = 0.1,
+        growth_rate_mut: float = 0.02,
+        death_rate_wt: float = 0.002,
+        death_rate_mut: float = 0.002,
+        treat_death_rate_wt: float = 0.02,
+        treat_death_rate_mut: float = 0.0,
+        treatment_time_step: int = 1,
+        reward_shaping_flag: int = 0,
+        normalize: bool = True,
+        normalize_to: float = 1,
+        image_size: int = 36,
         cell_positioning: str = 'surround_mutant',
     ) -> None:
-        super().__init__()
-        #################### Todo: move to base class ##################
-        # Spaces
-        self.name = 'GridEnv'
-        self.action_type = action_type
-        if self.action_type == 'discrete':
-            self.action_space = Discrete(2)
-        elif self.action_type == 'continuous':
-            self.action = Box(low=-1, high=1, shape=(1,), dtype=np.float32)
-        self.observation_type = observation_type
-        if self.observation_type == 'image':
-            self.observation_space = Box(low=0, high=255,
-                                         shape=(1, image_size, image_size),
-                                         dtype=np.uint8)
-        elif self.observation_type == 'number':
-            self.observation_space = Box(low=0, high=1, shape=(1,))
-        elif self.observation_type == 'multiobs':
-            raise NotImplementedError
-        else:
-            raise NotImplementedError
+        super().__init__(name=name, observation_type=observation_type, action_type=action_type,
+                         max_tumor_size=max_tumor_size, max_time=max_time, initial_wt=initial_wt,
+                         initial_mut=initial_mut, growth_rate_wt=growth_rate_wt, growth_rate_mut=growth_rate_mut,
+                         death_rate_wt=death_rate_wt, death_rate_mut=death_rate_mut,
+                         treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
+                         treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
+                         normalize=normalize, normalize_to=normalize_to, image_size=image_size,
+                         )
 
-        # Configurations
-        self.image_size = image_size
-        self.normalize = normalize
-        self.max_tumor_size = max_tumor_size
-        self.normalization_factor = normalize_to/max_tumor_size
-        self.reward_shaping_flag = reward_shaping_flag
-        self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
-        self.time = 0
-        self.max_time = max_time
-        self.treatment_time_step = treatment_time_step
-        self.wt_color = 128
-        self.mut_color = 255
-        self.drug_color = 0
-        self.initial_drug = 0
-        self.done = False
-
-        # set up initial conditions
-        if self.normalize:
-            self.threshold_burden = normalize_to
-            self.initial_wt = initial_wt*self.normalization_factor
-            self.initial_mut = initial_mut*self.normalization_factor
-        else:
-            self.threshold_burden = max_tumor_size
-            self.initial_wt = initial_wt
-            self.initial_mut = initial_mut
-
-        # set up initial state
-        self.state = [self.initial_wt,
-                      self.initial_mut,
-                      self.initial_drug]
-
-        # trajectory for plotting
-        if self.observation_type == 'number':
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)))
-        elif self.observation_type == 'image':
-            self.image_trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)))
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)))
-
-        ###############################################
-        # GridEnv specific for now
-        self.wt_growth_rate = wt_growth_rate
-        self.mut_growth_rate = mut_growth_rate
-        self.reference_wt_death_rate = wt_death_rate
-        self.reference_mut_death_rate = mut_death_rate
-        self.wt_death_rate = self.reference_wt_death_rate
-        self.mut_death_rate = self.reference_mut_death_rate
-        self.wt_drug_death_rate = wt_treat_death_rate
-        self.mut_drug_death_rate = mut_treat_death_rate
-
+        # GridEnv specific
+        self.reference_death_rate = self.death_rate
         self.cell_positioning = cell_positioning
         self.place_cells(positioning=self.cell_positioning)
-        self.fig, self.ax = plt.subplots()
 
     @classmethod
     def from_yaml(cls, config_file: str = 'config.yaml', port: str = '0', job_name: str = '000000'):
@@ -159,12 +100,12 @@ class GridEnv(BaseEnv):
                    reward_shaping_flag=config['env']['reward_shaping'],
                    initial_wt=config['env']['GridEnv']['initial_wt'],
                    initial_mut=config['env']['GridEnv']['initial_mut'],
-                   wt_growth_rate=config['env']['GridEnv']['wt_growth_rate'],
-                   mut_growth_rate=config['env']['GridEnv']['mut_growth_rate'],
-                   wt_death_rate=config['env']['GridEnv']['wt_death_rate'],
-                   mut_death_rate=config['env']['GridEnv']['mut_death_rate'],
-                   wt_treat_death_rate=config['env']['GridEnv']['wt_treat_death_rate'],
-                   mut_treat_death_rate=config['env']['GridEnv']['mut_treat_death_rate'],
+                   growth_rate_wt=config['env']['GridEnv']['wt_growth_rate'],
+                   growth_rate_mut=config['env']['GridEnv']['mut_growth_rate'],
+                   death_rate_wt=config['env']['GridEnv']['wt_death_rate'],
+                   death_rate_mut=config['env']['GridEnv']['mut_death_rate'],
+                   treat_death_rate_wt=config['env']['GridEnv']['wt_treat_death_rate'],
+                   treat_death_rate_mut=config['env']['GridEnv']['mut_treat_death_rate'],
                    cell_positioning=config['env']['GridEnv']['cell_positioning'],
                    treatment_time_step=config['env']['treatment_time_step'],
                    )
@@ -286,17 +227,17 @@ class GridEnv(BaseEnv):
             # check for neighbors
             neighbors = self.check_neighbors(wt_cells[0][i], wt_cells[1][i], grid)
             # kill cells first
-            if self.wt_death_rate == self.reference_wt_death_rate:
-                if wt_rand[i] < self.wt_death_rate:
+            if self.death_rate[0] == self.reference_death_rate[0]:
+                if wt_rand[i] < self.death_rate[0]:
                     grid[0, wt_cells[0][i], wt_cells[1][i]] = 0
-            if self.wt_death_rate == self.wt_drug_death_rate:
-                if wt_rand[i] < self.reference_wt_death_rate:
+            if self.death_rate[0] == self.death_rate_treat[0]:
+                if wt_rand[i] < self.reference_death_rate[0]:
                     grid[0, wt_cells[0][i], wt_cells[1][i]] = 0
-                if len(neighbors) > 1 and wt_rand[i] < self.wt_drug_death_rate:
+                if len(neighbors) > 1 and wt_rand[i] < self.death_rate_treat[0]:
                     grid[0, wt_cells[0][i], wt_cells[1][i]] = 0
 
             # if neighbors and random number is less than growth rate, grow tumor
-            if neighbors and wt_rand[i] < self.wt_growth_rate:
+            if neighbors and wt_rand[i] < self.growth_rate[0]:
                 # choose random neighbor
                 rand_neighbor = np.random.randint(0, len(neighbors))
                 # grow tumor
@@ -308,11 +249,11 @@ class GridEnv(BaseEnv):
             # check for neighbors
             mut_rand = np.random.rand(len(mut_cells[0]))
             # kill cells first
-            if mut_rand[i] < self.mut_death_rate:
+            if mut_rand[i] < self.death_rate[1]:
                 grid[0, mut_cells[0][i], mut_cells[1][i]] = 0
             neighbors = self.check_neighbors(mut_cells[0][i], mut_cells[1][i], grid)
             # if neighbors and random number is less than growth rate, grow tumor
-            if neighbors and mut_rand[i] < self.mut_growth_rate:
+            if neighbors and mut_rand[i] < self.growth_rate[1]:
                 # choose random neighbor
                 rand_neighbor = np.random.randint(0, len(neighbors))
                 # grow tumor
@@ -336,12 +277,10 @@ class GridEnv(BaseEnv):
         Utility function to apply the treatment action
         """
         if action == 0:
-            self.wt_death_rate = self.reference_wt_death_rate
-            self.mut_death_rate = self.reference_mut_death_rate
+            self.death_rate = self.reference_death_rate
 
         elif action == 1:
-            self.wt_death_rate = self.wt_drug_death_rate
-            self.mut_death_rate = self.reference_mut_death_rate
+            self.death_rate = [self.death_rate_treat[0], self.reference_death_rate[1]]
         return
 
     def _check_done(self, burden_type: str, **kwargs) -> bool:
@@ -421,22 +360,6 @@ class GridEnv(BaseEnv):
             raise ValueError('Observation type not supported')
 
         return obs
-
-    def render(self, mode: str = 'human') -> mpl.animation.ArtistAnimation:
-        # render state
-        # plot it on the grid with different colors for wt and mut
-        # animate simulation with matplotlib animation
-        ims = []
-
-        for i in range(self.time):
-            im = self.ax.imshow(self.image_trajectory[:, :, i], animated=True, cmap='viridis', vmin=0, vmax=255)
-            ims.append([im])
-        ani = animation.ArtistAnimation(self.fig, ims, interval=0.1, blit=True, repeat_delay=1000)
-
-        return ani
-
-    def close(self):
-        pass
 
 
 if __name__ == "__main__":
