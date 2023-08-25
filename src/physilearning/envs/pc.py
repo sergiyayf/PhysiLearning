@@ -1,12 +1,9 @@
 from physilearning.envs.base_env import BaseEnv
-from gym.spaces import Discrete, Box
 import numpy as np
 import subprocess
 import zmq
 import re
 import time
-import yaml
-import warnings
 from physilearning.reward import Reward
 import platform
 
@@ -15,17 +12,26 @@ class PcEnv(BaseEnv):
     """
     PhysiCell environment
 
-    :param port: port number for zmq communication
-    :param job_name: job name for zmq communication
-    :param burden: burden threshold in number of cells
-    :param max_time: maximum time steps
-    :param initial_wt: initial number of wild type cells
-    :param initial_mut: initial number of mutant cells
-    :param treatment_time_step: time step at which treatment is applied
-    :param transport_type: transport type for zmq communication
-    :param transport_address: transport address for zmq communication
-    :param reward_shaping_flag: flag to enable reward shaping
-    :param normalize_to: normalization factor for reward shaping
+    :param name: Name of the environment
+    :param observation_type: Type of observation space. Can be 'number', 'image', or 'multiobs'
+    :param action_type: Type of action space. Can be 'discrete' or 'continuous'
+    :param max_tumor_size: Maximum tumor size
+    :param max_time: Maximum time for the environment
+    :param initial_wt: Initial wild-type tumor size
+    :param initial_mut: Initial mutant tumor size
+    :param growth_rate_wt: Growth rate of wild-type tumor
+    :param growth_rate_mut: Growth rate of mutant tumor
+    :param death_rate_wt: Death rate of wild-type tumor
+    :param death_rate_mut: Death rate of mutant tumor
+    :param treat_death_rate_wt: Death rate of wild-type tumor under treatment
+    :param treat_death_rate_mut: Death rate of mutant tumor under treatment
+    :param treatment_time_step: Time step for treatment
+    :param reward_shaping_flag: Flag for reward shaping.
+    :param normalize: Flag for normalization. Can be 0 or 1
+    :param normalize_to: Maximum tumor size to normalize to
+    :param image_size: Size of the image
+    :param env_specific_params: Dictionary of environment specific parameters
+    :param kwargs: Additional arguments
     """
     def __init__(
         self,
@@ -82,7 +88,6 @@ class PcEnv(BaseEnv):
         self.cpu_per_task = env_specific_params.get('cpus_per_sim', 10)
         self.running = False
 
-
     def _start_slurm_physicell_job_step(self) -> None:
         """
         Start the PhysiCell simulation
@@ -101,9 +106,9 @@ class PcEnv(BaseEnv):
 
         else:
             pc_cpus_per_task = self.cpu_per_task
-            # command = f"srun --ntasks=1 --exclusive --mem-per-cpu=100 " \
-            #           f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
-            command = f"bash ../../../scripts/run.sh {self.port} {port_connection}"
+            command = f"srun --ntasks=1 --exclusive --mem-per-cpu=100 " \
+                      f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
+            # command = f"bash ../../../scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
     def _send_message(self, message: str) -> None:
@@ -140,12 +145,11 @@ class PcEnv(BaseEnv):
         # get tumor updated state
         message = self._receive_message()
         if self.observation_type == 'image' or self.observation_type == 'multiobs':
-            im = self._get_image_obs(message, action)
-            # num_wt_cells, num_mut_cells = self._get_tumor_volume_from_image(im)
             num_wt_cells, num_mut_cells = self._get_cell_number(message)
         elif self.observation_type == 'number':
             num_wt_cells, num_mut_cells = self._get_cell_number(message)
-
+        else:
+            raise ValueError('Observation type not supported')
         # num_wt_cells, num_mut_cells = self._get_cell_number(message)
 
         if self.normalize:
@@ -182,6 +186,8 @@ class PcEnv(BaseEnv):
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
+            else:
+                raise ValueError('Observation type not supported')
 
         elif self.observation_type == 'number':
             # record trajectory
@@ -248,9 +254,10 @@ class PcEnv(BaseEnv):
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
+            else:
+                raise ValueError('Observation type not supported')
         else:
             raise ValueError('Observation type not supported')
-
 
         return obs
 
@@ -339,14 +346,13 @@ class PcEnv(BaseEnv):
 
 
 if __name__ == '__main__':
-    env = PcEnv.from_yaml('./../../../config.yaml', port ='0', job_name='00000')
+    env = PcEnv.from_yaml('./../../../config.yaml', port='0', job_name='00000')
     # env.reset()
     grid = env.image
     i = 0
-    while i<10:
+    while i < 10:
         act = 1  # env.action_space.sample()
         env.step(act)
-        i+=1
+        i += 1
 
     anim = env.render()
-

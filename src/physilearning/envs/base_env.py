@@ -2,19 +2,41 @@
 import matplotlib as mpl
 import matplotlib.animation as animation
 from matplotlib import pyplot as plt
-import yaml
 from gym import Env
 from gym import spaces
-from typing import Optional
 import yaml
 from gym.spaces import Discrete, Box
 import numpy as np
-from physilearning.reward import Reward
+
 
 class BaseEnv(Env):
+    """
+    Base environment class for all environments
+
+    :param name: Name of the environment
+    :param observation_type: Type of observation space. Can be 'number', 'image', or 'multiobs'
+    :param action_type: Type of action space. Can be 'discrete' or 'continuous'
+    :param max_tumor_size: Maximum tumor size
+    :param max_time: Maximum time for the environment
+    :param initial_wt: Initial wild-type tumor size
+    :param initial_mut: Initial mutant tumor size
+    :param growth_rate_wt: Growth rate of wild-type tumor
+    :param growth_rate_mut: Growth rate of mutant tumor
+    :param death_rate_wt: Death rate of wild-type tumor
+    :param death_rate_mut: Death rate of mutant tumor
+    :param treat_death_rate_wt: Death rate of wild-type tumor under treatment
+    :param treat_death_rate_mut: Death rate of mutant tumor under treatment
+    :param treatment_time_step: Time step for treatment
+    :param reward_shaping_flag: Flag for reward shaping.
+    :param normalize: Flag for normalization. Can be 0 or 1
+    :param normalize_to: Maximum tumor size to normalize to
+    :param image_size: Size of the image
+    :param kwargs: Additional arguments
+
+    """
     def __init__(
         self,
-        name = 'BaseEnv',
+        name: str = 'BaseEnv',
         observation_type: str = 'number',
         action_type: str = 'discrete',
         max_tumor_size: float = 1000,
@@ -32,7 +54,7 @@ class BaseEnv(Env):
         normalize: bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
-        env_specific_params: dict = {},
+        **kwargs,
     ) -> None:
         # Normalization
         self.normalize = normalize
@@ -162,6 +184,7 @@ class BaseEnv(Env):
 
         """
         pass
+
     def step(self, action):
         raise NotImplementedError
 
@@ -169,9 +192,17 @@ class BaseEnv(Env):
         raise NotImplementedError
 
     def render(self, mode='human') -> mpl.animation.ArtistAnimation:
-        # render state
-        # plot it on the grid with different colors for wt and mut
-        # animate simulation with matplotlib animation
+        """
+        Render environment
+        Produce animation of tumor growth if observation_type is 'image' or 'multiobs'
+        Parameters
+        ----------
+        mode
+
+        Returns
+        -------
+
+        """
 
         if self.observation_type == 'number':
             pass

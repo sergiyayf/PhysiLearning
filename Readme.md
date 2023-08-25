@@ -65,7 +65,7 @@ pytest tests/test_evaluate.py
 ```
 
 
-### Changelog
+## Changelog
 #### 0.1.5 Major changes
 - Added image observation for LV environment
 - Changed trajectory attribute for image observation: now trajectory is always the number_trajectory, and image is in the image_trajectory

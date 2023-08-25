@@ -1,41 +1,38 @@
-import yaml
-from gym.spaces import Discrete, Box
 import numpy as np
 from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
 from typing import Tuple
-import matplotlib as mpl
-import matplotlib.animation as animation
-import matplotlib.pyplot as plt
 
 
 class LvEnv(BaseEnv):
     """
     Environment for Lottka-Volterra tumor growth model
 
-    :param max_tumor_size: (float) maximum tumor size in number of cells
-    :param max_time: (int) maximum time in days
-    :param carrying_capacity: (float) carrying capacity of the tumor
-    :param initial_wt: (float) initial number of wild type cells
-    :param initial_mut: (float) initial number of mutant cells
-    :param growth_rate_wt: (float) growth rate of wild type cells
-    :param growth_rate_mut: (float) growth rate of mutant cells
-    :param death_rate_wt: (float) death rate of wild type cells
-    :param death_rate_mut: (float) death rate of mutant cells
-    :param treat_death_rate_wt: (float) death rate of wild type cells under treatment
-    :param treat_death_rate_mut: (float) death rate of mutant cells under treatment
-    :param competition_wt: (float) competition coefficient of wild type cells
-    :param competition_mut: (float) competition coefficient of mutant cells
-    :param treatment_time_step: (int) time step for treatment
-    :param reward_shaping_flag: (int) flag for reward shaping
-    :param growth_function_flag: (int) flag for growth function
-    :param normalize: (bool) flag for normalization
-    :param normalize_to: (float) normalization factor for reward
+    :param name: Name of the environment
+    :param observation_type: Type of observation space. Can be 'number', 'image', or 'multiobs'
+    :param action_type: Type of action space. Can be 'discrete' or 'continuous'
+    :param max_tumor_size: Maximum tumor size
+    :param max_time: Maximum time for the environment
+    :param initial_wt: Initial wild-type tumor size
+    :param initial_mut: Initial mutant tumor size
+    :param growth_rate_wt: Growth rate of wild-type tumor
+    :param growth_rate_mut: Growth rate of mutant tumor
+    :param death_rate_wt: Death rate of wild-type tumor
+    :param death_rate_mut: Death rate of mutant tumor
+    :param treat_death_rate_wt: Death rate of wild-type tumor under treatment
+    :param treat_death_rate_mut: Death rate of mutant tumor under treatment
+    :param treatment_time_step: Time step for treatment
+    :param reward_shaping_flag: Flag for reward shaping.
+    :param normalize: Flag for normalization. Can be 0 or 1
+    :param normalize_to: Maximum tumor size to normalize to
+    :param image_size: Size of the image
+    :param env_specific_params: Dictionary of environment specific parameters
+    :param kwargs: Additional arguments
     """
 
     def __init__(
         self,
-        name = 'LvEnv',
+        name: str = 'LvEnv',
         observation_type: str = 'number',
         action_type: str = 'discrete',
         max_tumor_size: float = 1000,
@@ -62,14 +59,14 @@ class LvEnv(BaseEnv):
             initial_wt = np.random.random_integers(low=0, high=int(0.99*max_tumor_size), size=1)[0]
         if self.mut_random:
             initial_mut = np.random.random_integers(low=0, high=int(0.99*max_tumor_size), size=1)[0]
-        super().__init__(name = name, observation_type = observation_type, action_type = action_type,
-            max_tumor_size = max_tumor_size, max_time = max_time, initial_wt = initial_wt,
-            initial_mut = initial_mut, growth_rate_wt = growth_rate_wt, growth_rate_mut = growth_rate_mut,
-            death_rate_wt = death_rate_wt, death_rate_mut = death_rate_mut,
-            treat_death_rate_wt = treat_death_rate_wt, treat_death_rate_mut = treat_death_rate_mut,
-            treatment_time_step = treatment_time_step, reward_shaping_flag = reward_shaping_flag,
-            normalize = normalize, normalize_to = normalize_to, image_size = image_size,
-            )
+        super().__init__(name=name, observation_type=observation_type, action_type=action_type,
+                         max_tumor_size=max_tumor_size, max_time=max_time, initial_wt=initial_wt,
+                         initial_mut=initial_mut, growth_rate_wt=growth_rate_wt, growth_rate_mut=growth_rate_mut,
+                         death_rate_wt=death_rate_wt, death_rate_mut=death_rate_mut,
+                         treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
+                         treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
+                         normalize=normalize, normalize_to=normalize_to, image_size=image_size,
+                         )
 
         # Normalizazion
         if self.normalize:
@@ -83,11 +80,10 @@ class LvEnv(BaseEnv):
                             env_specific_params.get('competition_mut', 1.)]
         self.growth_function_flag = env_specific_params.get('growth_function_flag', 'delayed')
 
-        self.trajectory[:,0] = self.state
+        self.trajectory[:, 0] = self.state
         self.real_step_count = 0
 
         self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
-
 
     def _get_image(self, action: int):
         """
@@ -95,9 +91,9 @@ class LvEnv(BaseEnv):
         """
         # estimate the number of cells to sample
         num_wt_to_sample = self.image_size * self.image_size * \
-                           self.state[0] / (self.capacity * self.normalization_factor)
+            self.state[0] / (self.capacity * self.normalization_factor)
         num_mut_to_sample = self.image_size * self.image_size * \
-                            self.state[1] / (self.capacity * self.normalization_factor)
+            self.state[1] / (self.capacity * self.normalization_factor)
 
         if self.image_sampling_type == 'random':
 
@@ -108,7 +104,7 @@ class LvEnv(BaseEnv):
 
             # Sample resistant clones
             random_indices = np.random.choice(self.image_size*self.image_size,
-                                                int(np.round(num_mut_to_sample)), replace=False)
+                                              int(np.round(num_mut_to_sample)), replace=False)
             mut_x, mut_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
 
         elif self.image_sampling_type == 'dense':
@@ -118,19 +114,20 @@ class LvEnv(BaseEnv):
             radius = int(np.sqrt(num_wt_to_sample+num_mut_to_sample)/3)
 
             while len(wt_x) < num_wt_to_sample:
-                x = np.random.randint(0,self.image_size)
-                y = np.random.randint(0,self.image_size)
+                x = np.random.randint(0, self.image_size)
+                y = np.random.randint(0, self.image_size)
                 if np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2) < radius:
                     wt_x.append(x)
                     wt_y.append(y)
 
             while len(mut_x) < num_mut_to_sample:
-                x = np.random.randint(0,self.image_size)
-                y = np.random.randint(0,self.image_size)
+                x = np.random.randint(0, self.image_size)
+                y = np.random.randint(0, self.image_size)
                 if np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2) < radius:
                     mut_x.append(x)
                     mut_y.append(y)
-
+        else:
+            raise ValueError('Unknown image sampling type')
         # populate the image
         # clean the image and make the new one
         if action:
@@ -153,16 +150,16 @@ class LvEnv(BaseEnv):
 
         # grow_tumor
         reward = 0
-        for t in range(0,self.treatment_time_step):
-            #step time
+        for t in range(0, self.treatment_time_step):
+            # step time
             self.time += 1
-            self.state[0] = self.grow(0,1,self.growth_function_flag)
-            self.state[1] = self.grow(1,0,self.growth_function_flag)
+            self.state[0] = self.grow(0, 1, self.growth_function_flag)
+            self.state[1] = self.grow(1, 0, self.growth_function_flag)
             self.burden = np.sum(self.state[0:2])
 
             # record trajectory
             self.state[2] = action
-            self.trajectory[:,self.time] = self.state
+            self.trajectory[:, self.time] = self.state
 
             # check if done
             if self.state[0] <= 0 and self.state[1] <= 0:
@@ -189,34 +186,33 @@ class LvEnv(BaseEnv):
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
+            else:
+                raise NotImplementedError
         else:
-            obs = None
             raise NotImplementedError
         self.done = done
 
         return obs, reward, done, info
 
-
     def reset(self):
         self.real_step_count += 1
 
-        #self.state = [self.initial_wt/self.threshold_burden, self.initial_mut/self.threshold_burden, self.initial_drug]
         if self.wt_random:
             self.initial_wt = \
-            np.random.random_integers(low=0, high=self.max_tumor_size, size=1)[0]
+                np.random.random_integers(low=0, high=int(self.max_tumor_size), size=1)[0]
             if self.normalize:
                 self.initial_wt = self.initial_wt*self.normalization_factor
         if self.mut_random:
             self.initial_mut = \
-            np.random.random_integers(low=0, high=0.01*self.max_tumor_size, size=1)[0]
+                np.random.random_integers(low=0, high=int(0.01*self.max_tumor_size), size=1)[0]
             if self.normalize:
                 self.initial_mut = self.initial_mut*self.normalization_factor
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
 
-        self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)+1))
-        self.trajectory[:,0] = self.state
+        self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)+1))
+        self.trajectory[:, 0] = self.state
 
         if self.observation_type == 'number':
             obs = self.state
@@ -229,15 +225,14 @@ class LvEnv(BaseEnv):
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
+            else:
+                raise NotImplementedError
         else:
-            obs = None
             raise NotImplementedError
-
-        self.current_death_rate = [self.death_rate[0],self.death_rate[1]]
 
         return obs
 
-    def grow(self, i: int, j: int , flag: str) -> float:
+    def grow(self, i: int, j: int, flag: str) -> float:
 
         # instantaneous death rate increase by drug application
         if flag == 'instant':
@@ -250,23 +245,23 @@ class LvEnv(BaseEnv):
         elif flag == 'delayed':
             treat = self.state[2]
             if self.state[2] == 0:
-                if self.time>1 and (self.trajectory[2,self.time-1]==1):
+                if self.time > 1 and (self.trajectory[2, self.time-1] == 1):
                     treat = 1
                 else:
                     treat = 0
             elif self.state[2] == 1:
-                if self.time>1 and (self.trajectory[2,self.time-1]==0):
+                if self.time > 1 and (self.trajectory[2, self.time-1] == 0):
                     treat = 0
                 else:
                     treat = 1
-            new_pop_size = self.state[i] * \
-                           (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-                            self.death_rate[i] - self.death_rate_treat[i] * treat)
+            new_pop_size = self.state[i] * (1 + self.growth_rate[i] *
+                (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
+                self.death_rate[i] - self.death_rate_treat[i] * treat)
 
             if new_pop_size < 0:
                 new_pop_size = 0
-
+        else:
+            raise NotImplementedError
         return new_pop_size
 
 

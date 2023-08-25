@@ -1,12 +1,6 @@
-import matplotlib as mpl
-import matplotlib.animation as animation
-from matplotlib import pyplot as plt
-import yaml
-from gym.spaces import Discrete, Box
 import numpy as np
 from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
-from stable_baselines3.common.env_checker import check_env
 from typing import Dict, List, Tuple, Any
 import warnings
 
@@ -20,30 +14,32 @@ class GridEnv(BaseEnv):
     """
     Lattice based tumor growth simulation environment for reinforcement learning
 
-    :param image_size: (int) Size of the simulation grid
-    :param observation_type: (str) Type of observation space.
-     Can be 'image' or 'number' or 'multiobs'
-    :param action_type: (str) Type of action space. Can be 'discrete' or 'continuous'
-    :param normalize: (bool) Whether to normalize the observation space
-    :param normalize_to: (float) Value to normalize the observation space to
-    :param max_tumor_size: (int) Maximum tumor size
-    :param max_time: (int) Maximum time steps
-    :param reward_shaping_flag: (int) Flag to use reward shaping
-    :param initial_wt: (int) Number of wild type cells
-    :param initial_mut: (int) Number of mutant cells
-    :param wt_growth_rate: (float) Growth rate of wild type cells
-    :param mut_growth_rate: (float) Growth rate of mutant cells
-    :param wt_death_rate: (float) Death rate of wild type cells
-    :param mut_death_rate: (float) Death rate of mutant cells
-    :param wt_treat_death_rate: (float) Death rate of wild type cells when treated
-    :param mut_treat_death_rate: (float) Death rate of mutant cells when treated
-    :param cell_positioning: (str) Method to position cells.
-     Can be 'random' or 'surround_mut'
+    :param name: Name of the environment
+    :param observation_type: Type of observation space. Can be 'number', 'image', or 'multiobs'
+    :param action_type: Type of action space. Can be 'discrete' or 'continuous'
+    :param max_tumor_size: Maximum tumor size
+    :param max_time: Maximum time for the environment
+    :param initial_wt: Initial wild-type tumor size
+    :param initial_mut: Initial mutant tumor size
+    :param growth_rate_wt: Growth rate of wild-type tumor
+    :param growth_rate_mut: Growth rate of mutant tumor
+    :param death_rate_wt: Death rate of wild-type tumor
+    :param death_rate_mut: Death rate of mutant tumor
+    :param treat_death_rate_wt: Death rate of wild-type tumor under treatment
+    :param treat_death_rate_mut: Death rate of mutant tumor under treatment
+    :param treatment_time_step: Time step for treatment
+    :param reward_shaping_flag: Flag for reward shaping.
+    :param normalize: Flag for normalization. Can be 0 or 1
+    :param normalize_to: Maximum tumor size to normalize to
+    :param image_size: Size of the image
+    :param env_specific_params: Dictionary of environment specific parameters
+    :param kwargs: Additional arguments
+
     """
 
     def __init__(
         self,
-        name = 'GridEnv',
+        name: str = 'GridEnv',
         observation_type: str = 'image',
         action_type: str = 'discrete',
         max_tumor_size: int = 600,
@@ -79,7 +75,6 @@ class GridEnv(BaseEnv):
         self.reference_death_rate = self.death_rate
         self.cell_positioning = env_specific_params.get('cell_positioning', 'random')
         self.place_cells(positioning=self.cell_positioning)
-
 
     def place_cells(self, positioning: str = 'random') -> None:
         """
@@ -167,6 +162,8 @@ class GridEnv(BaseEnv):
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
+            else:
+                raise ValueError('Observation type not supported.')
 
         elif self.observation_type == 'number':
             self.trajectory[:, int(self.time / self.treatment_time_step) - 1] = self.state
@@ -323,7 +320,7 @@ class GridEnv(BaseEnv):
         self.done = False
         if self.observation_type == 'number':
             obs = self.state
-            self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)))
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)))
@@ -333,6 +330,8 @@ class GridEnv(BaseEnv):
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
+            else:
+                raise ValueError('Observation type not supported')
         else:
             raise ValueError('Observation type not supported')
 
