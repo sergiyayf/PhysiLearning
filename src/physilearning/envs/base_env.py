@@ -4,6 +4,7 @@ import matplotlib.animation as animation
 from matplotlib import pyplot as plt
 import yaml
 from gym import Env
+from gym import spaces
 from typing import Optional
 import yaml
 from gym.spaces import Discrete, Box
@@ -63,7 +64,14 @@ class BaseEnv(Env):
                                          shape=(1, image_size, image_size),
                                          dtype=np.uint8)
         elif self.observation_type == 'multiobs':
-            raise NotImplementedError
+            self.observation_space = spaces.Dict(
+                spaces={
+                    "vec": spaces.Box(low=0, high=self.threshold_burden, shape=(3,)),
+                    "img": spaces.Box(low=0, high=255,
+                                      shape=(1, image_size, image_size),
+                                      dtype=np.uint8)
+                        }
+            )
         else:
             raise NotImplementedError
         # Image configurations
@@ -91,7 +99,7 @@ class BaseEnv(Env):
         # trajectory for plotting
         if self.observation_type == 'number':
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step) + 1))
-        elif self.observation_type == 'image':
+        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step) + 1))
@@ -167,7 +175,7 @@ class BaseEnv(Env):
 
         if self.observation_type == 'number':
             pass
-        elif self.observation_type == 'image':
+        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             ims = []
 
             for i in range(self.time):

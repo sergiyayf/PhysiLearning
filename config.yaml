@@ -50,7 +50,7 @@ env:
     channels_order: 'first'
 
   # general simulation settings
-  observation_type: 'image' # 'image' # 'number'
+  observation_type: 'multiobs' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   max_tumor_size: 4000
   max_time: 120

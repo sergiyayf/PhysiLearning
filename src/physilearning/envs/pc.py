@@ -101,9 +101,9 @@ class PcEnv(BaseEnv):
 
         else:
             pc_cpus_per_task = self.cpu_per_task
-            command = f"srun --ntasks=1 --exclusive --mem-per-cpu=100 " \
-                      f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
-            # command = f"bash ../../../scripts/run.sh {self.port} {port_connection}"
+            # command = f"srun --ntasks=1 --exclusive --mem-per-cpu=100 " \
+            #           f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
+            command = f"bash ../../../scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
     def _send_message(self, message: str) -> None:
@@ -139,7 +139,7 @@ class PcEnv(BaseEnv):
         self.time += self.treatment_time_step
         # get tumor updated state
         message = self._receive_message()
-        if self.observation_type == 'image':
+        if self.observation_type == 'image' or self.observation_type == 'multiobs':
             im = self._get_image_obs(message, action)
             # num_wt_cells, num_mut_cells = self._get_tumor_volume_from_image(im)
             num_wt_cells, num_mut_cells = self._get_cell_number(message)
@@ -157,10 +157,10 @@ class PcEnv(BaseEnv):
 
         self.state[2] = action
         # get from the string comma separated values from t0_x to t0_y
-        if self.observation_type == 'image':
+        if self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image_obs(message, action)
             self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
-            obs = self.image
+
             done = self._check_done(burden_type='number', total_cell_number=self.state[0] + self.state[1],
                                     message=message)
             self.trajectory[:, int(self.time/self.treatment_time_step)] = self.state
@@ -177,6 +177,11 @@ class PcEnv(BaseEnv):
                     self.socket.send(b"Stop treatment")
                 elif action == 1:
                     self.socket.send(b"Treat")
+
+            if self.observation_type == 'image':
+                obs = self.image
+            elif self.observation_type == 'multiobs':
+                obs = {'vec': self.state, 'img': self.image}
 
         elif self.observation_type == 'number':
             # record trajectory
@@ -225,7 +230,6 @@ class PcEnv(BaseEnv):
 
         self._send_message('Start simulation')
 
-
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
         self.image = self._get_image_obs(message, 0)
@@ -233,14 +237,17 @@ class PcEnv(BaseEnv):
             obs = [np.sum(self.state[0:2])]
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
             self.trajectory[:, 0] = self.state
-        elif self.observation_type == 'image':
-            obs = self.image
+        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)+1))
             self.image_trajectory[:, :, 0] = self.image[0, :, :]
             self.trajectory = np.zeros(
                 (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
             self.trajectory[:, 0] = self.state
+            if self.observation_type == 'image':
+                obs = self.image
+            elif self.observation_type == 'multiobs':
+                obs = {'vec': self.state, 'img': self.image}
         else:
             raise ValueError('Observation type not supported')
 

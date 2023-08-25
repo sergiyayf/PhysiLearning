@@ -157,13 +157,16 @@ class GridEnv(BaseEnv):
             self.state[1] = num_mut_cells
         self.state[2] = action
 
-        if self.observation_type == 'image':
+        if self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image_trajectory[:, :, int(self.time / self.treatment_time_step) - 1] = self.image[0, :, :]
-            obs = self.image
             self.done = self._check_done(burden_type='number', total_cell_number=num_wt_cells+num_mut_cells)
             self.trajectory[:, int(self.time / self.treatment_time_step) - 1] = self.state
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(self.state, self.time / self.max_time)
+            if self.observation_type == 'image':
+                obs = self.image
+            elif self.observation_type == 'multiobs':
+                obs = {'vec': self.state, 'img': self.image}
 
         elif self.observation_type == 'number':
             self.trajectory[:, int(self.time / self.treatment_time_step) - 1] = self.state
@@ -319,14 +322,17 @@ class GridEnv(BaseEnv):
         # reset done
         self.done = False
         if self.observation_type == 'number':
-            obs = [np.sum(self.state[0:2])]
+            obs = self.state
             self.trajectory = np.zeros((np.shape(self.state)[0],int(self.max_time)))
-        elif self.observation_type == 'image':
-            obs = self.image
+        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)))
             self.trajectory = np.zeros(
                 (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)))
+            if self.observation_type == 'image':
+                obs = self.image
+            elif self.observation_type == 'multiobs':
+                obs = {'vec': self.state, 'img': self.image}
         else:
             raise ValueError('Observation type not supported')
 
@@ -343,5 +349,3 @@ if __name__ == "__main__":
         env.step(act)
 
     anim = env.render()
-    plt.show()
-    check_env(env, warn=True)

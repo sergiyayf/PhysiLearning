@@ -182,10 +182,13 @@ class LvEnv(BaseEnv):
 
         if self.observation_type == 'number':
             obs = self.state
-        elif self.observation_type == 'image':
+        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(action)
             self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
-            obs = self.image
+            if self.observation_type == 'image':
+                obs = self.image
+            elif self.observation_type == 'multiobs':
+                obs = {'vec': self.state, 'img': self.image}
         else:
             obs = None
             raise NotImplementedError
@@ -217,12 +220,15 @@ class LvEnv(BaseEnv):
 
         if self.observation_type == 'number':
             obs = self.state
-        elif self.observation_type == 'image':
+        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(self.initial_drug)
             self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
             self.image_trajectory[:, :, 0] = self.image[0, :, :]
-            obs = self.image
+            if self.observation_type == 'image':
+                obs = self.image
+            elif self.observation_type == 'multiobs':
+                obs = {'vec': self.state, 'img': self.image}
         else:
             obs = None
             raise NotImplementedError
