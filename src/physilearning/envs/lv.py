@@ -53,11 +53,7 @@ class LvEnv(BaseEnv):
         normalize:  bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
-        image_sampling_type: str = 'random',
-        carrying_capacity: float = 1500,
-        competition_wt: float = 2.4e3,
-        competition_mut: float = 1.0,
-        growth_function_flag: str = 'delayed',
+        env_specific_params: dict = None,
     ) -> None:
         self.wt_random = isinstance(initial_wt, str)
         self.mut_random = isinstance(initial_mut, str)
@@ -76,46 +72,20 @@ class LvEnv(BaseEnv):
 
         # Normalizazion
         if self.normalize:
-            self.capacity = carrying_capacity * self.normalization_factor
+            self.capacity = env_specific_params.get('carrying_capacity', 6500) \
+                            * self.normalization_factor
         else:
-            self.capacity = carrying_capacity
+            self.capacity = env_specific_params.get('carrying_capacity', 6500)
 
         # 1 - wt, 2 - resistant
-        self.competition = [competition_wt,competition_mut]
-        self.growth_function_flag = growth_function_flag
+        self.competition = [env_specific_params.get('competition_wt', 2.),
+                            env_specific_params.get('competition_mut', 1.)]
+        self.growth_function_flag = env_specific_params.get('growth_function_flag', 'delayed')
 
         self.trajectory[:,0] = self.state
         self.real_step_count = 0
 
-        self.image_sampling_type = image_sampling_type
-
-    @classmethod
-    def from_yaml(cls, yaml_file: str):
-        with open(yaml_file, 'r') as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-
-        return cls(max_tumor_size=config['env']['max_tumor_size'],
-                   max_time=config['env']['max_time'],
-                   initial_wt=config['env']['LV']['initial_wt'],
-                   treatment_time_step=config['env']['treatment_time_step'],
-                   initial_mut=config['env']['LV']['initial_mut'],
-                   reward_shaping_flag=config['env']['reward_shaping'],
-                   carrying_capacity=config['env']['LV']['carrying_capacity'],
-                   growth_rate_wt=config['env']['LV']['growth_rate_wt'],
-                   growth_rate_mut=config['env']['LV']['growth_rate_mut'],
-                   death_rate_wt=config['env']['LV']['death_rate_wt'],
-                   death_rate_mut=config['env']['LV']['death_rate_mut'],
-                   competition_wt=config['env']['LV']['competition_wt'],
-                   competition_mut=config['env']['LV']['competition_mut'],
-                   treat_death_rate_wt=config['env']['LV']['treat_death_rate_wt'],
-                   treat_death_rate_mut=config['env']['LV']['treat_death_rate_mut'],
-                   growth_function_flag=config['env']['LV']['growth_function_flag'],
-                   normalize=config['env']['normalize'],
-                   normalize_to=config['env']['normalize_to'],
-                   image_size=config['env']['image_size'],
-                   observation_type=config['env']['observation_type'],
-                   image_sampling_type=config['env']['LV']['image_sampling_type'],
-                   )
+        self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
 
 
     def _get_image(self, action: int):

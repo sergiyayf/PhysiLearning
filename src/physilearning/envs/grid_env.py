@@ -61,7 +61,7 @@ class GridEnv(BaseEnv):
         normalize: bool = True,
         normalize_to: float = 1,
         image_size: int = 36,
-        cell_positioning: str = 'surround_mutant',
+        env_specific_params: dict = None,
     ) -> None:
         super().__init__(name=name, observation_type=observation_type, action_type=action_type,
                          max_tumor_size=max_tumor_size, max_time=max_time, initial_wt=initial_wt,
@@ -74,41 +74,9 @@ class GridEnv(BaseEnv):
 
         # GridEnv specific
         self.reference_death_rate = self.death_rate
-        self.cell_positioning = cell_positioning
+        self.cell_positioning = env_specific_params.get('cell_positioning', 'random')
         self.place_cells(positioning=self.cell_positioning)
 
-    @classmethod
-    def from_yaml(cls, config_file: str = 'config.yaml', port: str = '0', job_name: str = '000000'):
-        """
-        Create an environment from a yaml file
-        :param config_file: (str) path to the config file
-        :param port: (str) port to use for the environment
-        :param job_name: (str) job name
-        :return: (object) the environment
-
-        """
-        with open(config_file, 'r') as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-
-        return cls(image_size=config['env']['image_size'],
-                   observation_type=config['env']['observation_type'],
-                   action_type=config['env']['action_type'],
-                   normalize=config['env']['normalize'],
-                   normalize_to=config['env']['normalize_to'],
-                   max_tumor_size=config['env']['max_tumor_size'],
-                   max_time=config['env']['max_time'],
-                   reward_shaping_flag=config['env']['reward_shaping'],
-                   initial_wt=config['env']['GridEnv']['initial_wt'],
-                   initial_mut=config['env']['GridEnv']['initial_mut'],
-                   growth_rate_wt=config['env']['GridEnv']['wt_growth_rate'],
-                   growth_rate_mut=config['env']['GridEnv']['mut_growth_rate'],
-                   death_rate_wt=config['env']['GridEnv']['wt_death_rate'],
-                   death_rate_mut=config['env']['GridEnv']['mut_death_rate'],
-                   treat_death_rate_wt=config['env']['GridEnv']['wt_treat_death_rate'],
-                   treat_death_rate_mut=config['env']['GridEnv']['mut_treat_death_rate'],
-                   cell_positioning=config['env']['GridEnv']['cell_positioning'],
-                   treatment_time_step=config['env']['treatment_time_step'],
-                   )
 
     def place_cells(self, positioning: str = 'random') -> None:
         """

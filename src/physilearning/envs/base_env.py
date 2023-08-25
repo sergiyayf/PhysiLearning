@@ -31,6 +31,7 @@ class BaseEnv(Env):
         normalize: bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
+        env_specific_params: dict = None,
     ) -> None:
         # Normalization
         self.normalize = normalize
@@ -108,21 +109,29 @@ class BaseEnv(Env):
         self.fig, self.ax = plt.subplots()
 
     @classmethod
-    def from_yaml(cls, yaml_file, kwargs=None):
-        """
-        Load environment from yaml file
-        Parameters
-        ----------
-        yaml_file
-
-        Returns
-        -------
-        Environment object from yaml file
-        """
+    def from_yaml(cls, yaml_file: str):
         with open(yaml_file, 'r') as f:
-            config  = yaml.load(f, Loader=yaml.FullLoader)
-
-        return cls(config)
+            config = yaml.load(f, Loader=yaml.FullLoader)
+        env_name = config['env']['type']
+        return cls(observation_type=config['env']['observation_type'],
+                   action_type=config['env']['action_type'],
+                   max_tumor_size=config['env']['max_tumor_size'],
+                   max_time=config['env']['max_time'],
+                   initial_wt=config['env']['initial_wt'],
+                   initial_mut=config['env']['initial_mut'],
+                   growth_rate_wt=config['env']['growth_rate_wt'],
+                   growth_rate_mut=config['env']['growth_rate_mut'],
+                   death_rate_wt=config['env']['death_rate_wt'],
+                   death_rate_mut=config['env']['death_rate_mut'],
+                   treat_death_rate_wt=config['env']['treat_death_rate_wt'],
+                   treat_death_rate_mut=config['env']['treat_death_rate_mut'],
+                   treatment_time_step=config['env']['treatment_time_step'],
+                   reward_shaping_flag=config['env']['reward_shaping'],
+                   normalize=config['env']['normalize'],
+                   normalize_to=config['env']['normalize_to'],
+                   image_size=config['env']['image_size'],
+                   env_specific_params=config['env'][env_name],
+                   )
 
     @classmethod
     def default_config(cls) -> dict:
