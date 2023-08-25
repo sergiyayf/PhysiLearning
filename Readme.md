@@ -47,6 +47,16 @@ To train the agent on ubuntu with installed slurm queuing system, run the follow
 python run.py train
 ```
 
+#### List of example policies
+This is for now only an example, these values will not work
+
+| **Usage**  | **policy_kwargs**                       | **Description**                  |
+|------------|-----------------------------------------|----------------------------------|
+| Number obs | `dict('net_arch': dict('pi': [62,62]))` | Simple MLP with different sizes  |
+| Image obs  | `dict('CNN_dim`                         | Simple CNN with different sizes  |
+| Multi obs  | `dict('CNN_dim': [32,32,32,32])`        | Simple CNN with different sizes  |
+
+
 ### Evaluation
 To evaluate the agent, run the following command:
 ```bash
@@ -66,10 +76,19 @@ pytest tests/test_evaluate.py
 
 
 ## Changelog
+
+#### 0.1.6 Major changes
+- Fully migrateted environment construction to BaseEnv class
+- Cleaned up config.yaml file, and moved most of the environment parameters outside of the specific environments
+- Implemented dictionary observation space for multiobs training 
+- Added policy_kwargs parameter to config.yaml file for changing the policy architecture for training 
+- Created a list of example policies in the Readme file
+
 #### 0.1.5 Major changes
 - Added image observation for LV environment
 - Changed trajectory attribute for image observation: now trajectory is always the number_trajectory, and image is in the image_trajectory
 - Updated evaluation.py for new trajectory naming 
-- Added new config parameter: image_sampling_type - can be 'random' or 'dense'
+- Added new config parameter for LV environment: image_sampling_type - can be 'random' or 'dense' and creates
+a proxy image of the tumor simulated by LV with either randomly placing cells on the grid, or placing them in a circle
 #### 0.1.5 Minor changes
 - Fixed stopping one time step too early for PC env with number observations

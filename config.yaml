@@ -20,23 +20,23 @@ learning:
   # Model options 
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
-    policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
+    policy: 'MultiInputPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
       n_steps: 124
       verbose: 1
       ent_coef: 0.02
       clip_range: 0.05
       learning_rate: 1.e-4
-    total_timesteps: 1000
+      policy_kwargs:
+        features_extractor_kwargs:
+          cnn_output_dim: 16
+    total_timesteps: 10000
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
     model_save_prefix: 'Lv_image'
     load:
       enable_loading: 0
       last_model: 0
       saved_model_name: './Training/SavedModels/test_PC_train_best_reward'
-  network:
-    n_lstm_layers: 2
-    lstm_hidden_size: 64
 
 # Environment configuration
 env:
