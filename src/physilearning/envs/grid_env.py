@@ -61,7 +61,8 @@ class GridEnv(BaseEnv):
         normalize: bool = True,
         normalize_to: float = 1,
         image_size: int = 36,
-        env_specific_params: dict = None,
+        env_specific_params: dict = {},
+        **kwargs,
     ) -> None:
         super().__init__(name=name, observation_type=observation_type, action_type=action_type,
                          max_tumor_size=max_tumor_size, max_time=max_time, initial_wt=initial_wt,
@@ -73,6 +74,8 @@ class GridEnv(BaseEnv):
                          )
 
         # GridEnv specific
+        if env_specific_params is None:
+            env_specific_params = {'cell_positioning': 'random'}
         self.reference_death_rate = self.death_rate
         self.cell_positioning = env_specific_params.get('cell_positioning', 'random')
         self.place_cells(positioning=self.cell_positioning)

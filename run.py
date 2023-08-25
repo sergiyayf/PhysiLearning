@@ -74,7 +74,7 @@ def train():
 
     # prepare PhysiCell simulations for job submission
     if config['env']['type'] == 'PcEnv':
-        pc_conf = config['env']['PC']
+        pc_conf = config['env']['PcEnv']['xml']
         change_pc_config(pc_conf, n_envs)
 
     # construct a command to run by shell
@@ -141,7 +141,7 @@ def evaluate():
     n_envs = config['env']['n_envs']
     # prepare PhysiCell simulations for job submission
     if config['eval']['evaluate_on'] == 'PcEnv':
-        pc_conf = config['env']['PC']
+        pc_conf = config['env']['PcEnv']['xml']
         change_pc_config(pc_conf, n_envs)
     click.echo('Evaluating')
     eval_command = 'cd ./scripts && sbatch evaluation_job.sh'

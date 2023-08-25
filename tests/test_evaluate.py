@@ -18,7 +18,8 @@ def test_at_fixed(env_type):
     env.observation_type = 'number'
     env.reset()
     env.step(0)
-    env.state[0] = 9
+    env.state[0] = 9.
+    env.state[1] = .4
 
     treatment = evaluate.fixed_at(env, threshold=0.8, at_type='fixed')
     assert treatment == 1

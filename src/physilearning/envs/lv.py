@@ -53,7 +53,8 @@ class LvEnv(BaseEnv):
         normalize:  bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
-        env_specific_params: dict = None,
+        env_specific_params: dict = {},
+        **kwargs,
     ) -> None:
         self.wt_random = isinstance(initial_wt, str)
         self.mut_random = isinstance(initial_mut, str)

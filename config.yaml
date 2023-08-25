@@ -1,8 +1,6 @@
 # global configuration
 global:
   machine: 'mela' # 'mela' # 'raven'
-  transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
-  transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
   evaluate_after: 0
 
 # job configuration
@@ -58,19 +56,17 @@ env:
   max_time: 120
   initial_wt: 27
   initial_mut: 1
-  growth_rate_wt: 0.29 #0.0175
-  growth_rate_mut: 0.438 #0.0175
+  growth_rate_wt: 0.29 # 0.0175
+  growth_rate_mut: 0.438 # 0.0175
   death_rate_wt: 0.0029
   death_rate_mut: 0.00438
-  treat_death_rate_wt: 0.397 #0.015
-  treat_death_rate_mut: 0.00 #0.0
+  treat_death_rate_wt: 0.397 # 0.015
+  treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0  # reward shaping flag for some predefined rewards
   normalize: 0
   normalize_to: 1000
   image_size: 84
-
-  domain_size: 1250
 
   # LV environment settings
   LvEnv:
@@ -81,41 +77,37 @@ env:
     image_sampling_type: 'random' # 'dense' # 'random'
 
   # note this is not yet functional
-  PC:
-    use_2D:
-        parent_nodes: ['domain']
-        value: 'true'
-    number_of_susceptible_cells:
-        parent_nodes: ['user_parameters']
-        value: 2500
-    number_of_resistant_cells:
-        parent_nodes: ['user_parameters']
-        value: 5
-    enable_chkpt:
-        parent_nodes: ['user_parameters']
-        value: 'true'
-    filename_chkpt:
-        parent_nodes: ['user_parameters']
-        value: './../paper_presims/patient_80_new_sims/final'
-    treatment_time_step:
-        parent_nodes: ['user_parameters']
-        value: 720
-    treatment_death_rate:
-        parent_nodes: ['user_parameters']
-        value: 0.00225
+  PcEnv:
+    domain_size: 1250
+    cpus_per_sim: 10
+    transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
+    transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
+    xml:
+      use_2D:
+          parent_nodes: ['domain']
+          value: 'true'
+      number_of_susceptible_cells:
+          parent_nodes: ['user_parameters']
+          value: 2500
+      number_of_resistant_cells:
+          parent_nodes: ['user_parameters']
+          value: 5
+      enable_chkpt:
+          parent_nodes: ['user_parameters']
+          value: 'true'
+      filename_chkpt:
+          parent_nodes: ['user_parameters']
+          value: './../paper_presims/patient_80_new_sims/final'
+      treatment_time_step:
+          parent_nodes: ['user_parameters']
+          value: 720
+      treatment_death_rate:
+          parent_nodes: ['user_parameters']
+          value: 0.00225
 
   # LatticeBased environment settings
   GridEnv:
-    initial_wt: 1
-    initial_mut: 1
-    wt_growth_rate: 0.25
-    mut_growth_rate: 0.09
-    wt_death_rate: 0.01
-    mut_death_rate: 0.004
-    wt_treat_death_rate: 0.5
-    mut_treat_death_rate: 0.00
     cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random' # 'load'
-
 
 # evaluation configuration
 eval:

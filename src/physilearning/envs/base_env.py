@@ -31,7 +31,7 @@ class BaseEnv(Env):
         normalize: bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
-        env_specific_params: dict = None,
+        env_specific_params: dict = {},
     ) -> None:
         # Normalization
         self.normalize = normalize
@@ -62,18 +62,16 @@ class BaseEnv(Env):
             self.observation_space = Box(low=0, high=255,
                                          shape=(1, image_size, image_size),
                                          dtype=np.uint8)
-            # Image configurations
-            self.image_size = image_size
-            self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
-            self.wt_color = 128
-            self.mut_color = 255
-            self.drug_color = 0
-
         elif self.observation_type == 'multiobs':
             raise NotImplementedError
         else:
             raise NotImplementedError
-
+        # Image configurations
+        self.image_size = image_size
+        self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
+        self.wt_color = 128
+        self.mut_color = 255
+        self.drug_color = 0
         #  Time Parameters
         self.time = 0
         self.treatment_time_step = treatment_time_step
@@ -109,7 +107,7 @@ class BaseEnv(Env):
         self.fig, self.ax = plt.subplots()
 
     @classmethod
-    def from_yaml(cls, yaml_file: str):
+    def from_yaml(cls, yaml_file: str, **kwargs):
         with open(yaml_file, 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
         env_name = config['env']['type']
@@ -131,6 +129,7 @@ class BaseEnv(Env):
                    normalize_to=config['env']['normalize_to'],
                    image_size=config['env']['image_size'],
                    env_specific_params=config['env'][env_name],
+                   **kwargs,
                    )
 
     @classmethod

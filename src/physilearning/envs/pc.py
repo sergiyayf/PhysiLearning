@@ -1,4 +1,4 @@
-from gym import Env
+from physilearning.envs.base_env import BaseEnv
 from gym.spaces import Discrete, Box
 import numpy as np
 import subprocess
@@ -11,7 +11,7 @@ from physilearning.reward import Reward
 import platform
 
 
-class PcEnv(Env):
+class PcEnv(BaseEnv):
     """
     PhysiCell environment
 
@@ -29,94 +29,49 @@ class PcEnv(Env):
     """
     def __init__(
         self,
+        name='PcEnv',
         observation_type: str = 'image',
         action_type: str = 'discrete',
-        image_size: int = 128,
-        normalize: bool = False,
-        normalize_to: float = 1000,
-        max_tumor_size: float = 1000,
-        max_time: int = 30000,
-        treatment_time_step: int = 60,
+        max_tumor_size: int = 600,
+        max_time: int = 1000,
+        initial_wt: int = 2,
+        initial_mut: int = 1,
+        growth_rate_wt: float = 0.1,
+        growth_rate_mut: float = 0.02,
+        death_rate_wt: float = 0.002,
+        death_rate_mut: float = 0.002,
+        treat_death_rate_wt: float = 0.02,
+        treat_death_rate_mut: float = 0.0,
+        treatment_time_step: int = 1,
         reward_shaping_flag: int = 0,
-        initial_wt: int = 45,
-        initial_mut: int = 5,
-        transport_type: str = 'ipc://',
-        transport_address: str = '/tmp/0',
+        normalize: bool = True,
+        normalize_to: float = 1,
+        image_size: int = 36,
+        env_specific_params: dict = {},
         port: str = '0',
         job_name: str = '0000000',
-        cpu_per_task: int = 1,
-        domain_size: int = 1200,
+        **kwargs,
     ) -> None:
-        #################### Todo: move to base class ##################
-        # Spaces
-        self.name = 'PcEnv'
-        self.action_type = action_type
-        if self.action_type == 'discrete':
-            self.action_space = Discrete(2)
-        elif self.action_type == 'continuous':
-            self.action_space = Box(low=0, high=1, shape=(1,), dtype=np.float32)
-        self.observation_type = observation_type
-        if self.observation_type == 'number':
-            self.observation_space = Box(low=0, high=1, shape=(1,))
-        elif self.observation_type == 'image':
-            self.observation_space = Box(low=0, high=255,
-                                         shape=(1, image_size, image_size),
-                                         dtype=np.uint8)
-        elif self.observation_type == 'multiobs':
-            raise NotImplementedError
-        else:
-            raise NotImplementedError
+        super().__init__(name=name, observation_type=observation_type, action_type=action_type,
+                         max_tumor_size=max_tumor_size, max_time=max_time, initial_wt=initial_wt,
+                         initial_mut=initial_mut, growth_rate_wt=growth_rate_wt, growth_rate_mut=growth_rate_mut,
+                         death_rate_wt=death_rate_wt, death_rate_mut=death_rate_mut,
+                         treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
+                         treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
+                         normalize=normalize, normalize_to=normalize_to, image_size=image_size,
+                         )
 
-        # Configurations
-        self.image_size = image_size
-        self.normalize = normalize
-        self.max_tumor_size = max_tumor_size
-        self.normalization_factor = normalize_to/max_tumor_size
-        self.reward_shaping_flag = reward_shaping_flag
-        self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
-        self.time = 0
-        self.max_time = max_time
-        self.treatment_time_step = treatment_time_step
-        self.wt_color = 128
-        self.mut_color = 255
-        self.drug_color = 0
-        self.initial_drug = 0
-        self.done = False
-
-        # set up initial wild type, mutant and treatment decision
-        if self.normalize:
-            self.threshold_burden = normalize_to
-            self.initial_wt = initial_wt*self.normalization_factor
-            self.initial_mut = initial_mut*self.normalization_factor
-        else:
-            self.threshold_burden = max_tumor_size
-            self.initial_wt = initial_wt
-            self.initial_mut = initial_mut
-
-        # set up initial state
-        self.state = [self.initial_wt,
-                      self.initial_mut,
-                      self.initial_drug]
-
-        # trajectory for plotting
-        if self.observation_type == 'number':
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)+1))
-        elif self.observation_type == 'image':
-            self.image_trajectory = np.zeros((self.image_size, self.image_size, int(self.max_time/self.treatment_time_step)+1))
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step)+1))
-
-        ######################################################
         # PhysiCell specific for now
-        self.domain_size = domain_size
+        self.domain_size = env_specific_params.get('domain_size', 1250)
         self.job_name = job_name
         self.port = port
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
-        self.transport_type = transport_type
-        self.transport_address = transport_address
-        if transport_type == 'ipc://':
+        self.transport_type = env_specific_params.get('transport_type', 'ipc://')
+        self.transport_address = env_specific_params.get('transport_address', '/tmp/0')
+        if self.transport_type == 'ipc://':
             self.socket.bind(f'{self.transport_type}{self.transport_address}')
-        elif transport_type == 'tcp://':
+        elif self.transport_type == 'tcp://':
             try:
                 self.socket.bind(f'{self.transport_type}localhost:{self.transport_address}')
             except zmq.error.ZMQError:
@@ -124,39 +79,9 @@ class PcEnv(Env):
                 self.socket.bind(f'{self.transport_type}localhost:5555')
                 self.transport_address = '5555'
         # reward shaping flag
-        self.cpu_per_task = cpu_per_task
+        self.cpu_per_task = env_specific_params.get('cpus_per_sim', 10)
         self.running = False
 
-    @classmethod
-    def from_yaml(cls, yaml_file: str, port: str = '0', job_name: str = '000000') -> object:
-        with open(yaml_file, 'r') as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-        max_tumor_size = config['env']['max_tumor_size']
-        normalize = config['env']['normalize']
-        normalize_to = config['env']['normalize_to']
-        max_time = config['env']['max_time']
-        initial_wt = config['env']['PC']['number_of_susceptible_cells']['value']
-        timestep = config['env']['treatment_time_step']
-        initial_mut = config['env']['PC']['number_of_resistant_cells']['value']
-        reward_shaping_flag = config['env']['reward_shaping']
-        observation_type = config['env']['observation_type']
-        image_size = config['env']['image_size']
-        transport_type = config['global']['transport_type']
-        transport_address = config['global']['transport_address']
-        cpu_per_task = config['job']['cpus-per-task']-config['job']['agent_buffer']
-        domain_size = config['env']['domain_size']
-        if transport_type == 'ipc://':
-            transport_address = f'{transport_address}{job_name}{port}'
-        else:
-            warnings.warn('Transport type is different from ipc, please check the config file if everything is correct')
-            transport_address = f'{transport_address}:{port}'
-        
-        return cls(port=port, job_name=job_name, max_tumor_size=max_tumor_size, max_time=max_time,
-                   initial_wt=initial_wt, treatment_time_step=timestep, initial_mut=initial_mut,
-                   transport_type=transport_type, transport_address=transport_address,
-                   reward_shaping_flag=reward_shaping_flag, normalize=normalize,
-                   normalize_to=normalize_to, observation_type=observation_type,
-                   image_size=image_size, cpu_per_task=cpu_per_task, domain_size=domain_size)
 
     def _start_slurm_physicell_job_step(self) -> None:
         """
@@ -178,6 +103,7 @@ class PcEnv(Env):
             pc_cpus_per_task = self.cpu_per_task
             command = f"srun --ntasks=1 --exclusive --mem-per-cpu=100 " \
                       f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
+            # command = f"bash ../../../scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
     def _send_message(self, message: str) -> None:
@@ -405,20 +331,15 @@ class PcEnv(Env):
         return self.image
 
 
-def render(trajectory: np.ndarray, timestep: int, fig, ax):
-    # render state
-    # plot it on the grid with different colors for wt and mut
-    # animate simulation with matplotlib animation
-    import matplotlib.animation as animation
-    ims = []
-    for i in range(timestep):
-        im = ax.imshow(trajectory[:, :, i], animated=True, cmap='viridis', vmin=0, vmax=255)
-        ims.append([im])
-    ani = animation.ArtistAnimation(fig, ims, interval=0.1, blit=True, repeat_delay=1000)
-
-    return ani
-
-
 if __name__ == '__main__':
-    env = PcEnv.from_yaml('../../../config.yaml')
+    env = PcEnv.from_yaml('./../../../config.yaml', port ='0', job_name='00000')
     # env.reset()
+    grid = env.image
+    i = 0
+    while i<10:
+        act = 1  # env.action_space.sample()
+        env.step(act)
+        i+=1
+
+    anim = env.render()
+
