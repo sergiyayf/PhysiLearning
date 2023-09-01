@@ -258,7 +258,7 @@ class LvEnv(BaseEnv):
                 (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
                 self.death_rate[i] - self.death_rate_treat[i] * treat)
 
-            if new_pop_size < 0:
+            if new_pop_size < 0.1*self.normalization_factor:
                 new_pop_size = 0
         else:
             raise NotImplementedError

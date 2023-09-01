@@ -78,10 +78,9 @@ sns.stripplot(data=combined_df, ax=ax, color='black', jitter=0.2, size=2.5)
 # show mean as well
 ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 #fig.savefig('all_treatments.pdf', transparent=True)
-fig.figs
 
 # plot one trajectory of aT scenario
-df = pd.read_hdf('Evaluations/PcEnvEvalpatient_80_AT100.h5', key='run_40')
+df = pd.read_hdf('Evaluations/LvEnvEvallv_2408_no_resistant_rew_6.h5', key='run_40')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'], label='Type 0')
 ax.plot(df.index, df['Type 1'], label='Type 1')

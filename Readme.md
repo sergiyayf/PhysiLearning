@@ -1,7 +1,7 @@
 # PhysiLearning
 [![CI](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml)
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
-![version](https://img.shields.io/badge/version-0.1.5-blue)
+![version](https://img.shields.io/badge/version-0.1.6-blue)
 
 PhysiLearning is a project in applying Reinforcement Learning to improve evolution based therapies
 considering physical cell-cell interactions. This repository is mainly build on two great open source platforms:
@@ -50,11 +50,10 @@ python run.py train
 #### List of example policies
 This is for now only an example, these values will not work
 
-| **Usage**  | **policy_kwargs**                       | **Description**                  |
-|------------|-----------------------------------------|----------------------------------|
-| Number obs | `dict('net_arch': dict('pi': [62,62]))` | Simple MLP with different sizes  |
-| Image obs  | `dict('CNN_dim`                         | Simple CNN with different sizes  |
-| Multi obs  | `dict('CNN_dim': [32,32,32,32])`        | Simple CNN with different sizes  |
+| **Usage**       | **policy_kwargs**                                       | **Description**                                  |
+|-----------------|---------------------------------------------------------|--------------------------------------------------|
+| Number obs      | `dict('net_arch': dict('pi': [32, 32], 'vf': [32, 32))` | Control the size of actor and critic networks    |
+| Image/Multi obs | `dict('cnn_output_dim': 16)`                            | Control number of extracted features from images |
 
 
 ### Evaluation

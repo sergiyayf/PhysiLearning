@@ -30,6 +30,9 @@ learning:
       policy_kwargs:
         features_extractor_kwargs:
           cnn_output_dim: 16
+        net_arch:
+          pi: [32, 32]
+          vf: [32, 32]
     total_timesteps: 10000
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
     model_save_prefix: 'Lv_image'
@@ -54,8 +57,8 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   max_tumor_size: 4000
   max_time: 120
-  initial_wt: 27
-  initial_mut: 1
+  initial_wt: 2700
+  initial_mut: 0
   growth_rate_wt: 0.29 # 0.0175
   growth_rate_mut: 0.438 # 0.0175
   death_rate_wt: 0.0029
@@ -114,7 +117,7 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: 'lv_2108_cont'
+  model_prefix: 'lv_2408_no_resistant_rew_6'
   step_to_load: '_best_reward'
   save_name: 'rl-lv'
   # evaluation settings
