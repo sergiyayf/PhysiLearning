@@ -59,6 +59,8 @@ class BaseEnv(Env):
         # Normalization
         self.normalize = normalize
         self.max_tumor_size = max_tumor_size
+        if isinstance(initial_mut, list):
+            initial_mut = np.random.choice(initial_mut)
 
         if self.normalize:
             self.normalization_factor = normalize_to / max_tumor_size

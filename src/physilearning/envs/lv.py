@@ -90,42 +90,45 @@ class LvEnv(BaseEnv):
         Randomly sample a tumor inside of the image and return the image
         """
         # estimate the number of cells to sample
-        num_wt_to_sample = self.image_size * self.image_size * \
-            self.state[0] / (self.capacity * self.normalization_factor)
-        num_mut_to_sample = self.image_size * self.image_size * \
-            self.state[1] / (self.capacity * self.normalization_factor)
+        num_wt_to_sample = np.round(self.image_size * self.image_size * \
+            self.state[0] / (self.capacity * self.normalization_factor))
+        num_mut_to_sample = np.round(self.image_size * self.image_size * \
+            self.state[1] / (self.capacity * self.normalization_factor))
 
         if self.image_sampling_type == 'random':
 
             # Sample sensitive clones
             random_indices = np.random.choice(self.image_size*self.image_size,
-                                              int(np.round(num_wt_to_sample)), replace=False)
+                                              int(num_wt_to_sample), replace=False)
             wt_x, wt_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
 
             # Sample resistant clones
             random_indices = np.random.choice(self.image_size*self.image_size,
-                                              int(np.round(num_mut_to_sample)), replace=False)
+                                              int(num_mut_to_sample), replace=False)
             mut_x, mut_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
 
         elif self.image_sampling_type == 'dense':
 
             wt_x, wt_y = [], []
             mut_x, mut_y = [], []
-            radius = int(np.sqrt(num_wt_to_sample+num_mut_to_sample)/3)
+            radius = np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/2.2*np.sqrt(2)+1)
 
             while len(wt_x) < num_wt_to_sample:
                 x = np.random.randint(0, self.image_size)
                 y = np.random.randint(0, self.image_size)
                 if np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2) < radius:
-                    wt_x.append(x)
-                    wt_y.append(y)
+                    # check if pair is already in the list
+                    if (x,y) not in zip(wt_x, wt_y):
+                        wt_x.append(x)
+                        wt_y.append(y)
 
             while len(mut_x) < num_mut_to_sample:
                 x = np.random.randint(0, self.image_size)
                 y = np.random.randint(0, self.image_size)
                 if np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2) < radius:
-                    mut_x.append(x)
-                    mut_y.append(y)
+                    if (x, y) not in zip(wt_x, wt_y):
+                        mut_x.append(x)
+                        mut_y.append(y)
         else:
             raise ValueError('Unknown image sampling type')
         # populate the image
@@ -266,6 +269,8 @@ class LvEnv(BaseEnv):
 
 
 if __name__ == "__main__":
+    # set random seed
+    np.random.seed(0)
     env = LvEnv.from_yaml("../../../config.yaml")
     env.reset()
     grid = env.image
