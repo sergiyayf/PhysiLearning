@@ -44,7 +44,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -85,6 +85,7 @@ env:
     cpus_per_sim: 10
     transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
     transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
+    patient_id: [53, 53]
     xml:
       use_2D:
           parent_nodes: ['domain']

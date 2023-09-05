@@ -1,3 +1,5 @@
+import os
+
 from physilearning.envs.base_env import BaseEnv
 import numpy as np
 import subprocess
@@ -6,6 +8,7 @@ import re
 import time
 from physilearning.reward import Reward
 import platform
+from physilearning.tools.xml_reader import CfgRead
 
 
 class PcEnv(BaseEnv):
@@ -71,10 +74,18 @@ class PcEnv(BaseEnv):
         self.domain_size = env_specific_params.get('domain_size', 1250)
         self.job_name = job_name
         self.port = port
+        patient_id = env_specific_params.get('patient_id', 0)
+        print(f'patient_id: {patient_id}')
+        if isinstance(patient_id, list):
+            self.patient_id = np.random.choice(patient_id)
+            if self.patient_id == 53:
+                print('correcting patient 53')
+                self._correct_patient()
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.transport_type = env_specific_params.get('transport_type', 'ipc://')
-        self.transport_address = env_specific_params.get('transport_address', '/tmp/0')
+        self.transport_address = env_specific_params.get('transport_address', f'/tmp/')+f'{self.port}'
+
         if self.transport_type == 'ipc://':
             self.socket.bind(f'{self.transport_type}{self.transport_address}')
         elif self.transport_type == 'tcp://':
@@ -111,6 +122,10 @@ class PcEnv(BaseEnv):
             # command = f"bash ../../../scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
+    def _correct_patient(self):
+        xml_reader = CfgRead(f'./simulations/PhysiCell_{self.port}/config/PhysiCell_settings.xml')
+        xml_reader.write_new_param(parent_nodes=['user_parameters'], parameter='filename_chkpt',
+                                   value='./../paper_presims/patient_53_core/output/final')
     def _send_message(self, message: str) -> None:
         """
         Send a message to the PhysiCell simulation
@@ -346,7 +361,9 @@ class PcEnv(BaseEnv):
 
 
 if __name__ == '__main__':
-    env = PcEnv.from_yaml('./../../../config.yaml', port='0', job_name='00000')
+    os.chdir("/home/saif/Projects/PhysiLearning")
+    np.random.seed(0)
+    env = PcEnv.from_yaml('./config.yaml', port='0', job_name='00000')
     # env.reset()
     grid = env.image
     i = 0
