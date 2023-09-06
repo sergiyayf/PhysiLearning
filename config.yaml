@@ -85,7 +85,7 @@ env:
     cpus_per_sim: 10
     transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
     transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
-    patient_id: [53, 53]
+    patient_id: 80
     xml:
       use_2D:
           parent_nodes: ['domain']

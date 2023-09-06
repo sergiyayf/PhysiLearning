@@ -74,13 +74,9 @@ class PcEnv(BaseEnv):
         self.domain_size = env_specific_params.get('domain_size', 1250)
         self.job_name = job_name
         self.port = port
-        patient_id = env_specific_params.get('patient_id', 0)
-        print(f'patient_id: {patient_id}')
-        if isinstance(patient_id, list):
-            self.patient_id = np.random.choice(patient_id)
-            if self.patient_id == 53:
-                print('correcting patient 53')
-                self._correct_patient()
+        self.patient_id = None
+        self.patient_id_list = env_specific_params.get('patient_id', 0)
+        self._pick_patient(self.patient_id_list)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.transport_type = env_specific_params.get('transport_type', 'ipc://')
@@ -122,10 +118,30 @@ class PcEnv(BaseEnv):
             # command = f"bash ../../../scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
-    def _correct_patient(self):
+    def _rewrite_xml_parameter(self, parent_nodes: list, parameter: str, value: str) -> None:
+        """
+        Rewrite a parameter in the PhysiCell_settings.xml file
+
+        param: parent_nodes: list of parent nodes of the parameter to be rewritten
+        param: parameter: parameter to be rewritten
+        param: value: new value of the parameter
+        """
         xml_reader = CfgRead(f'./simulations/PhysiCell_{self.port}/config/PhysiCell_settings.xml')
-        xml_reader.write_new_param(parent_nodes=['user_parameters'], parameter='filename_chkpt',
-                                   value='./../paper_presims/patient_53_core/output/final')
+        xml_reader.write_new_param(parent_nodes=parent_nodes, parameter=parameter, value=value)
+
+    def _pick_patient(self, patient_id):
+        """
+        Pick a patient to be simulated
+
+        """
+        if isinstance(patient_id, list):
+            self.patient_id = np.random.choice(patient_id)
+        else:
+            self.patient_id = patient_id
+        chkpt_filename = f'./../paper_presims/patient_{self.patient_id}/final'
+        self._rewrite_xml_parameter(parent_nodes=['user_parameters'], parameter='filename_chkpt',
+                                    value=chkpt_filename)
+
     def _send_message(self, message: str) -> None:
         """
         Send a message to the PhysiCell simulation
@@ -233,6 +249,7 @@ class PcEnv(BaseEnv):
         return obs, reward, done, info
 
     def reset(self):
+        self._pick_patient(self.patient_id_list)
         time.sleep(3.0)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
@@ -362,13 +379,14 @@ class PcEnv(BaseEnv):
 
 if __name__ == '__main__':
     os.chdir("/home/saif/Projects/PhysiLearning")
-    np.random.seed(0)
+    np.random.seed(15)
     env = PcEnv.from_yaml('./config.yaml', port='0', job_name='00000')
+    print(env.patient_id)
     # env.reset()
     grid = env.image
     i = 0
     while i < 10:
-        act = 1  # env.action_space.sample()
+        act = 0  # env.action_space.sample()
         env.step(act)
         i += 1
 
