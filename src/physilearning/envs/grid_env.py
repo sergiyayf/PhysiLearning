@@ -39,6 +39,7 @@ class GridEnv(BaseEnv):
 
     def __init__(
         self,
+        config: dict = None,
         name: str = 'GridEnv',
         observation_type: str = 'image',
         action_type: str = 'discrete',
@@ -57,16 +58,17 @@ class GridEnv(BaseEnv):
         normalize: bool = True,
         normalize_to: float = 1,
         image_size: int = 36,
+        patient_id: int = 0,
         env_specific_params: dict = {},
         **kwargs,
     ) -> None:
-        super().__init__(name=name, observation_type=observation_type, action_type=action_type,
+        super().__init__(config=config, name=name, observation_type=observation_type, action_type=action_type,
                          max_tumor_size=max_tumor_size, max_time=max_time, initial_wt=initial_wt,
                          initial_mut=initial_mut, growth_rate_wt=growth_rate_wt, growth_rate_mut=growth_rate_mut,
                          death_rate_wt=death_rate_wt, death_rate_mut=death_rate_mut,
                          treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
                          treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
-                         normalize=normalize, normalize_to=normalize_to, image_size=image_size,
+                         normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
                          )
 
         # GridEnv specific

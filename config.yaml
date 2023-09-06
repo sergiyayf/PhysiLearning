@@ -44,7 +44,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -58,7 +58,7 @@ env:
   max_tumor_size: 4000
   max_time: 120
   initial_wt: 2700
-  initial_mut: [0,10]
+  initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
   growth_rate_mut: 0.438 # 0.0175
   death_rate_wt: 0.0029
@@ -70,6 +70,9 @@ env:
   normalize: 0
   normalize_to: 1000
   image_size: 84
+  patient_sampling:
+    enable: 1
+    patient_id: 53
 
   # LV environment settings
   LvEnv:
@@ -85,7 +88,6 @@ env:
     cpus_per_sim: 10
     transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
     transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
-    patient_id: 80
     xml:
       use_2D:
           parent_nodes: ['domain']
@@ -112,6 +114,12 @@ env:
   # LatticeBased environment settings
   GridEnv:
     cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random' # 'load'
+
+patients:
+  80:
+    initial_mut: 800
+  53:
+    initial_mut: 530
 
 # evaluation configuration
 eval:

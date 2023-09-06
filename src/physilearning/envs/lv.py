@@ -32,6 +32,7 @@ class LvEnv(BaseEnv):
 
     def __init__(
         self,
+        config: dict = None,
         name: str = 'LvEnv',
         observation_type: str = 'number',
         action_type: str = 'discrete',
@@ -50,6 +51,7 @@ class LvEnv(BaseEnv):
         normalize:  bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
+        patient_id: int = 0,
         env_specific_params: dict = {},
         **kwargs,
     ) -> None:
@@ -59,13 +61,13 @@ class LvEnv(BaseEnv):
             initial_wt = np.random.random_integers(low=0, high=int(0.99*max_tumor_size), size=1)[0]
         if self.mut_random:
             initial_mut = np.random.random_integers(low=0, high=int(0.99*max_tumor_size), size=1)[0]
-        super().__init__(name=name, observation_type=observation_type, action_type=action_type,
+        super().__init__(config=config, name=name, observation_type=observation_type, action_type=action_type,
                          max_tumor_size=max_tumor_size, max_time=max_time, initial_wt=initial_wt,
                          initial_mut=initial_mut, growth_rate_wt=growth_rate_wt, growth_rate_mut=growth_rate_mut,
                          death_rate_wt=death_rate_wt, death_rate_mut=death_rate_mut,
                          treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
                          treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
-                         normalize=normalize, normalize_to=normalize_to, image_size=image_size,
+                         normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
                          )
 
         # Normalizazion

@@ -36,6 +36,7 @@ class BaseEnv(Env):
     """
     def __init__(
         self,
+        config: dict = None,
         name: str = 'BaseEnv',
         observation_type: str = 'number',
         action_type: str = 'discrete',
@@ -54,8 +55,11 @@ class BaseEnv(Env):
         normalize: bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
+        patient_id: int = 0,
         **kwargs,
     ) -> None:
+        self.config = config
+        self.patient_id = patient_id
         # Normalization
         self.normalize = normalize
         self.max_tumor_size = max_tumor_size
@@ -132,8 +136,10 @@ class BaseEnv(Env):
         self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
         self.trajectory[:, 0] = self.state
 
+        # If patient sampling enabled set patient specific parameters
+        if self.config['env']['patient_sampling']['enable']:
+            self._set_patient_params()
         # Other
-
         self.done = False
         self.reward_shaping_flag = reward_shaping_flag
         self.fig, self.ax = plt.subplots()
@@ -143,7 +149,8 @@ class BaseEnv(Env):
         with open(yaml_file, 'r') as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
         env_name = config['env']['type']
-        return cls(observation_type=config['env']['observation_type'],
+        return cls(config=config,
+                   observation_type=config['env']['observation_type'],
                    action_type=config['env']['action_type'],
                    max_tumor_size=config['env']['max_tumor_size'],
                    max_time=config['env']['max_time'],
@@ -160,9 +167,17 @@ class BaseEnv(Env):
                    normalize=config['env']['normalize'],
                    normalize_to=config['env']['normalize_to'],
                    image_size=config['env']['image_size'],
+                   patient_id=config['env']['patient_sampling']['patient_id'],
                    env_specific_params=config['env'][env_name],
                    **kwargs,
                    )
+
+    def _set_patient_params(self):
+        """
+        Set parameters of presimulated patients
+        """
+        self.initial_mut = self.config['patients'][self.patient_id]['initial_mut']
+        return
 
     @classmethod
     def default_config(cls) -> dict:
