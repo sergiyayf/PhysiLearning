@@ -1,6 +1,8 @@
 from physilearning.envs import LvEnv
 import pytest
 import numpy as np
+import os
+import yaml
 
 
 def test_observation_space():
@@ -102,3 +104,22 @@ def test_step_image_obs():
     assert (a > b)
     assert (c > b)
 
+def test_patient_sampling():
+    np.random.seed(0)
+    os.chdir('/home/saif/Projects/PhysiLearning')
+    config_file = './tests/test_cfg.yaml'
+    with open(config_file, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
+    config['env']['patient_sampling']['patient_id'] = [80, 53]
+    env = LvEnv(config=config, patient_id=[80, 53])
+    patient_list = []
+    initial_mut_list = []
+    patient_list.append(env.patient_id)
+    initial_mut_list.append(env.initial_mut)
+    for i in range(10):
+        env.reset()
+        patient_list.append(env.patient_id)
+        initial_mut_list.append(env.initial_mut)
+    assert len(set(patient_list)) > 1
+    assert len(set(initial_mut_list)) > 1

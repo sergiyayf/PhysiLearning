@@ -73,12 +73,11 @@ class PcEnv(BaseEnv):
                          )
 
         # PhysiCell specific
-        if self.config['env']['patient_sampling']['enable']:
-            self._get_patient_chkpt_file(self.patient_id)
-
         self.domain_size = env_specific_params.get('domain_size', 1250)
         self.job_name = job_name
         self.port = port
+        if self.config['env']['patient_sampling']['enable']:
+            self._get_patient_chkpt_file(self.patient_id)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.transport_type = env_specific_params.get('transport_type', 'ipc://')
@@ -251,8 +250,9 @@ class PcEnv(BaseEnv):
     def reset(self):
 
         if self.config['env']['patient_sampling']['enable']:
-            self._choose_new_patient()
-            self._get_patient_chkpt_file(self.patient_id)
+            if len(self.patient_id_list) > 1:
+                self._choose_new_patient()
+                self._get_patient_chkpt_file(self.patient_id)
 
         time.sleep(3.0)
         self.context = zmq.Context()

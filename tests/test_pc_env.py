@@ -4,6 +4,8 @@ import pytest
 from physilearning.envs import PcEnv
 import yaml
 import numpy as np
+import os
+from physilearning.tools.xml_reader import CfgRead
 
 
 def test_env_creation():
@@ -84,3 +86,36 @@ def test_check_done():
     env.state = [0, 3, 0]
     done = env._check_done(burden_type='number', message="Type 0:3, Type 1:2,")
     assert done == True
+
+
+def test_sample_patients():
+    """
+    Test environment reset.
+
+    :param env_type: Environment type
+    """
+    np.random.seed(0)
+    os.chdir('/home/saif/Projects/PhysiLearning')
+    config_file = './tests/test_cfg.yaml'
+    with open(config_file, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+    config['env']['patient_sampling']['patient_id'] = [80, 53]
+    EnvClass = getattr(importlib.import_module('physilearning.envs'), 'PcEnv')
+    env = EnvClass(config=config, patient_id=[80, 53])
+    patients_list = []
+
+    # mock the _send_message and _start_slurm_physicell_job_step method to avoid sending messages to the server
+    with (mock.patch.object(env, '_send_message') as mock_send_message,
+            mock.patch.object(env, '_start_slurm_physicell_job_step') as mock_start_slurm_physicell_job_step,
+            mock.patch.object(env, '_receive_message') as mock_receive_message):
+            mock_receive_message.return_value = 'Type 0:12 t0_x: -200.0, 200.0, t0_y: -200.0, 200.0, Type 1:22 t1_x: -200.0, 200.0, t1_y: 200.0, -200.0, '
+            for i in range(10):
+                env.reset()
+                cfg_chkpt_file = env.config['patients'][env.patient_id]['PcEnv']['filename_chkpt']['value']
+                xml_reader = CfgRead('./simulations/PhysiCell_0/config/PhysiCell_settings.xml')
+                real_value = xml_reader.read_value(parent_nodes=['user_parameters'], parameter='filename_chkpt')
+                assert cfg_chkpt_file == real_value
+                patients_list.append(env.patient_id)
+
+    assert len(set(patients_list)) == 2
+

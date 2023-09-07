@@ -311,6 +311,9 @@ class GridEnv(BaseEnv):
         :return: (np.ndarray) the initial state
         """
         # reset time
+        if self.config['env']['patient_sampling']['enable']:
+            if len(self.patient_id_list) > 1:
+                self._choose_new_patient()
         self.time = 0
         # reset state
         self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)

@@ -51,7 +51,7 @@ class LvEnv(BaseEnv):
         normalize:  bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
-        patient_id: int = 0,
+        patient_id: int | list = 0,
         env_specific_params: dict = {},
         **kwargs,
     ) -> None:
@@ -202,6 +202,9 @@ class LvEnv(BaseEnv):
 
     def reset(self):
         self.real_step_count += 1
+        if self.config['env']['patient_sampling']['enable']:
+            if len(self.patient_id_list) > 1:
+                self._choose_new_patient()
 
         if self.wt_random:
             self.initial_wt = \

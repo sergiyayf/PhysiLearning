@@ -57,7 +57,7 @@ class BaseEnv(Env):
         normalize: bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
-        patient_id: int = 0,
+        patient_id: int | list = 0,
         **kwargs,
     ) -> None:
         self.config = config
@@ -146,8 +146,12 @@ class BaseEnv(Env):
         self.trajectory[:, 0] = self.state
 
         # If patient sampling enabled set patient specific parameters
-        if self.config['env']['patient_sampling']['enable']:
-            self._set_patient_params()
+        if self.config is not None:
+            if self.config['env']['patient_sampling']['enable']:
+                self._set_patient_params()
+        else:
+            self.config = {'env': {'patient_sampling': {'enable': False}}}
+
         # Other
         self.done = False
         self.reward_shaping_flag = reward_shaping_flag
@@ -200,7 +204,7 @@ class BaseEnv(Env):
         """
         Choose new patient from the list of patients
         """
-        self.patient_id = np.random.choice(self.config['env']['patient_sampling']['patient_list'])
+        self.patient_id = np.random.choice(self.config['env']['patient_sampling']['patient_id'])
         self._set_patient_params()
 
     @classmethod
