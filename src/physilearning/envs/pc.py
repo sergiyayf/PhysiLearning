@@ -72,13 +72,13 @@ class PcEnv(BaseEnv):
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
                          )
 
-        # PhysiCell specific for now
+        # PhysiCell specific
+        if self.config['env']['patient_sampling']['enable']:
+            self._get_patient_chkpt_file(self.patient_id)
+
         self.domain_size = env_specific_params.get('domain_size', 1250)
         self.job_name = job_name
         self.port = port
-        self.patient_id = None
-        self.patient_id_list = env_specific_params.get('patient_id', 0)
-        self._pick_patient(self.patient_id_list)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.transport_type = env_specific_params.get('transport_type', 'ipc://')
@@ -131,18 +131,16 @@ class PcEnv(BaseEnv):
         xml_reader = CfgRead(f'./simulations/PhysiCell_{self.port}/config/PhysiCell_settings.xml')
         xml_reader.write_new_param(parent_nodes=parent_nodes, parameter=parameter, value=value)
 
-    def _pick_patient(self, patient_id):
+    def _get_patient_chkpt_file(self, patient_id):
         """
-        Pick a patient to be simulated
+        Copy patient checkpoint file to the PhysiCell xml config
 
         """
-        if isinstance(patient_id, list):
-            self.patient_id = np.random.choice(patient_id)
-        else:
-            self.patient_id = patient_id
-        chkpt_filename = f'./../paper_presims/patient_{self.patient_id}/final'
-        self._rewrite_xml_parameter(parent_nodes=['user_parameters'], parameter='filename_chkpt',
-                                    value=chkpt_filename)
+        parent_nodes = self.config['patients'][patient_id]['PcEnv']['filename_chkpt']['parent_nodes']
+        parameter = 'filename_chkpt'
+        value = self.config['patients'][patient_id]['PcEnv']['filename_chkpt']['value']
+        self._rewrite_xml_parameter(parent_nodes=parent_nodes, parameter=parameter,
+                                    value=value)
 
     def _send_message(self, message: str) -> None:
         """
@@ -251,7 +249,11 @@ class PcEnv(BaseEnv):
         return obs, reward, done, info
 
     def reset(self):
-        self._pick_patient(self.patient_id_list)
+
+        if self.config['env']['patient_sampling']['enable']:
+            self._choose_new_patient()
+            self._get_patient_chkpt_file(self.patient_id)
+
         time.sleep(3.0)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)

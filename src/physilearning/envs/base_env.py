@@ -1,4 +1,6 @@
 # Base environment class for all environments
+import os
+
 import matplotlib as mpl
 import matplotlib.animation as animation
 from matplotlib import pyplot as plt
@@ -59,7 +61,14 @@ class BaseEnv(Env):
         **kwargs,
     ) -> None:
         self.config = config
-        self.patient_id = patient_id
+        if isinstance(patient_id, list):
+            self.patient_id_list = patient_id
+            self.patient_id = np.random.choice(patient_id)
+        elif isinstance(patient_id, int):
+            self.patient_id_list = [patient_id]
+            self.patient_id = patient_id
+        else:
+            raise ValueError("patient_id must be an integer or a list of integers")
         # Normalization
         self.normalize = normalize
         self.max_tumor_size = max_tumor_size
@@ -177,7 +186,22 @@ class BaseEnv(Env):
         Set parameters of presimulated patients
         """
         self.initial_mut = self.config['patients'][self.patient_id]['initial_mut']
+        self.initial_wt = self.config['patients'][self.patient_id]['initial_wt']
+        self.growth_rate = [self.config['patients'][self.patient_id]['growth_rate_wt'],
+                            self.config['patients'][self.patient_id]['growth_rate_mut']]
+        self.death_rate = [self.config['patients'][self.patient_id]['death_rate_wt'],
+                           self.config['patients'][self.patient_id]['death_rate_mut']]
+        self.death_rate_treat = [self.config['patients'][self.patient_id]['treat_death_rate_wt'],
+                                 self.config['patients'][self.patient_id]['treat_death_rate_mut']]
+
         return
+
+    def _choose_new_patient(self):
+        """
+        Choose new patient from the list of patients
+        """
+        self.patient_id = np.random.choice(self.config['env']['patient_sampling']['patient_list'])
+        self._set_patient_params()
 
     @classmethod
     def default_config(cls) -> dict:
@@ -241,4 +265,9 @@ class BaseEnv(Env):
 
 
 if __name__ == '__main__':
-    env = BaseEnv()
+    os.chdir('/home/saif/Projects/PhysiLearning')
+    with open('config.yaml', 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
+    config['env']['patient_sampling']['enable'] = False
+    env = BaseEnv(config=config)

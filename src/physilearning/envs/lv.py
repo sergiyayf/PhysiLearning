@@ -55,6 +55,7 @@ class LvEnv(BaseEnv):
         env_specific_params: dict = {},
         **kwargs,
     ) -> None:
+
         self.wt_random = isinstance(initial_wt, str)
         self.mut_random = isinstance(initial_mut, str)
         if self.wt_random:
