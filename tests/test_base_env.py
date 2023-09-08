@@ -23,7 +23,7 @@ def test_patient_id():
     env = BaseEnv(config=config, patient_id=80)
     assert env.patient_id == 80
     assert len(env.patient_id_list) == 1
-    env_list = BaseEnv(config=config, patient_id=[80, 53])
+    env_list = BaseEnv(config=config, patient_id=[80, 55])
     assert isinstance(env_list.patient_id, np.int64)
     assert len(env_list.patient_id_list) == 2
 
@@ -35,8 +35,8 @@ def test_patient_sampling():
     with open(config_file, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    config['env']['patient_sampling']['patient_id'] = [80, 53]
-    env = BaseEnv(config=config, patient_id=[80, 53])
+    config['env']['patient_sampling']['patient_id'] = [80, 55]
+    env = BaseEnv(config=config, patient_id=[80, 55])
     patient_ids = []
     for _ in range(100):
         env._choose_new_patient()

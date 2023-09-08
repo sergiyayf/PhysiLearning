@@ -136,7 +136,6 @@ class Evaluation:
             obs = self.env.reset()
             done = False
             score = 0
-
             while not done:
                 if fixed_therapy:
                     action = fixed_at(self.env, **fixed_therapy_kwargs)

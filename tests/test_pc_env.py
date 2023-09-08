@@ -99,9 +99,9 @@ def test_sample_patients():
     config_file = './tests/test_cfg.yaml'
     with open(config_file, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-    config['env']['patient_sampling']['patient_id'] = [80, 53]
+    config['env']['patient_sampling']['patient_id'] = [80, 55]
     EnvClass = getattr(importlib.import_module('physilearning.envs'), 'PcEnv')
-    env = EnvClass(config=config, patient_id=[80, 53])
+    env = EnvClass(config=config, patient_id=[80, 55])
     patients_list = []
 
     # mock the _send_message and _start_slurm_physicell_job_step method to avoid sending messages to the server

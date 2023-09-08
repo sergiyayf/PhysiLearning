@@ -46,7 +46,7 @@ env:
   # general env settings
   type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 1
+  wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -72,7 +72,7 @@ env:
   image_size: 84
   patient_sampling:
     enable: 1
-    patient_id: 53
+    patient_id: 1 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -115,8 +115,78 @@ env:
   GridEnv:
     cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random' # 'load'
 
+# evaluation configuration
+eval:
+  most_recent: 0
+  from_file: 0
+  path: './'
+  model_prefix: 'lv_2408_no_resistant_rew_6'
+  step_to_load: '_best_reward'
+  save_name: 'mtd_lv_sampling_p1'
+  # evaluation settings
+  fixed_AT_protocol: 1
+  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.50
+  num_episodes: 100
+  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+
+
 # Predefined parameters for particular patients
 patients:
+  1:
+    initial_wt: 2700
+    initial_mut: 0
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_1/final'
+
+  4:
+    initial_wt: 2700
+    initial_mut: 1
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_4/final'
+
+  55:
+    initial_wt: 2700
+    initial_mut: 1
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_55/final'
+
   80:
     initial_wt: 2700
     initial_mut: 1
@@ -133,9 +203,9 @@ patients:
     PcEnv:
       filename_chkpt:
         parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_80_new_sims/final'
+        value: './../paper_presims/patient_80/final'
 
-  53:
+  93:
     initial_wt: 2700
     initial_mut: 1
     growth_rate_wt: 0.29 # 0.0175
@@ -151,20 +221,4 @@ patients:
     PcEnv:
       filename_chkpt:
         parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_50/final'
-
-# evaluation configuration
-eval:
-  most_recent: 0
-  from_file: 1
-  path: './'
-  model_prefix: 'lv_2408_no_resistant_rew_6'
-  step_to_load: '_best_reward'
-  save_name: 'rl-lv'
-  # evaluation settings
-  fixed_AT_protocol: 0
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.50
-  num_episodes: 100
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
-
+        value: './../paper_presims/patient_93/final'

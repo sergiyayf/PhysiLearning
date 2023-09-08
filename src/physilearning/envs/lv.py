@@ -112,26 +112,30 @@ class LvEnv(BaseEnv):
 
         elif self.image_sampling_type == 'dense':
 
-            wt_x, wt_y = [], []
-            mut_x, mut_y = [], []
-            radius = np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/2.2*np.sqrt(2)+1)
+            radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/2.6*np.sqrt(2)+1))
 
-            while len(wt_x) < num_wt_to_sample:
-                x = np.random.randint(0, self.image_size)
-                y = np.random.randint(0, self.image_size)
-                if np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2) < radius:
-                    # check if pair is already in the list
-                    if (x,y) not in zip(wt_x, wt_y):
-                        wt_x.append(x)
-                        wt_y.append(y)
+            x_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
+            y_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
+            xx, yy = np.meshgrid(x_range, y_range)
+            distances = (xx - self.image_size/2) ** 2 + (yy - self.image_size/2) ** 2
 
-            while len(mut_x) < num_mut_to_sample:
-                x = np.random.randint(0, self.image_size)
-                y = np.random.randint(0, self.image_size)
-                if np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2) < radius:
-                    if (x, y) not in zip(wt_x, wt_y):
-                        mut_x.append(x)
-                        mut_y.append(y)
+            # Create a mask for the coordinates that fall within the circular region
+            mask = distances <= radius ** 2
+            wt_x, wt_y = xx[mask], yy[mask]
+
+            # remove some cells until we have the right number
+            random_indices = np.random.randint(len(wt_x), size=int(num_wt_to_sample))
+            wt_x, wt_y = wt_x[random_indices], wt_y[random_indices]
+
+            # place resistant cells in the remaining space inside the circle
+            mut_x, mut_y = xx[mask], yy[mask]
+            # remove the indices that are already occupied by sensitive cells
+            mut_x, mut_y = np.delete(mut_x, random_indices), np.delete(mut_y, random_indices)
+
+            random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
+            mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
+
+
         else:
             raise ValueError('Unknown image sampling type')
         # populate the image
@@ -171,7 +175,7 @@ class LvEnv(BaseEnv):
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
 
-            if self.time >= self.max_time-1 or self.burden >= self.threshold_burden or self.burden <= 0:
+            if self.time >= self.max_time-1 or self.burden >= self.threshold_burden:
                 done = True
                 break
             else:
@@ -267,7 +271,7 @@ class LvEnv(BaseEnv):
                 (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
                 self.death_rate[i] - self.death_rate_treat[i] * treat)
 
-            if new_pop_size < 0.1*self.normalization_factor:
+            if new_pop_size < 0.5*self.normalization_factor:
                 new_pop_size = 0
         else:
             raise NotImplementedError

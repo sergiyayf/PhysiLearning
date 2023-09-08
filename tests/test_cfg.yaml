@@ -68,8 +68,8 @@ env:
   normalize_to: 1000
   image_size: 84
   patient_sampling:
-    enable: 1
-    patient_id: 53
+    enable: 0
+    patient_id: 80
 
   # LV environment settings
   LvEnv:
@@ -111,44 +111,6 @@ env:
   # LatticeBased environment settings
   GridEnv:
     cell_positioning: 'load' # 'surround_mutant' # 'random' # 'load'
-# Predefined parameters for particular patients
-patients:
-  80:
-    initial_wt: 2700
-    initial_mut: 1
-    growth_rate_wt: 0.29 # 0.0175
-    growth_rate_mut: 0.438 # 0.0175
-    death_rate_wt: 0.0029
-    death_rate_mut: 0.00438
-    treat_death_rate_wt: 0.397 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 6500
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_80_new_sims/final'
-
-  53:
-    initial_wt: 2700
-    initial_mut: 0
-    growth_rate_wt: 0.29 # 0.0175
-    growth_rate_mut: 0.438 # 0.0175
-    death_rate_wt: 0.0029
-    death_rate_mut: 0.00438
-    treat_death_rate_wt: 0.397 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 6500
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_50/final'
-
 
 # evaluation configuration
 eval:
@@ -165,3 +127,95 @@ eval:
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
+
+# Predefined parameters for particular patients
+patients:
+  1:
+    initial_wt: 2700
+    initial_mut: 0
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_1/final'
+
+  4:
+    initial_wt: 2700
+    initial_mut: 4
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_4/final'
+
+  55:
+    initial_wt: 2700
+    initial_mut: 12
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_55/final'
+
+  80:
+    initial_wt: 2700
+    initial_mut: 1
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_80/final'
+
+  93:
+    initial_wt: 2700
+    initial_mut: 1
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_93/final'

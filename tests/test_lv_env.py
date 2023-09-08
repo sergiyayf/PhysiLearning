@@ -111,8 +111,8 @@ def test_patient_sampling():
     with open(config_file, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    config['env']['patient_sampling']['patient_id'] = [80, 53]
-    env = LvEnv(config=config, patient_id=[80, 53])
+    config['env']['patient_sampling']['patient_id'] = [80, 55]
+    env = LvEnv(config=config, patient_id=[80, 55])
     patient_list = []
     initial_mut_list = []
     patient_list.append(env.patient_id)

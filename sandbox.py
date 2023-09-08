@@ -80,13 +80,22 @@ ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red'
 #fig.savefig('all_treatments.pdf', transparent=True)
 
 # plot one trajectory of aT scenario
-df = pd.read_hdf('Evaluations/LvEnvEvallv_2408_no_resistant_rew_6.h5', key='run_40')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
+#
+# df = pd.read_hdf('Evaluations/LvEnvEvalmtd_lv_sampling_p1.h5', key='run_40')
+# fig, ax = plt.subplots()
+# ax.plot(df.index, df['Type 0'], label='Type 0')
+# ax.plot(df.index, df['Type 1'], label='Type 1')
+# ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
+# ax.legend()
+# ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
 
+for i in range(20):
+    df = pd.read_hdf('Evaluations/lv_on_pc_2108_combined.h5', key='run_'+str(i))
+    fig, ax = plt.subplots()
+    ax.plot(df.index, df['Type 0'], label='Type 0')
+    ax.plot(df.index, df['Type 1'], label='Type 1')
+    ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
+    ax.legend()
+    ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
 
 plt.show()
