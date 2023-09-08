@@ -68,7 +68,7 @@ env:
   normalize_to: 1000
   image_size: 84
   patient_sampling:
-    enable: 0
+    enable: 1
     patient_id: 80
 
   # LV environment settings
