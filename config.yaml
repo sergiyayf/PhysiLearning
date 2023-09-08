@@ -3,7 +3,7 @@ global:
   machine: 'mela' # 'mela' # 'raven'
   evaluate_after: 0
 
-# job configuration
+# job configuration important for training
 job:
   nodes: 1
   ntasks: 1
@@ -35,7 +35,7 @@ learning:
           vf: [32, 32]
     total_timesteps: 10000
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'Lv_image'
+    model_save_prefix: 'Lv_image_patient_sampling_test'
     load:
       enable_loading: 0
       last_model: 0
@@ -46,7 +46,7 @@ env:
   # general env settings
   type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 0
+  wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -66,13 +66,13 @@ env:
   treat_death_rate_wt: 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 0  # reward shaping flag for some predefined rewards
+  reward_shaping: 6  # reward shaping flag for some predefined rewards
   normalize: 0
   normalize_to: 1000
   image_size: 84
   patient_sampling:
     enable: 1
-    patient_id: 1 # [1, 4, 55, 80, 93]
+    patient_id: [1, 80] # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -134,7 +134,7 @@ eval:
 # Predefined parameters for particular patients
 patients:
   1:
-    initial_wt: 2700
+    initial_wt: 2766
     initial_mut: 0
     growth_rate_wt: 0.29 # 0.0175
     growth_rate_mut: 0.438 # 0.0175
@@ -152,7 +152,7 @@ patients:
         value: './../paper_presims/patient_1/final'
 
   4:
-    initial_wt: 2700
+    initial_wt: 2961
     initial_mut: 1
     growth_rate_wt: 0.29 # 0.0175
     growth_rate_mut: 0.438 # 0.0175
@@ -170,8 +170,8 @@ patients:
         value: './../paper_presims/patient_4/final'
 
   55:
-    initial_wt: 2700
-    initial_mut: 1
+    initial_wt: 2558
+    initial_mut: 3
     growth_rate_wt: 0.29 # 0.0175
     growth_rate_mut: 0.438 # 0.0175
     death_rate_wt: 0.0029
@@ -188,7 +188,7 @@ patients:
         value: './../paper_presims/patient_55/final'
 
   80:
-    initial_wt: 2700
+    initial_wt: 2761
     initial_mut: 1
     growth_rate_wt: 0.29 # 0.0175
     growth_rate_mut: 0.438 # 0.0175
@@ -206,7 +206,7 @@ patients:
         value: './../paper_presims/patient_80/final'
 
   93:
-    initial_wt: 2700
+    initial_wt: 2807
     initial_mut: 1
     growth_rate_wt: 0.29 # 0.0175
     growth_rate_mut: 0.438 # 0.0175
