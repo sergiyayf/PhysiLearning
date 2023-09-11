@@ -456,3 +456,47 @@ void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
 { return; } 
+
+std::string get_relevant_cell_info() {
+    // try to change cell position to string;
+				std::string data{"Cells: "};
+				std::string IDs{"ID: "};
+				std::string pos_x{"x: "};
+				std::string pos_y{"y: "};
+				std::string pos_z{"z: "};
+				std::string barcode{"barcode: "};
+				std::string cell_type{"type: "};
+				std::string elapsed_time_in_phase{"elapsed_time_in_phase: "};
+
+					for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) {
+					    IDs.append(std::to_string((*all_cells)[cells_it]->ID));
+					    IDs.append(",");
+					    pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
+					    pos_x.append(",");
+					    pos_y.append(std::to_string((*all_cells)[cells_it]->position[1]));
+					    pos_y.append(",");
+					    pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
+					    pos_z.append(",");
+					    barcode.append(std::to_string((*all_cells)[cells_it]->parent_ID));
+					    barcode.append(",");
+					    cell_type.append(std::to_string((*all_cells)[cells_it]->type));
+					    cell_type.append(",");
+
+				}
+                data.append(IDs);
+                data.append(";");
+                data.append(pos_x);
+                data.append(";");
+                data.append(pos_y);
+                data.append(";");
+                data.append(pos_z);
+                data.append(";");
+                data.append(barcode);
+                data.append(";");
+                data.append(cell_type);
+                data.append(";");
+                data.append(elapsed_time_in_phase);
+                data.append(";");
+
+return data;
+}

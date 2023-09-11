@@ -92,5 +92,6 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt );
 void custom_function( Cell* pCell, Phenotype& phenotype , double dt );
 
 void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, double dt);
-void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt ); 
+void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt );
 
+std::string get_relevant_cell_info(void);
