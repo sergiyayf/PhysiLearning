@@ -8,7 +8,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 10
+  cpus-per-task: 4
   time: '14:00:00'
   agent_buffer: 1
   recurrent:

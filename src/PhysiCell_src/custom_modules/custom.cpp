@@ -481,6 +481,8 @@ std::string get_relevant_cell_info() {
 					    barcode.append(",");
 					    cell_type.append(std::to_string((*all_cells)[cells_it]->type));
 					    cell_type.append(",");
+					    elapsed_time_in_phase.append(std::to_string((*all_cells)[cells_it]->phenotype.cycle.data.elapsed_time_in_phase));
+					    elapsed_time_in_phase.append(",");
 
 				}
                 data.append(IDs);
@@ -497,6 +499,7 @@ std::string get_relevant_cell_info() {
                 data.append(";");
                 data.append(elapsed_time_in_phase);
                 data.append(";");
+                data.append("end:");
 
 return data;
 }
