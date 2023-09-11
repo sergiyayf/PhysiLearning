@@ -44,7 +44,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -56,7 +56,7 @@ env:
   observation_type: 'multiobs' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   max_tumor_size: 4000
-  max_time: 120
+  max_time: 10 # 120
   initial_wt: 2700
   initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
