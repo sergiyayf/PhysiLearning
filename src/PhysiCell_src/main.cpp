@@ -220,6 +220,8 @@ int main( int argc, char* argv[] )
 					// get relevant cell data and submit it to pub socket
 					if (parameters.bools("enable_barcode_communication")){
                         std::string cell_data = get_relevant_cell_info();
+                        std::string cur_time = "Current_time: " + std::to_string(PhysiCell_globals.current_time);
+                        cell_data = cur_time.append(cell_data);
                         zmq::message_t message(cell_data.size());
                         memcpy(message.data(), cell_data.c_str(), cell_data.size());
                         cell_data_socket.send(message, zmq::send_flags::none);

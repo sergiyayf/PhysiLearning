@@ -1,6 +1,7 @@
 import zmq
 import re
 import pandas as pd
+import os
 
 class PhysiCellDataListener:
     """
@@ -66,11 +67,22 @@ class PhysiCellDataListener:
         else:
             raise ValueError(f'Invalid type: {type}')
 
+    def write_to_hdf(self, message: str, path: str):
+        """
+        Writes the dataframe to an hdf file.
+        """
+
+        time = re.findall(r'\d+', message)[0]
+        df = self._message_to_df(message)
+        df.to_hdf(path, f'time_{time}')
+
+        return
 
 
 if __name__ == '__main__':
+    os.chdir('/home/saif/Projects/PhysiLearning')
     listener = PhysiCellDataListener()
     while True:
         message = listener.get_data()
-        df = listener._message_to_df(message)
-        print(df)
+        listener.write_to_hdf(message=message, path='test_data.h5')
+        print(listener._message_to_df(message))
