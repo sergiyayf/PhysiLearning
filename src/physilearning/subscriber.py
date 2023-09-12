@@ -33,20 +33,19 @@ class PhysiCellDataListener:
         Converts the message to a dataframe.
         """
         df = pd.DataFrame()
-        id_list = self._find_parameter(parameter='ID', next_parameter='x', type='int', message=message)
-        x_pos = self._find_parameter(parameter='x', next_parameter='y', type='float', message=message)
-        y_pos = self._find_parameter(parameter='y', next_parameter='z', type='float', message=message)
-        z_pos = self._find_parameter(parameter='z', next_parameter='barcode', type='float', message=message)
-        barcode = self._find_parameter(parameter='barcode', next_parameter='type', type='int', message=message)
-        type = self._find_parameter(parameter='type', next_parameter='elapsed_time_in_phase', type='int', message=message)
-        elapsed_time_in_phase = self._find_parameter(parameter='elapsed_time_in_phase', next_parameter='end', type='float', message=message)
-        df['ID'] = id_list
-        df['x'] = x_pos
-        df['y'] = y_pos
-        df['z'] = z_pos
-        df['barcode'] = barcode
-        df['type'] = type
-        df['elapsed_time_in_phase'] = elapsed_time_in_phase
+        # find all the words in the message
+        word_pattern = r'\w+:'
+        words = re.findall(word_pattern, message)
+
+        # loop through the words and find the parameters
+        for word in words:
+            parameter = word[:-1]
+            next_parameter = words[words.index(word)+1][:-1]
+            if next_parameter == 'end':
+                break
+            else:
+                df[parameter] = self._find_parameter(
+                    parameter=parameter, next_parameter=next_parameter, type='float', message=message)
 
         return df
 
@@ -59,17 +58,16 @@ class PhysiCellDataListener:
         end_idx = message.find(f',;{next_parameter}:')
         truncated_message = message[start_idx:end_idx]
         list_of_str_params = truncated_message.split(',')
-
-        if type == 'int':
+        integer_params = ['ID', 'barcode', 'type']
+        if parameter in integer_params:
             return [int(x) for x in list_of_str_params]
-        elif type == 'float':
-            return [float(x) for x in list_of_str_params]
         else:
-            raise ValueError(f'Invalid type: {type}')
+            return [float(x) for x in list_of_str_params]
+
 
     def write_to_hdf(self, message: str, path: str):
         """
-        Writes the dataframe to an hdf file.
+        Writes the dataframe to hdf file.
         """
 
         time = re.findall(r'\d+', message)[0]

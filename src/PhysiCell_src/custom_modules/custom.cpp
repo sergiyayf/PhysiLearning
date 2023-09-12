@@ -416,6 +416,9 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 			pCell->convert_to_cell_definition(*cell_definitions_by_index[ind_resistant]);
 			parameters.ints("number_of_denovo_mutations") += 1;
 			pCell->clone_ID = parameters.ints("number_of_denovo_mutations");
+			std::bitset<64> temp_bitset = pCell->barcode;
+	        temp_bitset.set( 3*(pCell->number_of_divisions-1)+2, 1 );
+	        pCell->barcode = temp_bitset;
 		}
 	}
 	
@@ -459,7 +462,7 @@ void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& 
 
 std::string get_relevant_cell_info() {
     // try to change cell position to string;
-				std::string data{"Cells: "};
+				std::string data{"<Cells> \n"};
 				std::string IDs{"ID: "};
 				std::string pos_x{"x: "};
 				std::string pos_y{"y: "};
@@ -477,7 +480,8 @@ std::string get_relevant_cell_info() {
 					    pos_y.append(",");
 					    pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
 					    pos_z.append(",");
-					    barcode.append(std::to_string((*all_cells)[cells_it]->parent_ID));
+					    barcode.append((*all_cells)[cells_it]->barcode.to_string());
+//                      barcode.append(std::to_string((*all_cells)[cells_it]->parent_ID));
 					    barcode.append(",");
 					    cell_type.append(std::to_string((*all_cells)[cells_it]->type));
 					    cell_type.append(",");
