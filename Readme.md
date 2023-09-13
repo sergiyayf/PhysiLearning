@@ -3,9 +3,7 @@
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
 ![version](https://img.shields.io/badge/version-0.1.6-blue)
 
-<center>
-    <img src="data/images/RL_treatment.gif" width="250" height="250" />
-</center>
+<img src="data/images/RL_treatment.gif" width="250" height="250" />
 
 PhysiLearning is a project in applying Reinforcement Learning to improve evolution based therapies
 considering physical cell-cell interactions. This repository is mainly build on two great open source platforms:
