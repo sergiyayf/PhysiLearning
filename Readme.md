@@ -4,7 +4,7 @@
 ![version](https://img.shields.io/badge/version-0.1.6-blue)
 
 <center>
-![Reinforcement Learning Treatment](./data/images/RL_treatment.gif =250x250)
+    <img src="data/images/RL_treatment.gif" width="250" height="250" />
 </center>
 
 PhysiLearning is a project in applying Reinforcement Learning to improve evolution based therapies
