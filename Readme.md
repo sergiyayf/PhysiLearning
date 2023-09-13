@@ -3,6 +3,9 @@
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
 ![version](https://img.shields.io/badge/version-0.1.6-blue)
 
+
+![Reinforcement Learning Treatment](/data/images/RL_treatment.gif)
+
 PhysiLearning is a project in applying Reinforcement Learning to improve evolution based therapies
 considering physical cell-cell interactions. This repository is mainly build on two great open source platforms:
 [PhysiCell](https://github.com/MathCancer/PhysiCell) - for simulating tumor growth, and [Stable Baselines 3](https://github.com/DLR-RM/stable-baselines3) - for reinforcement learning.
