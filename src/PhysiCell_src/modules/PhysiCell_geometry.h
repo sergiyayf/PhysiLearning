@@ -71,6 +71,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <bitset>
 
 #include "../core/PhysiCell.h"
 #include "./PhysiCell_settings.h"

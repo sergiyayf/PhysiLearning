@@ -507,7 +507,7 @@ void load_cells_csv( std::string filename )
 
 	return; 
 }
-    void load_cells_physicell( std::string outputname ) {
+void load_cells_physicell( std::string outputname ) {
     Cell* pC;
     pugi::xml_document checkpointing_document;
     pugi::xml_node physicell_checkpoint_root;
@@ -581,6 +581,8 @@ void load_cells_csv( std::string filename )
                
 	       	if (value == "ID") {
                     pC->ID =  B[index][i];
+                    std::bitset<128> bits(B[index][i]);
+                    pC->barcode = bits;
                 }
 		// If the code also includes parent_ID for lineage tracking uncomment       
 		//else if (value == "parent_ID") {
@@ -1011,6 +1013,23 @@ void load_minimal_cells_physicell( std::string outputname ) {
 
 	       	if (value == "ID") {
                     pC->ID =  B[index][i];
+                    std::bitset<128> bits(B[index][i]);
+
+                    // find leftmost bit
+                    int left_most_bit = 0;
+                    for (int j = 0; j < 128; j++) {
+                        if (bits[j]) {
+                            left_most_bit = j;
+                        }
+                    }
+                    // save leftmost bit to custom data
+                    pC->custom_data["left_most_bit"] = left_most_bit+6;
+
+                    for (int j = 0; j < 4; j++) {
+                        bits.set(left_most_bit+2+j);
+                    }
+
+                    pC->barcode = bits;
                 }
 		// If the code also includes parent_ID for lineage tracking uncomment
 		//else if (value == "parent_ID") {

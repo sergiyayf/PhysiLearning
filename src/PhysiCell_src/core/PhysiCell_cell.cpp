@@ -639,10 +639,11 @@ Cell* Cell::divide( )
 	child->parent_ID = this->ID;
 	child->clone_ID = this->clone_ID;
 
-    std::bitset<64> temp_bitset_child_1 = this->barcode;
-	std::bitset<64> temp_bitset_child_2 = this->barcode;
-	temp_bitset_child_1.set( 3*this->number_of_divisions, 1 );
-	temp_bitset_child_2.set( 3*this->number_of_divisions+1, 1 );
+    int left_most_initial_bit = this->custom_data["left_most_bit"];
+    std::bitset<128> temp_bitset_child_1 = this->barcode;
+	std::bitset<128> temp_bitset_child_2 = this->barcode;
+	temp_bitset_child_1.set( 3*this->number_of_divisions+left_most_initial_bit, 1 );
+	temp_bitset_child_2.set( 3*this->number_of_divisions+1+left_most_initial_bit, 1 );
     this->barcode = temp_bitset_child_1;
     child->barcode = temp_bitset_child_2;
 	this->number_of_divisions++;
