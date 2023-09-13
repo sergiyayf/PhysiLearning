@@ -42,6 +42,8 @@ class PhysiCellDataListener:
             parameter = word[:-1]
             next_parameter = words[words.index(word)+1][:-1]
             if next_parameter == 'end':
+                df[parameter] = self._find_parameter(
+                    parameter=parameter, next_parameter=next_parameter, type='float', message=message)
                 break
             else:
                 df[parameter] = self._find_parameter(
