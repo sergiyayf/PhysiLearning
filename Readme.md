@@ -78,6 +78,19 @@ pytest tests/test_evaluate.py
 
 ## Changelog
 
+#### 0.2.0 Major changes
+- Added support for unique cell barcodes that allow full tree reconstruction
+- Implemented PhysiCellDataListener in PUB/SUB communication pattern that listens to PhysiCell data communication channel
+and saves communicated data that includes binary barcodes to one hdf5 file 
+- Improved the speed of LV dense image sampling 
+- Added sampling of different patients with predefined tumor parameters inside of environments
+- Created a cohort of virtual patients to sample from
+
+#### 0.2.0 Minor changes
+- Added 6th reward flag for reward that takes size of the tumor into account 
+- Updated documentation
+- Added a gif to the Readme file
+
 #### 0.1.6 Major changes
 - Fully migrateted environment construction to BaseEnv class
 - Cleaned up config.yaml file, and moved most of the environment parameters outside of the specific environments
