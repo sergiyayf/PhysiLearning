@@ -25,6 +25,7 @@ class PhysiCellDataListener:
         self.socket.setsockopt(zmq.SUBSCRIBE, b'')
         self.socket.connect(f'ipc://{self.transport_address}{self.jobid}{self.port}_cell_data')
         self.message = None
+        self.run = 0
 
     def get_data(self):
         """
@@ -79,7 +80,10 @@ class PhysiCellDataListener:
 
         time = re.findall(r'\d+', message)[0]
         df = self._message_to_df(message)
-        df.to_hdf(path, f'time_{time}')
+        if str(time) == '0':
+            self.run += 1
+        df.to_hdf(path, f'run_{self.run}/time_{time}')
+
 
         return
 
@@ -87,16 +91,13 @@ class PhysiCellDataListener:
 @click.option('--jobid', default=0, help='ID of the job')
 @click.option('--port', default=0, help='ID of the task')
 def main(jobid, port):
+
     listener = PhysiCellDataListener(jobid=jobid, port=port)
+    print("Listener initiated")
     while True:
         message = listener.get_data()
-        listener.write_to_hdf(message=message, path='test_data.h5')
+        listener.write_to_hdf(message=message, path=f'pcdl_data_job_{jobid}_port_{port}.h5')
         print(listener._message_to_df(message))
 
 if __name__ == '__main__':
-    os.chdir('/home/saif/Projects/PhysiLearning')
-    listener = PhysiCellDataListener()
-    while True:
-        message = listener.get_data()
-        listener.write_to_hdf(message=message, path='test_data.h5')
-        print(listener._message_to_df(message))
+    main()

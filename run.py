@@ -129,8 +129,8 @@ def simulate_patients(n_sims):
     """
     click.echo('Simulating patients')
     if n_sims < 10:
-        eval_command = f'cd ./scripts && sbatch --nodes=1 --cpus-per-task=72 --ntasks-per-node=1' \
-                       f'--export=ARG1,ARG2 simulate_patients_job.sh 0 {n_sims}'
+        eval_command = f'cd ./scripts && sbatch --nodes=1 --cpus-per-task=9 --ntasks-per-node=1 ' \
+                       f'--export=ALL,ARG1,ARG2 simulate_patients_job.sh 0 {n_sims}'
         subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
     else:

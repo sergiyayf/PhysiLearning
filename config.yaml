@@ -85,7 +85,7 @@ env:
   # note this is not yet functional
   PcEnv:
     domain_size: 1250
-    cpus_per_sim: 10
+    cpus_per_sim: 1
     transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
     transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
     xml:
@@ -125,7 +125,7 @@ eval:
   save_name: 'mtd_lv_sampling_p1'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.50
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'

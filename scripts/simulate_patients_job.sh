@@ -10,7 +10,7 @@
 # Number of nodes and MPI tasks per node:
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --mem=2000MB
+#SBATCH --mem=10000MB
 
 #SBATCH --mail-type=none
 #SBATCH --mail-user=serhii.aif@mpl.mpg.de
@@ -34,11 +34,17 @@ export OMP_PLACES=threads
 arg1=$1
 arg2=$2
 
-arg1=$($(arg1))
-arg2=$($(arg2))
 for ((i=$arg1; i<$arg2; i++)); do
-    srun --ntasks=1 --exclusive --cpus-per-task=1 --mem-per-cpu=300  python3 ./scripts/simulate_patients.py --jobid=${SLURM_JOBID} --port=$i &
-    srun --ntasks=1 --exclusive --cpus-per-task=1 --mem-per-cpu=300  python3 ./scripts/pcdl.py --jobid=${SLURM_JOBID} --port=$i &
+    srun --ntasks=1 --exclusive --cpus-per-task=1 --mem-per-cpu=300  python ./scripts/simulate_patients.py --jobid=${SLURM_JOBID} --port=$i &
+    pid_array_j1[$i]=$!
+    srun --ntasks=1 --exclusive --cpus-per-task=1 --mem-per-cpu=300  python ./src/physilearning/pcdl.py --jobid=${SLURM_JOBID} --port=$i &
+    pid_array_j2[$i]=$!
 done;
 
-wait
+for ((i=$arg1; i<$arg2; i++)); do
+    wait ${pid_array_j1[$i]}
+    echo "Simulation job with PID ${pid_array_j1[$i]} has finished"
+    echo "Killing pcdl job with PID ${pid_array_j2[$i]}"
+    kill -TERM ${pid_array_j2[$i]}
+done;
+
