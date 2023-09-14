@@ -123,13 +123,21 @@ def train():
 
 
 @cli.command()
-def simulate_patients():
+@click.option('--n_sims', default=1, help='number of simulations to run')
+def simulate_patients(n_sims):
     """Submit a job to simulate virtual patients patients
     """
     click.echo('Simulating patients')
-    eval_command = 'cd ./scripts && sbatch --nodes=1 --cpus-per-task=10 --ntasks=1 simulate_patients_job.sh'
-    subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
+    if n_sims < 10:
+        eval_command = f'cd ./scripts && sbatch --nodes=1 --cpus-per-task=72 --ntasks-per-node=1' \
+                       f'--export=ARG1,ARG2 simulate_patients_job.sh 0 {n_sims}'
+        subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
+    else:
+        for i in range(n_sims // 10):
+            eval_command = f'cd ./scripts && sbatch --nodes=1 --cpus-per-task=72 --ntasks-per-node=1' \
+                           f'--export=ARG1,ARG2 simulate_patients_job.sh {i * 10} {i * 10 + 10}'
+            subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
 @cli.command()
 def evaluate():

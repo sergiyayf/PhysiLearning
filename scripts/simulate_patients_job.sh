@@ -31,8 +31,14 @@ export OMP_PLACES=threads
 # Run the program:
 #  the environment variable $SLURM_ARRAY_TASK_ID holds the index of the job array and
 #  can be used to discriminate between individual elements of the job array
-for i in {0..1}; do
+arg1=$1
+arg2=$2
+
+arg1=$($(arg1))
+arg2=$($(arg2))
+for ((i=$arg1; i<$arg2; i++)); do
     srun --ntasks=1 --exclusive --cpus-per-task=1 --mem-per-cpu=300  python3 ./scripts/simulate_patients.py --jobid=${SLURM_JOBID} --port=$i &
+    srun --ntasks=1 --exclusive --cpus-per-task=1 --mem-per-cpu=300  python3 ./scripts/pcdl.py --jobid=${SLURM_JOBID} --port=$i &
 done;
 
 wait

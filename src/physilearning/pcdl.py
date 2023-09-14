@@ -2,6 +2,8 @@ import zmq
 import re
 import pandas as pd
 import os
+import click
+import yaml
 
 class PhysiCellDataListener:
     """
@@ -11,13 +13,17 @@ class PhysiCellDataListener:
     def __init__(
         self,
         port=5556,
+        jobid=0,
     ):
-
+        with open('config.yaml', 'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+        self.transport_address = config['env']['PcEnv']['transport_address']
         self.port = port
+        self.jobid = jobid
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
         self.socket.setsockopt(zmq.SUBSCRIBE, b'')
-        self.socket.connect(f'ipc:///tmp/0_cell_data')
+        self.socket.connect(f'ipc://{self.transport_address}{self.jobid}{self.port}_cell_data')
         self.message = None
 
     def get_data(self):
@@ -43,16 +49,15 @@ class PhysiCellDataListener:
             next_parameter = words[words.index(word)+1][:-1]
             if next_parameter == 'end':
                 df[parameter] = self._find_parameter(
-                    parameter=parameter, next_parameter=next_parameter, type='float', message=message)
+                    parameter=parameter, next_parameter=next_parameter, message=message)
                 break
             else:
                 df[parameter] = self._find_parameter(
-                    parameter=parameter, next_parameter=next_parameter, type='float', message=message)
+                    parameter=parameter, next_parameter=next_parameter, message=message)
 
         return df
 
-    def _find_parameter(self, parameter: str = 'ID', next_parameter: str = 'x',
-                        type: str = 'int', message: str = None):
+    def _find_parameter(self, parameter: str = 'ID', next_parameter: str = 'x', message: str = None):
         """
         Finds a parameter in the message.
         """
@@ -78,6 +83,15 @@ class PhysiCellDataListener:
 
         return
 
+@click.command()
+@click.option('--jobid', default=0, help='ID of the job')
+@click.option('--port', default=0, help='ID of the task')
+def main(jobid, port):
+    listener = PhysiCellDataListener(jobid=jobid, port=port)
+    while True:
+        message = listener.get_data()
+        listener.write_to_hdf(message=message, path='test_data.h5')
+        print(listener._message_to_df(message))
 
 if __name__ == '__main__':
     os.chdir('/home/saif/Projects/PhysiLearning')

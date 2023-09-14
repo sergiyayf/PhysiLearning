@@ -81,7 +81,7 @@ class PcEnv(BaseEnv):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.transport_type = env_specific_params.get('transport_type', 'ipc://')
-        self.transport_address = env_specific_params.get('transport_address', f'/tmp/')+f'{self.port}'
+        self.transport_address = env_specific_params.get('transport_address', f'/tmp/')+f'{self.job_name}{self.port}'
 
         if self.transport_type == 'ipc://':
             self.socket.bind(f'{self.transport_type}{self.transport_address}')
