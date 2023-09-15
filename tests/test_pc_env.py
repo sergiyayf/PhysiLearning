@@ -6,6 +6,7 @@ import yaml
 import numpy as np
 import os
 from physilearning.tools.xml_reader import CfgRead
+import subprocess
 
 
 def test_env_creation():
@@ -99,6 +100,13 @@ def test_sample_patients():
     config_file = './tests/test_cfg.yaml'
     with open(config_file, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
+
+    # check if simulations directory exists
+    if not os.path.exists('./simulations'):
+        os.mkdir('./simulations')
+        command = 'cd scripts && ./create_dirs.sh 0'
+        subprocess.Popen([command], shell=True)
+
     config['env']['patient_sampling']['enable'] = True
     config['env']['patient_sampling']['patient_id'] = [80, 55]
     EnvClass = getattr(importlib.import_module('physilearning.envs'), 'PcEnv')
@@ -117,6 +125,7 @@ def test_sample_patients():
                 real_value = xml_reader.read_value(parent_nodes=['user_parameters'], parameter='filename_chkpt')
                 assert cfg_chkpt_file == real_value
                 patients_list.append(env.patient_id)
+
 
     assert len(set(patients_list)) == 2
 

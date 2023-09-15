@@ -30,12 +30,13 @@ def test_patient_id():
 
 def test_patient_sampling():
     np.random.seed(0)
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    # os.chdir('/home/saif/Projects/PhysiLearning')
     config_file = './tests/test_cfg.yaml'
     with open(config_file, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
     config['env']['patient_sampling']['patient_id'] = [80, 55]
+    config['env']['patient_sampling']['enable'] = True
     env = BaseEnv(config=config, patient_id=[80, 55])
     patient_ids = []
     for _ in range(100):
