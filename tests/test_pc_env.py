@@ -89,6 +89,7 @@ def test_check_done():
     assert done == True
 
 
+@pytest.mark.skipif(os.path.exists('./simulations/PhysiCell_0)') == 'false', reason='PhysiCell runnnig simulation directory does not exist')
 def test_sample_patients():
     """
     Test environment reset.
@@ -100,12 +101,6 @@ def test_sample_patients():
     config_file = './tests/test_cfg.yaml'
     with open(config_file, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-
-    # check if simulations directory exists
-    if not os.path.exists('./simulations'):
-        os.mkdir('./simulations')
-        command = 'cd scripts && ./create_dirs.sh 0'
-        subprocess.Popen([command], shell=True)
 
     config['env']['patient_sampling']['enable'] = True
     config['env']['patient_sampling']['patient_id'] = [80, 55]
