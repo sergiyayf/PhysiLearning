@@ -1,5 +1,5 @@
 import zmq
-from physilearning.subscriber import PhysiCellDataListener
+from physilearning.pcdl import PhysiCellDataListener
 import time
 
 def test_construct_pcdl():

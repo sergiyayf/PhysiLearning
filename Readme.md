@@ -64,6 +64,27 @@ To evaluate the agent, run the following command:
 python run.py evaluate
 ```
 
+### Simulating virtual patients with barcode tracking
+To simulate virtual patients with barcode tracking PhysiCell config via `./config.yaml` is not supported.
+You need to first configure your simulation in the `./src/PhysiCell_src/config/PhysiCell_settings.xml` file.
+Then you need to copy the PhysiCell source directory to the `./simulations` folder. You can do it with a script:
+```bash
+bash create_dirs.sh number_of_copies
+```
+
+Then you might need to reconfigure the `./scripts/simulate_patients_job.sh` script to load correct modules and use correct
+resources. In config.yaml parameter `envs::PcEnv::cpus_per_sim` and `envs::PcEnv::transport_address` also need to be adjusted.
+
+Then you can submit the jobs with:
+```bash
+python run.py simulate-patients --n_sims=number_of_simulations
+```
+On raven about 10 simulations will run in one job on one node in parallel.
+In the script `./scripts/simulate_patients.py` parameter `num_episodes` will define how many times 
+simulations from one directory will run. If you don't care about the PhysiCell original data, you can make
+this number larger than 1. Data will be stored by the PCDL class into hdf5 file, 1 file per simulation folder, and 
+will contain cell IDs, positions, barcodes, types and time in the current phase. 
+
 ### Run tests 
 
 To run all tests, run the following command:
