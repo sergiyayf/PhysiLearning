@@ -31,7 +31,7 @@ setup(
                       'sphinx<7.0.0', 'sphinx_rtd_theme', 'sphinx-autodoc-typehints',
                       'mpl-scatter-density', 'arviz', 'pytensor'
                       ],
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     classifiers=['Operating System :: ubuntu',
                  'Programming Language :: Python :: 3',
                  ],
