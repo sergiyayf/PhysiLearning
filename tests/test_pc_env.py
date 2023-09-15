@@ -89,7 +89,7 @@ def test_check_done():
     assert done == True
 
 
-@pytest.mark.skipif(os.path.exists('./simulations/PhysiCell_0)') == 'false', reason='PhysiCell runnnig simulation directory does not exist')
+@pytest.mark.skipif(not os.path.exists('./simulations/PhysiCell_0'), reason='PhysiCell runnnig simulation directory does not exist')
 def test_sample_patients():
     """
     Test environment reset.
