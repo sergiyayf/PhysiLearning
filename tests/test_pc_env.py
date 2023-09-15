@@ -95,10 +95,11 @@ def test_sample_patients():
     :param env_type: Environment type
     """
     np.random.seed(0)
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    # os.chdir('/home/saif/Projects/PhysiLearning')
     config_file = './tests/test_cfg.yaml'
     with open(config_file, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
+    config['env']['patient_sampling']['enable'] = True
     config['env']['patient_sampling']['patient_id'] = [80, 55]
     EnvClass = getattr(importlib.import_module('physilearning.envs'), 'PcEnv')
     env = EnvClass(config=config, patient_id=[80, 55])
