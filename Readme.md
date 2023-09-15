@@ -1,7 +1,7 @@
 # PhysiLearning
 [![CI](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml)
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
-![version](https://img.shields.io/badge/version-0.1.6-blue)
+![version](https://img.shields.io/badge/version-0.2.0-blue)
 
 <img src="data/images/RL_treatment.gif" width="250" height="250" />
 
@@ -118,12 +118,3 @@ and saves communicated data that includes binary barcodes to one hdf5 file
 - Implemented dictionary observation space for multiobs training 
 - Added policy_kwargs parameter to config.yaml file for changing the policy architecture for training 
 - Created a list of example policies in the Readme file
-
-#### 0.1.5 Major changes
-- Added image observation for LV environment
-- Changed trajectory attribute for image observation: now trajectory is always the number_trajectory, and image is in the image_trajectory
-- Updated evaluation.py for new trajectory naming 
-- Added new config parameter for LV environment: image_sampling_type - can be 'random' or 'dense' and creates
-a proxy image of the tumor simulated by LV with either randomly placing cells on the grid, or placing them in a circle
-#### 0.1.5 Minor changes
-- Fixed stopping one time step too early for PC env with number observations

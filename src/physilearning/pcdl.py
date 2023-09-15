@@ -1,13 +1,16 @@
 import zmq
 import re
 import pandas as pd
-import os
 import click
 import yaml
+
 
 class PhysiCellDataListener:
     """
     Listens for data from a PhysiCell simulation.
+
+    :param port: The port to listen on.
+    :param jobid: The jobid of the simulation.
     """
 
     def __init__(
@@ -35,7 +38,7 @@ class PhysiCellDataListener:
         self.message = message
         return message
 
-    def _message_to_df(self, message):
+    def message_to_df(self, message):
         """
         Converts the message to a dataframe.
         """
@@ -72,20 +75,17 @@ class PhysiCellDataListener:
         else:
             return [float(x) for x in list_of_str_params]
 
-
     def write_to_hdf(self, message: str, path: str):
         """
         Writes the dataframe to hdf file.
         """
-
         time = re.findall(r'\d+', message)[0]
-        df = self._message_to_df(message)
+        df = self.message_to_df(message)
         if str(time) == '0':
             self.run += 1
         df.to_hdf(path, f'run_{self.run}/time_{time}')
-
-
         return
+
 
 @click.command()
 @click.option('--jobid', default=0, help='ID of the job')
@@ -97,7 +97,8 @@ def main(jobid, port):
     while True:
         message = listener.get_data()
         listener.write_to_hdf(message=message, path=f'pcdl_data_job_{jobid}_port_{port}.h5')
-        print(listener._message_to_df(message))
+        print(listener.message_to_df(message))
+
 
 if __name__ == '__main__':
     main()
