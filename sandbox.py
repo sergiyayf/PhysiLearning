@@ -26,9 +26,22 @@ PC_files_list = ['Evaluations/PcEnvEvalpatient_80_no_treatment.h5',
                     'Evaluations/lv_on_pc_2108_combined.h5',
                     'Evaluations/PcEnvEval_pc_rl_1008_interruption_combined.h5',
                  ]
+pat_x = 93
+patient_4_files_list = [f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_no_treatment.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_mtd.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_AT50.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_AT75.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_AT100.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_random.h5',
+                            ]
+patient_4_name_list = [f'Patient {pat_x} No treatment', f'Patient {pat_x} MTD',
+                f'Patient {pat_x} AT50', f'Patient {pat_x} AT75', f'Patient {pat_x} AT100', f'Patient {pat_x} Random']
 
 PC_name_lsit = ['PC No treatment', 'PC MTD',
                 'PC AT50', 'PC AT75', 'PC AT100', 'PC Random', 'PC RL(lv trained)', 'PC RL']
+
+PC_files_list = patient_4_files_list
+PC_name_lsit = patient_4_name_list
 
 LV_files_list = ['Evaluations/LvEnvEvalLV-no_treat.h5',
                     'Evaluations/LvEnvEvalLV-mtd.h5',
@@ -89,13 +102,5 @@ ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red'
 # ax.legend()
 # ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
 
-for i in range(20):
-    df = pd.read_hdf('Evaluations/lv_on_pc_2108_combined.h5', key='run_'+str(i))
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df['Type 0'], label='Type 0')
-    ax.plot(df.index, df['Type 1'], label='Type 1')
-    ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-    ax.legend()
-    ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
 
 plt.show()
