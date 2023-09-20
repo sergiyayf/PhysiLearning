@@ -7,7 +7,6 @@ import multiprocessing as mp
 from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 from stable_baselines3.common.utils import set_random_seed
 
 from physilearning.callbacks import CopyConfigCallback, SaveOnBestTrainingRewardCallback
@@ -18,7 +17,7 @@ from typing import List, Callable, Optional, Dict, Any
 
 
 def make_env(
-    EnvClass: Callable = BaseEnv,
+    EnvClass: BaseEnv,
     *,
     config_file: str = 'config.yaml',
     env_kwargs: Optional[Dict[str, Any]] = None,
@@ -107,11 +106,9 @@ class Trainer:
                 if self.wrapper == 'VecFrameStack':
                     env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)])
                     self.env = VecFrameStack(env, **self.wrapper_kwargs)
-                    #self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
 
                 elif self.wrapper == 'DummyVecEnv':
                     self.env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)])
-                    #self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
                 else:
                     raise ValueError('Wrapper not recognized')
             else:
@@ -141,7 +138,6 @@ class Trainer:
                     raise ValueError('Wrapper not recognized')
             else:
                 raise ValueError('Vector environment must be wrapped')
-            #self.env = VecMonitor(self.env, os.path.join('Training', 'Logs'))
 
     def setup_model(self) -> None:
         """ Set up the model for training"""
@@ -176,7 +172,8 @@ class Trainer:
                     print('Loading model {0}'.format(self.saved_model_name))
                     try:
                         self.model = Algorithm.load(self.saved_model_name, env=self.env,
-                                                    tensorboard_log=os.path.join('Training', 'Logs'), **self.model_kwargs)
+                                                    tensorboard_log=os.path.join('Training', 'Logs'),
+                                                    **self.model_kwargs)
                     except KeyError:
                         self.model = Algorithm.load(self.saved_model_name, env=self.env, custom_objects=
                         {'observation_space': self.env.observation_space, 'action_space': self.env.action_space})

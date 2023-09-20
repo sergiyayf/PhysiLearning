@@ -101,7 +101,7 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
             else:
                 self.best_mean_reward = -np.inf
 
-        except:
+        except FileNotFoundError:
             self.best_mean_reward = -np.inf
 
     def _init_callback(self) -> None:

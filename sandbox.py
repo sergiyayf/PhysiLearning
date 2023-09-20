@@ -17,43 +17,90 @@ def get_ttps(filename, timesteps=100):
             ttps.append(0)
     return ttps
 
-# Loop through every key in the file
-ttps_no_treat = get_ttps('Evaluations/PcEnvEvalpatient_80_no_treatment.h5')
-ttps_mtd = get_ttps('Evaluations/PcEnvEvalpatient_80_mtd.h5')
-ttps_random = get_ttps('Evaluations/PcEnvEvalpatient_80_random.h5')
-ttps_at = get_ttps('Evaluations/PcEnvEvalpatient_80_AT_at_baseline.h5')
-ttps_LV_at = get_ttps('Evaluations/LvEnvEvalpatient_80_lv_fixed_cap_test.h5')
-ttps_LV_no_treat = get_ttps('Evaluations/LvEnvEvalLV-no_treat.h5')
-ttps_LV_mtd = get_ttps('Evaluations/LvEnvEvalLV-mtd.h5')
-ttps_LV_random = get_ttps('Evaluations/LvEnvEvalLV-random.h5')
-ttps_PC_rl = get_ttps('Evaluations/PcEnvEvalpatient_80_RL_training_images_1407.h5')
-ttps_PC_rl_new = get_ttps('Evaluations/PcEnvEvalpatient_80_RL_new_1407.h5')
+PC_files_list = ['Evaluations/PcEnvEvalpatient_80_no_treatment.h5',
+                    'Evaluations/PcEnvEvalpatient_80_mtd.h5',
+                    'Evaluations/PcEnvEvalpatient_80_AT50.h5',
+                    'Evaluations/PcEnvEvalpatient_80_AT75.h5',
+                    'Evaluations/PcEnvEvalpatient_80_AT100.h5',
+                    'Evaluations/PcEnvEvalpatient_80_random.h5',
+                    'Evaluations/lv_on_pc_2108_combined.h5',
+                    'Evaluations/PcEnvEval_pc_rl_1008_interruption_combined.h5',
+                 ]
+pat_x = 93
+patient_4_files_list = [f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_no_treatment.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_mtd.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_AT50.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_AT75.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_AT100.h5',
+                            f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_random.h5',
+                            ]
+patient_4_name_list = [f'Patient {pat_x} No treatment', f'Patient {pat_x} MTD',
+                f'Patient {pat_x} AT50', f'Patient {pat_x} AT75', f'Patient {pat_x} AT100', f'Patient {pat_x} Random']
 
-df = pd.DataFrame({'MTD': ttps_mtd,
-                   'LV_MTD': ttps_LV_mtd,
-                   'AT': ttps_at,
-                   'RL treat PC': ttps_PC_rl,
-                   'RL treat PC new': ttps_PC_rl_new,
-                   'LV_AT': ttps_LV_at,
-                   'Random': ttps_random,
-                   'LV_Random': ttps_LV_random,
-                   } )
+PC_name_lsit = ['PC No treatment', 'PC MTD',
+                'PC AT50', 'PC AT75', 'PC AT100', 'PC Random', 'PC RL(lv trained)', 'PC RL']
+
+PC_files_list = patient_4_files_list
+PC_name_lsit = patient_4_name_list
+
+LV_files_list = ['Evaluations/LvEnvEvalLV-no_treat.h5',
+                    'Evaluations/LvEnvEvalLV-mtd.h5',
+                    'Evaluations/LvEnvEvalLV-AT50.h5',
+                    'Evaluations/LvEnvEvalLV-AT75.h5',
+                    'Evaluations/LvEnvEvalLV-AT100.h5',
+                    'Evaluations/LvEnvEvalLV-random.h5',
+                    'Evaluations/LvEnvEvallv_2108_cont_2.h5',
+                    'Evaluations/LvEnvEvallv_2108_cont_2.h5',
+                 ]
+LV_name_lsit = ['LV No treatment', 'LV MTD',
+                'LV AT50', 'LV AT75', 'LV AT100', 'LV Random', 'LV RL', 'LV RL']
+
+PC_dict = {}
+LV_dict = {}
+combined = {}
+for i in range(len(PC_files_list)):
+    PC_dict[PC_name_lsit[i]] = get_ttps(PC_files_list[i])
+
+for i in range(len(LV_files_list)):
+    LV_dict[LV_name_lsit[i]] = get_ttps(LV_files_list[i])
+
+for i in range(len(PC_files_list)):
+    combined[PC_name_lsit[i]] = get_ttps(PC_files_list[i])
+    combined[LV_name_lsit[i]] = get_ttps(LV_files_list[i])
+
+PC_df = pd.DataFrame(PC_dict)
+LV_df = pd.DataFrame(LV_dict)
+combined_df = pd.DataFrame(combined)
 
 # box plot the distribution with scatter using seaborn
 fig, ax = plt.subplots()
-sns.boxplot(data=df, ax=ax)
-sns.stripplot(data=df, ax=ax, color='black', jitter=0.2, size=2.5)
+sns.boxplot(data=PC_df, ax=ax)
+sns.stripplot(data=PC_df, ax=ax, color='black', jitter=0.2, size=2.5)
 # show mean as well
-ax.scatter(df.mean().index, df.mean().values, marker='o', color='red', s=20)
+ax.scatter(PC_df.mean().index, PC_df.mean(), marker='x', color='red', s=50, label='mean')
+
+fig, ax = plt.subplots()
+sns.boxplot(data=LV_df, ax=ax)
+sns.stripplot(data=LV_df, ax=ax, color='black', jitter=0.2, size=2.5)
+# show mean as well
+ax.scatter(LV_df.mean().index, LV_df.mean(), marker='x', color='red', s=50, label='mean')
+
+fig, ax = plt.subplots()
+sns.boxplot(data=combined_df, ax=ax)
+sns.stripplot(data=combined_df, ax=ax, color='black', jitter=0.2, size=2.5)
+# show mean as well
+ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
+#fig.savefig('all_treatments.pdf', transparent=True)
 
 # plot one trajectory of aT scenario
-df = pd.read_hdf('Evaluations/LvEnvEvalLV-mtd.h5', key='run_0')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
+#
+# df = pd.read_hdf('Evaluations/LvEnvEvalmtd_lv_sampling_p1.h5', key='run_40')
+# fig, ax = plt.subplots()
+# ax.plot(df.index, df['Type 0'], label='Type 0')
+# ax.plot(df.index, df['Type 1'], label='Type 1')
+# ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
+# ax.legend()
+# ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
 
 
 plt.show()

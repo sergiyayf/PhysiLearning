@@ -338,7 +338,26 @@ void setup_tissue( void )
 	std::cout << std::endl; 
 	
 	// load cells from your CSV file (if enabled)
-	load_cells_from_pugixml(); 	
+	load_cells_from_pugixml();
+
+	// set the correct barcode for all of the initially created cells
+	for (int i=0; i<(*all_cells).size(); i++){
+        Cell* pCell = (*all_cells)[i];
+        std::bitset<128> temp_bitset(pCell->ID);
+        int left_most_bit = 0;
+
+        for (int j = 0; j < 128; j++) {
+            if (temp_bitset[j]) {
+                left_most_bit = j;
+            }
+        }
+        // save leftmost bit to custom data
+        pCell->custom_data["left_most_bit"] = left_most_bit+6;
+        for (int j = 0; j < 4; j++) {
+            temp_bitset.set(left_most_bit+2+j);
+        }
+        pCell->barcode = temp_bitset;
+    }
 	//setup_round_tumoroid();
 	}
 	return; 
@@ -416,6 +435,9 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 			pCell->convert_to_cell_definition(*cell_definitions_by_index[ind_resistant]);
 			parameters.ints("number_of_denovo_mutations") += 1;
 			pCell->clone_ID = parameters.ints("number_of_denovo_mutations");
+			std::bitset<128> temp_bitset = pCell->barcode;
+	        temp_bitset.set( 3*(pCell->number_of_divisions-1)+2+pCell->custom_data["left_most_bit"], 1 );
+	        pCell->barcode = temp_bitset;
 		}
 	}
 	
@@ -456,3 +478,51 @@ void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
 { return; } 
+
+std::string get_relevant_cell_info() {
+    // try to change cell position to string;
+				std::string data{"<Cells> \n"};
+				std::string IDs{"ID: "};
+				std::string pos_x{"x: "};
+				std::string pos_y{"y: "};
+				std::string pos_z{"z: "};
+				std::string barcode{"barcode: "};
+				std::string cell_type{"type: "};
+				std::string elapsed_time_in_phase{"elapsed_time_in_phase: "};
+
+					for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) {
+					    IDs.append(std::to_string((*all_cells)[cells_it]->ID));
+					    IDs.append(",");
+					    pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
+					    pos_x.append(",");
+					    pos_y.append(std::to_string((*all_cells)[cells_it]->position[1]));
+					    pos_y.append(",");
+					    pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
+					    pos_z.append(",");
+					    barcode.append((*all_cells)[cells_it]->barcode.to_string());
+//                      barcode.append(std::to_string((*all_cells)[cells_it]->parent_ID));
+					    barcode.append(",");
+					    cell_type.append(std::to_string((*all_cells)[cells_it]->type));
+					    cell_type.append(",");
+					    elapsed_time_in_phase.append(std::to_string((*all_cells)[cells_it]->phenotype.cycle.data.elapsed_time_in_phase));
+					    elapsed_time_in_phase.append(",");
+
+				}
+                data.append(IDs);
+                data.append(";");
+                data.append(pos_x);
+                data.append(";");
+                data.append(pos_y);
+                data.append(";");
+                data.append(pos_z);
+                data.append(";");
+                data.append(barcode);
+                data.append(";");
+                data.append(cell_type);
+                data.append(";");
+                data.append(elapsed_time_in_phase);
+                data.append(";");
+                data.append("end:");
+
+return data;
+}

@@ -1,8 +1,6 @@
 # global configuration
 global:
   machine: 'mela' # 'mela' # 'raven'
-  transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
-  transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
   evaluate_after: 0
 
 # job configuration
@@ -10,29 +8,32 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 20
+  cpus-per-task: 10
   time: '14:00:00'
   agent_buffer: 1
+  recurrent:
+    enable: 0
+    n_jobs: 5
 
 # Reinforcement learning configuration
 learning:
-  # Model options 
+  # Model options
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'CnnPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy'
     model_kwargs:
-      n_steps: 1024
+      n_steps: 124
       verbose: 1
-      ent_coef: 0.002
-      clip_range: 0.005
-      learning_rate: 5.e-5
-    total_timesteps: 1.e+9
+      ent_coef: 0.02
+      clip_range: 0.05
+      learning_rate: 1.e-4
+    total_timesteps: 100
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '0508_gridenv_last_try_to_fix'
+    model_save_prefix: 'Lv_image'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './data/gm_cnn_trained/Training/SavedModels/0504_raven_gridenv_best_reward'
+      saved_model_name: './Training/SavedModels/test_PC_train_best_reward'
   network:
     n_lstm_layers: 2
     lstm_hidden_size: 64
@@ -47,82 +48,174 @@ env:
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first'
-  reward_shaping: 5  # reward shaping flag for some predefined rewards
 
   # general simulation settings
-  max_tumor_size: 2000
-  treatment_time_step: 1 
-  max_time: 1000
-  normalize: 0
-  normalize_to: 2000
   observation_type: 'image' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
+  max_tumor_size: 2000
+  max_time: 1000
+  initial_wt: 27
+  initial_mut: 1
+  growth_rate_wt: 0.29 # 0.0175
+  growth_rate_mut: 0.0438 # 0.0175
+  death_rate_wt: 0.029
+  death_rate_mut: 0.0438
+  treat_death_rate_wt: 0.397 # 0.015
+  treat_death_rate_mut: 0.00 # 0.0
+  treatment_time_step: 1
+  reward_shaping: 0  # reward shaping flag for some predefined rewards
+  normalize: 0
+  normalize_to: 1000
   image_size: 84
-  domain_size: 100
+  patient_sampling:
+    enable: 0
+    patient_id: 80
 
   # LV environment settings
-  LV:
-    initial_wt: 249
-    initial_mut: 10
-    carrying_capacity: 7500
-    growth_rate_wt: 0.0357 #0.0175
-    growth_rate_mut: 0.0275 #0.0175
-    death_rate_wt: 0.0036
-    death_rate_mut: 0.0036
-    treat_death_rate_wt: 0.02 #0.015
-    treat_death_rate_mut: 0.00 #0.0
-    competition_wt: 2.5 #2400.0
-    competition_mut: 1.0
-    growth_function_flag: 2 # flag for growth function 0 - for delayed death, 1 - for immediate
+  LvEnv:
+    carrying_capacity: 6500
+    competition_wt: 1.323 #2400.0
+    competition_mut: 0.336
+    growth_function_flag: 'delayed' # flag for growth function 0 - for delayed death, 1 - for immediate
+    image_sampling_type: 'random' # 'dense' # 'random'
 
   # note this is not yet functional
-  PC:
-    use_2D:
-        parent_nodes: ['domain']
-        value: 'true'
-    number_of_susceptible_cells:
-        parent_nodes: ['user_parameters']
-        value: 995
-    number_of_resistant_cells:
-        parent_nodes: ['user_parameters']
-        value: 5
-    enable_chkpt:
-        parent_nodes: ['user_parameters']
-        value: 'true'
-    filename_chkpt:
-        parent_nodes: ['user_parameters']
-        value: './../presims/long_train_test_patient/final'
-    treatment_time_step:
-        parent_nodes: ['user_parameters']
-        value: 60
-    treatment_death_rate:
-        parent_nodes: ['user_parameters']
-        value: 0.00225
+  PcEnv:
+    domain_size: 1250
+    cpus_per_sim: 10
+    transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
+    transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
+    xml:
+      use_2D:
+          parent_nodes: ['domain']
+          value: 'true'
+      number_of_susceptible_cells:
+          parent_nodes: ['user_parameters']
+          value: 2500
+      number_of_resistant_cells:
+          parent_nodes: ['user_parameters']
+          value: 5
+      enable_chkpt:
+          parent_nodes: ['user_parameters']
+          value: 'true'
+      filename_chkpt:
+          parent_nodes: ['user_parameters']
+          value: './../paper_presims/patient_80_new_sims/final'
+      treatment_time_step:
+          parent_nodes: ['user_parameters']
+          value: 720
+      treatment_death_rate:
+          parent_nodes: ['user_parameters']
+          value: 0.00225
 
   # LatticeBased environment settings
   GridEnv:
-    initial_wt: 1
-    initial_mut: 1
-    wt_growth_rate: 0.25
-    mut_growth_rate: 0.09
-    wt_death_rate: 0.01
-    mut_death_rate: 0.004
-    wt_treat_death_rate: 0.5
-    mut_treat_death_rate: 0.00
     cell_positioning: 'load' # 'surround_mutant' # 'random' # 'load'
-
 
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: 'test'
-  fixed_AT_protocol: 1
-  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.5
-  num_episodes: 1
+  model_prefix: 'lv_2108_cont'
   step_to_load: '_best_reward'
-  save_name: '_test_'
+  save_name: 'rl-lv'
+  # evaluation settings
+  fixed_AT_protocol: 0
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.50
+  num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
+
+# Predefined parameters for particular patients
+patients:
+  1:
+    initial_wt: 2700
+    initial_mut: 0
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_1/final'
+
+  4:
+    initial_wt: 2700
+    initial_mut: 4
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_4/final'
+
+  55:
+    initial_wt: 2700
+    initial_mut: 12
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_55/final'
+
+  80:
+    initial_wt: 2700
+    initial_mut: 1
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_80/final'
+
+  93:
+    initial_wt: 2700
+    initial_mut: 1
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_93/final'

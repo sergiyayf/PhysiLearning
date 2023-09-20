@@ -1,14 +1,16 @@
 from physilearning.envs import LvEnv
 import pytest
 import numpy as np
+import os
+import yaml
 
 
 def test_observation_space():
     env = LvEnv(observation_type='number')
     assert env.observation_type == 'number'
 
-    with pytest.raises(NotImplementedError):
-        env = LvEnv(observation_type='image')
+    env = LvEnv(observation_type='image')
+    assert env.observation_type == 'image'
 
 
 def test_random_cell_number():
@@ -60,5 +62,65 @@ def test_normalization():
     assert np.sum(env.state) == 10
 
 
+def test_get_image():
+    env = LvEnv(observation_type='image', initial_wt=6500, initial_mut=0, max_tumor_size=7000,
+                normalize=False, env_specific_params={'carrying_capacity': 6500}, treatment_time_step=1)
+    env.reset()
+    image = env._get_image(0)
+    assert np.sum(image) == 84*84*128
+
+    env = LvEnv(observation_type='image', initial_wt=3000, initial_mut=0, max_tumor_size=7000,
+                normalize=False, env_specific_params={'carrying_capacity': 6000}, treatment_time_step=1)
+    env.reset()
+    image = env._get_image(0)
+    assert np.sum(image) == 84 * 84 * 128/2
+
+    env = LvEnv(observation_type='image', initial_wt=0, initial_mut=3000, max_tumor_size=7000,
+                normalize=False, env_specific_params={'carrying_capacity': 6000}, treatment_time_step=1)
+    env.reset()
+    image = env._get_image(0)
+    assert np.sum(image) == 84 * 84 * env.mut_color / 2
+    assert not (env.wt_color in image)
+    assert (env.mut_color in image)
 
 
+def test_step_image_obs():
+    env = LvEnv(observation_type='image', initial_wt=500, initial_mut=0, max_tumor_size=7000,
+                normalize=False, env_specific_params={'carrying_capacity': 6500, 'growth_function_flag': 'delayed'},
+                treatment_time_step=1, growth_rate_wt=0.2, treat_death_rate_wt=0.5)
+    env.reset()
+    obs, reward, done, info = env.step(0)
+    a = np.sum(obs)
+    env.step(1)
+    env.step(1)
+    obs, reward, done, info = env.step(1)
+    b = np.sum(obs)
+    env.step(0)
+    env.step(0)
+    env.step(0)
+    env.step(0)
+    obs, reward, done, info = env.step(0)
+    c = np.sum(obs)
+    assert (a > b)
+    assert (c > b)
+
+def test_patient_sampling():
+    np.random.seed(0)
+    # os.chdir('/home/saif/Projects/PhysiLearning')
+    config_file = './tests/test_cfg.yaml'
+    with open(config_file, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
+    config['env']['patient_sampling']['enable'] = True
+    config['env']['patient_sampling']['patient_id'] = [80, 55]
+    env = LvEnv(config=config, patient_id=[80, 55])
+    patient_list = []
+    initial_mut_list = []
+    patient_list.append(env.patient_id)
+    initial_mut_list.append(env.initial_mut)
+    for i in range(10):
+        env.reset()
+        patient_list.append(env.patient_id)
+        initial_mut_list.append(env.initial_mut)
+    assert len(set(patient_list)) > 1
+    assert len(set(initial_mut_list)) > 1

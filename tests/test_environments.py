@@ -84,8 +84,6 @@ def test_grid_env_from_yaml():
     """
     Test environment creation from yaml file.
     """
-    with open('./tests/test_cfg.yaml', 'r') as f:
-        yaml.safe_load(f)
     env = GridEnv.from_yaml('./tests/test_cfg.yaml')
     assert env is not None
 

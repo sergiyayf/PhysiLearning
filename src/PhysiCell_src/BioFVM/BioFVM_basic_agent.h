@@ -50,6 +50,7 @@
 #define __BioFVM_basic_agent_h__
 
 #include <vector>
+#include <bitset>
 #include "BioFVM_microenvironment.h"
 #include "BioFVM_matlab.h"
 #include "BioFVM_vector.h"
@@ -100,8 +101,10 @@ class Basic_Agent
 	Microenvironment* get_microenvironment( void ); 
 
 	int ID;
-	int parent_ID;
+	int number_of_divisions;
 	int clone_ID;
+	int parent_ID;
+	std::bitset<128> barcode;
 	int index; 
 	int type;
 	

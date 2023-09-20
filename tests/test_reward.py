@@ -41,6 +41,10 @@ def test_rewards():
     assert reward-10 < 1e-3
 
     rewards = Reward(reward_shaping_flag=6)
+    reward = rewards.get_reward([0.5, 0.4, 1], 0.1)
+    assert reward-0.3 < 1e-3
+
+    rewards = Reward(reward_shaping_flag=7)
     try:
         reward = rewards.get_reward([0.5, 0.4, 1], 0.1)
     except ValueError:
