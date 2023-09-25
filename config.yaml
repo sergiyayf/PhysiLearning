@@ -46,7 +46,7 @@ env:
   # general env settings
   type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 1
+  wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -56,7 +56,7 @@ env:
   observation_type: 'multiobs' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   max_tumor_size: 4000
-  max_time: 10 # 120
+  max_time: 120 # 120
   initial_wt: 2700
   initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
@@ -72,7 +72,7 @@ env:
   image_size: 84
   patient_sampling:
     enable: 1
-    patient_id: [1, 80] # [1, 4, 55, 80, 93]
+    patient_id: 93 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -120,9 +120,9 @@ eval:
   most_recent: 0
   from_file: 0
   path: './'
-  model_prefix: 'lv_2408_no_resistant_rew_6'
+  model_prefix: '20_09_LV_multiobs_patient_sampling'
   step_to_load: '_best_reward'
-  save_name: 'mtd_lv_sampling_p1'
+  save_name: '_patient_93_no_treatment'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
