@@ -12,8 +12,8 @@ job:
   time: '14:00:00'
   agent_buffer: 1
   recurrent:
-    enable: 0
-    n_jobs: 5
+    enable: 1
+    n_jobs: 3
 
 # Reinforcement learning configuration
 learning:
@@ -33,18 +33,18 @@ learning:
         net_arch:
           pi: [32, 32]
           vf: [32, 32]
-    total_timesteps: 10000
+    total_timesteps: 1000
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
     model_save_prefix: 'Lv_image_patient_sampling_test'
     load:
-      enable_loading: 0
+      enable_loading: 1
       last_model: 0
-      saved_model_name: './Training/SavedModels/test_PC_train_best_reward'
+      saved_model_name: './Training/SavedModels/Lv_image_patient_sampling_test_best_reward'
 
 # Environment configuration
 env:
   # general env settings
-  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
