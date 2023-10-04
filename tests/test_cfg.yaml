@@ -69,6 +69,7 @@ env:
   image_size: 84
   patient_sampling:
     enable: 0
+    type: 'sequential'
     patient_id: 80
 
   # LV environment settings

@@ -35,7 +35,7 @@ def test_save_on_best_training_reward_callback():
     command = r'cp ./tests/test_cfg.yaml ./test_cfg.yaml'
     os.system(command)
     env = DummyVecEnv([make_env(LvEnv, config_file='test_cfg.yaml')])
-    env = VecMonitor(env, './Training/Logs')
+    # env = VecMonitor(env, './Training/Logs')
     model = PPO('MlpPolicy', env, verbose=1)
     # train the model
     model.learn(total_timesteps=100,
