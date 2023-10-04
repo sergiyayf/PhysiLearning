@@ -95,6 +95,10 @@ class LvEnv(BaseEnv):
         self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
                             self.config['patients'][patient_id]['LvEnv']['competition_mut']]
 
+    def _set_patient_specific_competition(self, patient_id):
+        self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
+                            self.config['patients'][patient_id]['LvEnv']['competition_mut']]
+
     def _get_image(self, action: int):
         """
         Randomly sample a tumor inside of the image and return the image
@@ -217,11 +221,6 @@ class LvEnv(BaseEnv):
             if len(self.patient_id_list) > 1:
                 self._choose_new_patient()
                 self._set_patient_specific_competition(self.patient_id)
-        print(f'Patient ID: {self.patient_id}')
-        print(f'Competitions used: {self.competition}')
-        print(f'Num wt: {self.initial_wt}, Num mut: {self.initial_mut}')
-        print(f'Growth rate: {self.growth_rate}')
-        print(f'Treatment death rate: {self.death_rate_treat}')
 
         if self.wt_random:
             self.initial_wt = \
@@ -283,7 +282,7 @@ class LvEnv(BaseEnv):
                 (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
                 self.death_rate[i] - self.death_rate_treat[i] * treat)
 
-            if new_pop_size < 10*self.normalization_factor and self.death_rate_treat[i]*treat>0:
+            if new_pop_size < 10*self.normalization_factor and self.death_rate_treat[i]*treat > 0:
                 new_pop_size = 0
         else:
             raise NotImplementedError

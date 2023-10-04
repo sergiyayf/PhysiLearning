@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        './../../Evaluations/PcEnvEvalpatient_80_mtd.h5', key='run_50')
+        '../../Evaluations/Pc/PcEnvEvalpatient_80_mtd.h5', key='run_50')
     # find the index when all of the data is 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
 

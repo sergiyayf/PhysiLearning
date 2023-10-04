@@ -204,7 +204,17 @@ class BaseEnv(Env):
         """
         Choose new patient from the list of patients
         """
-        self.patient_id = np.random.choice(self.config['env']['patient_sampling']['patient_id'])
+        if self.config['env']['patient_sampling']['type'] == 'random':
+            self.patient_id = np.random.choice(self.config['env']['patient_sampling']['patient_id'])
+        elif self.config['env']['patient_sampling']['type'] == 'sequential':
+            patient_list = self.config['env']['patient_sampling']['patient_id']
+            patient_index = patient_list.index(self.patient_id)
+            if patient_index == len(patient_list) - 1:
+                self.patient_id = patient_list[0]
+            else:
+                self.patient_id = patient_list[patient_index + 1]
+        else:
+            raise ValueError('Patient sampling type not supported')
         self._set_patient_params()
 
     @classmethod

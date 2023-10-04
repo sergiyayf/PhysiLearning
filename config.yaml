@@ -47,7 +47,7 @@ env:
   # general env settings
   type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 1
+  wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -73,7 +73,8 @@ env:
   image_size: 84
   patient_sampling:
     enable: 1
-    patient_id: [1, 4, 55, 80, 93] # [1, 4, 55, 80, 93]
+    type: 'sequential' # 'random' # 'sequential'
+    patient_id: [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -121,9 +122,9 @@ eval:
   most_recent: 0
   from_file: 0
   path: './'
-  model_prefix: 'lv_2408_no_resistant_rew_6'
+  model_prefix: '20_09_LV_multiobs_patient_sampling'
   step_to_load: '_best_reward'
-  save_name: 'mtd_lv_sampling_p1'
+  save_name: '_patient_93_no_treatment'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
