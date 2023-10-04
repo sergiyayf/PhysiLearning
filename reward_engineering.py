@@ -88,17 +88,17 @@ def add_to_df(simulation, df, flag = 0, custom = False, func = None):
     return df
 
 def reward_func(obs, time):
-    reward = (4000 - 0.75 * (obs[0] - obs[1])) / 4000 - 0.25 * obs[2]
+    reward = (4000 - 0.75 * (obs[0] + obs[1])) / 4000 - 0.25 * obs[2]
     if sum(obs[0:2]) < 1.e-3:
-        reward += 2
+        reward = 1
     return reward
 
 df = pd.DataFrame()
-for patient in [4, 55, 80, 93]:
+for patient in [1, 4, 55, 80, 93]:
     for therapy in ['mtd', 'AT50', 'AT75', 'AT100']:
 
         simulation = SimOut('Lv', patient, therapy)
-        df = add_to_df(simulation, df, flag = 6, custom=True, func=reward_func)
+        df = add_to_df(simulation, df, flag = 7, custom=True, func=reward_func)
 fig2, ax2 = plt.subplots()
 sns.boxplot(ax=ax2, data=df)
 plt.show()
