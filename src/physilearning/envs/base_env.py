@@ -57,7 +57,7 @@ class BaseEnv(Env):
         normalize: bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
-        patient_id: int | list = 0,
+        patient_id: int or list = 0,
         **kwargs,
     ) -> None:
         self.config = config

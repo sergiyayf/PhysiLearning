@@ -40,7 +40,7 @@ def make_env(
 
     def _init():
         env = EnvClass.from_yaml(config_file, **env_kwargs)
-        env = Monitor(env, filename=os.path.join('Training', 'Logs'), override_existing=False)
+        env = Monitor(env, filename=os.path.join('Training', 'Logs'), override_existing=True)
         # env.seed(seed+rank) # Seed in the env not implemented, This shouldn't be needed
         # as I am setting the random seed later
         return env

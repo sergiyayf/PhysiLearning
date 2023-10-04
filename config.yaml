@@ -1,7 +1,5 @@
 # global configuration
-# PhysiLearning Version: 0.1.2
-# Run 2
-# Modification: reward changed from no treatment to ttp 
+# PhysiLearning Version: 0.2.1
 global:
   machine: 'raven' # 'mela' # 'raven'
   evaluate_after: 0
@@ -16,7 +14,7 @@ job:
   agent_buffer: 12
   recurrent:
     enable: 1
-    n_jobs: 4
+    n_jobs: 5
 
 # Reinforcement learning configuration
 learning:
@@ -25,29 +23,29 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MultiInputPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
-      n_steps: 124
+      n_steps: 512
       verbose: 1
       ent_coef: 0.01
       clip_range: 0.01
       learning_rate: 1.e-4
       policy_kwargs:
         features_extractor_kwargs:
-          cnn_output_dim: 16
+          cnn_output_dim: 32
         net_arch:
           pi: [32, 32]
           vf: [32, 32]
-    total_timesteps: 1.e+6 
+    total_timesteps: 1.e+9 
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'Lv_image_patient_sampling_test'
+    model_save_prefix: '03_10_LV_multiobs_long'
     load:
-      enable_loading: 0
+      enable_loading: 1
       last_model: 0
-      saved_model_name: './Training/SavedModels/test_PC_train_best_reward'
+      saved_model_name: './Training/SavedModels/03_10_LV_multiobs_long_best_reward'
 
 # Environment configuration
 env:
   # general env settings
-  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -59,7 +57,7 @@ env:
   observation_type: 'multiobs' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   max_tumor_size: 4000
-  max_time: 10 # 120
+  max_time: 120 # 120
   initial_wt: 2700
   initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
@@ -75,7 +73,7 @@ env:
   image_size: 84
   patient_sampling:
     enable: 1
-    patient_id: [1, 80] # [1, 4, 55, 80, 93]
+    patient_id: [1, 4, 55, 80, 93] # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
