@@ -79,14 +79,22 @@ class LvEnv(BaseEnv):
             self.capacity = env_specific_params.get('carrying_capacity', 6500)
 
         # 1 - wt, 2 - resistant
-        self.competition = [env_specific_params.get('competition_wt', 2.),
-                            env_specific_params.get('competition_mut', 1.)]
+        if self.config['env']['patient_sampling']['enable']:
+            self._set_patient_specific_competition(self.patient_id)
+        else:
+            self.competition = [env_specific_params.get('competition_wt', 2.),
+                                env_specific_params.get('competition_mut', 1.)]
+
         self.growth_function_flag = env_specific_params.get('growth_function_flag', 'delayed')
 
         self.trajectory[:, 0] = self.state
         self.real_step_count = 0
 
         self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
+
+    def _set_patient_specific_competition(self, patient_id):
+        self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
+                            self.config['patients'][patient_id]['LvEnv']['competition_mut']]
 
     def _get_image(self, action: int):
         """
@@ -209,6 +217,7 @@ class LvEnv(BaseEnv):
         if self.config['env']['patient_sampling']['enable']:
             if len(self.patient_id_list) > 1:
                 self._choose_new_patient()
+                self._set_patient_specific_competition(self.patient_id)
 
         if self.wt_random:
             self.initial_wt = \
@@ -271,7 +280,7 @@ class LvEnv(BaseEnv):
                 (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
                 self.death_rate[i] - self.death_rate_treat[i] * treat)
 
-            if new_pop_size < 0.5*self.normalization_factor:
+            if new_pop_size < 10*self.normalization_factor and self.death_rate_treat[i]*treat > 0:
                 new_pop_size = 0
         else:
             raise NotImplementedError
