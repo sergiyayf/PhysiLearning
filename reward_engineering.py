@@ -88,10 +88,10 @@ def add_to_df(simulation, df, flag = 0, custom = False, func = None):
     return df
 
 def reward_func(obs, time):
-    reward = 1 - 0.75 * (obs[0] + obs[1])/4000 - 0.5 * obs[2]
+    reward = 1 - 0.5 * (obs[0] + obs[1])/4000 - 0.5 * obs[2]
     if sum(obs[0:2]) < 1.e-3:
         reward = 2
-    return 1 # reward
+    return reward # reward
 
 df = pd.DataFrame()
 for patient in [1, 4, 55, 80, 93]:
@@ -101,7 +101,7 @@ for patient in [1, 4, 55, 80, 93]:
         df = add_to_df(simulation, df, flag = 7, custom=True, func=reward_func)
 fig2, ax2 = plt.subplots()
 sns.boxplot(ax=ax2, data=df)
-ax2.set_title(r'Reward: reward = (4000 - 9.5 * (obs[0] + obs[1])) / 4000 - 0.5 * obs[2]')
+ax2.set_title(r'Reward: reward = (4000 - 0.5 * (obs[0] + obs[1])) / 4000 - 0.5 * obs[2]')
 plt.show()
 
 at_sim = SimOut('Lv', 1, 'AT100')
