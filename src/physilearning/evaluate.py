@@ -213,6 +213,7 @@ def evaluate(config_file='config.yaml') -> None:
         model_config_file = os.path.join(model_training_path, 'Training', 'Configs', model_prefix + '.yaml')
 
         env_type = general_config['eval']['evaluate_on']
+        save_name = general_config['eval']['save_name']
         with open(model_config_file, 'r') as f:
             model_config = yaml.load(f, Loader=yaml.FullLoader)
         if env_type == 'same':
@@ -231,7 +232,7 @@ def evaluate(config_file='config.yaml') -> None:
         print(model_name)
         evaluation.run_environment(model_name, num_episodes=general_config['eval']['num_episodes'],
                                    save_path=os.path.join(model_training_path, 'Evaluations'),
-                                   save_name=env_type + 'Eval' + model_prefix, fixed_therapy=fixed,
+                                   save_name=env_type + 'Eval_' + save_name + model_prefix, fixed_therapy=fixed,
                                    fixed_therapy_kwargs={'at_type': at_type})
 
     else:
