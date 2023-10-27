@@ -1,3 +1,4 @@
+# Version 0.2.2
 # global configuration
 global:
   machine: 'mela' # 'mela' # 'raven'
