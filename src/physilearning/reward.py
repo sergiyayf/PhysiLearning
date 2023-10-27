@@ -37,9 +37,29 @@ class Reward:
 
         # reward for decreasing probability of dying
         elif self.reward_shaping_flag == 6:
-            reward = (self.normalization-0.5*(obs[0]+obs[1]))/self.normalization-0.5*obs[2]
+            reward = (self.normalization - 0.5 * (obs[0] + obs[1])) / self.normalization - 0.5 * obs[2]
             if sum(obs[0:2]) < 1.e-3:
                 reward += 2
+        elif self.reward_shaping_flag == 7:
+            reward = (self.normalization - 1.5 * (obs[0] + obs[1])) / self.normalization - 0.5 * obs[2]
+            if sum(obs[0:2]) < 1.e-3:
+                reward += 2
+        elif self.reward_shaping_flag == 8:
+            reward = 1 - 0.5 * (obs[0] + obs[1]) / 6500 - 0.1 * obs[2]
+            if sum(obs[0:2]) < 1.e-3:
+                reward = 10
+        elif self.reward_shaping_flag == 9:
+            reward = 1 - 0.5 * (obs[0] + obs[1]) / 6500
+            if sum(obs[0:2]) < 1.e-3:
+                reward = 10
+        elif self.reward_shaping_flag == 10:
+            reward = 1 - 1.5 * (obs[0] + obs[2]) / 6500
+            if sum(obs[0:2]) < 1.e-3:
+                reward = 10
+        elif self.reward_shaping_flag == 11:
+            reward = 1
+            if sum(obs[0:2]) < 1.e-3:
+                reward = 10
 
         else:
             raise ValueError("reward_shaping_flag not recognized")
