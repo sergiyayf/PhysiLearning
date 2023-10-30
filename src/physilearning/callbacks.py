@@ -129,7 +129,7 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
                           f"- Last mean reward per episode: {mean_reward:.2f}")
 
                 # New best model, you could save the agent here
-                if mean_reward > self.best_mean_reward:
+                if mean_reward >= self.best_mean_reward:
                     self.best_mean_reward = mean_reward
                     # Example for saving best model
                     if self.verbose >= 1:
