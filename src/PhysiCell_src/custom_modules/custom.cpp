@@ -105,6 +105,7 @@ void create_cell_types( void )
 	cell_defaults.parameters.o2_proliferation_threshold = 8.0;
 	cell_defaults.parameters.o2_necrosis_threshold = 2.0;
 	cell_defaults.parameters.o2_necrosis_max = 0.0;
+	cell_defaults.custom_data.add_variable( "treatment" , "dimensionless", 0.0 );
 	/*
 	   This parses the cell definitions in the XML config file. 
 	*/
@@ -186,6 +187,9 @@ void activate_drug_dc(void)
 {
 	static int drug_index = microenvironment.find_density_index("drug");
 	microenvironment.set_substrate_dirichlet_activation(drug_index,true);
+	// change custom data treatment parameter in 0th cell
+	(*all_cells)[0]->custom_data["treatment"] = 1.0;
+
 	return;
 }
 
@@ -193,6 +197,7 @@ void deactivate_drug_dc(void)
 {
 	static int drug_index = microenvironment.find_density_index("drug");
 	microenvironment.set_substrate_dirichlet_activation(drug_index,false);
+	(*all_cells)[0]->custom_data["treatment"] = 0.0;
 	return; 
 }
 

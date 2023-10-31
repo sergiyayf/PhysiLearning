@@ -2,6 +2,7 @@ import numpy as np
 from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
 from typing import Tuple
+import time
 
 
 class LvEnv(BaseEnv):
@@ -283,6 +284,27 @@ class LvEnv(BaseEnv):
                 self.death_rate[i] - self.death_rate_treat[i] * treat)
 
             if new_pop_size < 10*self.normalization_factor and self.death_rate_treat[i]*treat > 0:
+                new_pop_size = 0
+        elif flag == 'delayed_with_noise':
+            treat = self.state[2]
+            if self.state[2] == 0:
+                if self.time > 1 and (self.trajectory[2, self.time - 1] == 1):
+                    treat = 1
+                else:
+                    treat = 0
+            elif self.state[2] == 1:
+                if self.time > 1 and (self.trajectory[2, self.time - 1] == 0):
+                    treat = 0
+                else:
+                    treat = 1
+            new_pop_size = self.state[i] * (1 + self.growth_rate[i] *
+                                            (1 - (self.state[i] + self.state[j] * self.competition[
+                                                j]) / self.capacity) -
+                                            self.death_rate[i] - self.death_rate_treat[i] * treat)
+            # add noise
+            new_pop_size += np.random.normal(0, 0.01*new_pop_size, 1)[0]
+
+            if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * treat > 0:
                 new_pop_size = 0
         else:
             raise NotImplementedError

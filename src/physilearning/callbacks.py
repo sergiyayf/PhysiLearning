@@ -97,8 +97,8 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         try:
             x, y = ts2xy(load_results(self.log_dir), "timesteps")
             if len(x) > 0:
-                if len(y)<5:
-                    self.best_mean_reward = np.mean(y[-10:])/2
+                if len(y) < 5:
+                    self.best_mean_reward = np.mean(y[-10:]) / 2
                 else:
                     self.best_mean_reward = np.mean(y[-10:])
             else:
@@ -119,8 +119,8 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
             x, y = ts2xy(load_results(self.log_dir), "timesteps")
             if len(x) > 0:
                 # Mean training reward over the last 20 episodes
-                if len(y)<5:
-                    mean_reward = np.mean(y[-10:])/2
+                if len(y) < 5:
+                    mean_reward = np.mean(y[-10:]) / 2
                 else:
                     mean_reward = np.mean(y[-10:])
                 if self.verbose >= 1:

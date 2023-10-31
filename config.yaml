@@ -1,5 +1,5 @@
+# Version 0.2.3
 # global configuration
-# PhysiLearning Version: 0.2.1
 global:
   machine: 'raven' # 'mela' # 'raven'
   evaluate_after: 0
@@ -51,10 +51,10 @@ env:
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
-    channels_order: 'first'
+    channels_order: 'last'
 
   # general simulation settings
-  observation_type: 'multiobs' # 'image' # 'number' # 'multiobs'
+  observation_type: 'number' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   max_tumor_size: 4000
   max_time: 120 # 120
@@ -72,7 +72,7 @@ env:
   normalize_to: 1000
   image_size: 84
   patient_sampling:
-    enable: 1
+    enable: 0
     type: 'sequential' # 'random' # 'sequential'
     patient_id: [1, 4, 55, 80, 93]
 
@@ -81,7 +81,7 @@ env:
     carrying_capacity: 6500
     competition_wt: 1.323 #2400.0
     competition_mut: 0.336
-    growth_function_flag: 'delayed' # flag for growth function 0 - for delayed death, 1 - for immediate
+    growth_function_flag: 'delayed_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' # 'dense' # 'random'
 
   # note this is not yet functional
@@ -105,7 +105,7 @@ env:
           value: 'true'
       filename_chkpt:
           parent_nodes: ['user_parameters']
-          value: './../paper_presims/patient_80_new_sims/final'
+          value: './../paper_presims/patient_80/final'
       treatment_time_step:
           parent_nodes: ['user_parameters']
           value: 720
@@ -122,13 +122,13 @@ eval:
   most_recent: 0
   from_file: 0
   path: './'
-  model_prefix: '20_09_LV_multiobs_patient_sampling'
+  model_prefix: '20231030_patient_80_load_good_rl_2'
   step_to_load: '_best_reward'
-  save_name: '_patient_93_no_treatment'
+  save_name: 'lv_noise'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.50
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.0
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

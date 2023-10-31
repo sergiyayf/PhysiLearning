@@ -1,7 +1,7 @@
 # PhysiLearning
 [![CI](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml)
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
-![version](https://img.shields.io/badge/version-0.2.0-blue)
+![version](https://img.shields.io/badge/version-0.2.3-blue)
 
 <img src="data/images/RL_treatment.gif" width="250" height="250" />
 
@@ -98,6 +98,18 @@ pytest tests/test_evaluate.py
 
 
 ## Changelog
+
+#### 0.2.3 Changes
+- Added 'delayed_with_noise' growth flag for LvEnv that can be used for training to make the policy more robust. 
+ 
+#### 0.2.2 Major changes
+- None 
+
+#### 0.2.2 Minor changes
+- Added a new reward flags
+- Added treatment custom var in PhysiCel for better pov rendering 
+- Add black and white povs
+- Fixed eval script reseting environment twice after finishm which caused issues evaling on PcEnvs  
 
 #### 0.2.0 Major changes
 - Added support for unique cell barcodes that allow full tree reconstruction

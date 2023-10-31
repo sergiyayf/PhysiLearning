@@ -2,9 +2,9 @@
 
 <povwriter_settings>
 	<camera> <!-- done -->
-		<distance_from_origin units="micron">500</distance_from_origin>
+		<distance_from_origin units="micron">1500</distance_from_origin>
 		<xy_angle>3.92699081699</xy_angle> <!-- 5*pi/4 -->
-		<yz_angle>1.047</yz_angle><!--1.0471975512</yz_angle>  pi/3 --> 
+		<yz_angle>0.0</yz_angle><!--1.0471975512</yz_angle>  pi/3 --> 
 	</camera>
 
 	<options> <!-- done -->
@@ -20,10 +20,10 @@
 		<time_index>3696</time_index> 
 	</save>
 	
-	<clipping_planes> <!-- done --> 
+	<clipping_planes> <!--  
 		<clipping_plane>0,-1,0,0</clipping_plane>
 		<clipping_plane>-1,0,0,0</clipping_plane>
-		<clipping_plane>0,0,1,0</clipping_plane>
+	<clipping_plane>0,0,1,0</clipping_plane> -->
 	</clipping_planes>
 	
 	<!-- if using standard coloring (above), these will be used --> 
