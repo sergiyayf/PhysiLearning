@@ -115,8 +115,8 @@ class PcEnv(BaseEnv):
         else:
             pc_cpus_per_task = self.cpu_per_task
             command = f"srun --ntasks=1 --exclusive --mem-per-cpu=200 " \
-                      f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
-            # command = f"bash ../../../scripts/run.sh {self.port} {port_connection}"
+                      f"--cpus-per-task={pc_cpus_per_task} --cpu-bind=no ./scripts/run.sh {self.port} {port_connection}"
+            #command = f"bash ./scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
 
     def _rewrite_xml_parameter(self, parent_nodes: list, parameter: str, value: str) -> None:

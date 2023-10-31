@@ -14,7 +14,7 @@ job:
   agent_buffer: 12
   recurrent:
     enable: 1
-    n_jobs: 5
+    n_jobs: 2
 
 # Reinforcement learning configuration
 learning:
@@ -36,18 +36,18 @@ learning:
           vf: [32, 32]
     total_timesteps: 1.e+9 
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '03_10_LV_multiobs_long'
+    model_save_prefix: '20231012_LV_vfs_r10'
     load:
-      enable_loading: 1
+      enable_loading: 0 
       last_model: 0
-      saved_model_name: './Training/SavedModels/03_10_LV_multiobs_long_best_reward'
+      saved_model_name: './Training/SavedModels/04_10_LV_sequential_patient_sampling_best_reward'
 
 # Environment configuration
 env:
   # general env settings
   type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 0
+  wrap: 1 
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -67,7 +67,7 @@ env:
   treat_death_rate_wt: 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 6  # reward shaping flag for some predefined rewards
+  reward_shaping: 10  # reward shaping flag for some predefined rewards
   normalize: 0
   normalize_to: 1000
   image_size: 84

@@ -389,6 +389,6 @@
         <treatment_time_step type="int" units="min" description="">720</treatment_time_step>
         <number_of_denovo_mutations type="int" units="none" description="">1</number_of_denovo_mutations>
         <treatment_strength type="double" units="none" description="">6.0e2</treatment_strength>
-        <enable_barcode_communication type="bool" units="none">true</enable_barcode_communication>
+        <enable_barcode_communication type="bool" units="none">false</enable_barcode_communication>
     </user_parameters>
 </PhysiCell_settings>
