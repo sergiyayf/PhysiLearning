@@ -97,14 +97,26 @@ def main():
 
 # plot one trajectory of aT scenario
 
-df = pd.read_hdf('Evaluations/LvEnvEval_lveval_rew0_refine20231030_patient_80_load_good_rl_2.h5', key='run_0')
+df = pd.read_hdf('Evaluations/LvEnvEvallv_noise.h5', key='run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'], label='Type 0')
 ax.plot(df.index, df['Type 1'], label='Type 1')
 ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
 ax.legend()
-ax.set_title('Patient 80, lv run 2')
+ax.set_title('Patient 80, lv run0')
 #ax.set_yscale('log')
 ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
+
+for j in range(1,10):
+
+    df = pd.read_hdf('Evaluations/LvEnvEvallv_noise.h5', key=f'run_{j}')
+    fig, ax = plt.subplots()
+    ax.plot(df.index, df['Type 0'], label='Type 0')
+    ax.plot(df.index, df['Type 1'], label='Type 1')
+    ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
+    ax.legend()
+    ax.set_title(f'Patient 80, lv run {j}')
+    #ax.set_yscale('log')
+    ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
 main()
 plt.show()
