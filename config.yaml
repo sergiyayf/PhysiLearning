@@ -122,15 +122,15 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: '20231024_patient_80_retraining_r0'
+  model_prefix: '20231030_patient_80_load_good_rl_2'
   step_to_load: '_best_reward'
-  save_name: 'test_2_rew8_pc_eval_'
+  save_name: 'lveval_rew0_refine'
   # evaluation settings
   fixed_AT_protocol: 0
   at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.0
   num_episodes: 4
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'same' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients

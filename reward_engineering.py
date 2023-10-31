@@ -91,7 +91,7 @@ def reward_func(obs, time):
     reward = 1 - 0.5*np.exp((obs[0] + obs[1])/3000) - 0.5 * obs[2]
     if sum(obs[0:2]) < 1.e-3:
         reward = 2
-    return reward # reward
+    return 1 # reward
 
 df = pd.DataFrame()
 for patient in [1, 4, 55, 80, 93]:

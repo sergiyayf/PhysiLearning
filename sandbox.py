@@ -24,8 +24,9 @@ def main():
                         'Evaluations/Pc/PcEnvEval_patient_80_AT75.h5',
                         'Evaluations/Pc/PcEnvEval_patient_80_AT100.h5',
                         'Evaluations/Pc/PcEnvEval_patient_80_random.h5',
-                        'Evaluations/lv_on_pc_2108_combined.h5',
-                        'Evaluations/PcEnvEval_pc_rl_1008_interruption_combined.h5',
+                        'Evaluations/older_evals/lv_on_pc_2108_combined.h5',
+                        'Evaluations/older_evals/PcEnvEval_pc_rl_1008_interruption_combined.h5',
+                        'Evaluations/PcEnvEval_20231027_transfer.h5',
                      ]
     pat_x = 93
     patient_4_files_list = [f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_no_treatment.h5',
@@ -39,7 +40,7 @@ def main():
                     f'Patient {pat_x} AT50', f'Patient {pat_x} AT75', f'Patient {pat_x} AT100', f'Patient {pat_x} Random']
 
     PC_name_lsit = ['PC No treatment', 'PC MTD',
-                    'PC AT50', 'PC AT75', 'PC AT100', 'PC Random', 'PC RL(lv trained)', 'PC RL']
+                    'PC AT50', 'PC AT75', 'PC AT100', 'PC Random', 'PC RL(lv trained)', 'PC RL', 'Transfer']
 
     # PC_files_list = patient_4_files_list
     # PC_name_lsit = patient_4_name_list
@@ -50,11 +51,12 @@ def main():
                         'Evaluations/Lv/LvEnvEval_patient_80_AT75.h5',
                         'Evaluations/Lv/LvEnvEval_patient_80_AT100.h5',
                         'Evaluations/Lv/LvEnvEval_patient_80_random.h5',
-                        'Evaluations/LvEnvEvallv_2108_cont_2.h5',
-                        'Evaluations/LvEnvEvallv_2108_cont_2.h5',
+                        'Evaluations/older_evals/LvEnvEvallv_2108_cont_2.h5',
+                     'Evaluations/older_evals/LvEnvEvallv_2108_cont_2.h5',
+                     'Evaluations/older_evals/LvEnvEvallv_2108_cont_2.h5',
                      ]
     LV_name_lsit = ['LV No treatment', 'LV MTD',
-                    'LV AT50', 'LV AT75', 'LV AT100', 'LV Random', 'LV RL', 'LV RL']
+                    'LV AT50', 'LV AT75', 'LV AT100', 'LV Random', 'LV RL', 'LV RL', 'LV RL' ]
 
     PC_dict = {}
     LV_dict = {}
@@ -94,93 +96,14 @@ def main():
     #fig.savefig('all_treatments.pdf', transparent=True)
 
 # plot one trajectory of aT scenario
-#
-df = pd.read_hdf('Evaluations/LvEnvEval_test_rew020231024_patient_80_retraining_r0.h5', key='run_50')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.set_title('Patient 80, rew020231024_patient_80_retraining_r0')
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
 
-df = pd.read_hdf('Evaluations/LvEnvEval_test_rew020231024_patient_80_retraining_r8.h5', key='run_50')
+df = pd.read_hdf('Evaluations/LvEnvEval_lveval_rew0_refine20231030_patient_80_load_good_rl_2.h5', key='run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'], label='Type 0')
 ax.plot(df.index, df['Type 1'], label='Type 1')
 ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
 ax.legend()
-ax.set_title('Patient 80, rew020231024_patient_80_retraining_r8')
-#ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
-
-df = pd.read_hdf('Evaluations/older_evals/LvEnvEvallv_2108_cont_2.h5', key='run_50')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.set_title('Patient 80, lv_2108_cont_2')
-#ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
-
-df = pd.read_hdf('Evaluations/PcEnvEval20231024_patient_80_retraining_r8.h5', key='run_1')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.set_title('Patient 80, run1')
-#ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
-
-df = pd.read_hdf('Evaluations/older_evals/lv_on_pc_2108_combined.h5', key='run_60')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.set_title('Patient 80, rllv run 0')
-#ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
-
-df = pd.read_hdf('Evaluations/older_evals/lv_on_pc_2108_combined.h5', key='run_1')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.set_title('Patient 80, rllv run 1')
-#ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
-
-df = pd.read_hdf('Evaluations/PcEnvEval_test_2_rew8_pc_eval_20231024_patient_80_retraining_r0.h5', key='run_0')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.set_title('Patient 80, at100 run 60 ')
-#ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
-
-df = pd.read_hdf('Evaluations/PcEnvEval_test_2_rew8_pc_eval_20231024_patient_80_retraining_r0.h5', key='run_1')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.set_title('Patient 80, at100 run 0')
-#ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
-
-df = pd.read_hdf('Evaluations/PcEnvEval_test_2_rew8_pc_eval_20231024_patient_80_retraining_r0.h5', key='run_2')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-ax.legend()
-ax.set_title('Patient 80, at100 run 0')
+ax.set_title('Patient 80, lv run 2')
 #ax.set_yscale('log')
 ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
 main()
