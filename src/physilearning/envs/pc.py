@@ -135,10 +135,12 @@ class PcEnv(BaseEnv):
         Copy patient checkpoint file to the PhysiCell xml config
 
         """
-        parent_nodes = self.config['patients'][patient_id]['PcEnv']['filename_chkpt']['parent_nodes']
         parameter = 'filename_chkpt'
-        value = self.config['patients'][patient_id]['PcEnv']['filename_chkpt']['value']
-        self._rewrite_xml_parameter(parent_nodes=parent_nodes, parameter=parameter,
+        if self.config['env']['patient_sampling']['type'] == 'range':
+            value = f'./../paper_presims/patient_{patient_id}/final'
+        else:
+            value = self.config['patients'][patient_id]['PcEnv']['filename_chkpt']['value']
+        self._rewrite_xml_parameter(parent_nodes=['user_parameters'], parameter=parameter,
                                     value=value)
 
     def _send_message(self, message: str) -> None:

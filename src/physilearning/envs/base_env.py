@@ -63,7 +63,10 @@ class BaseEnv(Env):
         self.config = config
         if isinstance(patient_id, list):
             self.patient_id_list = patient_id
-            self.patient_id = np.random.choice(patient_id)
+            if self.config['env']['patient_sampling']['type'] == 'range':
+                self.patient_id = 1
+            else:
+                self.patient_id = np.random.choice(patient_id)
         elif isinstance(patient_id, int):
             self.patient_id_list = [patient_id]
             self.patient_id = patient_id
@@ -206,6 +209,7 @@ class BaseEnv(Env):
         """
         if self.config['env']['patient_sampling']['type'] == 'random':
             self.patient_id = np.random.choice(self.config['env']['patient_sampling']['patient_id'])
+            self._set_patient_params()
         elif self.config['env']['patient_sampling']['type'] == 'sequential':
             patient_list = self.config['env']['patient_sampling']['patient_id']
             patient_index = patient_list.index(self.patient_id)
@@ -213,9 +217,19 @@ class BaseEnv(Env):
                 self.patient_id = patient_list[0]
             else:
                 self.patient_id = patient_list[patient_index + 1]
+            self._set_patient_params()
+        elif self.config['env']['patient_sampling']['type'] == 'range':
+            range_values = self.config['env']['patient_sampling']['patient_id']
+            patient_list = list(range(range_values[0], range_values[1]))
+            patient_index = patient_list.index(self.patient_id)
+            if patient_index == len(patient_list) - 1:
+                self.patient_id = patient_list[0]
+            else:
+                self.patient_id = patient_list[patient_index + 1]
+
         else:
             raise ValueError('Patient sampling type not supported')
-        self._set_patient_params()
+
 
     @classmethod
     def default_config(cls) -> dict:

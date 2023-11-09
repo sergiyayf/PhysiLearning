@@ -1,4 +1,4 @@
-# Version 0.2.3
+# Version 0.2.4
 # global configuration
 global:
   machine: 'raven' # 'mela' # 'raven'
@@ -56,9 +56,9 @@ env:
   # general simulation settings
   observation_type: 'number' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
-  max_tumor_size: 4000
+  max_tumor_size: 4000 # 110000 # 4000
   max_time: 120 # 120
-  initial_wt: 2700
+  initial_wt: 2761 # 74291 # 2761
   initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
   growth_rate_mut: 0.438 # 0.0175
@@ -72,7 +72,7 @@ env:
   normalize_to: 1000
   image_size: 84
   patient_sampling:
-    enable: 0
+    enable: 1
     type: 'sequential' # 'random' # 'sequential'
     patient_id: [1, 4, 55, 80, 93]
 
@@ -81,7 +81,7 @@ env:
     carrying_capacity: 6500
     competition_wt: 1.323 #2400.0
     competition_mut: 0.336
-    growth_function_flag: 'delayed_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
+    growth_function_flag: 'delayed' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' # 'dense' # 'random'
 
   # note this is not yet functional
@@ -93,7 +93,7 @@ env:
     xml:
       use_2D:
           parent_nodes: ['domain']
-          value: 'true'
+          value: 'false'
       number_of_susceptible_cells:
           parent_nodes: ['user_parameters']
           value: 2500
@@ -105,7 +105,7 @@ env:
           value: 'true'
       filename_chkpt:
           parent_nodes: ['user_parameters']
-          value: './../paper_presims/patient_80/final'
+          value: './../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
       treatment_time_step:
           parent_nodes: ['user_parameters']
           value: 720
@@ -120,15 +120,15 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: '20231030_patient_80_load_good_rl_2'
+  model_prefix: '20231108_new_train_rew_0'
   step_to_load: '_best_reward'
-  save_name: 'lv_noise'
+  save_name: '_pat_55_'
   # evaluation settings
-  fixed_AT_protocol: 1
+  fixed_AT_protocol: 0
   at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.0
+  threshold: 0.5
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
