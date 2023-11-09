@@ -346,6 +346,7 @@ void setup_tissue( void )
 	load_cells_from_pugixml();
 
 	// set the correct barcode for all of the initially created cells
+	/*
 	for (int i=0; i<(*all_cells).size(); i++){
         Cell* pCell = (*all_cells)[i];
         std::bitset<128> temp_bitset(pCell->ID);
@@ -362,7 +363,7 @@ void setup_tissue( void )
             temp_bitset.set(left_most_bit+2+j);
         }
         pCell->barcode = temp_bitset;
-    }
+    } */
 	//setup_round_tumoroid();
 	}
 	return; 
@@ -440,9 +441,9 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 			pCell->convert_to_cell_definition(*cell_definitions_by_index[ind_resistant]);
 			parameters.ints("number_of_denovo_mutations") += 1;
 			pCell->clone_ID = parameters.ints("number_of_denovo_mutations");
-			std::bitset<128> temp_bitset = pCell->barcode;
-	        temp_bitset.set( 3*(pCell->number_of_divisions-1)+2+pCell->custom_data["left_most_bit"], 1 );
-	        pCell->barcode = temp_bitset;
+			// std::bitset<128> temp_bitset = pCell->barcode;
+	        // temp_bitset.set( 3*(pCell->number_of_divisions-1)+2+pCell->custom_data["left_most_bit"], 1 );
+	        // pCell->barcode = temp_bitset;
 		}
 	}
 	

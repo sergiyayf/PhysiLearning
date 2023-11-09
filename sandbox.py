@@ -5,7 +5,7 @@ mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
 
-def get_ttps(filename, timesteps=100):
+def get_ttps(filename, timesteps=70):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key='run_'+str(i))
@@ -27,6 +27,10 @@ def main():
                         'Evaluations/older_evals/lv_on_pc_2108_combined.h5',
                         'Evaluations/older_evals/PcEnvEval_pc_rl_1008_interruption_combined.h5',
                         'Evaluations/PcEnvEval_20231027_transfer.h5',
+                        'data/results/eval_transfered_r0/PcEnvEval__transfer_r020231102_PC_transfer_r0_changed_callback_1.h5',
+                        'Evaluations/PcEnvEval_20231103_transfer_r0to8.h5',
+                        'data/results/eval_lv_r0/PcEnvEval__patient_93_no_treatment20231031_patient_80_add_noise_2.h5',
+                        'data/results/eval_lv_r8/PcEnvEval__r8_lv_trained20231102_patient_80_r8_with_noise.h5',
                      ]
     pat_x = 93
     patient_4_files_list = [f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_no_treatment.h5',
@@ -40,7 +44,9 @@ def main():
                     f'Patient {pat_x} AT50', f'Patient {pat_x} AT75', f'Patient {pat_x} AT100', f'Patient {pat_x} Random']
 
     PC_name_lsit = ['PC No treatment', 'PC MTD',
-                    'PC AT50', 'PC AT75', 'PC AT100', 'PC Random', 'PC RL(lv trained)', 'PC RL', 'Transfer']
+                    'PC AT50', 'PC AT75', 'PC AT100', 'PC Random',
+                    'PC RL(lv trained)', 'PC RL', 'Transfer','tr r0', 'tr t8',
+                    'r0', 'r8']
 
     # PC_files_list = patient_4_files_list
     # PC_name_lsit = patient_4_name_list
@@ -52,11 +58,10 @@ def main():
                         'Evaluations/Lv/LvEnvEval_patient_80_AT100.h5',
                         'Evaluations/Lv/LvEnvEval_patient_80_random.h5',
                         'Evaluations/older_evals/LvEnvEvallv_2108_cont_2.h5',
-                     'Evaluations/older_evals/LvEnvEvallv_2108_cont_2.h5',
-                     'Evaluations/older_evals/LvEnvEvallv_2108_cont_2.h5',
+                        'Evaluations/LvEnvEval_lv_noise20231106_patient_80_r8_with_noise_load.h5',
                      ]
     LV_name_lsit = ['LV No treatment', 'LV MTD',
-                    'LV AT50', 'LV AT75', 'LV AT100', 'LV Random', 'LV RL', 'LV RL', 'LV RL' ]
+                    'LV AT50', 'LV AT75', 'LV AT100', 'LV Random', 'LV RL', 'newest lv noise' ]
 
     PC_dict = {}
     LV_dict = {}
@@ -69,54 +74,117 @@ def main():
 
     for i in range(len(PC_files_list)):
         combined[PC_name_lsit[i]] = get_ttps(PC_files_list[i])
-        combined[LV_name_lsit[i]] = get_ttps(LV_files_list[i])
+        # combined[LV_name_lsit[i]] = get_ttps(LV_files_list[i])
 
     PC_df = pd.DataFrame(PC_dict)
     LV_df = pd.DataFrame(LV_dict)
-    combined_df = pd.DataFrame(combined)
+    # combined_df = pd.DataFrame(combined)
 
     # box plot the distribution with scatter using seaborn
     fig, ax = plt.subplots()
-    sns.boxplot(data=PC_df, ax=ax)
+    sns.boxplot(data=PC_df, ax=ax, width = 0.3)
     sns.stripplot(data=PC_df, ax=ax, color='black', jitter=0.2, size=2.5)
     # show mean as well
     ax.scatter(PC_df.mean().index, PC_df.mean(), marker='x', color='red', s=50, label='mean')
 
     fig, ax = plt.subplots()
-    sns.boxplot(data=LV_df, ax=ax)
+    sns.boxplot(data=LV_df, ax=ax, width = 0.5)
     sns.stripplot(data=LV_df, ax=ax, color='black', jitter=0.2, size=2.5)
     # show mean as well
     ax.scatter(LV_df.mean().index, LV_df.mean(), marker='x', color='red', s=50, label='mean')
 
-    fig, ax = plt.subplots()
-    sns.boxplot(data=combined_df, ax=ax)
-    sns.stripplot(data=combined_df, ax=ax, color='black', jitter=0.2, size=2.5)
-    # show mean as well
-    ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
-    #fig.savefig('all_treatments.pdf', transparent=True)
+    # fig, ax = plt.subplots()
+    # sns.boxplot(data=combined_df, ax=ax)
+    # sns.stripplot(data=combined_df, ax=ax, color='black', jitter=0.2, size=2.5)
+    # # show mean as well
+    # ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
+    # #fig.savefig('all_treatments.pdf', transparent=True)
 
-# plot one trajectory of aT scenario
+    for i in range(1, 0):
+        df = pd.read_hdf('Evaluations/LvEnvEval_lv_noise20231106_patient_80_r8_with_noise_load.h5', key=f'run_{i}')
+        fig, ax = plt.subplots()
+        ax.plot(df.index, df['Type 0'], label='Type 0')
+        ax.plot(df.index, df['Type 1'], label='Type 1')
+        ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
+        ax.legend()
+        ax.set_title(f'Patient 80, lv r0 run 5')
+        # ax.set_yscale('log')
+        ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug', lw=0)
 
-df = pd.read_hdf('Evaluations/LvEnvEvallv_noise.h5', key='run_0')
+    for j in [1, 4, 55, 80, 93]:
+        for i in range(1, 2):
+            df = pd.read_hdf(f'Evaluations/LvEnvEval__pat_{j}_20231108_rew12_cohort.h5', key=f'run_{i}')
+            fig, ax = plt.subplots()
+            ax.plot(df.index, df['Type 0'], label='Type 0')
+            ax.plot(df.index, df['Type 1'], label='Type 1')
+            ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
+            ax.legend()
+            ax.set_title(f'eval r8 pat{j} run {i}')
+            # ax.set_yscale('log')
+            ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
+                            lw=0)
+
+    for j in [4, 55, 80, 93]:
+        for i in range(1, 2):
+            df = pd.read_hdf(f'Evaluations/LvEnvEval__pat_{j}_20231106_patient_80_r8_with_noise_load.h5',
+                             key=f'run_{i}')
+            fig, ax = plt.subplots()
+            ax.plot(df.index, df['Type 0'], label='Type 0')
+            ax.plot(df.index, df['Type 1'], label='Type 1')
+            ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
+            ax.legend()
+            ax.set_title(f'only p80 pat{j} run {i}')
+            # ax.set_yscale('log')
+            ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
+                            lw=0)
+
+    for j in [80]:
+        for i in range(1, 2):
+            df = pd.read_hdf(f'Evaluations/LvEnvEval_test_rew020231024_patient_80_retraining_r0.h5', key=f'run_{i}')
+            fig, ax = plt.subplots()
+            ax.plot(df.index, df['Type 0'], label='Type 0')
+            ax.plot(df.index, df['Type 1'], label='Type 1')
+            ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
+            ax.legend()
+            ax.set_title(f'only p80 pat{j} run {i}')
+            # ax.set_yscale('log')
+            ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
+                            lw=0)
+
+df = pd.read_hdf(f'Evaluations/LvEnvEval__pat_80_20231108_new_train_rew_0.h5', key=f'run_10')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'], label='Type 0')
 ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
+ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
 ax.legend()
-ax.set_title('Patient 80, lv run0')
-#ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
+ax.set_title(f'only p80 pat80 new train')
+# ax.set_yscale('log')
+ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
+                lw=0)
 
-for j in range(1,10):
+df = pd.read_hdf(f'Evaluations/LvEnvEval__pat_93_20231108_new_train_rew_0.h5', key=f'run_10')
+fig, ax = plt.subplots()
+ax.plot(df.index, df['Type 0'], label='Type 0')
+ax.plot(df.index, df['Type 1'], label='Type 1')
+ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
+ax.legend()
+ax.set_title(f'only p93 pat80 new train')
+# ax.set_yscale('log')
+ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
+                lw=0)
 
-    df = pd.read_hdf('Evaluations/LvEnvEvallv_noise.h5', key=f'run_{j}')
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df['Type 0'], label='Type 0')
-    ax.plot(df.index, df['Type 1'], label='Type 1')
-    ax.plot(df.index, df['Type 0']+df['Type 1'], label='total')
-    ax.legend()
-    ax.set_title(f'Patient 80, lv run {j}')
-    #ax.set_yscale('log')
-    ax.fill_between(df.index, df['Treatment']*4000, df['Treatment']*4250, color='orange', label='drug', lw=0)
-main()
+df = pd.read_hdf(f'Evaluations/LvEnvEval__pat_55_20231108_new_train_rew_0.h5', key=f'run_10')
+fig, ax = plt.subplots()
+ax.plot(df.index, df['Type 0'], label='Type 0')
+ax.plot(df.index, df['Type 1'], label='Type 1')
+ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
+ax.legend()
+ax.set_title(f'only p55 pat80 new train')
+# ax.set_yscale('log')
+ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
+                lw=0)
+
+# plot one trajectory of aT scenario
+
+# main()
 plt.show()
