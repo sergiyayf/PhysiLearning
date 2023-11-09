@@ -19,7 +19,7 @@ def test_observation_space():
 
 
 def test_patient_id():
-    config = {'env': {'patient_sampling': {'enable': False}}}
+    config = {'env': {'patient_sampling': {'enable': False, 'type': 'random'}}}
     env = BaseEnv(config=config, patient_id=80)
     assert env.patient_id == 80
     assert len(env.patient_id_list) == 1
@@ -44,3 +44,23 @@ def test_patient_sampling():
         patient_ids.append(env.patient_id)
     # assert that patients ids are not all the same
     assert len(set(patient_ids)) > 1
+
+
+def test_range_sampling():
+    np.random.seed(0)
+    # os.chdir('/home/saif/Projects/PhysiLearning')
+    config_file = './tests/test_cfg.yaml'
+    with open(config_file, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
+    config['env']['patient_sampling']['patient_id'] = [1, 101]
+    config['env']['patient_sampling']['enable'] = True
+    config['env']['patient_sampling']['type'] = 'range'
+    env = BaseEnv(config=config, patient_id=[1, 101])
+    patient_ids = []
+    for _ in range(100):
+        patient_ids.append(env.patient_id)
+        env._choose_new_patient()
+    # assert that patients ids are range between 1 and 101
+    assert patient_ids == list(range(1, 101))
+
