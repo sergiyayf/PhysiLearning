@@ -60,7 +60,8 @@ class Reward:
             reward = 1
             if sum(obs[0:2]) < 1.e-3:
                 reward = 10
-
+        elif self.reward_shaping_flag == 12:
+            reward = 1 - 0.5 * (obs[0] + obs[1]) / 6500 - 0.1 * obs[2]
         else:
             raise ValueError("reward_shaping_flag not recognized")
 
