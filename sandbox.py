@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib as mpl
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def get_ttps(filename, timesteps=70):
@@ -151,39 +152,33 @@ def main():
             ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
                             lw=0)
 
-df = pd.read_hdf(f'Evaluations/LvEnvEval__pat_80_20231108_new_train_rew_0.h5', key=f'run_10')
+df = pd.read_hdf(f'Evaluations/PcEnvEvaltesting_fix_delay_4.h5', key=f'run_0')
 fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
+ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
+ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'only p80 pat80 new train')
+ax.set_title(f'Run 0')
 # ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
-                lw=0)
+treat = df['Treatment'].values
+# replace 0s that are directly after 1 with 1s
+#treat = np.where(treat == 0, np.roll(treat, 1), treat)
+ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
+lw=2)
 
-df = pd.read_hdf(f'Evaluations/LvEnvEval__pat_93_20231108_new_train_rew_0.h5', key=f'run_10')
+df = pd.read_hdf(f'Evaluations/PcEnvEvaltesting_fix_delay_4.h5', key=f'run_1')
 fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
+ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
+ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'only p93 pat80 new train')
+ax.set_title(f'Run 1')
 # ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
-                lw=0)
-
-df = pd.read_hdf(f'Evaluations/LvEnvEval__pat_55_20231108_new_train_rew_0.h5', key=f'run_10')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'], label='Type 0')
-ax.plot(df.index, df['Type 1'], label='Type 1')
-ax.plot(df.index, df['Type 0'] + df['Type 1'], label='total')
-ax.legend()
-ax.set_title(f'only p55 pat80 new train')
-# ax.set_yscale('log')
-ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
-                lw=0)
-
+treat = df['Treatment'].values
+# replace 0s that are directly after 1 with 1s
+#treat = np.where(treat == 0, np.roll(treat, 1), treat)
+ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
+lw=2)
 # plot one trajectory of aT scenario
 
 # main()

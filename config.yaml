@@ -45,10 +45,10 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 1
-  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
+  wrap: 0
+  wrapper: 'SubprocVecEnv' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'last'
@@ -72,7 +72,7 @@ env:
   normalize_to: 1000
   image_size: 84
   patient_sampling:
-    enable: 1
+    enable: 0
     type: 'sequential' # 'random' # 'sequential'
     patient_id: 55 # [1, 4, 55, 80, 93]
 
@@ -93,7 +93,7 @@ env:
     xml:
       use_2D:
           parent_nodes: ['domain']
-          value: 'false'
+          value: 'true'
       number_of_susceptible_cells:
           parent_nodes: ['user_parameters']
           value: 2500
@@ -105,7 +105,7 @@ env:
           value: 'true'
       filename_chkpt:
           parent_nodes: ['user_parameters']
-          value: './../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
+          value:  './../paper_presims/patient_80/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
       treatment_time_step:
           parent_nodes: ['user_parameters']
           value: 720
@@ -120,17 +120,17 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
   model_prefix: '20231108_new_train_rew_0'
   step_to_load: '_best_reward'
-  save_name: '_pat_55_'
+  save_name: 'testing_fix_delay_4'
   # evaluation settings
-  fixed_AT_protocol: 0
+  fixed_AT_protocol: 1
   at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.5
+  threshold: 0.8
   num_episodes: 100
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients

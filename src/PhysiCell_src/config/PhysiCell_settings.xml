@@ -5,12 +5,12 @@
         <x_max>600</x_max>
         <y_min>-600</y_min>
         <y_max>600</y_max>
-        <z_min>-600</z_min>
-        <z_max>600</z_max>
+        <z_min>-10</z_min>
+        <z_max>10</z_max>
         <dx>20</dx>
         <dy>20</dy>
         <dz>20</dz>
-        <use_2D>false</use_2D>
+        <use_2D>true</use_2D>
     </domain>
 
     <overall>

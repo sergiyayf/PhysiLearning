@@ -65,6 +65,7 @@
 ###############################################################################
 */
 
+#include <zmq.hpp>
 #include "../core/PhysiCell.h"
 #include "../modules/PhysiCell_standard_modules.h" 
 
@@ -95,3 +96,4 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt );
 
 std::string get_relevant_cell_info(void);
+int talk_to_pcenv(zmq::socket_t& socket);

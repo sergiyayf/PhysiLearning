@@ -38,7 +38,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
         else:
             warnings.warn('This implementation is sensitive to the type of observation space, be careful')
 
-            if environment.trajectory[2, int(environment.time) - 1] == 1 and tumor_size > threshold * ini_tumor_size:
+            if environment.trajectory[2, int(environment.time)] == 1 and tumor_size > threshold * ini_tumor_size:
                 action = 1
             else:
                 action = 0

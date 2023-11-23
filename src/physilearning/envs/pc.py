@@ -78,11 +78,24 @@ class PcEnv(BaseEnv):
         self.port = port
         if self.config['env']['patient_sampling']['enable']:
             self._get_patient_chkpt_file(self.patient_id)
+        self.transport_type = env_specific_params.get('transport_type', 'ipc://')
+        self.transport_address = env_specific_params.get('transport_address', f'/tmp/') + f'{self.job_name}{self.port}'
+        self._bind_socket()
+        # reward shaping flag
+        self.cpu_per_task = env_specific_params.get('cpus_per_sim', 10)
+        self.running = False
+        self._start_slurm_physicell_job_step()
+
+
+
+    def _bind_socket(self) -> None:
+        """
+        Bind the socket for communication between PhysiCell and the python environment
+        Using ZMQ Request-Reply pattern. Can use ipc transport or potentially also tcp for remote execution
+        or for Windows.
+        """
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
-        self.transport_type = env_specific_params.get('transport_type', 'ipc://')
-        self.transport_address = env_specific_params.get('transport_address', f'/tmp/')+f'{self.job_name}{self.port}'
-
         if self.transport_type == 'ipc://':
             self.socket.bind(f'{self.transport_type}{self.transport_address}')
         elif self.transport_type == 'tcp://':
@@ -92,9 +105,6 @@ class PcEnv(BaseEnv):
                 print("Connection failed. Double check the transport type and address. Trying with the default address")
                 self.socket.bind(f'{self.transport_type}localhost:5555')
                 self.transport_address = '5555'
-        # reward shaping flag
-        self.cpu_per_task = env_specific_params.get('cpus_per_sim', 10)
-        self.running = False
 
     def _start_slurm_physicell_job_step(self) -> None:
         """
@@ -118,6 +128,9 @@ class PcEnv(BaseEnv):
                       f"--cpus-per-task={pc_cpus_per_task} ./scripts/run.sh {self.port} {port_connection}"
             # command = f"bash ../../../scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
+        self.running = True
+        self._receive_message()
+        self._send_message('Start simulation')
 
     def _rewrite_xml_parameter(self, parent_nodes: list, parameter: str, value: str) -> None:
         """
@@ -171,7 +184,11 @@ class PcEnv(BaseEnv):
         # check if the simulation is running or not, if not start physicell for testing
         if not self.running:
             self._start_slurm_physicell_job_step()
-            self.running = True
+
+        if action == 0:
+            self.socket.send(b"Stop treatment")
+        elif action == 1:
+            self.socket.send(b"Treat")
 
         self.time += self.treatment_time_step
         # get tumor updated state
@@ -208,11 +225,11 @@ class PcEnv(BaseEnv):
                 self.socket.send(b"End simulation")
                 self.socket.close()
                 self.context.term()
-            else:
-                if action == 0:
-                    self.socket.send(b"Stop treatment")
-                elif action == 1:
-                    self.socket.send(b"Treat")
+            # else:
+            #     if action == 0:
+            #         self.socket.send(b"Stop treatment")
+            #     elif action == 1:
+            #         self.socket.send(b"Treat")
 
             if self.observation_type == 'image':
                 obs = self.image
@@ -238,10 +255,10 @@ class PcEnv(BaseEnv):
 
             else:
                 done = False
-                if action == 0:
-                    self.socket.send(b"Stop treatment")
-                elif action == 1:
-                    self.socket.send(b"Treat")
+            #     if action == 0:
+            #         self.socket.send(b"Stop treatment")
+            #     elif action == 1:
+            #         self.socket.send(b"Treat")
 
         else:
             raise ValueError('Observation type not supported')
@@ -256,14 +273,11 @@ class PcEnv(BaseEnv):
                 self._choose_new_patient()
                 self._get_patient_chkpt_file(self.patient_id)
 
-        time.sleep(3.0)
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REP)
-        self.socket.bind(f'{self.transport_type}{self.transport_address}')
-
         if not self.running:
             self._start_slurm_physicell_job_step()
-            self.running = True
+        self._bind_socket()
+        _message = self._receive_message()
+        self._send_message('Reset')
 
         message = self._receive_message()
         self.initial_wt, self.initial_mut = self._get_cell_number(message)
@@ -272,7 +286,7 @@ class PcEnv(BaseEnv):
             self.initial_wt *= self.normalization_factor
             self.initial_mut *= self.normalization_factor
 
-        self._send_message('Start simulation')
+        # self._send_message('Start simulation')
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
