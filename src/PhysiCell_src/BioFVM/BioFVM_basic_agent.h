@@ -104,7 +104,7 @@ class Basic_Agent
 	int number_of_divisions;
 	int clone_ID;
 	int parent_ID;
-	std::bitset<128> barcode;
+	//std::bitset<128> barcode;
 	int index; 
 	int type;
 	

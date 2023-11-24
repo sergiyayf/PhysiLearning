@@ -72,9 +72,9 @@ env:
   normalize_to: 1000
   image_size: 84
   patient_sampling:
-    enable: 0
+    enable: 1
     type: 'sequential' # 'random' # 'sequential'
-    patient_id: 55 # [1, 4, 55, 80, 93]
+    patient_id: 1 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -127,7 +127,7 @@ eval:
   save_name: 'testing_fix_delay_4'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.8
   num_episodes: 100
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
