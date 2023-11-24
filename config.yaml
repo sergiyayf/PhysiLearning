@@ -45,7 +45,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 0
   wrapper: 'SubprocVecEnv' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -72,16 +72,16 @@ env:
   normalize_to: 1000
   image_size: 84
   patient_sampling:
-    enable: 1
+    enable: 0
     type: 'sequential' # 'random' # 'sequential'
-    patient_id: 1 # [1, 4, 55, 80, 93]
+    patient_id: 80 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
     carrying_capacity: 6500
     competition_wt: 1.323 #2400.0
     competition_mut: 0.336
-    growth_function_flag: 'delayed' # 'instant', 'delayed', 'delayed_with_noise'
+    growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' # 'dense' # 'random'
 
   # note this is not yet functional
@@ -124,13 +124,13 @@ eval:
   path: './'
   model_prefix: '20231108_new_train_rew_0'
   step_to_load: '_best_reward'
-  save_name: 'testing_fix_delay_4'
+  save_name: 'at100_instant'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.8
-  num_episodes: 100
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.0
+  num_episodes: 2
+  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients

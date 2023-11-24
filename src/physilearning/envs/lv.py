@@ -169,6 +169,7 @@ class LvEnv(BaseEnv):
 
         # grow_tumor
         reward = 0
+        self.state[2] = action
         for t in range(0, self.treatment_time_step):
             # step time
             self.time += 1
@@ -177,7 +178,7 @@ class LvEnv(BaseEnv):
             self.burden = np.sum(self.state[0:2])
 
             # record trajectory
-            self.state[2] = action
+            #self.state[2] = action
             self.trajectory[:, self.time] = self.state
 
             # check if done

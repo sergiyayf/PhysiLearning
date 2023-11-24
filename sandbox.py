@@ -152,27 +152,13 @@ def main():
             ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
                             lw=0)
 
-df = pd.read_hdf(f'Evaluations/PcEnvEvaltesting_fix_delay_4.h5', key=f'run_0')
+df = pd.read_hdf(f'Evaluations/LvEnvEvalat100_instant.h5', key=f'run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'Run 0')
-# ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
-
-df = pd.read_hdf(f'Evaluations/PcEnvEvaltesting_fix_delay_4.h5', key=f'run_1')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'Run 1')
+ax.set_title(f'Inst at 100')
 # ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
@@ -180,6 +166,21 @@ treat = df['Treatment'].values
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
 # plot one trajectory of aT scenario
+
+df = pd.read_hdf(f'Evaluations/LvEnvEvalat_instant_2.h5', key=f'run_0')
+fig, ax = plt.subplots()
+ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
+ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
+ax.legend()
+ax.set_title(f'inst at 60')
+# ax.set_yscale('log')
+treat = df['Treatment'].values
+# replace 0s that are directly after 1 with 1s
+#treat = np.where(treat == 0, np.roll(treat, 1), treat)
+ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
+lw=2)
+
 
 # main()
 plt.show()

@@ -33,7 +33,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
 
     if at_type == 'zhang_et_al':
         ini_tumor_size = environment.initial_wt + environment.initial_mut
-        if tumor_size > ini_tumor_size:
+        if tumor_size >= ini_tumor_size:
             action = 1
         else:
             warnings.warn('This implementation is sensitive to the type of observation space, be careful')
