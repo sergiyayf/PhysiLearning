@@ -131,17 +131,17 @@ class Evaluation:
         else:
             final_score = np.zeros(num_episodes)
             model = None
-        obs = self.env.reset()
+        obs, _ = self.env.reset()
         for episode in range(num_episodes):
             if self._is_venv():
                 if self.env.get_attr('time')[0] > 0:
-                    obs = self.env.reset()
+                    obs, _ = self.env.reset()
                 else:
                     print ('Episode 0, already reset')
 
             else:
                 if self.env.time > 0:
-                    obs = self.env.reset()
+                    obs, _ = self.env.reset()
                 else:
                     print ('Episode 0, already reset')
             # obs = self.env.reset()
@@ -161,7 +161,7 @@ class Evaluation:
                     if self.env.observation_type == 'image':
                         self.image_trajectory = self.env.image_trajectory
 
-                obs, reward, done, info = self.env.step(action)
+                obs, reward, done, trunc, info = self.env.step(action)
                 score += reward
 
             final_score[episode] = score

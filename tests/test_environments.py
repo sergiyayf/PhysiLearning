@@ -59,12 +59,13 @@ def test_env_step(env_type):
     else:
         raise ValueError('Environment type not recognized')
     env = EnvClass()
-    obs = env.reset()
+    obs, _ = env.reset()
     action = env.action_space.sample()
-    obs, reward, done, info = env.step(action)
+    obs, reward, done, trunc, info = env.step(action)
     assert obs is not None
     assert reward is not None
     assert done is not None
+    assert trunc == False
 
 
 @pytest.mark.skip(reason="runs physicell")

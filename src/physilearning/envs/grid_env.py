@@ -127,7 +127,7 @@ class GridEnv(BaseEnv):
         else:
             raise ValueError('Positioning method not recognized.')
 
-    def step(self, action: int) -> Tuple[np.ndarray, float, bool, Dict[str, Any]]:
+    def step(self, action: int) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
         """
         Take a step in the environment simulating simple tumour growth
         on the grid following the rule that a cell can only grow if it
@@ -180,7 +180,7 @@ class GridEnv(BaseEnv):
             raise ValueError('Observation type not supported.')
 
         # return state, reward, done, info
-        return obs, reward, self.done, {}
+        return obs, reward, self.done, False, {}
 
     def grow_tumor(self, grid: np.ndarray) -> np.ndarray:
         """
@@ -305,7 +305,7 @@ class GridEnv(BaseEnv):
                 neighbors.append([x, y+1])
         return neighbors
 
-    def reset(self) -> np.ndarray:
+    def reset(self, *, seed=None, options=None) -> np.ndarray:
         """
         Reset the environment
         :return: (np.ndarray) the initial state
@@ -340,7 +340,7 @@ class GridEnv(BaseEnv):
         else:
             raise ValueError('Observation type not supported')
 
-        return obs
+        return obs, {}
 
 
 if __name__ == "__main__":

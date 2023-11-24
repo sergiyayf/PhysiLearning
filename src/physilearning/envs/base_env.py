@@ -4,10 +4,10 @@ import os
 import matplotlib as mpl
 import matplotlib.animation as animation
 from matplotlib import pyplot as plt
-from gym import Env
-from gym import spaces
+from gymnasium import Env
+from gymnasium import spaces
 import yaml
-from gym.spaces import Discrete, Box
+from gymnasium.spaces import Discrete, Box
 import numpy as np
 
 
@@ -257,7 +257,7 @@ class BaseEnv(Env):
     def step(self, action):
         raise NotImplementedError
 
-    def reset(self):
+    def reset(self, *, seed=None, options=None):
         raise NotImplementedError
 
     def render(self, mode='human') -> mpl.animation.ArtistAnimation:

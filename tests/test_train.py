@@ -23,7 +23,7 @@ def test_setup_env(env_type):
 def test_1_env_vecframestack():
     trainer = train.Trainer(config_file='./tests/test_cfg.yaml')
     trainer.n_envs = 1
-    trainer.env_type = "PcEnv"
+    trainer.env_type = "LvEnv"
     trainer.wrap = True
     trainer.wrapper = "VecFrameStack"
     trainer.setup_env()
@@ -35,7 +35,7 @@ def test_1_env_vecframestack():
 def test_1_env_dummy():
     trainer = train.Trainer(config_file='./tests/test_cfg.yaml')
     trainer.n_envs = 1
-    trainer.env_type = "PcEnv"
+    trainer.env_type = "LvEnv"
     trainer.wrap = True
     trainer.wrapper = "DummyVecEnv"
     trainer.setup_env()
@@ -47,7 +47,7 @@ def test_1_env_dummy():
 def test_not_defined_wrapper():
     trainer = train.Trainer(config_file='./tests/test_cfg.yaml')
     trainer.n_envs = 1
-    trainer.env_type = "PcEnv"
+    trainer.env_type = "LvEnv"
     trainer.wrap = True
     trainer.wrapper = "NotDefinedWrapper"
     with pytest.raises(ValueError):
@@ -57,6 +57,7 @@ def test_not_defined_wrapper():
 @pytest.mark.parametrize("wrapper", ["DummyVecEnv", "VecFrameStack"])
 def test_vector_envs(wrapper):
     trainer = train.Trainer(config_file='./tests/test_cfg.yaml')
+    trainer.env_type = "LvEnv"
     trainer.wrap = True
     trainer.wrapper = wrapper
     trainer.n_envs = 2
@@ -66,7 +67,7 @@ def test_vector_envs(wrapper):
 
 def test_subprocess_vec_env():
     trainer = train.Trainer(config_file='./tests/test_cfg.yaml')
-    trainer.env_type = "PcEnv"
+    trainer.env_type = "LvEnv"
     trainer.wrap = True
     trainer.wrapper = "SubprocVecEnv"
     trainer.n_envs = 2
@@ -77,6 +78,7 @@ def test_subprocess_vec_env():
 def test_setup_callbacks():
     trainer = train.Trainer(config_file='./tests/test_cfg.yaml')
     callbacks = trainer.setup_callbacks()
+    trainer.env_type = "LvEnv"
     assert callbacks is not None
     assert isinstance(callbacks[1], CopyConfigCallback)
     trainer.save_freq = 0

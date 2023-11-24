@@ -87,7 +87,6 @@ class PcEnv(BaseEnv):
         self._start_slurm_physicell_job_step()
 
 
-
     def _bind_socket(self) -> None:
         """
         Bind the socket for communication between PhysiCell and the python environment
@@ -264,9 +263,9 @@ class PcEnv(BaseEnv):
             raise ValueError('Observation type not supported')
         info = {}
 
-        return obs, reward, done, info
+        return obs, reward, done, False, info
 
-    def reset(self):
+    def reset(self, *, seed=None, options=None):
 
         if self.config['env']['patient_sampling']['enable']:
             if len(self.patient_id_list) > 1:
@@ -292,7 +291,7 @@ class PcEnv(BaseEnv):
         self.time = 0
         self.image = self._get_image_obs(message, 0)
         if self.observation_type == 'number':
-            obs = [np.sum(self.state[0:2])]
+            obs = self.state
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
             self.trajectory[:, 0] = self.state
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
@@ -311,7 +310,7 @@ class PcEnv(BaseEnv):
         else:
             raise ValueError('Observation type not supported')
 
-        return obs
+        return obs, {}
 
     def _check_done(self, burden_type: str, **kwargs) -> bool:
         """

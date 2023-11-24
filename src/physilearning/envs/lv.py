@@ -161,7 +161,7 @@ class LvEnv(BaseEnv):
 
         return self.image
 
-    def step(self, action: int) -> Tuple[np.ndarray, float, bool, dict]:
+    def step(self, action: int) -> Tuple[np.ndarray, float, bool, bool, dict]:
         """
         Step in the environment that simulates tumor growth and treatment
         :param action: 0 - no treatment, 1 - treatment
@@ -212,9 +212,9 @@ class LvEnv(BaseEnv):
             raise NotImplementedError
         self.done = done
 
-        return obs, reward, done, info
+        return obs, reward, done, False, info
 
-    def reset(self):
+    def reset(self, *, seed=None, options=None):
         self.real_step_count += 1
         if self.config['env']['patient_sampling']['enable']:
             if len(self.patient_id_list) > 1:
@@ -254,7 +254,7 @@ class LvEnv(BaseEnv):
         else:
             raise NotImplementedError
 
-        return obs
+        return obs, {}
 
     def grow(self, i: int, j: int, flag: str) -> float:
 
