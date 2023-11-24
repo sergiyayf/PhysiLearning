@@ -124,11 +124,11 @@ eval:
   path: './'
   model_prefix: '20231108_new_train_rew_0'
   step_to_load: '_best_reward'
-  save_name: 'at100_instant'
+  save_name: 'lv_at_50'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.0
+  threshold: 0.50
   num_episodes: 2
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

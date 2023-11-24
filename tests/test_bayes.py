@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
-from physilearning.tools import ODEModel
-from physilearning.tools import ODEBayesianFitter
+from physilearning.tools.bayes import ODEModel
+from physilearning.tools.bayes import ODEBayesianFitter
 import numpy as np
 
 

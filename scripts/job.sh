@@ -14,7 +14,8 @@
 
 module purge
 module load gcc/11
-module load anaconda/3/plvenv
+module load use.own
+module load physilearning
 # Export
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 #export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK

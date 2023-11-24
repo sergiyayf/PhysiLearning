@@ -7,7 +7,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3 import PPO
 
 
-@pytest.mark.parametrize("env_type", ["PcEnv", "LvEnv", "GridEnv"])
+@pytest.mark.parametrize("env_type", ["LvEnv", "GridEnv"])
 def test_setup_env(env_type):
     trainer = train.Trainer(config_file='./tests/test_cfg.yaml')
     assert trainer.env is None

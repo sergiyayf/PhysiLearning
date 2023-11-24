@@ -22,8 +22,9 @@
 # Wall clock limit:
 #SBATCH --time=10:00:00
 
-module purge 
-module load anaconda/3/plvenv
+module purge
+module load use.own
+module load physilearning
 # Export
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
