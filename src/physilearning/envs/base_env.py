@@ -192,8 +192,8 @@ class BaseEnv(Env):
         """
         Set parameters of presimulated patients
         """
-        self.initial_mut = self.config['patients'][self.patient_id]['initial_mut']
-        self.initial_wt = self.config['patients'][self.patient_id]['initial_wt']
+        self.initial_mut = self.config['patients'][self.patient_id]['initial_mut']*self.normalization_factor
+        self.initial_wt = self.config['patients'][self.patient_id]['initial_wt']*self.normalization_factor
         self.growth_rate = [self.config['patients'][self.patient_id]['growth_rate_wt'],
                             self.config['patients'][self.patient_id]['growth_rate_mut']]
         self.death_rate = [self.config['patients'][self.patient_id]['death_rate_wt'],
@@ -299,3 +299,4 @@ if __name__ == '__main__':
 
     config['env']['patient_sampling']['enable'] = False
     env = BaseEnv(config=config)
+    print(env.initial_wt)

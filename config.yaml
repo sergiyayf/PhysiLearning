@@ -54,12 +54,12 @@ env:
     channels_order: 'last'
 
   # general simulation settings
-  observation_type: 'number' # 'image' # 'number' # 'multiobs'
+  observation_type: 'image' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   max_tumor_size: 4000 # 110000 # 4000
   max_time: 120 # 120
-  initial_wt: 2761 # 74291 # 2761
-  initial_mut: 1
+  initial_wt: 0 #2761 # 74291 # 2761
+  initial_mut: 2000
   growth_rate_wt: 0.29 # 0.0175
   growth_rate_mut: 0.438 # 0.0175
   death_rate_wt: 0.0029
@@ -68,13 +68,13 @@ env:
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 6  # reward shaping flag for some predefined rewards
-  normalize: 0
-  normalize_to: 1000
+  normalize: True
+  normalize_to: 1
   image_size: 84
   patient_sampling:
     enable: 0
     type: 'sequential' # 'random' # 'sequential'
-    patient_id: 80 # [1, 4, 55, 80, 93]
+    patient_id: 1 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -82,7 +82,8 @@ env:
     competition_wt: 1.323 #2400.0
     competition_mut: 0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
-    image_sampling_type: 'dense' # 'dense' # 'random'
+    image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
+    mutant_distance_to_front: 10
 
   # note this is not yet functional
   PcEnv:
