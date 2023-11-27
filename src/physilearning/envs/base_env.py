@@ -230,6 +230,38 @@ class BaseEnv(Env):
         else:
             raise ValueError('Patient sampling type not supported')
 
+    def measure_response(self):
+        """
+        Measure response to treatment
+        """
+        if self.trajectory[2, self.time] == 1:
+            response = np.sum(self.trajectory[0:2, self.time-1])-np.sum(self.state[0:2])
+        else:
+            response = 0
+        return response
+
+    def truncate(self):
+        """
+        Truncation condition
+        """
+        if self.time >= self.max_time:
+            truncate = True
+        elif self.state[0] + self.state[1] >= 2*(np.sum(self.trajectory[0:2,0])):
+            truncate = True
+        else:
+            truncate = False
+        return truncate
+
+    def terminate(self):
+        """
+        Termination condition
+        """
+        response = self.measure_response()
+        if response < 0:
+            terminate = True
+        else:
+            terminate = False
+        return terminate
 
     @classmethod
     def default_config(cls) -> dict:

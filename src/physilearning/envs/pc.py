@@ -219,11 +219,11 @@ class PcEnv(BaseEnv):
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(self.state, self.time/self.max_time)
 
-            if done:
-                print('Done')
-                self.socket.send(b"End simulation")
-                self.socket.close()
-                self.context.term()
+            # if done:
+            #     print('Done')
+            #     self.socket.send(b"End simulation")
+            #     self.socket.close()
+            #     self.context.term()
             # else:
             #     if action == 0:
             #         self.socket.send(b"Stop treatment")
@@ -246,14 +246,14 @@ class PcEnv(BaseEnv):
 
             obs = self.state
 
-            if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
-                done = True
-                self.socket.send(b"End simulation")
-                self.socket.close()
-                self.context.term()
-
-            else:
-                done = False
+            # if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
+            #     done = True
+            #     self.socket.send(b"End simulation")
+            #     self.socket.close()
+            #     self.context.term()
+            #
+            # else:
+            #     done = False
             #     if action == 0:
             #         self.socket.send(b"Stop treatment")
             #     elif action == 1:
@@ -262,8 +262,13 @@ class PcEnv(BaseEnv):
         else:
             raise ValueError('Observation type not supported')
         info = {}
-
-        return obs, reward, done, False, info
+        terminate = self.terminate()
+        truncate = self.truncate()
+        if terminate or truncate:
+            self.socket.send(b"End simulation")
+            self.socket.close()
+            self.context.term()
+        return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):
 

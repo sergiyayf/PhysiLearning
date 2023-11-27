@@ -176,8 +176,8 @@ class LvEnv(BaseEnv):
             if ini_num_mut_to_sample <= 1e-2:
                 mut_x, mut_y = np.array([]), np.array([])
             # remove until we have the right number
-            random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
-            mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
+            # random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
+            # mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
 
             # put the senstitive cells inside of the circle of big radius, but not where resistant cells are
             radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/2.6*np.sqrt(2)+1))
@@ -188,11 +188,11 @@ class LvEnv(BaseEnv):
             mask = distances <= radius ** 2
             wt_x, wt_y = xx[mask], yy[mask]
             # delete untill we have the right number
-            random_indices = np.random.randint(len(wt_x), size=int(num_wt_to_sample))
-            if ini_num_wt_to_sample <= 1e-2:
-                wt_x, wt_y = np.array([]), np.array([])
-            else:
-                wt_x, wt_y = wt_x[random_indices], wt_y[random_indices]
+            # random_indices = np.random.randint(len(wt_x), size=int(num_wt_to_sample))
+            # if ini_num_wt_to_sample <= 1e-2:
+            #     wt_x, wt_y = np.array([]), np.array([])
+            # else:
+            #     wt_x, wt_y = wt_x[random_indices], wt_y[random_indices]
 
 
         else:
@@ -262,7 +262,9 @@ class LvEnv(BaseEnv):
             raise NotImplementedError
         self.done = done
 
-        return obs, reward, done, False, info
+        terminate = self.terminate()
+        truncate = self.truncate()
+        return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):
         self.real_step_count += 1

@@ -44,7 +44,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
                 action = 0
 
     elif at_type == 'fixed':
-        if tumor_size > threshold*environment.threshold_burden:
+        if tumor_size > threshold*(environment.initial_wt + environment.initial_mut):
             action = 1
         else:
             action = 0
@@ -161,7 +161,8 @@ class Evaluation:
                     if self.env.observation_type == 'image':
                         self.image_trajectory = self.env.image_trajectory
 
-                obs, reward, done, trunc, info = self.env.step(action)
+                obs, reward, term, trunc, info = self.env.step(action)
+                done = term or trunc
                 score += reward
 
             final_score[episode] = score

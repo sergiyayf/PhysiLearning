@@ -45,7 +45,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 0
   wrapper: 'SubprocVecEnv' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -54,12 +54,12 @@ env:
     channels_order: 'last'
 
   # general simulation settings
-  observation_type: 'image' # 'image' # 'number' # 'multiobs'
+  observation_type: 'number' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   max_tumor_size: 4000 # 110000 # 4000
   max_time: 120 # 120
-  initial_wt: 0 #2761 # 74291 # 2761
-  initial_mut: 2000
+  initial_wt: 2500 #2761 # 74291 # 2761
+  initial_mut: 2
   growth_rate_wt: 0.29 # 0.0175
   growth_rate_mut: 0.438 # 0.0175
   death_rate_wt: 0.0029
@@ -125,13 +125,13 @@ eval:
   path: './'
   model_prefix: '20231108_new_train_rew_0'
   step_to_load: '_best_reward'
-  save_name: 'lv_at_50'
+  save_name: 'ntp_pc_response_check'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.50
   num_episodes: 2
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients
