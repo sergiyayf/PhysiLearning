@@ -23,7 +23,13 @@ def test_at_fixed(env_type):
 
     treatment = evaluate.fixed_at(env, threshold=0.8, at_type='fixed')
     assert treatment == 1
-    treatment = evaluate.fixed_at(env, threshold=0.95, at_type='fixed')
+    treatment = evaluate.fixed_at(env, threshold=1.95, at_type='fixed')
+    assert treatment == 1
+    threshold = 9.4/4-1.e-3
+    treatment = evaluate.fixed_at(env, threshold=threshold, at_type='fixed')
+    assert treatment == 1
+    threshold = 9.4 / 4
+    treatment = evaluate.fixed_at(env, threshold=threshold, at_type='fixed')
     assert treatment == 0
     treatment = evaluate.fixed_at(env, at_type='mtd')
     assert treatment == 1

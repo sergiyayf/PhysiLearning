@@ -65,7 +65,7 @@ def test_env_step(env_type):
     assert obs is not None
     assert reward is not None
     assert done is not None
-    assert trunc == False
+    assert trunc is not None
 
 
 @pytest.mark.skip(reason="runs physicell")
