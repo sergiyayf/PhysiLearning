@@ -64,7 +64,7 @@ class BaseEnv(Env):
         if isinstance(patient_id, list):
             self.patient_id_list = patient_id
             if self.config['env']['patient_sampling']['type'] == 'range':
-                self.patient_id = 1
+                self.patient_id = patient_id[-1]-1
             else:
                 self.patient_id = np.random.choice(patient_id)
         elif isinstance(patient_id, int):
@@ -151,7 +151,10 @@ class BaseEnv(Env):
         # If patient sampling enabled set patient specific parameters
         if self.config is not None:
             if self.config['env']['patient_sampling']['enable']:
-                self._set_patient_params()
+                if self.config['env']['patient_sampling']['type'] == 'range':
+                    pass 
+                else:
+                    self._set_patient_params()
         else:
             self.config = {'env': {'patient_sampling': {'enable': False}}}
 
