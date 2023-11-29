@@ -72,7 +72,6 @@
 #include <cmath>
 #include <omp.h>
 #include <fstream>
-#include <zmq.hpp>
 
 #include "./core/PhysiCell.h"
 #include "./modules/PhysiCell_standard_modules.h" 
@@ -93,7 +92,6 @@ int main( int argc, char* argv[] )
     zmq::context_t context(1);
 	zmq::socket_t socket{context,zmq::socket_type::req};
 	// create a second socket of publisher type for barcoding communication, if barcoding is turned on
-	zmq::socket_t cell_data_socket{context,zmq::socket_type::pub};
 
 	bool XML_status = false;
 	char copy_command [1024];
@@ -109,18 +107,12 @@ int main( int argc, char* argv[] )
 	    sprintf( port , argv[1]);
 	    socket.connect(port);
 		std::cout<<"Binding to port: "<<port<<std::endl;
-        if (parameters.bools("enable_barcode_communication")){
-            std::string cell_data_port = std::string(port) + std::string("_cell_data");
-            cell_data_socket.bind(cell_data_port);
-        }
 	}
 	else
 	{
 		socket.connect("ipc:/tmp/1");
         std::cout<<"Warning: Port is not specified, reinforcement learning will not work"<<std::endl;
-        if (parameters.bools("enable_barcode_communication")){
-            cell_data_socket.bind("ipc:/tmp/1_cell_data");
-        }
+
 	}
 	
 	// copy config file to output directry 
@@ -197,7 +189,8 @@ int main( int argc, char* argv[] )
 	}
 	
 	// main loop 
-	
+    int reset = talk_to_pcenv(socket);
+    std::cout<<"Reset: "<<reset<<std::endl;
 	try 
 	{		
 		while( PhysiCell_globals.current_time < PhysiCell_settings.max_time + 0.1*diffusion_dt )
@@ -218,14 +211,6 @@ int main( int argc, char* argv[] )
 					save_PhysiCell_to_MultiCellDS_v2( filename , microenvironment , PhysiCell_globals.current_time );
 
 					// get relevant cell data and submit it to pub socket
-					if (parameters.bools("enable_barcode_communication")){
-                        std::string cell_data = get_relevant_cell_info();
-                        std::string cur_time = "Current_time " + std::to_string(PhysiCell_globals.current_time);
-                        cell_data = cur_time.append(cell_data);
-                        zmq::message_t message(cell_data.size());
-                        memcpy(message.data(), cell_data.c_str(), cell_data.size());
-                        cell_data_socket.send(message, zmq::send_flags::none);
-                    }
 				}
 				
 				PhysiCell_globals.full_output_index++; 
@@ -257,83 +242,15 @@ int main( int argc, char* argv[] )
 			// zmq code block here
 			if (fabs (PhysiCell_globals.current_time - doctor_timer)<0.01*diffusion_dt) {
 
-				// try to change cell position to string;
-				std::string data{"Type 0:"};
-				std::string t0_pos_x{""};
-				std::string t0_pos_y{""};
-				std::string t0_pos_z{""};
-				std::string t1_pos_x{""};
-				std::string t1_pos_y{""};
-				std::string t1_pos_z{""};
-
-				int type_0_counter = 0;
-				int type_1_counter = 0;
-					for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) { 
-						if ((*all_cells)[cells_it]->type == 0) {
-
-					        type_0_counter++;
-					        t0_pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
-					        t0_pos_x.append(",");
-					        t0_pos_y.append(std::to_string((*all_cells)[cells_it]->position[1]));
-					        t0_pos_y.append(",");
-					        t0_pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
-					        t0_pos_z.append(",");
-					    }else if ((*all_cells)[cells_it]->type == 1 ) {
-				 		    type_1_counter++;
-                            t1_pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
-                            t1_pos_x.append(",");
-                            t1_pos_y.append(std::to_string((*all_cells)[cells_it]->position[1]));
-                            t1_pos_y.append(",");
-                            t1_pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
-                            t1_pos_z.append(",");
-
-					}
+				int reset_status = talk_to_pcenv(socket);
+				if (reset_status == 1) {
+				    break;
+				} else if (reset_status == 2) {
+				    while (reset_status != 1) {
+                        reset_status = talk_to_pcenv(socket);
+                    }
+                    break;
 				}
-				
-				data.append(std::to_string(type_0_counter));
-				data.append(" Type 1:");
-				data.append(std::to_string(type_1_counter));
-
-				data.append(" t0_x: ");
-				data.append(t0_pos_x);
-				data.append(" t0_y: ");
-				data.append(t0_pos_y);
-				//data.append(" z: ");
-				//data.append(t0_pos_z);
-				data.append(" t1_x: ");
-				data.append(t1_pos_x);
-				data.append(" t1_y: ");
-				data.append(t1_pos_y);
-				//data.append(" z: ");
-				//data.append(t1_pos_z);
-				
-				// send the request t0 the server
-				zmq::message_t request(data.size());
-				memcpy(request.data(), data.data(), data.size());
-				socket.send(request, zmq::send_flags::none);
-				// socket.send(zmq::buffer(data), zmq::send_flags::none);
-				// receive treatment decision from the client
-
-				zmq::message_t reply;
-
-				// recieve a reply
-				socket.recv(reply, zmq::recv_flags::none);
-                // do treatment or not
-                if (reply.to_string() == "Treat") {
-                    activate_drug_dc();
-		         //treatment_on();
-                } else if (reply.to_string() == "Stop treatment") {
-			        //std::cout<<"Deactivating treatment"<<std::endl;
-                    deactivate_drug_dc();
-		         //treatment_off();
-                } else if (reply.to_string() == "Start simulation") {
-                    deactivate_drug_dc();
-		            //treatment_off();
-                } else if (reply.to_string() == "End simulation") {
-
-                break;
-                }
-				
                 doctor_timer+=parameters.ints("treatment_time_step");
 			}
 
@@ -363,11 +280,17 @@ int main( int argc, char* argv[] )
 	// timer 
 	
 	std::cout << std::endl << "Total simulation runtime: " << std::endl; 
-	BioFVM::display_stopwatch_value( std::cout , BioFVM::runtime_stopwatch_value() ); 
+	BioFVM::display_stopwatch_value( std::cout , BioFVM::runtime_stopwatch_value() );
+
+	//send request to reset environment
+	// send the request t0 the server
+//	std::string reset_message = "reset";
+//    zmq::message_t request(reset_message.size());
+//    memcpy(request.data(), reset_message.data(), reset_message.size());
+//    socket.send(request, zmq::send_flags::none);
 			
 	// close socket and terminate context
 	socket.close();
-	cell_data_socket.close();
 	context.close();
 	return 0; 
 }

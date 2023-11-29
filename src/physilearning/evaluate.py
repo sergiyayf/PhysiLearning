@@ -33,18 +33,18 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
 
     if at_type == 'zhang_et_al':
         ini_tumor_size = environment.initial_wt + environment.initial_mut
-        if tumor_size > ini_tumor_size:
+        if tumor_size >= ini_tumor_size:
             action = 1
         else:
             warnings.warn('This implementation is sensitive to the type of observation space, be careful')
 
-            if environment.trajectory[2, int(environment.time) - 1] == 1 and tumor_size > threshold * ini_tumor_size:
+            if environment.trajectory[2, int(environment.time)] == 1 and tumor_size > threshold * ini_tumor_size:
                 action = 1
             else:
                 action = 0
 
     elif at_type == 'fixed':
-        if tumor_size > threshold*environment.threshold_burden:
+        if tumor_size > threshold*(environment.initial_wt + environment.initial_mut):
             action = 1
         else:
             action = 0
@@ -131,17 +131,17 @@ class Evaluation:
         else:
             final_score = np.zeros(num_episodes)
             model = None
-        obs = self.env.reset()
+        obs, _ = self.env.reset()
         for episode in range(num_episodes):
             if self._is_venv():
                 if self.env.get_attr('time')[0] > 0:
-                    obs = self.env.reset()
+                    obs, _ = self.env.reset()
                 else:
                     print ('Episode 0, already reset')
 
             else:
                 if self.env.time > 0:
-                    obs = self.env.reset()
+                    obs, _ = self.env.reset()
                 else:
                     print ('Episode 0, already reset')
             # obs = self.env.reset()
@@ -161,7 +161,8 @@ class Evaluation:
                     if self.env.observation_type == 'image':
                         self.image_trajectory = self.env.image_trajectory
 
-                obs, reward, done, info = self.env.step(action)
+                obs, reward, term, trunc, info = self.env.step(action)
+                done = term or trunc
                 score += reward
 
             final_score[episode] = score

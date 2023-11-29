@@ -188,8 +188,9 @@ void activate_drug_dc(void)
 	static int drug_index = microenvironment.find_density_index("drug");
 	microenvironment.set_substrate_dirichlet_activation(drug_index,true);
 	// change custom data treatment parameter in 0th cell
-	(*all_cells)[0]->custom_data["treatment"] = 1.0;
-
+	if ((*all_cells).size()>0) {
+	    (*all_cells)[0]->custom_data["treatment"] = 1.0;
+    }
 	return;
 }
 
@@ -197,7 +198,9 @@ void deactivate_drug_dc(void)
 {
 	static int drug_index = microenvironment.find_density_index("drug");
 	microenvironment.set_substrate_dirichlet_activation(drug_index,false);
-	(*all_cells)[0]->custom_data["treatment"] = 0.0;
+	if ((*all_cells).size()>0) {
+	    (*all_cells)[0]->custom_data["treatment"] = 0.0;
+    }
 	return; 
 }
 
@@ -227,8 +230,7 @@ void setup_round_tumoroid( void )
 {
 	// place a cluster of tumor cells at the center
     double cell_radius = cell_defaults.phenotype.geometry.radius; 
-	double cell_spacing = 0.95 * 2.0 * cell_radius; 
-	
+	double cell_spacing = 0.95 * 2.0 * cell_radius;
 	
 		
 	Cell* pCell = NULL;
@@ -346,7 +348,7 @@ void setup_tissue( void )
 	load_cells_from_pugixml();
 
 	// set the correct barcode for all of the initially created cells
-	/*
+    /*
 	for (int i=0; i<(*all_cells).size(); i++){
         Cell* pCell = (*all_cells)[i];
         std::bitset<128> temp_bitset(pCell->ID);
@@ -441,9 +443,9 @@ void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, 
 			pCell->convert_to_cell_definition(*cell_definitions_by_index[ind_resistant]);
 			parameters.ints("number_of_denovo_mutations") += 1;
 			pCell->clone_ID = parameters.ints("number_of_denovo_mutations");
-			// std::bitset<128> temp_bitset = pCell->barcode;
-	        // temp_bitset.set( 3*(pCell->number_of_divisions-1)+2+pCell->custom_data["left_most_bit"], 1 );
-	        // pCell->barcode = temp_bitset;
+//			std::bitset<128> temp_bitset = pCell->barcode;
+//	        temp_bitset.set( 3*(pCell->number_of_divisions-1)+2+pCell->custom_data["left_most_bit"], 1 );
+//	        pCell->barcode = temp_bitset;
 		}
 	}
 	
@@ -485,50 +487,84 @@ void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
 { return; } 
 
-std::string get_relevant_cell_info() {
+
+int talk_to_pcenv(zmq::socket_t& socket) {
+
     // try to change cell position to string;
-				std::string data{"<Cells> \n"};
-				std::string IDs{"ID: "};
-				std::string pos_x{"x: "};
-				std::string pos_y{"y: "};
-				std::string pos_z{"z: "};
-				std::string barcode{"barcode: "};
-				std::string cell_type{"type: "};
-				std::string elapsed_time_in_phase{"elapsed_time_in_phase: "};
+    std::string data{"Type 0:"};
+    std::string t0_pos_x{""};
+    std::string t0_pos_y{""};
+    std::string t0_pos_z{""};
+    std::string t1_pos_x{""};
+    std::string t1_pos_y{""};
+    std::string t1_pos_z{""};
 
-					for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) {
-					    IDs.append(std::to_string((*all_cells)[cells_it]->ID));
-					    IDs.append(",");
-					    pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
-					    pos_x.append(",");
-					    pos_y.append(std::to_string((*all_cells)[cells_it]->position[1]));
-					    pos_y.append(",");
-					    pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
-					    pos_z.append(",");
-					    barcode.append((*all_cells)[cells_it]->barcode.to_string());
-//                      barcode.append(std::to_string((*all_cells)[cells_it]->parent_ID));
-					    barcode.append(",");
-					    cell_type.append(std::to_string((*all_cells)[cells_it]->type));
-					    cell_type.append(",");
-					    elapsed_time_in_phase.append(std::to_string((*all_cells)[cells_it]->phenotype.cycle.data.elapsed_time_in_phase));
-					    elapsed_time_in_phase.append(",");
+    int type_0_counter = 0;
+    int type_1_counter = 0;
+        for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) {
+            if ((*all_cells)[cells_it]->type == 0) {
 
-				}
-                data.append(IDs);
-                data.append(";");
-                data.append(pos_x);
-                data.append(";");
-                data.append(pos_y);
-                data.append(";");
-                data.append(pos_z);
-                data.append(";");
-                data.append(barcode);
-                data.append(";");
-                data.append(cell_type);
-                data.append(";");
-                data.append(elapsed_time_in_phase);
-                data.append(";");
-                data.append("end:");
+                type_0_counter++;
+                t0_pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
+                t0_pos_x.append(",");
+                t0_pos_y.append(std::to_string((*all_cells)[cells_it]->position[1]));
+                t0_pos_y.append(",");
+                t0_pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
+                t0_pos_z.append(",");
+            }else if ((*all_cells)[cells_it]->type == 1 ) {
+                type_1_counter++;
+                t1_pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
+                t1_pos_x.append(",");
+                t1_pos_y.append(std::to_string((*all_cells)[cells_it]->position[1]));
+                t1_pos_y.append(",");
+                t1_pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
+                t1_pos_z.append(",");
 
-return data;
+        }
+    }
+    data.append(std::to_string(type_0_counter));
+    data.append(" Type 1:");
+    data.append(std::to_string(type_1_counter));
+
+    data.append(" t0_x: ");
+    data.append(t0_pos_x);
+    data.append(" t0_y: ");
+    data.append(t0_pos_y);
+    //data.append(" z: ");
+    //data.append(t0_pos_z);
+    data.append(" t1_x: ");
+    data.append(t1_pos_x);
+    data.append(" t1_y: ");
+    data.append(t1_pos_y);
+    //data.append(" z: ");
+    //data.append(t1_pos_z);
+
+    // send the request t0 the server
+    zmq::message_t request(data.size());
+    memcpy(request.data(), data.data(), data.size());
+    socket.send(request, zmq::send_flags::none);
+    // socket.send(zmq::buffer(data), zmq::send_flags::none);
+    // receive treatment decision from the client
+
+    zmq::message_t reply;
+    // recieve a reply
+    socket.recv(reply, zmq::recv_flags::none);
+    // do treatment or not
+    if (reply.to_string() == "Treat") {
+        activate_drug_dc();
+     //treatment_on();
+    } else if (reply.to_string() == "Stop treatment") {
+        //std::cout<<"Deactivating treatment"<<std::endl;
+        deactivate_drug_dc();
+
+    } else if (reply.to_string() == "Start simulation") {
+
+    } else if (reply.to_string() == "End simulation") {
+    return 2;
+    } else if (reply.to_string() == "Reset") {
+    std::cout<<"Reset simulation message is received by PhysiCell"<<std::endl;
+    return 1;
+
+    }
+    return 0;
 }

@@ -1,6 +1,6 @@
 import os
 from physilearning.envs import BaseEnv
-from gym.spaces import Box
+from gymnasium.spaces import Box
 import numpy as np
 import yaml
 

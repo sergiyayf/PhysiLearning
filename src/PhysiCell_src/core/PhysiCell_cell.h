@@ -120,10 +120,8 @@ class Cell_Definition
  private:
  public: 
 	int type;
-	int clone_ID;
-	int parent_ID;
-	int number_of_divisions;
-    std::bitset<128> barcode;
+    int parent_ID;
+    int clone_ID;
 	std::string name; 
 
 	bool is_movable; 

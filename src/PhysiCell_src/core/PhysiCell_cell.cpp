@@ -137,11 +137,10 @@ Cell_Definition::Cell_Definition()
 	// set up the default parameters 
 		// the default Cell_Parameters constructor should take care of this
 		
-	type = 0;
-	name = "unnamed";
-	clone_ID = 0;
+	type = 0; 
 	parent_ID = -1;
-	number_of_divisions = 0;
+	clone_ID = 0;
+	name = "unnamed"; 
 
 	is_movable = true;
 
@@ -184,10 +183,9 @@ Cell_Definition::Cell_Definition( Cell_Definition& cd )
 		// the default Cell_Parameters constructor should take care of this
 		
 	type = cd.type; 
-	name = cd.name;
-	clone_ID = cd.clone_ID;
+	name = cd.name; 
 	parent_ID = cd.parent_ID;
-	number_of_divisions = cd.number_of_divisions;
+	clone_ID = cd.clone_ID;
 	 
 	parameters = cd.parameters;
 	custom_data = cd.custom_data; 
@@ -211,10 +209,9 @@ Cell_Definition& Cell_Definition::operator=( const Cell_Definition& cd )
 		// the default Cell_Parameters constructor should take care of this
 		
 	type = cd.type; 
-	name = cd.name;
-	clone_ID = cd.clone_ID;
+	name = cd.name; 
 	parent_ID = cd.parent_ID;
-	number_of_divisions = cd.number_of_divisions;
+	clone_ID = cd.clone_ID;
 	 
 	parameters = cd.parameters;
 	custom_data = cd.custom_data; 
@@ -401,9 +398,8 @@ Cell::Cell()
 	
 	type = cell_defaults.type; 
 	type_name = cell_defaults.name;
-	clone_ID = cell_defaults.clone_ID;
-	parent_ID = cell_defaults.parent_ID;
-    number_of_divisions = cell_defaults.number_of_divisions;
+    parent_ID = cell_defaults.parent_ID;
+    clone_ID = cell_defaults.clone_ID;
 	
 	custom_data = cell_defaults.custom_data; 
 	parameters = cell_defaults.parameters; 
@@ -635,19 +631,10 @@ Cell* Cell::divide( )
 	set_total_volume(phenotype.volume.total);
 	
 	// child->set_phenotype( phenotype ); 
-	child->phenotype = phenotype;
+	child->phenotype = phenotype; 
 	child->parent_ID = this->ID;
 	child->clone_ID = this->clone_ID;
 
-//    int left_most_initial_bit = this->custom_data["left_most_bit"];
-//    std::bitset<128> temp_bitset_child_1 = this->barcode;
-//	std::bitset<128> temp_bitset_child_2 = this->barcode;
-//	temp_bitset_child_1.set( 3*this->number_of_divisions+left_most_initial_bit, 1 );
-//	temp_bitset_child_2.set( 3*this->number_of_divisions+1+left_most_initial_bit, 1 );
-//    this->barcode = temp_bitset_child_1;
-//    child->barcode = temp_bitset_child_2;
-	this->number_of_divisions++;
-	child->number_of_divisions = this->number_of_divisions;
 
     if (child->phenotype.intracellular){
         child->phenotype.intracellular->start();

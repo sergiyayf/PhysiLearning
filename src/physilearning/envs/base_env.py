@@ -4,10 +4,10 @@ import os
 import matplotlib as mpl
 import matplotlib.animation as animation
 from matplotlib import pyplot as plt
-from gym import Env
-from gym import spaces
+from gymnasium import Env
+from gymnasium import spaces
 import yaml
-from gym.spaces import Discrete, Box
+from gymnasium.spaces import Discrete, Box
 import numpy as np
 
 
@@ -195,8 +195,8 @@ class BaseEnv(Env):
         """
         Set parameters of presimulated patients
         """
-        self.initial_mut = self.config['patients'][self.patient_id]['initial_mut']
-        self.initial_wt = self.config['patients'][self.patient_id]['initial_wt']
+        self.initial_mut = self.config['patients'][self.patient_id]['initial_mut']*self.normalization_factor
+        self.initial_wt = self.config['patients'][self.patient_id]['initial_wt']*self.normalization_factor
         self.growth_rate = [self.config['patients'][self.patient_id]['growth_rate_wt'],
                             self.config['patients'][self.patient_id]['growth_rate_mut']]
         self.death_rate = [self.config['patients'][self.patient_id]['death_rate_wt'],
@@ -233,6 +233,38 @@ class BaseEnv(Env):
         else:
             raise ValueError('Patient sampling type not supported')
 
+    def measure_response(self):
+        """
+        Measure response to treatment
+        """
+        if self.trajectory[2, self.time] == 1:
+            response = np.sum(self.trajectory[0:2, self.time-1])-np.sum(self.state[0:2])
+        else:
+            response = 0
+        return response
+
+    def truncate(self):
+        """
+        Truncation condition
+        """
+        if self.time >= self.max_time:
+            truncate = True
+        elif self.state[0] + self.state[1] >= 2*(np.sum(self.trajectory[0:2,0])):
+            truncate = True
+        else:
+            truncate = False
+        return truncate
+
+    def terminate(self):
+        """
+        Termination condition
+        """
+        response = self.measure_response()
+        if response < 0:
+            terminate = True
+        else:
+            terminate = False
+        return terminate
 
     @classmethod
     def default_config(cls) -> dict:
@@ -260,7 +292,7 @@ class BaseEnv(Env):
     def step(self, action):
         raise NotImplementedError
 
-    def reset(self):
+    def reset(self, *, seed=None, options=None):
         raise NotImplementedError
 
     def render(self, mode='human') -> mpl.animation.ArtistAnimation:
@@ -302,3 +334,4 @@ if __name__ == '__main__':
 
     config['env']['patient_sampling']['enable'] = False
     env = BaseEnv(config=config)
+    print(env.initial_wt)

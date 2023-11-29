@@ -48,9 +48,10 @@ if __name__ == '__main__':
     distance_to_front_cell =  []
     distance_to_front_circle = []
     min_distance_to_front_cell = []
+    per_sim_min_distance = []
     for sim in sims:
         # pymc = pyMCDS.pyMCDS('final.xml' ,f'../../data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
-        cell_info = pd.read_hdf('./../../data/simplified_data_0607_presims.h5', key=f'PhysiCell_{sim}')
+        cell_info = pd.read_hdf('./../../data/simplified_data_1107_mid_mutation_rate.h5', key=f'PhysiCell_{sim}')
         type_1_cells = cell_info[cell_info['cell_type'] == 1]
 
         cells_at_front = cell_info[cell_info['is_at_front'] == 1]
@@ -59,6 +60,7 @@ if __name__ == '__main__':
         type_1_cells = calculate_distance_to_front(type_1_cells, positions)
 
         unique_clones = type_1_cells['clone_ID'].unique()
+        _min_per_sim = []
         for clone in unique_clones:
             single_clone = type_1_cells[type_1_cells['clone_ID']==clone]
 
@@ -66,11 +68,17 @@ if __name__ == '__main__':
             mean_dist_to_front_circle = single_clone['distance_to_front_circle'].mean()
             mean_dist_to_front_cell = single_clone['distance_to_front_cell'].mean()
             min_dist_to_front_cell = single_clone['distance_to_front_cell'].min()
+            _min_per_sim.append(min_dist_to_front_cell)
 
             # add to list
             distance_to_front_circle.append(mean_dist_to_front_circle)
             distance_to_front_cell.append(mean_dist_to_front_cell)
             min_distance_to_front_cell.append(min_dist_to_front_cell)
+
+        if len(_min_per_sim) > 0:
+            per_sim_min_distance.append(np.min(_min_per_sim))
+        else:
+            per_sim_min_distance.append(np.nan)
 
     # plot histogram
 

@@ -78,11 +78,23 @@ class PcEnv(BaseEnv):
         self.port = port
         if self.config['env']['patient_sampling']['enable']:
             self._get_patient_chkpt_file(self.patient_id)
+        self.transport_type = env_specific_params.get('transport_type', 'ipc://')
+        self.transport_address = env_specific_params.get('transport_address', f'/tmp/') + f'{self.job_name}{self.port}'
+        self._bind_socket()
+        # reward shaping flag
+        self.cpu_per_task = env_specific_params.get('cpus_per_sim', 10)
+        self.running = False
+        self._start_slurm_physicell_job_step()
+
+
+    def _bind_socket(self) -> None:
+        """
+        Bind the socket for communication between PhysiCell and the python environment
+        Using ZMQ Request-Reply pattern. Can use ipc transport or potentially also tcp for remote execution
+        or for Windows.
+        """
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
-        self.transport_type = env_specific_params.get('transport_type', 'ipc://')
-        self.transport_address = env_specific_params.get('transport_address', f'/tmp/')+f'{self.job_name}{self.port}'
-
         if self.transport_type == 'ipc://':
             self.socket.bind(f'{self.transport_type}{self.transport_address}')
         elif self.transport_type == 'tcp://':
@@ -92,9 +104,6 @@ class PcEnv(BaseEnv):
                 print("Connection failed. Double check the transport type and address. Trying with the default address")
                 self.socket.bind(f'{self.transport_type}localhost:5555')
                 self.transport_address = '5555'
-        # reward shaping flag
-        self.cpu_per_task = env_specific_params.get('cpus_per_sim', 10)
-        self.running = False
 
     def _start_slurm_physicell_job_step(self) -> None:
         """
@@ -118,6 +127,9 @@ class PcEnv(BaseEnv):
                       f"--cpus-per-task={pc_cpus_per_task} --cpu-bind=no ./scripts/run.sh {self.port} {port_connection}"
             #command = f"bash ./scripts/run.sh {self.port} {port_connection}"
             subprocess.Popen([command], shell=True)
+        self.running = True
+        self._receive_message()
+        self._send_message('Start simulation')
 
     def _rewrite_xml_parameter(self, parent_nodes: list, parameter: str, value: str) -> None:
         """
@@ -171,7 +183,11 @@ class PcEnv(BaseEnv):
         # check if the simulation is running or not, if not start physicell for testing
         if not self.running:
             self._start_slurm_physicell_job_step()
-            self.running = True
+
+        if action == 0:
+            self.socket.send(b"Stop treatment")
+        elif action == 1:
+            self.socket.send(b"Treat")
 
         self.time += self.treatment_time_step
         # get tumor updated state
@@ -203,16 +219,16 @@ class PcEnv(BaseEnv):
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(self.state, self.time/self.max_time)
 
-            if done:
-                print('Done')
-                self.socket.send(b"End simulation")
-                self.socket.close()
-                self.context.term()
-            else:
-                if action == 0:
-                    self.socket.send(b"Stop treatment")
-                elif action == 1:
-                    self.socket.send(b"Treat")
+            # if done:
+            #     print('Done')
+            #     self.socket.send(b"End simulation")
+            #     self.socket.close()
+            #     self.context.term()
+            # else:
+            #     if action == 0:
+            #         self.socket.send(b"Stop treatment")
+            #     elif action == 1:
+            #         self.socket.send(b"Treat")
 
             if self.observation_type == 'image':
                 obs = self.image
@@ -230,40 +246,42 @@ class PcEnv(BaseEnv):
 
             obs = self.state
 
-            if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
-                done = True
-                self.socket.send(b"End simulation")
-                self.socket.close()
-                self.context.term()
-
-            else:
-                done = False
-                if action == 0:
-                    self.socket.send(b"Stop treatment")
-                elif action == 1:
-                    self.socket.send(b"Treat")
+            # if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
+            #     done = True
+            #     self.socket.send(b"End simulation")
+            #     self.socket.close()
+            #     self.context.term()
+            #
+            # else:
+            #     done = False
+            #     if action == 0:
+            #         self.socket.send(b"Stop treatment")
+            #     elif action == 1:
+            #         self.socket.send(b"Treat")
 
         else:
             raise ValueError('Observation type not supported')
         info = {}
+        terminate = self.terminate()
+        truncate = self.truncate()
+        if terminate or truncate:
+            self.socket.send(b"End simulation")
+            self.socket.close()
+            self.context.term()
+        return obs, reward, terminate, truncate, info
 
-        return obs, reward, done, info
-
-    def reset(self):
+    def reset(self, *, seed=None, options=None):
 
         if self.config['env']['patient_sampling']['enable']:
             if len(self.patient_id_list) > 1:
                 self._choose_new_patient()
                 self._get_patient_chkpt_file(self.patient_id)
 
-        time.sleep(3.0)
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REP)
-        self.socket.bind(f'{self.transport_type}{self.transport_address}')
-
         if not self.running:
             self._start_slurm_physicell_job_step()
-            self.running = True
+        self._bind_socket()
+        _message = self._receive_message()
+        self._send_message('Reset')
 
         message = self._receive_message()
         self.initial_wt, self.initial_mut = self._get_cell_number(message)
@@ -272,13 +290,13 @@ class PcEnv(BaseEnv):
             self.initial_wt *= self.normalization_factor
             self.initial_mut *= self.normalization_factor
 
-        self._send_message('Start simulation')
+        # self._send_message('Start simulation')
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
         self.image = self._get_image_obs(message, 0)
         if self.observation_type == 'number':
-            obs = [np.sum(self.state[0:2])]
+            obs = self.state
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
             self.trajectory[:, 0] = self.state
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
@@ -297,7 +315,7 @@ class PcEnv(BaseEnv):
         else:
             raise ValueError('Observation type not supported')
 
-        return obs
+        return obs, {}
 
     def _check_done(self, burden_type: str, **kwargs) -> bool:
         """

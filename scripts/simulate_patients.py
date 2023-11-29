@@ -22,7 +22,7 @@ def main(jobid, port):
 
     env = PcEnv.from_yaml('config.yaml', port=str(port), job_name=str(jobid))
     evaluation = Evaluation(env)
-    evaluation.run_environment(model_name='None', num_episodes=11,
+    evaluation.run_environment(model_name='None', num_episodes=1,
                                save_path=os.path.join('.', 'Evaluations'),
                                save_name=env_type + 'Eval' + save_name, fixed_therapy=fixed,
                                fixed_therapy_kwargs={'at_type': at_type, 'threshold': threshold})
