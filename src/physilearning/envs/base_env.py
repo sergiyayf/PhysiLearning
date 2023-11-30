@@ -42,6 +42,7 @@ class BaseEnv(Env):
         name: str = 'BaseEnv',
         observation_type: str = 'number',
         action_type: str = 'discrete',
+        see_resistance: bool = False,
         max_tumor_size: float = 1000,
         max_time: int = 3000,
         initial_wt: float = 45,
@@ -92,6 +93,7 @@ class BaseEnv(Env):
         # Spaces
         self.name = name
         self.action_type = action_type
+        self.see_resistance = see_resistance
         if self.action_type == 'discrete':
             self.action_space = Discrete(2)
         elif self.action_type == 'continuous':
@@ -168,6 +170,7 @@ class BaseEnv(Env):
         return cls(config=config,
                    observation_type=config['env']['observation_type'],
                    action_type=config['env']['action_type'],
+                   see_resistance=config['env']['see_resistance'],
                    max_tumor_size=config['env']['max_tumor_size'],
                    max_time=config['env']['max_time'],
                    initial_wt=config['env']['initial_wt'],
