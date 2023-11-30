@@ -152,47 +152,71 @@ def main():
             ax.fill_between(df.index, df['Treatment'] * 4000, df['Treatment'] * 4250, color='orange', label='drug',
                             lw=0)
 
-
-df = pd.read_hdf(f'Evaluations/LvEnvEvalat50_lv_response_check.h5', key=f'run_0')
+fig0, ax0 = plt.subplots()
+df = pd.read_hdf(f'Evaluations/LvEnvEvalon_off.h5', key=f'run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+ax0.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1, 1')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'at50 response check')
+ax.set_title(f'1 on off')
 # ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
+print("1 average: ",df['Type 0'].mean())
 
-df = pd.read_hdf(f'Evaluations/PcEnvEvalntp_pc_response_check.h5', key=f'run_0')
+df = pd.read_hdf(f'Evaluations/LvEnvEvalon_off_double.h5', key=f'run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+ax0.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1, 2')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'ntp response check')
+ax.set_title(f'2 on off')
 # ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
+print("2 average: ",df['Type 0'].mean())
 
-df = pd.read_hdf(f'Evaluations/PcEnvEvalpc_at_50_twice_slower.h5', key=f'run_0')
+df = pd.read_hdf(f'Evaluations/LvEnvEvalon_off_triple.h5', key=f'run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+ax0.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1, 3')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'Inst at 50 twice slower')
+ax.set_title(f'3 on off')
 # ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
+print("3 average: ",df['Type 0'].mean())
+
+ax0.legend()
+
+for i in range(1,6):
+    df = pd.read_hdf(f'data/degeneracy_tests/LV_deg_{i}/Evaluations/LvEnvEval_policy_{i}test_v0.3.0b_conda_env.h5', key=f'run_0')
+    fig, ax = plt.subplots()
+    ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
+    ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+    ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
+    ax.legend()
+    ax.set_title(f'Policy {i}')
+    # ax.set_yscale('log')
+    treat = df['Treatment'].values
+    # replace 0s that are directly after 1 with 1s
+    #treat = np.where(treat == 0, np.roll(treat, 1), treat)
+    ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
+    lw=2)
+    print("3 average: ",df['Type 0'].mean())
 # main()
 plt.show()

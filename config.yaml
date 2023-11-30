@@ -58,18 +58,18 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   max_tumor_size: 4000 # 110000 # 4000
   max_time: 120 # 120
-  initial_wt: 2500 #2761 # 74291 # 2761
-  initial_mut: 2
+  initial_wt: 2761 #2761 # 74291 # 2761
+  initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
   growth_rate_mut: 0.438 # 0.0175
   death_rate_wt: 0.0029
   death_rate_mut: 0.00438
-  treat_death_rate_wt: 0.397 # 0.015
+  treat_death_rate_wt: 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 6  # reward shaping flag for some predefined rewards
-  normalize: True
-  normalize_to: 1
+  reward_shaping: 0  # reward shaping flag for some predefined rewards
+  normalize: False
+  normalize_to: 4000
   image_size: 84
   patient_sampling:
     enable: 0
@@ -88,7 +88,7 @@ env:
   # note this is not yet functional
   PcEnv:
     domain_size: 1250
-    cpus_per_sim: 1
+    cpus_per_sim: 10
     transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
     transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
     xml:
@@ -112,7 +112,7 @@ env:
           value: 720
       treatment_death_rate:
           parent_nodes: ['user_parameters']
-          value: 0.00225
+          value: 0.001125 # 0.00225
 
   # LatticeBased environment settings
   GridEnv:
@@ -121,17 +121,17 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
-  path: './'
-  model_prefix: '20231108_new_train_rew_0'
+  from_file: 1
+  path: './data/degeneracy_tests/LV_deg_5/'
+  model_prefix: 'test_v0.3.0b_conda_env'
   step_to_load: '_best_reward'
-  save_name: 'ntp_pc_response_check'
+  save_name: 'policy_5'
   # evaluation settings
-  fixed_AT_protocol: 1
-  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  fixed_AT_protocol: 0
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.50
-  num_episodes: 2
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  num_episodes: 4
+  evaluate_on: 'same' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients

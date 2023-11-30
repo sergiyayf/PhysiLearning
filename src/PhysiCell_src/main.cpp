@@ -95,7 +95,6 @@ int main( int argc, char* argv[] )
 
 	bool XML_status = false;
 	char copy_command [1024];
-	int doctor_timer = 0;
 
 	XML_status = load_PhysiCell_config_file( "./config/PhysiCell_settings.xml" );
 	sprintf( copy_command , "cp ./config/PhysiCell_settings.xml %s" , PhysiCell_settings.folder.c_str() );
@@ -139,8 +138,6 @@ int main( int argc, char* argv[] )
 	create_cell_types();
 	
 	setup_tissue();
-
-     
 
 	/* Users typically stop modifying here. END USERMODS */ 
 	
@@ -188,7 +185,8 @@ int main( int argc, char* argv[] )
 		report_file<<"simulated time\tnum cells\tnum division\tnum death\twall time"<<std::endl;
 	}
 	
-	// main loop 
+	// main loop
+	int doctor_timer = parameters.ints("treatment_time_step");
     int reset = talk_to_pcenv(socket);
     std::cout<<"Reset: "<<reset<<std::endl;
 	try 
