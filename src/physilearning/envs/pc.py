@@ -1,5 +1,7 @@
 import os
 
+import pandas as pd
+
 from physilearning.envs.base_env import BaseEnv
 import numpy as np
 import subprocess

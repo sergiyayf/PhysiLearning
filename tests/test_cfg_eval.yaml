@@ -51,6 +51,7 @@ env:
   # general simulation settings
   observation_type: 'image' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
+  see_resistance: False
   max_tumor_size: 4000
   max_time: 120
   initial_wt: 27

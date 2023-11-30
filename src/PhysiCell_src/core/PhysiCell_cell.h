@@ -122,6 +122,8 @@ class Cell_Definition
 	int type;
     int parent_ID;
     int clone_ID;
+    int number_of_divisions;
+    std::bitset<256> barcode;
 	std::string name; 
 
 	bool is_movable; 

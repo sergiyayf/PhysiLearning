@@ -73,7 +73,7 @@ env:
   normalize_to: 4000
   image_size: 84
   patient_sampling:
-    enable: 0
+    enable: 1
     type: 'sequential' # 'random' # 'sequential'
     patient_id: 1 # [1, 4, 55, 80, 93]
 
@@ -122,17 +122,17 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './data/degeneracy_tests/LV_deg_5/'
   model_prefix: 'test_v0.3.0b_conda_env'
   step_to_load: '_best_reward'
-  save_name: 'policy_5'
+  save_name: 'mtd_test_with_pdl'
   # evaluation settings
-  fixed_AT_protocol: 0
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  fixed_AT_protocol: 1
+  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.50
-  num_episodes: 4
-  evaluate_on: 'same' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  num_episodes: 2
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients
