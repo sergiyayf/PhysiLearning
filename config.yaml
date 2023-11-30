@@ -13,7 +13,7 @@ job:
   time: '24:00:00'
   agent_buffer: 12
   recurrent:
-    enable: 1
+    enable: 0
     n_jobs: 2
 
 # Reinforcement learning configuration
@@ -21,7 +21,7 @@ learning:
   # Model options 
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
-    policy: 'MultiInputPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
+    policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
       n_steps: 512
       verbose: 1
@@ -29,14 +29,14 @@ learning:
       clip_range: 0.01
       learning_rate: 1.e-4
       policy_kwargs:
-        features_extractor_kwargs:
-          cnn_output_dim: 32
+      #  features_extractor_kwargs:
+      #    cnn_output_dim: 32
         net_arch:
           pi: [32, 32]
           vf: [32, 32]
     total_timesteps: 1.e+9 
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '20231012_LV_vfs_r10'
+    model_save_prefix: 'test_v0.3.0b_conda_env'
     load:
       enable_loading: 0 
       last_model: 0
@@ -47,7 +47,7 @@ env:
   # general env settings
   type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 1 
+  wrap: 0 
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -112,7 +112,7 @@ env:
           value: 720
       treatment_death_rate:
           parent_nodes: ['user_parameters']
-          value: 0.00225
+          value: 0.001125 # 0.00225
 
   # LatticeBased environment settings
   GridEnv:

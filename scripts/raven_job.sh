@@ -14,7 +14,8 @@
 
 module purge
 module load gcc/11
-module load anaconda/3/2023.03
+# module load anaconda/3/2023.03
+conda activate py11
 # Export
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 #export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
