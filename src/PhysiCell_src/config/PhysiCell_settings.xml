@@ -29,11 +29,11 @@
     <save>
         <folder>output</folder>
         <full_data>
-            <interval units="min">180</interval>
+            <interval units="min">720</interval>
             <enable>true</enable>
         </full_data>
         <SVG>
-            <interval units="min">180</interval>
+            <interval units="min">720</interval>
             <enable>true</enable>
         </SVG>
         <legacy_data>
@@ -388,7 +388,7 @@
         <treatment_death_rate type="double" units="1/min" description="">0.0001157</treatment_death_rate> 
         <treatment_time_step type="int" units="min" description="">720</treatment_time_step>
         <number_of_denovo_mutations type="int" units="none" description="">1</number_of_denovo_mutations>
-        <treatment_strength type="double" units="none" description="">6.0e2</treatment_strength>
+        <treatment_strength type="double" units="none" description="">3.0e2</treatment_strength>
         <enable_barcode_communication type="bool" units="none">false</enable_barcode_communication>
     </user_parameters>
 </PhysiCell_settings>

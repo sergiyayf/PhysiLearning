@@ -73,7 +73,7 @@ env:
   normalize_to: 4000
   image_size: 84
   patient_sampling:
-    enable: 1
+    enable: 0
     type: 'sequential' # 'random' # 'sequential'
     patient_id: 1 # [1, 4, 55, 80, 93]
 
@@ -111,9 +111,9 @@ env:
       treatment_time_step:
           parent_nodes: ['user_parameters']
           value: 720
-      treatment_death_rate:
+      treatment_strength:
           parent_nodes: ['user_parameters']
-          value: 0.001125 # 0.00225
+          value: 3.0e2 # 3.0e2 or 6.0e2
 
   # LatticeBased environment settings
   GridEnv:
@@ -126,11 +126,11 @@ eval:
   path: './data/degeneracy_tests/LV_deg_5/'
   model_prefix: 'test_v0.3.0b_conda_env'
   step_to_load: '_best_reward'
-  save_name: 'mtd_test_with_pdl'
+  save_name: 'fixed_1'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.50
+  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.0
   num_episodes: 2
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
