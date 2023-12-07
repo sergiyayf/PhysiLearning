@@ -76,8 +76,6 @@ class BaseEnv(Env):
         # Normalization
         self.normalize = normalize
         self.max_tumor_size = max_tumor_size
-        if isinstance(initial_mut, list):
-            initial_mut = np.random.choice(initial_mut)
 
         if self.normalize:
             self.normalization_factor = normalize_to / max_tumor_size
@@ -267,7 +265,7 @@ class BaseEnv(Env):
         return terminate
 
     @classmethod
-    def default_config(cls) -> dict:
+    def default_config(cls) -> dict: # pragma: no cover
         """
         Default configuration for environment
         Returns
@@ -276,7 +274,7 @@ class BaseEnv(Env):
         """
         pass
 
-    def configure(self, config: dict) -> None:
+    def configure(self, config: dict) -> None: # pragma: no cover
         """
         Configure environment
         Parameters
@@ -289,10 +287,10 @@ class BaseEnv(Env):
         """
         pass
 
-    def step(self, action):
+    def step(self, action): # pragma: no cover
         raise NotImplementedError
 
-    def reset(self, *, seed=None, options=None):
+    def reset(self, *, seed=None, options=None): # pragma: no cover
         raise NotImplementedError
 
     def render(self, mode='human') -> mpl.animation.ArtistAnimation:
@@ -320,14 +318,14 @@ class BaseEnv(Env):
 
             return ani
 
-    def close(self):
+    def close(self): # pragma: no cover
         pass
 
-    def seed(self, seed=None):
+    def seed(self, seed=None): # pragma: no cover
         raise NotImplementedError
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     os.chdir('/home/saif/Projects/PhysiLearning')
     with open('config.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)

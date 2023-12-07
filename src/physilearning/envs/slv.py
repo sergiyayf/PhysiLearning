@@ -348,7 +348,7 @@ class SLvEnv(BaseEnv):
         return new_pop_size
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     # set random seed
     np.random.seed(int(time.time()))
     env = SLvEnv.from_yaml("../../../config.yaml")
