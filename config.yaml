@@ -1,4 +1,4 @@
-# Version 0.2.4
+# Version 0.3.0b
 # global configuration
 global:
   machine: 'mela' # 'mela' # 'raven'
@@ -45,7 +45,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: 0
   wrapper: 'SubprocVecEnv' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -81,11 +81,20 @@ env:
   LvEnv:
     carrying_capacity: 6500
     competition_wt: 1.323 #2400.0
-    competition_mut: 0.336
+    competition_mut: 0.0 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 55
+    mutant_distance_to_front: 40
 
+  SLvEnv:
+    carrying_capacity: 6500
+    competition_wt: 1.323 #2400.0
+    competition_mut: 0.0 #0.336
+    growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
+    image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
+    mutant_distance_to_front: 40
+    max_competition: 3.5
+    growth_layer: 15
   # note this is not yet functional
   PcEnv:
     domain_size: 1250

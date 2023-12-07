@@ -5,7 +5,7 @@ from typing import Tuple
 import time
 
 
-class LvEnv(BaseEnv):
+class SLvEnv(BaseEnv):
     """
     Environment for Lottka-Volterra tumor growth model
 
@@ -34,7 +34,7 @@ class LvEnv(BaseEnv):
     def __init__(
         self,
         config: dict = None,
-        name: str = 'LvEnv',
+        name: str = 'SLvEnv',
         observation_type: str = 'number',
         action_type: str = 'discrete',
         max_tumor_size: float = 1000,
@@ -95,11 +95,12 @@ class LvEnv(BaseEnv):
 
         self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
 
-        self.growth_layer = 10
+        self.growth_layer = env_specific_params.get('growth_layer', 10)
         self.mutant_x = 0
         self.mutant_y = 0
-        self._set_iniitial_mutant_positions()
+        self._set_initial_mutant_positions()
         self.drug_color = 30
+        self.max_competition = env_specific_params.get('max_competition', 3.0)
 
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
@@ -115,88 +116,52 @@ class LvEnv(BaseEnv):
         num_mut_to_sample = np.round(self.image_size * self.image_size * \
             self.state[1] / (self.capacity))
 
-        if self.image_sampling_type == 'random':
+        mut_x = self.mutant_x
+        mut_y = self.mutant_y
 
-            # Sample sensitive clones
-            random_indices = np.random.choice(self.image_size*self.image_size,
-                                              int(num_wt_to_sample), replace=False)
-            wt_x, wt_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
-
-            # Sample resistant clones
-            random_indices = np.random.choice(self.image_size*self.image_size,
-                                              int(num_mut_to_sample), replace=False)
-            mut_x, mut_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
-
-        elif self.image_sampling_type == 'dense':
-
-            radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/2.6*np.sqrt(2)+1))
-
-            x_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
-            y_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
-            xx, yy = np.meshgrid(x_range, y_range)
-            distances = (xx - self.image_size/2) ** 2 + (yy - self.image_size/2) ** 2
-
-            # Create a mask for the coordinates that fall within the circular region
-            mask = distances <= radius ** 2
-            wt_x, wt_y = xx[mask], yy[mask]
-
-            # remove some cells until we have the right number
-            random_indices = np.random.randint(len(wt_x), size=int(num_wt_to_sample))
-            wt_x, wt_y = wt_x[random_indices], wt_y[random_indices]
-
-            # place resistant cells in the remaining space inside the circle
-            mut_x, mut_y = xx[mask], yy[mask]
-            # remove the indices that are already occupied by sensitive cells
-            mut_x, mut_y = np.delete(mut_x, random_indices), np.delete(mut_y, random_indices)
-
-            random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
-            mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
-
-        elif self.image_sampling_type == 'mutant_position':
-            # This implementation takes into account the position of the mutant cell
-            # resistant cells are placed in a circle around the mutant cell
-            # Place the mutant cell at a random angular position at fix radius
-            ini_num_wt_to_sample = np.round(self.image_size * self.image_size * \
-                                        self.initial_wt / (self.capacity))
-            ini_num_mut_to_sample = np.round(self.image_size * self.image_size * \
-                                         self.initial_mut / (self.capacity))
-            large_radius = int(np.round(np.sqrt(ini_num_wt_to_sample + ini_num_mut_to_sample) / 2.6 * np.sqrt(2) + 1))
-            mutant_radius = large_radius - self.mutant_distance_to_front
-            if self.time == 0:
-                self.angle = np.random.uniform(0, 2*np.pi)
-            mut_x = self.mutant_x
-            mut_y = self.mutant_y
-
-            # Place the resistant cells in a circle around the mutant cell
-            radius = int(np.round(np.sqrt(num_mut_to_sample)/2.6*np.sqrt(2)+1))
-            x_range = np.arange(mut_x - radius, mut_x + radius + 1)
-            y_range = np.arange(mut_y - radius, mut_y + radius + 1)
-
-            xx, yy = np.meshgrid(x_range, y_range)
-            distances = (xx - mut_x) ** 2 + (yy - mut_y) ** 2
-            mask = distances <= radius ** 2
-            mut_x, mut_y = xx[mask], yy[mask]
-            # make sure positions are within the image
-            mut_x, mut_y = mut_x[(mut_x >= 0) & (mut_x < self.image_size)], \
-                            mut_y[(mut_y >= 0) & (mut_y < self.image_size)]
-            if ini_num_mut_to_sample <= 1e-2:
-                mut_x, mut_y = np.array([]), np.array([])
-            # remove until we have the right number
-            # random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
-            # mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
-
-            # put the senstitive cells inside of the circle of big radius, but not where resistant cells are
-            radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/2.6*np.sqrt(2)+1))
-            x_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
-            y_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
-            xx, yy = np.meshgrid(x_range, y_range)
-            distances = (xx - self.image_size/2) ** 2 + (yy - self.image_size/2) ** 2
-            mask = distances <= radius ** 2
-            wt_x, wt_y = xx[mask], yy[mask]
-
-
+        # Place the resistant cells in a circle around the mutant cell
+        radius = int(np.round(np.sqrt(num_mut_to_sample)/3.0*np.sqrt(2)+1))
+        if mut_x-radius<0:
+            min_x = 0
         else:
-            raise ValueError('Unknown image sampling type')
+            min_x = mut_x-radius
+        if mut_y-radius<0:
+            min_y = 0
+        else:
+            min_y = mut_y-radius
+        if mut_x+radius>self.image_size:
+            max_x = self.image_size
+        else:
+            max_x = mut_x+radius
+        if mut_y+radius>self.image_size:
+            max_y = self.image_size
+        else:
+            max_y = mut_y+radius
+        x_range = np.arange(min_x, max_x)
+        y_range = np.arange(min_y, max_y)
+
+        xx, yy = np.meshgrid(x_range, y_range)
+        distances = (xx - mut_x) ** 2 + (yy - mut_y) ** 2
+        mask = distances <= radius ** 2
+        mut_x, mut_y = xx[mask], yy[mask]
+        # make sure positions are within the image
+        # mut_x, mut_y = mut_x[(mut_x >= 0) & (mut_x < self.image_size)], \
+        #                 mut_y[(mut_y >= 0) & (mut_y < self.image_size)]
+        if num_mut_to_sample <= 1e-2:
+            mut_x, mut_y = np.array([]), np.array([])
+        # remove until we have the right number
+        # random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
+        # mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
+
+        # put the senstitive cells inside of the circle of big radius, but not where resistant cells are
+        radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/3.0*np.sqrt(2)+1))
+        x_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
+        y_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
+        xx, yy = np.meshgrid(x_range, y_range)
+        distances = (xx - self.image_size/2) ** 2 + (yy - self.image_size/2) ** 2
+        mask = distances <= radius ** 2
+        wt_x, wt_y = xx[mask], yy[mask]
+
         # populate the image
         # clean the image and make the new one
         if action:
@@ -321,7 +286,7 @@ class LvEnv(BaseEnv):
 
         return obs, {}
 
-    def _set_iniitial_mutant_positions(self):
+    def _set_initial_mutant_positions(self):
         ini_num_wt_to_sample = np.round(self.image_size * self.image_size * \
                                         self.initial_wt / (self.capacity))
         ini_num_mut_to_sample = np.round(self.image_size * self.image_size * \
@@ -334,17 +299,10 @@ class LvEnv(BaseEnv):
         self.mutant_y = np.round(self.image_size / 2 + mutant_radius * np.sin(self.angle))
 
     def _competition_function(self, dist, growth_layer) -> float:
-        """
-        Hill response function
-        :param x: input
-        :param k: half-maximal constant
-        :param n: Hill coefficient
-        :return: output
-        """
         if dist > growth_layer:
-            return 3
+            return (self.capacity-self.state[1])/self.state[0]
         else:
-            return 3*dist/growth_layer
+            return (self.capacity-self.state[1])/self.state[0]*dist/growth_layer
 
     def _move_mutant(self, dist, growth_layer) -> float:
 
@@ -371,9 +329,8 @@ class LvEnv(BaseEnv):
         # instantaneous death rate increase by drug application
         num_wt_to_sample = np.round(self.image_size * self.image_size * \
                                         self.state[0] / (self.capacity))
-        num_mut_to_sample = np.round(self.image_size * self.image_size * \
-                                         self.state[1] / (self.capacity))
-        radius = int(np.round(np.sqrt(num_mut_to_sample+num_wt_to_sample) / 2.6 * np.sqrt(2) + 1))
+
+        radius = int(np.round(np.sqrt(num_wt_to_sample) / 3.0 * np.sqrt(2) + 1))
         dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
         growth_layer = self.growth_layer
         self._move_mutant(dist, growth_layer)
@@ -394,7 +351,7 @@ class LvEnv(BaseEnv):
 if __name__ == "__main__":
     # set random seed
     np.random.seed(int(time.time()))
-    env = LvEnv.from_yaml("../../../config.yaml")
+    env = SLvEnv.from_yaml("../../../config.yaml")
     env.reset()
     grid = env.image
 
