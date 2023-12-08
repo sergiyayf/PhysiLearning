@@ -52,6 +52,30 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
         action = 1
     elif at_type == 'random':
         action = np.random.choice([0, 1])
+    elif at_type == 'on_off':
+        if environment.trajectory[2, int(environment.time)] == 0:
+            action = 1
+        else:
+            action = 0
+    elif at_type == 'on_off_double':
+        if (environment.trajectory[2, int(environment.time)] == 0 and environment.trajectory[2, int(environment.time)-1] == 0) or \
+                (environment.trajectory[2, int(environment.time)] == 1 and environment.trajectory[2, int(environment.time)-1] == 0):
+            action = 1
+        else:
+            action = 0
+    elif at_type == 'on_off_triple':
+        if (environment.trajectory[2, int(environment.time)] == 0 and
+            environment.trajectory[2, int(environment.time)-1] == 0 and
+            environment.trajectory[2, int(environment.time)-2] == 0) or \
+            (environment.trajectory[2, int(environment.time)] == 1 and
+             environment.trajectory[2, int(environment.time) - 1] == 0 and
+             environment.trajectory[2, int(environment.time) - 2] == 0) or \
+            (environment.trajectory[2, int(environment.time)] == 1 and
+             environment.trajectory[2, int(environment.time) - 1] == 1 and
+             environment.trajectory[2, int(environment.time) - 2] == 0):
+            action = 1
+        else:
+            action = 0
     else:
         action = 0
 
@@ -74,9 +98,9 @@ class Evaluation:
             if self.env.get_attr('observation_type')[0] == 'image':
                 self.image_trajectory = self.env.get_attr('image_trajectory')[0]
         else:
-            self.trajectory = self.env.trajectory
-            if self.env.observation_type == 'image':
-                self.image_trajectory = self.env.image_trajectory
+            self.trajectory = self.env.unwrapped.trajectory
+            if self.env.unwrapped.observation_type == 'image':
+                self.image_trajectory = self.env.unwrapped.image_trajectory
 
         with open(config_file, 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
@@ -131,16 +155,19 @@ class Evaluation:
         else:
             final_score = np.zeros(num_episodes)
             model = None
-        obs, _ = self.env.reset()
+        if self._is_venv():
+            obs = self.env.reset()
+        else:
+            obs, _ = self.env.reset()
         for episode in range(num_episodes):
             if self._is_venv():
                 if self.env.get_attr('time')[0] > 0:
-                    obs, _ = self.env.reset()
+                    obs = self.env.reset()
                 else:
                     print ('Episode 0, already reset')
 
             else:
-                if self.env.time > 0:
+                if self.env.unwrapped.time > 0:
                     obs, _ = self.env.reset()
                 else:
                     print ('Episode 0, already reset')
@@ -156,12 +183,14 @@ class Evaluation:
                     self.trajectory = self.env.get_attr('trajectory')[0]
                     if self.env.get_attr('observation_type')[0] == 'image':
                         self.image_trajectory = self.env.get_attr('image_trajectory')[0]
+                    obs, reward, term, info = self.env.step(action)
+                    trunc = info[0]['TimeLimit.truncated']
                 else:
-                    self.trajectory = self.env.trajectory
+                    self.trajectory = self.env.unwrapped.trajectory
                     if self.env.observation_type == 'image':
-                        self.image_trajectory = self.env.image_trajectory
+                        self.image_trajectory = self.env.unwrapped.image_trajectory
 
-                obs, reward, term, trunc, info = self.env.step(action)
+                    obs, reward, term, trunc, info = self.env.step(action)
                 done = term or trunc
                 score += reward
 
@@ -265,5 +294,7 @@ def evaluate(config_file='config.yaml') -> None:
     return
 
 
-if __name__ == '__main__':
-    evaluate(config_file='config.yaml')
+if __name__ == '__main__': # pragma: no cover
+    # set dir to the root of the project
+    os.chdir('/home/saif/Projects/PhysiLearning')
+    evaluate(config_file='./config.yaml')

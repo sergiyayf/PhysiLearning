@@ -1,7 +1,7 @@
 # PhysiLearning
 [![CI](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml)
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
-![version](https://img.shields.io/badge/version-0.2.4-blue)
+![version](https://img.shields.io/badge/version-0.3.0-blue)
 
 <img src="data/images/RL_treatment.gif" width="250" height="250" />
 
@@ -98,6 +98,21 @@ pytest tests/test_evaluate.py
 
 
 ## Changelog
+#### 0.3.0 Major Changes
+- Update to sb3 v2 
+- Move environments from gym to gymnasium 
+- Implement truncation and termination conditions (truncate if tumor size is too large, or timelimit is reached,
+terminate if cells are not responding to treatment)
+- Remove delay in treatment application
+- Implement SLvEnv that is quasi-spatial version of Lotka-Volterra model, with mutant position tracking. Mutant is 
+initially spawned at a predefined distance to the front cells layer. It is being slowly pushed out if within the 
+growth layer. Competition coefficient is a function to the distance to the front, and if within the growth layer or behind.
+
+#### 0.3.0 Minor Changes
+- Update fixed evaluation strategies
+- Add more tests
+- Implement agent blindfolding for number observation from the yaml file
+- Fix core dump, when 0 PhysiCells, related to saving treatment data in the .mat file
 
 #### 0.2.4 Changes
 - Implement sampling of patients from a range in PcEnv to do proper eval with KM plots

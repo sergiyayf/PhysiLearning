@@ -42,6 +42,7 @@ class BaseEnv(Env):
         name: str = 'BaseEnv',
         observation_type: str = 'number',
         action_type: str = 'discrete',
+        see_resistance: bool = False,
         max_tumor_size: float = 1000,
         max_time: int = 3000,
         initial_wt: float = 45,
@@ -75,8 +76,6 @@ class BaseEnv(Env):
         # Normalization
         self.normalize = normalize
         self.max_tumor_size = max_tumor_size
-        if isinstance(initial_mut, list):
-            initial_mut = np.random.choice(initial_mut)
 
         if self.normalize:
             self.normalization_factor = normalize_to / max_tumor_size
@@ -92,6 +91,7 @@ class BaseEnv(Env):
         # Spaces
         self.name = name
         self.action_type = action_type
+        self.see_resistance = see_resistance
         if self.action_type == 'discrete':
             self.action_space = Discrete(2)
         elif self.action_type == 'continuous':
@@ -171,6 +171,7 @@ class BaseEnv(Env):
         return cls(config=config,
                    observation_type=config['env']['observation_type'],
                    action_type=config['env']['action_type'],
+                   see_resistance=config['env']['see_resistance'],
                    max_tumor_size=config['env']['max_tumor_size'],
                    max_time=config['env']['max_time'],
                    initial_wt=config['env']['initial_wt'],
@@ -267,7 +268,7 @@ class BaseEnv(Env):
         return terminate
 
     @classmethod
-    def default_config(cls) -> dict:
+    def default_config(cls) -> dict: # pragma: no cover
         """
         Default configuration for environment
         Returns
@@ -276,7 +277,7 @@ class BaseEnv(Env):
         """
         pass
 
-    def configure(self, config: dict) -> None:
+    def configure(self, config: dict) -> None: # pragma: no cover
         """
         Configure environment
         Parameters
@@ -289,10 +290,10 @@ class BaseEnv(Env):
         """
         pass
 
-    def step(self, action):
+    def step(self, action): # pragma: no cover
         raise NotImplementedError
 
-    def reset(self, *, seed=None, options=None):
+    def reset(self, *, seed=None, options=None): # pragma: no cover
         raise NotImplementedError
 
     def render(self, mode='human') -> mpl.animation.ArtistAnimation:
@@ -320,14 +321,14 @@ class BaseEnv(Env):
 
             return ani
 
-    def close(self):
+    def close(self): # pragma: no cover
         pass
 
-    def seed(self, seed=None):
+    def seed(self, seed=None): # pragma: no cover
         raise NotImplementedError
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     os.chdir('/home/saif/Projects/PhysiLearning')
     with open('config.yaml', 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)

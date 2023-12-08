@@ -1,4 +1,4 @@
-# Version 0.2.4
+# Version 0.3.0
 # global configuration
 global:
   machine: 'raven' # 'mela' # 'raven'
@@ -45,32 +45,33 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: 1 
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
-    channels_order: 'last'
+    channels_order: 'first' # use first fir image learning and last for number
 
   # general simulation settings
-  observation_type: 'number' # 'image' # 'number' # 'multiobs'
+  observation_type: 'multiobs' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
+  see_resistance: False
   max_tumor_size: 4000 # 110000 # 4000
   max_time: 120 # 120
-  initial_wt: 2500 #2761 # 74291 # 2761
-  initial_mut: 2
+  initial_wt: 2761 #2761 # 74291 # 2761
+  initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
   growth_rate_mut: 0.438 # 0.0175
   death_rate_wt: 0.0029
   death_rate_mut: 0.00438
-  treat_death_rate_wt: 0.397 # 0.015
+  treat_death_rate_wt: 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
   normalize: True
-  normalize_to: 1
-  image_size: 84
+  normalize_to: 1.0
+  image_size: 124 #84
   patient_sampling:
     enable: 0
     type: 'sequential' # 'random' # 'sequential'
@@ -80,15 +81,23 @@ env:
   LvEnv:
     carrying_capacity: 6500
     competition_wt: 1.323 #2400.0
-    competition_mut: 0.336
+    competition_mut: 0.0 #0.336
+    growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
+    image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
+
+  SLvEnv:
+    carrying_capacity: 6500
+    competition_wt: 1.323 #2400.0
+    competition_mut: 0.0 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 10
-
+    mutant_distance_to_front: 40
+    max_competition: 3.5
+    growth_layer: 15
   # note this is not yet functional
   PcEnv:
     domain_size: 1250
-    cpus_per_sim: 1
+    cpus_per_sim: 10
     transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
     transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
     xml:
@@ -110,9 +119,9 @@ env:
       treatment_time_step:
           parent_nodes: ['user_parameters']
           value: 720
-      treatment_death_rate:
+      treatment_strength:
           parent_nodes: ['user_parameters']
-          value: 0.00225
+          value: 3.0e2 # 3.0e2 or 6.0e2
 
   # LatticeBased environment settings
   GridEnv:
@@ -122,16 +131,16 @@ env:
 eval:
   most_recent: 0
   from_file: 0
-  path: './'
-  model_prefix: '20231108_new_train_rew_0'
+  path: './data/degeneracy_tests/LV_deg_5/'
+  model_prefix: 'test_v0.3.0b_conda_env'
   step_to_load: '_best_reward'
-  save_name: 'ntp_pc_response_check'
+  save_name: 'at65_slvenv_test'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.50
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.65
   num_episodes: 2
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients

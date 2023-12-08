@@ -5,17 +5,30 @@ import numpy as np
 import yaml
 
 def test_construct_base_env():
-    config = {'env': {'patient_sampling': {'enable': False}}}
-    env = BaseEnv(config=config)
+    env = BaseEnv()
     assert env
 
 
 def test_observation_space():
     obs_space = 'number'
-    config = {'env': {'patient_sampling': {'enable': False}}}
-    env = BaseEnv(config=config, observation_type=obs_space, normalize=True, normalize_to=20)
+    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20)
     box = Box(low=0, high=20, shape=(3,))
     assert (env.observation_space == box)
+    obs_space = 'image'
+    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, image_size=124)
+    box = Box(low=0, high=255, shape=(1, 124, 124), dtype=np.uint8)
+    assert (env.observation_space == box)
+    obs_space = 'multiobs'
+    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, image_size=124)
+    box1 = Box(low=0, high=20, shape=(3,))
+    box2 = Box(low=0, high=255, shape=(1, 124, 124), dtype=np.uint8)
+    assert (env.observation_space['vec']==box1)
+    assert (env.observation_space['img']==box2)
+    obs_space = 'other'
+    try:
+        env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, image_size=124)
+    except NotImplementedError:
+        assert True
 
 
 def test_patient_id():
@@ -26,6 +39,11 @@ def test_patient_id():
     env_list = BaseEnv(config=config, patient_id=[80, 55])
     assert isinstance(env_list.patient_id, np.int64)
     assert len(env_list.patient_id_list) == 2
+    # assert raising value error if patient_id is not int or list
+    try:
+        env = BaseEnv(config=config, patient_id='80')
+    except ValueError:
+        assert True
 
 
 def test_patient_sampling():
@@ -64,3 +82,42 @@ def test_range_sampling():
     # assert that patients ids are range between 1 and 101
     assert patient_ids == list(range(1, 101))
 
+
+def test_truncate():
+    env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False)
+    trunc = env.truncate()
+    assert trunc == False
+    env.state = [20, 5, 0]
+    trunc = env.truncate()
+    assert trunc
+
+
+def test_measure_response():
+    env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False)
+    resp = env.measure_response()
+    assert resp == 0
+    env.time = 1
+    env.trajectory[0,env.time] = 10
+    env.trajectory[1,env.time] = 3
+    env.trajectory[2,env.time] = 1
+    env.state = [10, 3, 1]
+    resp = env.measure_response()
+    assert resp != 0
+
+def test_terminate():
+    env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False)
+    term = env.terminate()
+    assert term == False
+    env.time = 1
+    env.trajectory[0,env.time] = 10
+    env.trajectory[1,env.time] = 3
+    env.trajectory[2,env.time] = 1
+    env.state = [10, 3, 1]
+    term = env.terminate()
+    assert term
+
+def test_render():
+    env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False, observation_type='image')
+    from matplotlib.animation import ArtistAnimation
+    ani = env.render()
+    assert isinstance(ani, ArtistAnimation)
