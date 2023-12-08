@@ -1,4 +1,4 @@
-# Version 0.3.0b
+# Version 0.3.0
 # global configuration
 global:
   machine: 'mela' # 'mela' # 'raven'
@@ -9,11 +9,11 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 4
-  time: '14:00:00'
-  agent_buffer: 1
+  cpus-per-task: 10
+  time: '24:00:00'
+  agent_buffer: 0
   recurrent:
-    enable: 1
+    enable: 0
     n_jobs: 3
 
 # Reinforcement learning configuration
@@ -23,22 +23,22 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MultiInputPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
-      n_steps: 124
+      n_steps: 256
       verbose: 1
-      ent_coef: 0.02
-      clip_range: 0.05
-      learning_rate: 1.e-4
+      ent_coef: 0.2
+      clip_range: 0.01
+      learning_rate: 1.e-3
       policy_kwargs:
         features_extractor_kwargs:
-          cnn_output_dim: 16
+          cnn_output_dim: 32
         net_arch:
-          pi: [32, 32]
-          vf: [32, 32]
-    total_timesteps: 1000
+          pi: [64, 64]
+          vf: [64, 64]
+    total_timesteps: 1.e+9
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'Lv_image_patient_sampling_test'
+    model_save_prefix: 'SLV_test_20231207'
     load:
-      enable_loading: 1
+      enable_loading: 0
       last_model: 0
       saved_model_name: './Training/SavedModels/Lv_image_patient_sampling_test_best_reward'
 
@@ -48,13 +48,13 @@ env:
   type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: 0
-  wrapper: 'SubprocVecEnv' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
+  wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
-    channels_order: 'last'
+    channels_order: 'first' # use first fir image learning and last for number
 
   # general simulation settings
-  observation_type: 'image' # 'image' # 'number' # 'multiobs'
+  observation_type: 'multiobs' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   max_tumor_size: 4000 # 110000 # 4000
@@ -68,10 +68,10 @@ env:
   treat_death_rate_wt: 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 0  # reward shaping flag for some predefined rewards
-  normalize: False
-  normalize_to: 4000
-  image_size: 256 #84
+  reward_shaping: 8  # reward shaping flag for some predefined rewards
+  normalize: True
+  normalize_to: 1.0
+  image_size: 124 #84
   patient_sampling:
     enable: 0
     type: 'sequential' # 'random' # 'sequential'
@@ -134,13 +134,13 @@ eval:
   path: './data/degeneracy_tests/LV_deg_5/'
   model_prefix: 'test_v0.3.0b_conda_env'
   step_to_load: '_best_reward'
-  save_name: 'fixed_1'
+  save_name: 'at65_slvenv_test'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.0
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.65
   num_episodes: 2
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients

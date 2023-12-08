@@ -99,7 +99,7 @@ class SLvEnv(BaseEnv):
         self.mutant_x = 0
         self.mutant_y = 0
         self._set_initial_mutant_positions()
-        self.drug_color = 30
+        self.drug_color = 0
         self.max_competition = env_specific_params.get('max_competition', 3.0)
 
     def _set_patient_specific_competition(self, patient_id):
@@ -155,8 +155,8 @@ class SLvEnv(BaseEnv):
 
         # put the senstitive cells inside of the circle of big radius, but not where resistant cells are
         radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/3.0*np.sqrt(2)+1))
-        x_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
-        y_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
+        x_range = np.arange(max(self.image_size/2 - radius,0), min(self.image_size/2 + radius, self.image_size))
+        y_range = np.arange(max(self.image_size/2 - radius,0), min(self.image_size/2 + radius, self.image_size))
         xx, yy = np.meshgrid(x_range, y_range)
         distances = (xx - self.image_size/2) ** 2 + (yy - self.image_size/2) ** 2
         mask = distances <= radius ** 2

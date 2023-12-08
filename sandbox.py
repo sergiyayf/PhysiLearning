@@ -108,22 +108,35 @@ def main():
 
 
 
-fig0, ax0 = plt.subplots()
-df = pd.read_hdf(f'Evaluations/LvEnvEvalon_off.h5', key=f'run_0')
+
+df = pd.read_hdf(f'Evaluations/SLvEnvEvalat65_slvenv_test.h5', key=f'run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax0.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1, 1')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'1 on off')
-# ax.set_yscale('log')
+ax.set_title(f'AT65 Spatial LV')
+ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
-print("1 average: ",df['Type 0'].mean())
 
-main()
+for i in [5,9,10]:
+    df = pd.read_hdf(f'Evaluations/Pc/PcEnvEval_patient_80_AT100.h5', key=f'run_{i}')
+    fig, ax = plt.subplots()
+    ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
+    ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+    ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
+    ax.legend()
+    ax.set_title(f'AT100 PC')
+    ax.set_yscale('log')
+    treat = df['Treatment'].values
+    # replace 0s that are directly after 1 with 1s
+    #treat = np.where(treat == 0, np.roll(treat, 1), treat)
+    ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
+    lw=2)
+
+#main()
 plt.show()

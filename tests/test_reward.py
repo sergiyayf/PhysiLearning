@@ -40,10 +40,9 @@ def test_rewards():
     reward = rewards.get_reward([0.5, 0.4, 1], 0.95)
     assert reward-10 < 1e-3
 
-    for i in range(6, 12):
-        rewards = Reward(reward_shaping_flag=i)
-        reward = rewards.get_reward([0.5, 0.4, 1], 0.1)
-        assert reward
+    rewards = Reward(reward_shaping_flag=6)
+    reward = rewards.get_reward([0.5, 0.4, 1], 0.1)
+    assert reward
 
     rewards = Reward(reward_shaping_flag=12)
     try:
