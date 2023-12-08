@@ -25,15 +25,15 @@ learning:
     model_kwargs:
       n_steps: 256
       verbose: 1
-      ent_coef: 0.2
-      clip_range: 0.01
-      learning_rate: 1.e-3
+      ent_coef: 0.001
+      clip_range: 0.001
+      learning_rate: 5.e-5
       policy_kwargs:
         features_extractor_kwargs:
-          cnn_output_dim: 32
+          cnn_output_dim: 16
         net_arch:
-          pi: [64, 64]
-          vf: [64, 64]
+          pi: [32, 32]
+          vf: [32, 32]
     total_timesteps: 1.e+9
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
     model_save_prefix: 'SLV_test_20231207'
@@ -47,7 +47,7 @@ env:
   # general env settings
   type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: 0
+  wrap: 1
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -68,10 +68,10 @@ env:
   treat_death_rate_wt: 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 8  # reward shaping flag for some predefined rewards
+  reward_shaping: 6  # reward shaping flag for some predefined rewards
   normalize: True
   normalize_to: 1.0
-  image_size: 124 #84
+  image_size: 84 #84
   patient_sampling:
     enable: 0
     type: 'sequential' # 'random' # 'sequential'
