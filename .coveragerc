@@ -1,0 +1,5 @@
+[run]
+omit =
+    src/physilearning/tools/bayes.py
+    src/physilearning/tools/odemodel.py
+    src/physilearning/pcdl.py

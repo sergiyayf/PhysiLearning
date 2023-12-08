@@ -409,7 +409,7 @@ class PcEnv(BaseEnv):
         return self.image
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     os.chdir("/home/saif/Projects/PhysiLearning")
     np.random.seed(15)
     env = PcEnv.from_yaml('./config.yaml', port='0', job_name='00000')

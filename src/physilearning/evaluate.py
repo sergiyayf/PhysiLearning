@@ -98,9 +98,9 @@ class Evaluation:
             if self.env.get_attr('observation_type')[0] == 'image':
                 self.image_trajectory = self.env.get_attr('image_trajectory')[0]
         else:
-            self.trajectory = self.env.trajectory
-            if self.env.observation_type == 'image':
-                self.image_trajectory = self.env.image_trajectory
+            self.trajectory = self.env.unwrapped.trajectory
+            if self.env.unwrapped.observation_type == 'image':
+                self.image_trajectory = self.env.unwrapped.image_trajectory
 
         with open(config_file, 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
@@ -167,7 +167,7 @@ class Evaluation:
                     print ('Episode 0, already reset')
 
             else:
-                if self.env.time > 0:
+                if self.env.unwrapped.time > 0:
                     obs, _ = self.env.reset()
                 else:
                     print ('Episode 0, already reset')
@@ -186,9 +186,9 @@ class Evaluation:
                     obs, reward, term, info = self.env.step(action)
                     trunc = info[0]['TimeLimit.truncated']
                 else:
-                    self.trajectory = self.env.trajectory
+                    self.trajectory = self.env.unwrapped.trajectory
                     if self.env.observation_type == 'image':
-                        self.image_trajectory = self.env.image_trajectory
+                        self.image_trajectory = self.env.unwrapped.image_trajectory
 
                     obs, reward, term, trunc, info = self.env.step(action)
                 done = term or trunc
@@ -294,6 +294,6 @@ def evaluate(config_file='config.yaml') -> None:
     return
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     # set dir to the root of the project
     evaluate(config_file='./config.yaml')

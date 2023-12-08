@@ -88,4 +88,11 @@ def test_grid_env_from_yaml():
     env = GridEnv.from_yaml('./tests/test_cfg.yaml')
     assert env is not None
 
+def test_grid_env_surround_mutant_placing():
+    env = GridEnv()
+    env.cell_positioning = 'surround_mutant'
+    env.reset()
+    mut_color = env.mut_color
+    center = [env.image_size//2, env.image_size//2]
+    assert env.image[0, center[0], center[1]] == mut_color
 

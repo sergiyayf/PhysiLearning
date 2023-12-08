@@ -124,3 +124,37 @@ def test_patient_sampling():
         initial_mut_list.append(env.initial_mut)
     assert len(set(patient_list)) > 1
     assert len(set(initial_mut_list)) > 1
+
+def test_delayed_growth_with_noise():
+    np.random.seed(0)
+    env = LvEnv()
+    env.reset()
+    pop_size = env.grow(1,0,'delayed')
+    env.reset()
+    pop_size_2 = env.grow(1, 0, 'delayed')
+    env.reset()
+    pop_size_with_noise = env.grow(1,0,'delayed_with_noise')
+    assert pop_size_with_noise != pop_size and pop_size == pop_size_2
+    pop_sizes_with_noise = []
+    for i in range(1000):
+        env.reset()
+        pop_sizes_with_noise.append(env.grow(1,0,'delayed_with_noise'))
+    assert pop_size-np.mean(pop_sizes_with_noise) < 1.e-2
+
+def test_image_sampling():
+    env = LvEnv(initial_wt=500, initial_mut=0, image_size=124)
+    env.capacity = 500
+    env.image_sampling_type = 'random'
+    image = env._get_image(0)
+    # all are wt_color
+    assert np.sum(image) == 124*124*env.wt_color
+    env.capacity = 1000
+    image = env._get_image(0)
+    first_rows_sum = np.sum(image[0,0:4,:])
+    assert np.sum(image) == 124 * 124 * env.wt_color/2
+    assert first_rows_sum >0
+
+    env.image_sampling_type = 'dense'
+    dense_image = env._get_image(0)
+    first_rows_sum = np.sum(dense_image[0, 0:4, :])
+    assert first_rows_sum == 0

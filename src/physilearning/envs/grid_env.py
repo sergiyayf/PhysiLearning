@@ -343,7 +343,7 @@ class GridEnv(BaseEnv):
         return obs, {}
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     env = GridEnv.from_yaml("../../../config.yaml")
     env.reset()
     grid = env.image

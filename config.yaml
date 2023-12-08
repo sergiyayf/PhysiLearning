@@ -1,4 +1,4 @@
-# Version 0.2.4
+# Version 0.3.0
 # global configuration
 global:
   machine: 'raven' # 'mela' # 'raven'
@@ -45,16 +45,16 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: 0 
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
-    channels_order: 'last'
+    channels_order: 'first' # use first fir image learning and last for number
 
   # general simulation settings
-  observation_type: 'number' # 'image' # 'number' # 'multiobs'
+  observation_type: 'multiobs' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   max_tumor_size: 4000 # 110000 # 4000
@@ -70,10 +70,10 @@ env:
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
   normalize: True
-  normalize_to: 1
-  image_size: 84
+  normalize_to: 1.0
+  image_size: 124 #84
   patient_sampling:
-    enable: 1
+    enable: 0
     type: 'sequential' # 'random' # 'sequential'
     patient_id: 279 # [1, 4, 55, 80, 93]
 
@@ -81,11 +81,19 @@ env:
   LvEnv:
     carrying_capacity: 6500
     competition_wt: 1.323 #2400.0
-    competition_mut: 0.336
+    competition_mut: 0.0 #0.336
+    growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
+    image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
+
+  SLvEnv:
+    carrying_capacity: 6500
+    competition_wt: 1.323 #2400.0
+    competition_mut: 0.0 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 10
-
+    mutant_distance_to_front: 40
+    max_competition: 3.5
+    growth_layer: 15
   # note this is not yet functional
   PcEnv:
     domain_size: 1250
@@ -132,7 +140,7 @@ eval:
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.75
   num_episodes: 2
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients

@@ -5,7 +5,7 @@ from typing import Tuple
 import time
 
 
-class LvEnv(BaseEnv):
+class SLvEnv(BaseEnv):
     """
     Environment for Lottka-Volterra tumor growth model
 
@@ -34,7 +34,7 @@ class LvEnv(BaseEnv):
     def __init__(
         self,
         config: dict = None,
-        name: str = 'LvEnv',
+        name: str = 'SLvEnv',
         observation_type: str = 'number',
         action_type: str = 'discrete',
         max_tumor_size: float = 1000,
@@ -79,22 +79,28 @@ class LvEnv(BaseEnv):
         else:
             self.capacity = env_specific_params.get('carrying_capacity', 6500)
 
+        # get mutant radius
+        self.mutant_distance_to_front = env_specific_params.get('mutant_distance_to_front', 0.0)
         # 1 - wt, 2 - resistant
         if self.config['env']['patient_sampling']['enable']:
             self._set_patient_specific_competition(self.patient_id)
         else:
             self.competition = [env_specific_params.get('competition_wt', 2.),
                                 env_specific_params.get('competition_mut', 1.)]
+
         self.growth_function_flag = env_specific_params.get('growth_function_flag', 'delayed')
 
         self.trajectory[:, 0] = self.state
         self.real_step_count = 0
 
         self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
-    
-    def _set_patient_specific_competition(self, patient_id):
-        self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
-                            self.config['patients'][patient_id]['LvEnv']['competition_mut']]
+
+        self.growth_layer = env_specific_params.get('growth_layer', 10)
+        self.mutant_x = 0
+        self.mutant_y = 0
+        self._set_initial_mutant_positions()
+        self.drug_color = 0
+        self.max_competition = env_specific_params.get('max_competition', 3.0)
 
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
@@ -110,45 +116,52 @@ class LvEnv(BaseEnv):
         num_mut_to_sample = np.round(self.image_size * self.image_size * \
             self.state[1] / (self.capacity))
 
-        if self.image_sampling_type == 'random':
+        mut_x = self.mutant_x
+        mut_y = self.mutant_y
 
-            # Sample sensitive clones
-            random_indices = np.random.choice(self.image_size*self.image_size,
-                                              int(num_wt_to_sample), replace=False)
-            wt_x, wt_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
-
-            # Sample resistant clones
-            random_indices = np.random.choice(self.image_size*self.image_size,
-                                              int(num_mut_to_sample), replace=False)
-            mut_x, mut_y = np.unravel_index(random_indices, (self.image_size, self.image_size))
-
-        elif self.image_sampling_type == 'dense':
-
-            radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/2.6*np.sqrt(2)+1))
-
-            x_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
-            y_range = np.arange(self.image_size/2 - radius, self.image_size/2 + radius + 1)
-            xx, yy = np.meshgrid(x_range, y_range)
-            distances = (xx - self.image_size/2) ** 2 + (yy - self.image_size/2) ** 2
-
-            # Create a mask for the coordinates that fall within the circular region
-            mask = distances <= radius ** 2
-            wt_x, wt_y = xx[mask], yy[mask]
-
-            # remove some cells until we have the right number
-            random_indices = np.random.randint(len(wt_x), size=int(num_wt_to_sample))
-            wt_x, wt_y = wt_x[random_indices], wt_y[random_indices]
-
-            # place resistant cells in the remaining space inside the circle
-            mut_x, mut_y = xx[mask], yy[mask]
-            # remove the indices that are already occupied by sensitive cells
-            mut_x, mut_y = np.delete(mut_x, random_indices), np.delete(mut_y, random_indices)
-
-            random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
-            mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
-
+        # Place the resistant cells in a circle around the mutant cell
+        radius = int(np.round(np.sqrt(num_mut_to_sample)/3.0*np.sqrt(2)+1))
+        if mut_x-radius<0:
+            min_x = 0
         else:
-            raise ValueError('Unknown image sampling type')
+            min_x = mut_x-radius
+        if mut_y-radius<0:
+            min_y = 0
+        else:
+            min_y = mut_y-radius
+        if mut_x+radius>self.image_size:
+            max_x = self.image_size
+        else:
+            max_x = mut_x+radius
+        if mut_y+radius>self.image_size:
+            max_y = self.image_size
+        else:
+            max_y = mut_y+radius
+        x_range = np.arange(min_x, max_x)
+        y_range = np.arange(min_y, max_y)
+
+        xx, yy = np.meshgrid(x_range, y_range)
+        distances = (xx - mut_x) ** 2 + (yy - mut_y) ** 2
+        mask = distances <= radius ** 2
+        mut_x, mut_y = xx[mask], yy[mask]
+        # make sure positions are within the image
+        # mut_x, mut_y = mut_x[(mut_x >= 0) & (mut_x < self.image_size)], \
+        #                 mut_y[(mut_y >= 0) & (mut_y < self.image_size)]
+        if num_mut_to_sample <= 1e-2:
+            mut_x, mut_y = np.array([]), np.array([])
+        # remove until we have the right number
+        # random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
+        # mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
+
+        # put the senstitive cells inside of the circle of big radius, but not where resistant cells are
+        radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/3.0*np.sqrt(2)+1))
+        x_range = np.arange(max(self.image_size/2 - radius,0), min(self.image_size/2 + radius, self.image_size))
+        y_range = np.arange(max(self.image_size/2 - radius,0), min(self.image_size/2 + radius, self.image_size))
+        xx, yy = np.meshgrid(x_range, y_range)
+        distances = (xx - self.image_size/2) ** 2 + (yy - self.image_size/2) ** 2
+        mask = distances <= radius ** 2
+        wt_x, wt_y = xx[mask], yy[mask]
+
         # populate the image
         # clean the image and make the new one
         if action:
@@ -157,7 +170,14 @@ class LvEnv(BaseEnv):
             self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
 
         for x, y in zip(wt_x, wt_y):
-            self.image[0, int(x), int(y)] = self.wt_color
+            # color wild-type differently if they are within the growth layer
+            threshold_radius = radius-self.growth_layer
+            distance_to_center = np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2)
+            if distance_to_center < threshold_radius:
+                self.image[0, int(x), int(y)] = self.wt_color
+            else:
+                self.image[0, int(x), int(y)] = self.wt_color-20
+            #self.image[0, int(x), int(y)] = self.wt_color
         for x, y in zip(mut_x, mut_y):
             self.image[0, int(x), int(y)] = self.mut_color
 
@@ -168,6 +188,7 @@ class LvEnv(BaseEnv):
         Step in the environment that simulates tumor growth and treatment
         :param action: 0 - no treatment, 1 - treatment
         """
+
         # grow_tumor
         reward = 0
         self.state[2] = action
@@ -240,6 +261,7 @@ class LvEnv(BaseEnv):
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
+
         self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)+1))
         self.trajectory[:, 0] = self.state
 
@@ -264,69 +286,82 @@ class LvEnv(BaseEnv):
 
         return obs, {}
 
+    def _set_initial_mutant_positions(self):
+        ini_num_wt_to_sample = np.round(self.image_size * self.image_size * \
+                                        self.initial_wt / (self.capacity))
+        ini_num_mut_to_sample = np.round(self.image_size * self.image_size * \
+                                         self.initial_mut / (self.capacity))
+        large_radius = int(np.round(np.sqrt(ini_num_wt_to_sample + ini_num_mut_to_sample) / 2.6 * np.sqrt(2) + 1))
+        mutant_radius = large_radius - self.mutant_distance_to_front
+        if self.time == 0:
+            self.angle = np.random.uniform(0, 2 * np.pi)
+        self.mutant_x = np.round(self.image_size / 2 + mutant_radius * np.cos(self.angle))
+        self.mutant_y = np.round(self.image_size / 2 + mutant_radius * np.sin(self.angle))
+
+    def _competition_function(self, dist, growth_layer) -> float:
+        if dist > growth_layer:
+            return (self.capacity-self.state[1])/self.state[0]
+        else:
+            return (self.capacity-self.state[1])/self.state[0]*dist/growth_layer
+
+    def _move_mutant(self, dist, growth_layer) -> float:
+
+        if dist > growth_layer:
+            mv = 0
+        elif dist > 0:
+            mv = 1-dist/growth_layer
+        else:
+            mv = 0
+
+        if np.random.uniform() < mv:
+            # move mutant on the grid radially outward
+            center = [self.image_size / 2, self.image_size / 2]
+            # calculate the angle between the mutant and the center
+            angle = np.arctan2(self.mutant_y - center[1], self.mutant_x - center[0])
+            # calculate the new position of the mutant
+            if np.random.uniform() < abs(np.cos(angle)):
+                self.mutant_x += np.sign(np.cos(angle))
+            if np.random.uniform() < abs(np.sin(angle)):
+                self.mutant_y += np.sign(np.sin(angle))
+
     def grow(self, i: int, j: int, flag: str) -> float:
 
         # instantaneous death rate increase by drug application
-        if flag == 'instant':
-            new_pop_size = self.state[i] * \
-                           (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-                            self.death_rate[i] -
-                            self.death_rate_treat[i] * self.state[2])
-        # one time step delay in treatment effect
-        elif flag == 'delayed':
-            treat = self.state[2]
-            if self.state[2] == 0:
-                if self.time > 1 and (self.trajectory[2, self.time-1] == 1):
-                    treat = 1
-                else:
-                    treat = 0
-            elif self.state[2] == 1:
-                if self.time > 1 and (self.trajectory[2, self.time-1] == 0):
-                    treat = 0
-                else:
-                    treat = 1
-            new_pop_size = self.state[i] * (1 + self.growth_rate[i] *
-                (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-                self.death_rate[i] - self.death_rate_treat[i] * treat)
+        num_wt_to_sample = np.round(self.image_size * self.image_size * \
+                                        self.state[0] / (self.capacity))
 
-            if new_pop_size < 10*self.normalization_factor and self.death_rate_treat[i]*treat > 0:
-                new_pop_size = 0
-        elif flag == 'delayed_with_noise':
-            treat = self.state[2]
-            if self.state[2] == 0:
-                if self.time > 1 and (self.trajectory[2, self.time - 1] == 1):
-                    treat = 1
-                else:
-                    treat = 0
-            elif self.state[2] == 1:
-                if self.time > 1 and (self.trajectory[2, self.time - 1] == 0):
-                    treat = 0
-                else:
-                    treat = 1
-            new_pop_size = self.state[i] * (1 + self.growth_rate[i] *
-                                            (1 - (self.state[i] + self.state[j] * self.competition[
-                                                j]) / self.capacity) -
-                                            self.death_rate[i] - self.death_rate_treat[i] * treat)
-            # add noise
-            new_pop_size += np.random.normal(0, 0.01*new_pop_size, 1)[0]
+        radius = int(np.round(np.sqrt(num_wt_to_sample) / 3.0 * np.sqrt(2) + 1))
+        dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
+        growth_layer = self.growth_layer
+        self._move_mutant(dist, growth_layer)
+        competition = self._competition_function(dist, growth_layer)
+        self.competition = [competition, 0]
 
-            if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * treat > 0:
-                new_pop_size = 0
-        else:
-            raise NotImplementedError
+        new_pop_size = self.state[i] * \
+                       (1 + self.growth_rate[i] *
+                        (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
+                        self.death_rate[i] -
+                        self.death_rate_treat[i] * self.state[2])
+        if new_pop_size < 0:
+            new_pop_size = 0
+
         return new_pop_size
 
 
 if __name__ == "__main__": # pragma: no cover
     # set random seed
     np.random.seed(int(time.time()))
-    env = LvEnv.from_yaml("../../../config.yaml")
+    env = SLvEnv.from_yaml("../../../config.yaml")
     env.reset()
     grid = env.image
 
-    while not env.done:
-        act = env.action_space.sample()
-        env.step(act)
-
+    for i in range(150):
+        if i% 2 == 0:
+            act = 1
+        else:
+            act = 0
+        obs, rew, term, trunc, _ = env.step(act)
+        if term or trunc:
+            break
     anim = env.render()
+    # anim.save('test.mp4', fps)

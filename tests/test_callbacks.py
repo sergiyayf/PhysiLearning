@@ -4,7 +4,6 @@ from physilearning.train import make_env
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 import os
-from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 
 
 def test_copy_config_callback():
@@ -31,6 +30,7 @@ def test_save_on_best_training_reward_callback():
     """
     Test the SaveOnBestTrainingRewardCallback
     """
+    # os.chdir('/home/saif/Projects/PhysiLearning')
     # create a LvEnv
     command = r'cp ./tests/test_cfg.yaml ./test_cfg.yaml'
     os.system(command)
