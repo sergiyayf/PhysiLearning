@@ -23,7 +23,7 @@
     </overall>
 
     <parallel>
-        <omp_num_threads>60</omp_num_threads>
+        <omp_num_threads>50</omp_num_threads>
     </parallel>
 
     <save>
@@ -385,7 +385,7 @@
         <treatment type="bool" units="none" description="">false</treatment>
         <enable_chkpt description="" type="bool" units="none">false</enable_chkpt>
         <filename_chkpt description="" type="string" units="none">./../presims/final</filename_chkpt>
-        <treatment_death_rate type="double" units="1/min" description="">0.0001157</treatment_death_rate> 
+        <treatment_death_rate type="double" units="1/min" description="">0.000115</treatment_death_rate> 
         <treatment_time_step type="int" units="min" description="">720</treatment_time_step>
         <number_of_denovo_mutations type="int" units="none" description="">1</number_of_denovo_mutations>
         <treatment_strength type="double" units="none" description="">6.0e2</treatment_strength>

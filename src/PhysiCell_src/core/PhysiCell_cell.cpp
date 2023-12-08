@@ -137,147 +137,150 @@ Cell_Definition::Cell_Definition()
 	// set up the default parameters 
 		// the default Cell_Parameters constructor should take care of this
 		
-	type = 0; 
-	parent_ID = -1;
+	type = 0;
+	name = "unnamed";
 	clone_ID = 0;
-	name = "unnamed"; 
+	parent_ID = -1;
+	number_of_divisions = 0;
 
 	is_movable = true;
 
-	parameters.pReference_live_phenotype = &phenotype; 
-		
-	// set up the default custom data 
-		// the default Custom_Cell_Data constructor should take care of this
-		
-	// set up the default functions 
-	functions.volume_update_function = NULL; // standard_volume_update_function;
-	functions.update_migration_bias = NULL; 
-	
-	functions.update_phenotype = NULL; 
-	functions.custom_cell_rule = NULL; 
-	
-	functions.update_velocity = NULL; // standard_update_cell_velocity;
-	functions.add_cell_basement_membrane_interactions = NULL; 
-	functions.calculate_distance_to_membrane = NULL; 
-	
-	functions.set_orientation = NULL;
-	
-	// new March 2022 : make sure Cell_Interactions and Cell_Transformations 
-	// 					are appropriately sized. Same on motiltiy. 
-	phenotype.cell_interactions.sync_to_cell_definitions(); 
-	phenotype.cell_transformations.sync_to_cell_definitions(); 
-	phenotype.motility.sync_to_current_microenvironment(); 
-	phenotype.mechanics.sync_to_cell_definitions(); 
-	
-	cell_definitions_by_index.push_back( this ); 
+	parameters.pReference_live_phenotype = &phenotype;
 
-	return; 
+	// set up the default custom data
+		// the default Custom_Cell_Data constructor should take care of this
+
+	// set up the default functions
+	functions.volume_update_function = NULL; // standard_volume_update_function;
+	functions.update_migration_bias = NULL;
+
+	functions.update_phenotype = NULL;
+	functions.custom_cell_rule = NULL;
+
+	functions.update_velocity = NULL; // standard_update_cell_velocity;
+	functions.add_cell_basement_membrane_interactions = NULL;
+	functions.calculate_distance_to_membrane = NULL;
+
+	functions.set_orientation = NULL;
+
+	// new March 2022 : make sure Cell_Interactions and Cell_Transformations
+	// 					are appropriately sized. Same on motiltiy.
+	phenotype.cell_interactions.sync_to_cell_definitions();
+	phenotype.cell_transformations.sync_to_cell_definitions();
+	phenotype.motility.sync_to_current_microenvironment();
+	phenotype.mechanics.sync_to_cell_definitions();
+
+	cell_definitions_by_index.push_back( this );
+
+	return;
 }
 
 Cell_Definition::Cell_Definition( Cell_Definition& cd )
 {
-	// set the microenvironment pointer 
+	// set the microenvironment pointer
 	pMicroenvironment = cd.pMicroenvironment;
 
-	// set up the default parameters 
+	// set up the default parameters
 		// the default Cell_Parameters constructor should take care of this
-		
-	type = cd.type; 
-	name = cd.name; 
-	parent_ID = cd.parent_ID;
+
+	type = cd.type;
+	name = cd.name;
 	clone_ID = cd.clone_ID;
-	 
+	parent_ID = cd.parent_ID;
+	number_of_divisions = cd.number_of_divisions;
+
 	parameters = cd.parameters;
-	custom_data = cd.custom_data; 
-	functions = cd.functions; 
-	phenotype = cd.phenotype; 
-	
-	// this is the whole reason we need ot make a copy constructor 
-	parameters.pReference_live_phenotype = &phenotype; 
-	
-	cell_definitions_by_index.push_back( this ); 
-	
-	return; 
+	custom_data = cd.custom_data;
+	functions = cd.functions;
+	phenotype = cd.phenotype;
+
+	// this is the whole reason we need ot make a copy constructor
+	parameters.pReference_live_phenotype = &phenotype;
+
+	cell_definitions_by_index.push_back( this );
+
+	return;
 }
 
 Cell_Definition& Cell_Definition::operator=( const Cell_Definition& cd )
 {
-	// set the microenvironment pointer 
+	// set the microenvironment pointer
 	pMicroenvironment = cd.pMicroenvironment;
 
-	// set up the default parameters 
+	// set up the default parameters
 		// the default Cell_Parameters constructor should take care of this
-		
-	type = cd.type; 
-	name = cd.name; 
-	parent_ID = cd.parent_ID;
+
+	type = cd.type;
+	name = cd.name;
 	clone_ID = cd.clone_ID;
-	 
+	parent_ID = cd.parent_ID;
+	number_of_divisions = cd.number_of_divisions;
+
 	parameters = cd.parameters;
-	custom_data = cd.custom_data; 
-	functions = cd.functions; 
-	phenotype = cd.phenotype; 
-	
-	// this is the whole reason we need ot make a copy constructor 
-	parameters.pReference_live_phenotype = &phenotype; 
-	
-	// commented out on March 10, 2020 
-	// cell_definitions_by_index.push_back( this ); 
-	
-	return *this; 
+	custom_data = cd.custom_data;
+	functions = cd.functions;
+	phenotype = cd.phenotype;
+
+	// this is the whole reason we need ot make a copy constructor
+	parameters.pReference_live_phenotype = &phenotype;
+
+	// commented out on March 10, 2020
+	// cell_definitions_by_index.push_back( this );
+
+	return *this;
 }
 
-Cell_Definition cell_defaults; 
+Cell_Definition cell_defaults;
 
 Cell_State::Cell_State()
 {
-	neighbors.resize(0); 
-	spring_attachments.resize(0); 
+	neighbors.resize(0);
+	spring_attachments.resize(0);
 
-	orientation.resize( 3 , 0.0 ); 
-	
-	simple_pressure = 0.0; 
-	
-	attached_cells.clear(); 
-	spring_attachments.clear(); 
-	
-	number_of_nuclei = 1; 
-	
-	damage = 0.0; 
-	total_attack_time = 0.0; 
-	
-	contact_with_basement_membrane = false; 
+	orientation.resize( 3 , 0.0 );
 
-	return; 
+	simple_pressure = 0.0;
+
+	attached_cells.clear();
+	spring_attachments.clear();
+
+	number_of_nuclei = 1;
+
+	damage = 0.0;
+	total_attack_time = 0.0;
+
+	contact_with_basement_membrane = false;
+
+	return;
 }
 
 void Cell::update_motility_vector( double dt_ )
 {
 	if( phenotype.motility.is_motile == false )
 	{
-		phenotype.motility.motility_vector.assign( 3, 0.0 ); 
-		return; 
+		phenotype.motility.motility_vector.assign( 3, 0.0 );
+		return;
 	}
-	
+
 	if( UniformRandom() < dt_ / phenotype.motility.persistence_time || phenotype.motility.persistence_time < dt_ )
 	{
 		/*
-		// choose a uniformly random unit vector 
+		// choose a uniformly random unit vector
 		double temp_angle = 6.28318530717959*UniformRandom();
 		double temp_phi = 3.1415926535897932384626433832795*UniformRandom();
-		
+
 		double sin_phi = sin(temp_phi);
 		double cos_phi = cos(temp_phi);
-		
+
 		if( phenotype.motility.restrict_to_2D == true )
-		{ 
-			sin_phi = 1.0; 
+		{
+			sin_phi = 1.0;
 			cos_phi = 0.0;
 		}
-		
-		std::vector<double> randvec; 
-		randvec.resize(3,sin_phi); 
-		
+
+		std::vector<double> randvec;
+		randvec.resize(3,sin_phi);
+
 		randvec[0] *= cos( temp_angle ); // cos(theta)*sin(phi)
 		randvec[1] *= sin( temp_angle ); // sin(theta)*sin(phi)
 		randvec[2] = cos_phi; //  cos(phi)
@@ -288,46 +291,46 @@ void Cell::update_motility_vector( double dt_ )
 		else
 		{ randvec = UniformOnUnitSphere(); }
 
-		// if the update_bias_vector function is set, use it  
+		// if the update_bias_vector function is set, use it
 		if( functions.update_migration_bias )
 		{
-			functions.update_migration_bias( this,phenotype,dt_ ); 
+			functions.update_migration_bias( this,phenotype,dt_ );
 		}
-		
+
 		phenotype.motility.motility_vector = phenotype.motility.migration_bias_direction; // motiltiy = bias_vector
-		phenotype.motility.motility_vector *= phenotype.motility.migration_bias; // motility = bias*bias_vector 
-		
-		double one_minus_bias = 1.0 - phenotype.motility.migration_bias; 
-		
+		phenotype.motility.motility_vector *= phenotype.motility.migration_bias; // motility = bias*bias_vector
+
+		double one_minus_bias = 1.0 - phenotype.motility.migration_bias;
+
 		axpy( &(phenotype.motility.motility_vector), one_minus_bias, randvec ); // motility = (1-bias)*randvec + bias*bias_vector
-		
-		normalize( &(phenotype.motility.motility_vector) ); 
-		
-		phenotype.motility.motility_vector *= phenotype.motility.migration_speed; 
-	}	
-	return; 
-} 
+
+		normalize( &(phenotype.motility.motility_vector) );
+
+		phenotype.motility.motility_vector *= phenotype.motility.migration_speed;
+	}
+	return;
+}
 
 void Cell::advance_bundled_phenotype_functions( double dt_ )
 {
 	// New March 2022
-	// perform transformations 
-	standard_cell_transformations( this,this->phenotype,dt_ ); 
+	// perform transformations
+	standard_cell_transformations( this,this->phenotype,dt_ );
 
-	// New March 2023 in Version 1.12.0 
-	// call the rules-based code to update the phenotype 
+	// New March 2023 in Version 1.12.0
+	// call the rules-based code to update the phenotype
 	if( PhysiCell_settings.rules_enabled )
 	{ apply_ruleset( this ); }
 	if( get_single_signal(this,"necrotic") > 0.5 )
 	{
-		double rupture = this->phenotype.volume.rupture_volume; 
-		double volume = this->phenotype.volume.total; 
+		double rupture = this->phenotype.volume.rupture_volume;
+		double volume = this->phenotype.volume.total;
 		if( volume > rupture )
 		{
-			std::cout << this->phenotype.volume.total << " vs " << this->phenotype.volume.rupture_volume << 
-			" dead: " << get_single_signal( this, "dead") << 	std::endl; 
-			std::cout << this->phenotype.cycle.current_phase_index() << " " 
-			<< this->phenotype.cycle.pCycle_Model->name << std::endl; 
+			std::cout << this->phenotype.volume.total << " vs " << this->phenotype.volume.rupture_volume <<
+			" dead: " << get_single_signal( this, "dead") << 	std::endl;
+			std::cout << this->phenotype.cycle.current_phase_index() << " "
+			<< this->phenotype.cycle.pCycle_Model->name << std::endl;
 		}
 
 	}
@@ -335,151 +338,152 @@ void Cell::advance_bundled_phenotype_functions( double dt_ )
 //	if( functions.update_phenotype )
 //	{ functions.update_phenotype( this , phenotype , dt_ ); }
 
-	// call the custom code to update the phenotype 
+	// call the custom code to update the phenotype
 	if( functions.update_phenotype )
 	{ functions.update_phenotype( this , phenotype , dt_ ); }
-	
-	// update volume 
+
+	// update volume
 	if( functions.volume_update_function )
 	{
-		functions.volume_update_function(this,phenotype,dt_); 
-		
-		// The following line is needed in every volume 
+		functions.volume_update_function(this,phenotype,dt_);
+
+		// The following line is needed in every volume
 		// regulation method (it sets BioFVM total_volume)
-		
-		set_total_volume( phenotype.volume.total ); 
+
+		set_total_volume( phenotype.volume.total );
 	}
-	
+
 	// update geometry
 	phenotype.geometry.update( this, phenotype, dt_ );
-	
-	// check for new death events 
+
+	// check for new death events
 	if( phenotype.death.check_for_death( dt_ ) == true )
 	{
-		// if so, change the cycle model to the current death model 
-		phenotype.cycle.sync_to_cycle_model( phenotype.death.current_model() ); 
-		
+		// if so, change the cycle model to the current death model
+		phenotype.cycle.sync_to_cycle_model( phenotype.death.current_model() );
+
 		// also, turn off motility.
-		
-		phenotype.motility.is_motile = false; 
-		phenotype.motility.motility_vector.assign( 3, 0.0 ); 
+
+		phenotype.motility.is_motile = false;
+		phenotype.motility.motility_vector.assign( 3, 0.0 );
 		functions.update_migration_bias = NULL;
-		
-		// turn off secretion, and reduce uptake by a factor of 10 
+
+		// turn off secretion, and reduce uptake by a factor of 10
 		phenotype.secretion.set_all_secretion_to_zero();
 		phenotype.secretion.scale_all_uptake_by_factor( 0.10 );
-		
-		// make sure to run the death entry function 
+
+		// make sure to run the death entry function
 		if( phenotype.cycle.current_phase().entry_function )
 		{
-			phenotype.cycle.current_phase().entry_function( this, phenotype, dt_ ); 
+			phenotype.cycle.current_phase().entry_function( this, phenotype, dt_ );
 		}
 	}
-	
+
 	// advance cycle model (for both cell cycle and death cycle models)
-	phenotype.cycle.advance_cycle( this, phenotype, dt_ ); 
+	phenotype.cycle.advance_cycle( this, phenotype, dt_ );
 	if( phenotype.flagged_for_removal )
 	{
-		flag_for_removal(); 
-		phenotype.flagged_for_removal = false; 
+		flag_for_removal();
+		phenotype.flagged_for_removal = false;
 	}
 	if( phenotype.flagged_for_division )
 	{
-		flag_for_division(); 
-		phenotype.flagged_for_division = false; 
+		flag_for_division();
+		phenotype.flagged_for_division = false;
 	}
-	
-	return; 
+
+	return;
 }
 
 Cell::Cell()
 {
-	// use the cell defaults; 
-	
-	type = cell_defaults.type; 
+	// use the cell defaults;
+
+	type = cell_defaults.type;
 	type_name = cell_defaults.name;
-    parent_ID = cell_defaults.parent_ID;
-    clone_ID = cell_defaults.clone_ID;
-	
-	custom_data = cell_defaults.custom_data; 
-	parameters = cell_defaults.parameters; 
-	functions = cell_defaults.functions; 
-	
-	phenotype = cell_defaults.phenotype; 
-	
-	phenotype.molecular.sync_to_cell( this ); 
-	
-	// cell state should be fine by the default constructor 
-	
+	clone_ID = cell_defaults.clone_ID;
+	parent_ID = cell_defaults.parent_ID;
+    number_of_divisions = cell_defaults.number_of_divisions;
+
+	custom_data = cell_defaults.custom_data;
+	parameters = cell_defaults.parameters;
+	functions = cell_defaults.functions;
+
+	phenotype = cell_defaults.phenotype;
+
+	phenotype.molecular.sync_to_cell( this );
+
+	// cell state should be fine by the default constructor
+
 	current_mechanics_voxel_index=-1;
-	
+
 	updated_current_mechanics_voxel_index = 0;
-	
+
 	is_movable = true;
 	is_out_of_domain = false;
-	displacement.resize(3,0.0); // state? 
-	
+	displacement.resize(3,0.0); // state?
+
 	assign_orientation();
 	container = NULL;
-	
-	set_total_volume( phenotype.volume.total ); 
-	
-	return; 
+
+	set_total_volume( phenotype.volume.total );
+
+	return;
 }
 
 Cell::~Cell()
 {
-//	std::cout << std::endl << "=====-----------------------------=====" << std::endl; 
+//	std::cout << std::endl << "=====-----------------------------=====" << std::endl;
 //	std::cout << "\tcell destructor " << this << " " << type_name << " at " << position << std::endl;
-//		std::cout << "\t\tattached cells: " << this->state.attached_cells.size() << std::endl << std::endl; 
-	
+//		std::cout << "\t\tattached cells: " << this->state.attached_cells.size() << std::endl << std::endl;
+
 	auto result = std::find( std::begin(*all_cells),std::end(*all_cells),this );
 	if( result != std::end(*all_cells) )
 	{
-		std::cout << "Warning: Cell was never removed from data structure " << std::endl ; 
-		std::cout << "I am of type " << this->type << " at " << this->position << std::endl; 
+		std::cout << "Warning: Cell was never removed from data structure " << std::endl ;
+		std::cout << "I am of type " << this->type << " at " << this->position << std::endl;
 
-		int temp_index = -1; 
-		bool found = false; 
+		int temp_index = -1;
+		bool found = false;
 		for( int n= 0 ; n < (*all_cells).size() ; n++ )
 		{
-			std::cout << this << " vs " << (*all_cells)[n] << std::endl; 
+			std::cout << this << " vs " << (*all_cells)[n] << std::endl;
 			if( (*all_cells)[n] == this )
-			{ found = true; temp_index = n; } 
+			{ found = true; temp_index = n; }
 		}
-		
+
 		if( found )
 		{
 			// release any attached cells (as of 1.7.2 release)
-			this->remove_all_attached_cells(); 
+			this->remove_all_attached_cells();
 			// 1.11.0
-			this->remove_all_spring_attachments(); 
-			
+			this->remove_all_spring_attachments();
+
 			// released internalized substrates (as of 1.5.x releases)
-			this->release_internalized_substrates(); 
+			this->release_internalized_substrates();
 
 			// performance goal: don't delete in the middle -- very expensive reallocation
 			// alternative: copy last element to index position, then shrink vector by 1 at the end O(constant)
 
-			// move last item to index location  
+			// move last item to index location
 			(*all_cells)[ (*all_cells).size()-1 ]->index=temp_index;
 			(*all_cells)[temp_index] = (*all_cells)[ (*all_cells).size()-1 ];
 			// shrink the vector
-			(*all_cells).pop_back();	
-			
+			(*all_cells).pop_back();
+
 			// deregister agent in from the agent container
 			this->get_container()->remove_agent(this);
 		}
 	}
-	
-	
-	return; 
+
+
+	return;
 }
 
 void Cell::flag_for_division( void )
 {
 	get_container()->flag_cell_for_division( this );
-	return; 
+	return;
 }
 
 void Cell::flag_for_removal( void )
@@ -490,27 +494,27 @@ void Cell::flag_for_removal( void )
 
 void Cell::start_death( int death_model_index )
 {
-	// set the death data struture to the indicated death model 
-	phenotype.death.trigger_death( death_model_index ); 
-	// change the cycle model to the current death model 
-	phenotype.cycle.sync_to_cycle_model( phenotype.death.current_model() ); 
-		
-	// turn off secretion, and reduce uptake by a factor of 10 
+	// set the death data struture to the indicated death model
+	phenotype.death.trigger_death( death_model_index );
+	// change the cycle model to the current death model
+	phenotype.cycle.sync_to_cycle_model( phenotype.death.current_model() );
+
+	// turn off secretion, and reduce uptake by a factor of 10
 	phenotype.secretion.set_all_secretion_to_zero();
 	phenotype.secretion.scale_all_uptake_by_factor( 0.10 );
-		
+
 	// turn off motility.
-	phenotype.motility.is_motile = false; 
-	phenotype.motility.motility_vector.assign( 3, 0.0 ); 
+	phenotype.motility.is_motile = false;
+	phenotype.motility.motility_vector.assign( 3, 0.0 );
 	functions.update_migration_bias = NULL;
-		
-	// make sure to run the death entry function 
+
+	// make sure to run the death entry function
 	if( phenotype.cycle.current_phase().entry_function )
 	{
-		phenotype.cycle.current_phase().entry_function( this, phenotype, 0.0 ); 
+		phenotype.cycle.current_phase().entry_function( this, phenotype, 0.0 );
 	}
 
-	return; 
+	return;
 }
 
 void Cell::assign_orientation()
@@ -530,22 +534,22 @@ void Cell::assign_orientation()
 		state.orientation[1]= temp * sin(theta);
 		state.orientation[2]= z;
 	}
-	
-	return; 
+
+	return;
 }
 
 
 
 Cell* Cell::divide( )
 {
-	// phenotype.flagged_for_division = false; 
-	// phenotype.flagged_for_removal = false; 
-	
-	// make sure ot remove adhesions 
-	remove_all_attached_cells(); 
-	remove_all_spring_attachments(); 
+	// phenotype.flagged_for_division = false;
+	// phenotype.flagged_for_removal = false;
 
-	// version 1.10.3: 
+	// make sure ot remove adhesions
+	remove_all_attached_cells();
+	remove_all_spring_attachments();
+
+	// version 1.10.3:
 	// conserved quantitites in custom data aer divided in half
 	// so that each daughter cell gets half of the original ;
 	for( int nn = 0 ; nn < custom_data.variables.size() ; nn++ )
@@ -559,61 +563,61 @@ Cell* Cell::divide( )
 		{ custom_data.vector_variables[nn].value *= 0.5; }
 	}
 
-	
+
 	Cell* child = create_cell();
-	child->copy_data( this );	
+	child->copy_data( this );
 	child->copy_function_pointers(this);
 	child->parameters = parameters;
-	
-	// evenly divide internalized substrates 
-	// if these are not actively tracked, they are zero anyway 
-	*internalized_substrates *= 0.5; 
-	*(child->internalized_substrates) = *internalized_substrates ; 
-	
+
+	// evenly divide internalized substrates
+	// if these are not actively tracked, they are zero anyway
+	*internalized_substrates *= 0.5;
+	*(child->internalized_substrates) = *internalized_substrates ;
+
 	// The following is already performed by create_cell(). JULY 2017 ***
 	// child->register_microenvironment( get_microenvironment() );
-	
-	// randomly place the new agent close to me, accounting for orientation and 
+
+	// randomly place the new agent close to me, accounting for orientation and
 	// polarity (if assigned)
-		
-	// May 30, 2020: 
-	// Set cell_division_orientation = LegacyRandomOnUnitSphere to 
-	// reproduce this code 
+
+	// May 30, 2020:
+	// Set cell_division_orientation = LegacyRandomOnUnitSphere to
+	// reproduce this code
 	/*
 	double temp_angle = 6.28318530717959*UniformRandom();
 	double temp_phi = 3.1415926535897932384626433832795*UniformRandom();
-	
+
 	double radius= phenotype.geometry.radius;
 	std::vector<double> rand_vec (3, 0.0);
-	
+
 	rand_vec[0]= cos( temp_angle ) * sin( temp_phi );
 	rand_vec[1]= sin( temp_angle ) * sin( temp_phi );
 	rand_vec[2]= cos( temp_phi );
-	
-	rand_vec = rand_vec- phenotype.geometry.polarity*(rand_vec[0]*state.orientation[0]+ 
+
+	rand_vec = rand_vec- phenotype.geometry.polarity*(rand_vec[0]*state.orientation[0]+
 		rand_vec[1]*state.orientation[1]+rand_vec[2]*state.orientation[2])*state.orientation;
-	
+
 	if( norm(rand_vec) < 1e-16 )
 	{
 		std::cout<<"************ERROR********************"<<std::endl;
 	}
-	normalize( &rand_vec ); 
-	rand_vec *= radius; // multiply direction times the displacement 
+	normalize( &rand_vec );
+	rand_vec *= radius; // multiply direction times the displacement
 	*/
-	
-	std::vector<double> rand_vec = cell_division_orientation(); 
-	rand_vec = rand_vec- phenotype.geometry.polarity*(rand_vec[0]*state.orientation[0]+ 
-		rand_vec[1]*state.orientation[1]+rand_vec[2]*state.orientation[2])*state.orientation;	
+
+	std::vector<double> rand_vec = cell_division_orientation();
+	rand_vec = rand_vec- phenotype.geometry.polarity*(rand_vec[0]*state.orientation[0]+
+		rand_vec[1]*state.orientation[1]+rand_vec[2]*state.orientation[2])*state.orientation;
 	rand_vec *= phenotype.geometry.radius;
 
 	child->assign_position(position[0] + rand_vec[0],
 						   position[1] + rand_vec[1],
 						   position[2] + rand_vec[2]);
-						 
-	//change my position to keep the center of mass intact 
+
+	//change my position to keep the center of mass intact
 	// and then see if I need to update my voxel index
-	static double negative_one_half = -0.5; 
-	axpy( &position, negative_one_half , rand_vec ); // position = position - 0.5*rand_vec; 
+	static double negative_one_half = -0.5;
+	axpy( &position, negative_one_half , rand_vec ); // position = position - 0.5*rand_vec;
 
 	//If this cell has been moved outside of the boundaries, mark it as such.
 	//(If the child cell is outside of the boundaries, that has been taken care of in the assign_position function.)
@@ -622,19 +626,28 @@ Cell* Cell::divide( )
 		is_out_of_domain = true;
 		is_active = false;
 		is_movable = false;
-	}	
-	 
+	}
+
 	update_voxel_in_container();
-	phenotype.volume.divide(); 
+	phenotype.volume.divide();
 	child->phenotype.volume.divide();
 	child->set_total_volume(child->phenotype.volume.total);
 	set_total_volume(phenotype.volume.total);
-	
-	// child->set_phenotype( phenotype ); 
-	child->phenotype = phenotype; 
+
+	// child->set_phenotype( phenotype );
+	child->phenotype = phenotype;
 	child->parent_ID = this->ID;
 	child->clone_ID = this->clone_ID;
 
+    int left_most_initial_bit = this->custom_data["left_most_bit"];
+    std::bitset<256> temp_bitset_child_1 = this->barcode;
+	std::bitset<256> temp_bitset_child_2 = this->barcode;
+	temp_bitset_child_1.set( 3*this->number_of_divisions+left_most_initial_bit, 1 );
+	temp_bitset_child_2.set( 3*this->number_of_divisions+1+left_most_initial_bit, 1 );
+    this->barcode = temp_bitset_child_1;
+    child->barcode = temp_bitset_child_2;
+	this->number_of_divisions++;
+	child->number_of_divisions = this->number_of_divisions;
 
     if (child->phenotype.intracellular){
         child->phenotype.intracellular->start();

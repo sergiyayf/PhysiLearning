@@ -1,5 +1,7 @@
 import os
 
+import pandas as pd
+
 from physilearning.envs.base_env import BaseEnv
 import numpy as np
 import subprocess
@@ -244,7 +246,10 @@ class PcEnv(BaseEnv):
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(self.state, self.time/self.max_time)
 
-            obs = self.state
+            if self.see_resistance:
+                obs = self.state
+            else:
+                obs = [np.sum(self.state[0:2]), self.state[2]]
 
             # if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
             #     done = True
@@ -296,7 +301,10 @@ class PcEnv(BaseEnv):
         self.time = 0
         self.image = self._get_image_obs(message, 0)
         if self.observation_type == 'number':
-            obs = self.state
+            if self.see_resistance:
+                obs = self.state
+            else:
+                obs = [np.sum(self.state[0:2]), self.state[2]]
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
             self.trajectory[:, 0] = self.state
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':

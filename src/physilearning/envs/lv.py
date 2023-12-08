@@ -250,7 +250,10 @@ class LvEnv(BaseEnv):
         info = {}
 
         if self.observation_type == 'number':
-            obs = self.state
+            if self.see_resistance:
+                obs = self.state
+            else:
+                obs = [np.sum(self.state[0:2]), self.state[2]]
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(action)
             self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
@@ -292,7 +295,10 @@ class LvEnv(BaseEnv):
         self.trajectory[:, 0] = self.state
 
         if self.observation_type == 'number':
-            obs = self.state
+            if self.see_resistance:
+                obs = self.state
+            else:
+                obs = [np.sum(self.state[0:2]), self.state[2]]
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(self.initial_drug)
             self.image_trajectory = np.zeros(

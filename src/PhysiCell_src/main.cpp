@@ -92,10 +92,10 @@ int main( int argc, char* argv[] )
     zmq::context_t context(1);
 	zmq::socket_t socket{context,zmq::socket_type::req};
 	// create a second socket of publisher type for barcoding communication, if barcoding is turned on
+	zmq::socket_t cell_data_socket{context,zmq::socket_type::pub};
 
 	bool XML_status = false;
 	char copy_command [1024];
-	int doctor_timer = 0;
 
 	XML_status = load_PhysiCell_config_file( "./config/PhysiCell_settings.xml" );
 	sprintf( copy_command , "cp ./config/PhysiCell_settings.xml %s" , PhysiCell_settings.folder.c_str() );
@@ -107,12 +107,18 @@ int main( int argc, char* argv[] )
 	    sprintf( port , argv[1]);
 	    socket.connect(port);
 		std::cout<<"Binding to port: "<<port<<std::endl;
+		if (parameters.bools("enable_barcode_communication")){
+            std::string cell_data_port = std::string(port) + std::string("_cell_data");
+            cell_data_socket.bind(cell_data_port);
+        }
 	}
 	else
 	{
 		socket.connect("ipc:/tmp/1");
         std::cout<<"Warning: Port is not specified, reinforcement learning will not work"<<std::endl;
-
+        if (parameters.bools("enable_barcode_communication")){
+            cell_data_socket.bind("ipc:/tmp/1_cell_data");
+        }
 	}
 	
 	// copy config file to output directry 
@@ -139,8 +145,6 @@ int main( int argc, char* argv[] )
 	create_cell_types();
 	
 	setup_tissue();
-
-     
 
 	/* Users typically stop modifying here. END USERMODS */ 
 	
@@ -188,7 +192,8 @@ int main( int argc, char* argv[] )
 		report_file<<"simulated time\tnum cells\tnum division\tnum death\twall time"<<std::endl;
 	}
 	
-	// main loop 
+	// main loop
+	int doctor_timer = parameters.ints("treatment_time_step");
     int reset = talk_to_pcenv(socket);
     std::cout<<"Reset: "<<reset<<std::endl;
 	try 
@@ -211,6 +216,14 @@ int main( int argc, char* argv[] )
 					save_PhysiCell_to_MultiCellDS_v2( filename , microenvironment , PhysiCell_globals.current_time );
 
 					// get relevant cell data and submit it to pub socket
+					if (parameters.bools("enable_barcode_communication")){
+                        std::string cell_data = get_relevant_cell_info();
+                        std::string cur_time = "Current_time " + std::to_string(PhysiCell_globals.current_time);
+                        cell_data = cur_time.append(cell_data);
+                        zmq::message_t message(cell_data.size());
+                        memcpy(message.data(), cell_data.c_str(), cell_data.size());
+                        cell_data_socket.send(message, zmq::send_flags::none);
+                    }
 				}
 				
 				PhysiCell_globals.full_output_index++; 
@@ -291,6 +304,7 @@ int main( int argc, char* argv[] )
 			
 	// close socket and terminate context
 	socket.close();
+	cell_data_socket.close();
 	context.close();
 	return 0; 
 }

@@ -56,15 +56,16 @@ env:
   # general simulation settings
   observation_type: 'number' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
+  see_resistance: False
   max_tumor_size: 4000 # 110000 # 4000
   max_time: 120 # 120
-  initial_wt: 2500 #2761 # 74291 # 2761
-  initial_mut: 2
+  initial_wt: 2761 #2761 # 74291 # 2761
+  initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
   growth_rate_mut: 0.438 # 0.0175
   death_rate_wt: 0.0029
   death_rate_mut: 0.00438
-  treat_death_rate_wt: 0.397 # 0.015
+  treat_death_rate_wt: 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
@@ -72,9 +73,9 @@ env:
   normalize_to: 1
   image_size: 84
   patient_sampling:
-    enable: 0
+    enable: 1
     type: 'sequential' # 'random' # 'sequential'
-    patient_id: 1 # [1, 4, 55, 80, 93]
+    patient_id: 279 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -88,7 +89,7 @@ env:
   # note this is not yet functional
   PcEnv:
     domain_size: 1250
-    cpus_per_sim: 1
+    cpus_per_sim: 50
     transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
     transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
     xml:
@@ -110,9 +111,9 @@ env:
       treatment_time_step:
           parent_nodes: ['user_parameters']
           value: 720
-      treatment_death_rate:
+      treatment_strength:
           parent_nodes: ['user_parameters']
-          value: 0.001125 # 0.00225
+          value: 3.0e2 # 6.0e2
 
   # LatticeBased environment settings
   GridEnv:
@@ -122,14 +123,14 @@ env:
 eval:
   most_recent: 0
   from_file: 0
-  path: './'
-  model_prefix: '20231108_new_train_rew_0'
+  path: './data/degeneracy_tests/LV_deg_5/'
+  model_prefix: 'test_v0.3.0b_conda_env'
   step_to_load: '_best_reward'
-  save_name: 'ntp_pc_response_check'
+  save_name: 'fixed_pat_tets'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.50
+  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.75
   num_episodes: 2
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
@@ -225,3 +226,39 @@ patients:
       filename_chkpt:
         parent_nodes: [ 'user_parameters' ]
         value: './../paper_presims/patient_93/final'
+
+  94:
+    initial_wt: 2807
+    initial_mut: 1
+    growth_rate_wt: 0.255 # 0.0175
+    growth_rate_mut: 0.448 # 0.0175
+    death_rate_wt: 0.00255
+    death_rate_mut: 0.00448
+    treat_death_rate_wt: 0.366 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 2.265 #2400.0
+      competition_mut: 0.135
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_94/final'
+
+  279:
+    initial_wt: 2807
+    initial_mut: 1
+    growth_rate_wt: 0.255 # 0.0175
+    growth_rate_mut: 0.448 # 0.0175
+    death_rate_wt: 0.00255
+    death_rate_mut: 0.00448
+    treat_death_rate_wt: 0.366 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 2.265 #2400.0
+      competition_mut: 0.135
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_279/final'
