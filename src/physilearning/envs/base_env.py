@@ -101,7 +101,7 @@ class BaseEnv(Env):
             if see_resistance:
                 self.observation_space = Box(low=0, high=self.threshold_burden, shape=(3,))
             else:
-                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(3,))
+                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(2,))
         elif self.observation_type == 'image':
             self.observation_space = Box(low=0, high=255,
                                          shape=(1, image_size, image_size),

@@ -187,7 +187,7 @@ class Evaluation:
                     trunc = info[0]['TimeLimit.truncated']
                 else:
                     self.trajectory = self.env.unwrapped.trajectory
-                    if self.env.observation_type == 'image':
+                    if self.env.unwrapped.observation_type == 'image':
                         self.image_trajectory = self.env.unwrapped.image_trajectory
 
                     obs, reward, term, trunc, info = self.env.step(action)
