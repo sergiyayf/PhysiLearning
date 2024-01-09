@@ -25,18 +25,18 @@ learning:
     model_kwargs:
       n_steps: 124
       verbose: 1
-      ent_coef: 0.0001
-      clip_range: 0.0001
-      learning_rate: 1.e-3
+      ent_coef: 0.001
+      clip_range: 0.001
+      learning_rate: 5.e-3
 #      policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
 #        net_arch:
 #          pi: [32, 32]
 #          vf: [32, 32]
-    total_timesteps: 1.e+6
+    total_timesteps: 2.e+6
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'SLV_test_2024'
+    model_save_prefix: 'SLvEnv_test_240109'
     load:
       enable_loading: 0
       last_model: 0
@@ -45,7 +45,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -130,13 +130,13 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
   model_prefix: 'SLV_test_2024'
   step_to_load: '_best_reward'
-  save_name: 'test_fixed_ther_lv'
+  save_name: 'policy'
   # evaluation settings
-  fixed_AT_protocol: 1
+  fixed_AT_protocol: 0
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.7
   num_episodes: 100

@@ -109,7 +109,7 @@ def main():
 
 
 
-df = pd.read_hdf(f'Evaluations/SLvEnvEval_testSLV_test_2024.h5', key=f'run_0')
+df = pd.read_hdf(f'Evaluations/SLvEnvEval_policySLV_test_2024.h5', key=f'run_10')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
