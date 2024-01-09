@@ -45,7 +45,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -54,7 +54,7 @@ env:
     channels_order: 'first' # use first for image learning and last for number
 
   # general simulation settings
-  observation_type: 'number' # 'image' # 'number' # 'multiobs'
+  observation_type: 'image' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   max_tumor_size: 4000 # 110000 # 4000

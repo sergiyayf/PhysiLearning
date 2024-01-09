@@ -250,8 +250,6 @@ class BaseEnv(Env):
         """
         if self.time >= self.max_time:
             truncate = True
-        elif self.state[0] + self.state[1] >= 2*(np.sum(self.trajectory[0:2,0])):
-            truncate = True
         else:
             truncate = False
         return truncate
@@ -262,6 +260,8 @@ class BaseEnv(Env):
         """
         response = self.measure_response()
         if response < 0:
+            terminate = True
+        elif self.state[0] + self.state[1] >= 2 * (np.sum(self.trajectory[0:2, 0])):
             terminate = True
         else:
             terminate = False

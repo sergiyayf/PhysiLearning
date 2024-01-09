@@ -35,7 +35,7 @@ class Reward:
             else: 
                 reward = 10
 
-        # reward for decreasing probability of dying
+        # reward for decreasing probability of dyingr
         elif self.reward_shaping_flag == 6:
             reward = 1 - 0.5 * (obs[0] + obs[1])
             if sum(obs[0:2]) < 1.e-3:
