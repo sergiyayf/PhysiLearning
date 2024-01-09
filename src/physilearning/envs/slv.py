@@ -207,12 +207,6 @@ class SLvEnv(BaseEnv):
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
 
-            if self.time >= self.max_time-1 or self.burden >= self.threshold_burden:
-                done = True
-                break
-            else:
-                done = False
-
             # get the reward
             rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
             reward += rewards.get_reward(self.state, self.time/self.max_time)
@@ -235,10 +229,9 @@ class SLvEnv(BaseEnv):
                 raise NotImplementedError
         else:
             raise NotImplementedError
-        self.done = done
-
         terminate = self.terminate()
         truncate = self.truncate()
+        self.done = terminate or truncate
         return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):
@@ -354,13 +347,14 @@ if __name__ == "__main__": # pragma: no cover
     env = SLvEnv.from_yaml("../../../config.yaml")
     env.reset()
     grid = env.image
-
+    obs = [0]
     for i in range(150):
-        if i% 2 == 0:
+        if i%2 == 0:
             act = 1
         else:
             act = 0
         obs, rew, term, trunc, _ = env.step(act)
+        print(rew)
         if term or trunc:
             break
     anim = env.render()
