@@ -113,23 +113,20 @@ df_06 = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_6.h5', key=f'run_1
 df_07 = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_7.h5', key=f'run_14')
 df_08 = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_8.h5', key=f'run_14')
 
-# find out the smallest index where type 0 is 0
-# print(df_06['Type 0'].values)
-x = np.where[df_06['Type 0'].values == 0]
 
-
-# fig, ax = plt.subplots()
-# ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-# ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-# ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-# ax.legend()
-# ax.set_title(f'AT65 Spatial LV')
-# # ax.set_yscale('log')
-# treat = df['Treatment'].values
-# # replace 0s that are directly after 1 with 1s
-# #treat = np.where(treat == 0, np.roll(treat, 1), treat)
-# ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-# lw=2)
+df = pd.read_hdf(f'Evaluations/SLvEnvEval_best_reward_p111slvenv_sample_rew7.h5', key=f'run_14')
+fig, ax = plt.subplots()
+ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
+ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
+ax.legend()
+ax.set_title(f'AT65 Spatial LV')
+# ax.set_yscale('log')
+treat = df['Treatment'].values
+# replace 0s that are directly after 1 with 1s
+#treat = np.where(treat == 0, np.roll(treat, 1), treat)
+ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
+lw=2)
 
 
 #main()

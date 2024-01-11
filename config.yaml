@@ -40,7 +40,7 @@ learning:
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/sampling_slvenv_400000_steps'
+      saved_model_name: './Training/SavedModels/slvenv_sample_rew7_best_reward'
 
 # Environment configuration
 env:
@@ -75,7 +75,7 @@ env:
   patient_sampling:
     enable: 1
     type: 'sequential' # 'random' # 'sequential'
-    patient_id: [111, 112, 113] # [1, 4, 55, 80, 93]
+    patient_id: 111 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -132,9 +132,9 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: 'sampling_slvenv_load'
-  step_to_load: '_100000_steps'
-  save_name: 'slv_policy_p_111'
+  model_prefix: 'slvenv_sample_rew7'
+  step_to_load: '_best_reward'
+  save_name: 'best_reward_p111'
   # evaluation settings
   fixed_AT_protocol: 0
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
