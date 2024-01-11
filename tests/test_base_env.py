@@ -11,8 +11,11 @@ def test_construct_base_env():
 
 def test_observation_space():
     obs_space = 'number'
-    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20)
+    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=True)
     box = Box(low=0, high=20, shape=(3,))
+    assert (env.observation_space == box)
+    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=False)
+    box = Box(low=0, high=20, shape=(2,))
     assert (env.observation_space == box)
     obs_space = 'image'
     env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, image_size=124)
@@ -89,7 +92,9 @@ def test_truncate():
     assert trunc == False
     env.state = [20, 5, 0]
     trunc = env.truncate()
-    assert trunc
+    term = env.terminate()
+    assert term
+    assert not trunc
 
 
 def test_measure_response():
