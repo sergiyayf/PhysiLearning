@@ -98,7 +98,10 @@ class BaseEnv(Env):
             self.action_space = Box(low=0, high=1, shape=(1,), dtype=np.float32)
         self.observation_type = observation_type
         if self.observation_type == 'number':
-            self.observation_space = Box(low=0, high=self.threshold_burden, shape=(3,))
+            if see_resistance:
+                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(3,))
+            else:
+                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(2,))
         elif self.observation_type == 'image':
             self.observation_space = Box(low=0, high=255,
                                          shape=(1, image_size, image_size),

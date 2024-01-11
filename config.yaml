@@ -29,14 +29,14 @@ learning:
       clip_range: 0.01
       learning_rate: 1.e-4
       policy_kwargs:
-      #  features_extractor_kwargs:
-      #    cnn_output_dim: 32
-        net_arch:
-          pi: [32, 32]
-          vf: [32, 32]
+        #features_extractor_kwargs:
+        #cnn_output_dim: 32
+        #net_arch:
+        #  pi: [32, 32]
+        #  vf: [32, 32]
     total_timesteps: 1.e+9 
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'test_v0.3.0b_conda_env'
+    model_save_prefix: 'test_v0.3.0_lvenv'
     load:
       enable_loading: 0 
       last_model: 0
@@ -45,16 +45,16 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: 0 
+  wrap: 1 
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'first' # use first fir image learning and last for number
 
   # general simulation settings
-  observation_type: 'multiobs' # 'image' # 'number' # 'multiobs'
+  observation_type: 'number' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   max_tumor_size: 4000 # 110000 # 4000
