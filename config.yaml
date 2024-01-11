@@ -26,8 +26,8 @@ learning:
       n_steps: 124
       verbose: 1
       ent_coef: 0.01
-      clip_range: 0.01
-      learning_rate: 1.e-4
+      clip_range: 0.001
+      learning_rate: 1.e-5
 #      policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
@@ -35,12 +35,12 @@ learning:
 #          pi: [32, 32]
 #          vf: [32, 32]
     total_timesteps: 1.e+7
-    save_freq: 1.e+5 # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'another_slv_check_10012024_load'
+    save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
+    model_save_prefix: 'slvenv_sample_rew7'
     load:
-      enable_loading: 1
+      enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/another_slv_check_10012024_3000000_steps'
+      saved_model_name: './Training/SavedModels/sampling_slvenv_400000_steps'
 
 # Environment configuration
 env:
@@ -54,7 +54,7 @@ env:
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
-  observation_type: 'image' # 'image' # 'number' # 'multiobs'
+  observation_type: 'mutant_position' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: True
   max_tumor_size: 4000 # 110000 # 4000
@@ -68,7 +68,7 @@ env:
   treat_death_rate_wt: 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 0  # reward shaping flag for some predefined rewards
+  reward_shaping: 7  # reward shaping flag for some predefined rewards
   normalize: True
   normalize_to: 1.0
   image_size: 124 #84
@@ -132,13 +132,13 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: 'check_lv'
-  step_to_load: '_300000_steps'
-  save_name: 'applied_on_slv'
+  model_prefix: 'sampling_slvenv_load'
+  step_to_load: '_100000_steps'
+  save_name: 'slv_policy_p_111'
   # evaluation settings
   fixed_AT_protocol: 0
-  at_type: 'random' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.7
+  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.4
   num_episodes: 100
   evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

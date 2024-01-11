@@ -99,9 +99,9 @@ class BaseEnv(Env):
         self.observation_type = observation_type
         if self.observation_type == 'number':
             if see_resistance:
-                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(3,))
+                self.observation_space = Box(low=0, high=2*self.threshold_burden, shape=(3,))
             else:
-                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(2,))
+                self.observation_space = Box(low=0, high=2*self.threshold_burden, shape=(2,))
         elif self.observation_type == 'image':
             self.observation_space = Box(low=0, high=255,
                                          shape=(1, image_size, image_size),
@@ -109,7 +109,7 @@ class BaseEnv(Env):
         elif self.observation_type == 'multiobs':
             self.observation_space = spaces.Dict(
                 spaces={
-                    "vec": spaces.Box(low=0, high=self.threshold_burden, shape=(3,)),
+                    "vec": spaces.Box(low=0, high=2*self.threshold_burden, shape=(3,)),
                     "img": spaces.Box(low=0, high=255,
                                       shape=(1, image_size, image_size),
                                       dtype=np.uint8)
@@ -117,9 +117,9 @@ class BaseEnv(Env):
             )
         elif self.observation_type == 'mutant_position':
             if see_resistance:
-                self.observation_space = Box(low=-2, high=self.threshold_burden, shape=(4,))
+                self.observation_space = Box(low=-2, high=2*self.threshold_burden, shape=(4,))
             else:
-                self.observation_space = Box(low=-2, high=self.threshold_burden, shape=(3,))
+                self.observation_space = Box(low=-2, high=2*self.threshold_burden, shape=(3,))
         else:
             raise NotImplementedError
         # Image configurations
