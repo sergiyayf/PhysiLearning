@@ -12,10 +12,10 @@ def test_construct_base_env():
 def test_observation_space():
     obs_space = 'number'
     env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=True)
-    box = Box(low=0, high=20, shape=(3,))
+    box = Box(low=0, high=40, shape=(3,))
     assert (env.observation_space == box)
     env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=False)
-    box = Box(low=0, high=20, shape=(2,))
+    box = Box(low=0, high=40, shape=(2,))
     assert (env.observation_space == box)
     obs_space = 'image'
     env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, image_size=124)
@@ -23,7 +23,7 @@ def test_observation_space():
     assert (env.observation_space == box)
     obs_space = 'multiobs'
     env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, image_size=124)
-    box1 = Box(low=0, high=20, shape=(3,))
+    box1 = Box(low=0, high=40, shape=(3,))
     box2 = Box(low=0, high=255, shape=(1, 124, 124), dtype=np.uint8)
     assert (env.observation_space['vec']==box1)
     assert (env.observation_space['img']==box2)
