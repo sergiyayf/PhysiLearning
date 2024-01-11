@@ -115,6 +115,11 @@ class BaseEnv(Env):
                                       dtype=np.uint8)
                         }
             )
+        elif self.observation_type == 'mutant_position':
+            if see_resistance:
+                self.observation_space = Box(low=-2, high=self.threshold_burden, shape=(4,))
+            else:
+                self.observation_space = Box(low=-2, high=self.threshold_burden, shape=(3,))
         else:
             raise NotImplementedError
         # Image configurations

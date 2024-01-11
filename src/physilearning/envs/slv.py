@@ -227,6 +227,11 @@ class SLvEnv(BaseEnv):
                 obs = {'vec': self.state, 'img': self.image}
             else:
                 raise NotImplementedError
+        elif self.observation_type == 'mutant_position':
+            if self.see_resistance:
+                obs = [self.state, self.mutant_normalized_position]
+            else:
+                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
         else:
             raise NotImplementedError
         terminate = self.terminate()
@@ -272,8 +277,12 @@ class SLvEnv(BaseEnv):
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
+        elif self.observation_type == 'mutant_position':
+            if self.see_resistance:
+                obs = [self.state, self.mutant_normalized_position]
             else:
-                raise NotImplementedError
+                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
+
         else:
             raise NotImplementedError
 
@@ -284,12 +293,15 @@ class SLvEnv(BaseEnv):
                                         self.initial_wt / (self.capacity))
         ini_num_mut_to_sample = np.round(self.image_size * self.image_size * \
                                          self.initial_mut / (self.capacity))
-        large_radius = int(np.round(np.sqrt(ini_num_wt_to_sample + ini_num_mut_to_sample) / 2.6 * np.sqrt(2) + 1))
+        large_radius = int(np.round(np.sqrt(ini_num_wt_to_sample + ini_num_mut_to_sample) / 3.0 * np.sqrt(2) + 1))
         mutant_radius = large_radius - self.mutant_distance_to_front
         if self.time == 0:
             self.angle = np.random.uniform(0, 2 * np.pi)
         self.mutant_x = np.round(self.image_size / 2 + mutant_radius * np.cos(self.angle))
         self.mutant_y = np.round(self.image_size / 2 + mutant_radius * np.sin(self.angle))
+        radius = int(np.round(np.sqrt(ini_num_wt_to_sample) / 3.0 * np.sqrt(2) + 1))
+        dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
+        self.mutant_normalized_position = dist / radius
 
     def _competition_function(self, dist, growth_layer) -> float:
         if dist > growth_layer:
@@ -325,6 +337,7 @@ class SLvEnv(BaseEnv):
 
         radius = int(np.round(np.sqrt(num_wt_to_sample) / 3.0 * np.sqrt(2) + 1))
         dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
+        self.mutant_normalized_position = dist / radius
         growth_layer = self.growth_layer
         self._move_mutant(dist, growth_layer)
         competition = self._competition_function(dist, growth_layer)
@@ -348,13 +361,15 @@ if __name__ == "__main__": # pragma: no cover
     env.reset()
     grid = env.image
     obs = [0]
+    print('before loop')
     for i in range(150):
         if i%2 == 0:
             act = 1
         else:
             act = 0
         obs, rew, term, trunc, _ = env.step(act)
-        print(rew)
+        print(env.mutant_normalized_position)
+        print(obs)
         if term or trunc:
             break
     anim = env.render()
