@@ -79,12 +79,12 @@ class SLvEnv(BaseEnv):
         else:
             self.capacity = env_specific_params.get('carrying_capacity', 6500)
 
-        # get mutant radius
-        self.mutant_distance_to_front = env_specific_params.get('mutant_distance_to_front', 0.0)
         # 1 - wt, 2 - resistant
         if self.config['env']['patient_sampling']['enable']:
             self._set_patient_specific_competition(self.patient_id)
+            self._set_patient_specific_position(self.patient_id)
         else:
+            self.mutant_distance_to_front = env_specific_params.get('mutant_distance_to_front', 0.0)
             self.competition = [env_specific_params.get('competition_wt', 2.),
                                 env_specific_params.get('competition_mut', 1.)]
 
@@ -103,9 +103,10 @@ class SLvEnv(BaseEnv):
         self.max_competition = env_specific_params.get('max_competition', 3.0)
 
     def _set_patient_specific_competition(self, patient_id):
-        self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
-                            self.config['patients'][patient_id]['LvEnv']['competition_mut']]
-
+        self.competition = [self.config['patients'][patient_id]['SLvEnv']['competition_wt'],
+                            self.config['patients'][patient_id]['SLvEnv']['competition_mut']]
+    def _set_patient_specific_position(self, patient_id):
+        self.mutant_distance_to_front = self.config['patients'][patient_id]['SLvEnv']['mutant_distance_to_front']
     def _get_image(self, action: int):
         """
         Randomly sample a tumor inside of the image and return the image
@@ -245,7 +246,9 @@ class SLvEnv(BaseEnv):
             if len(self.patient_id_list) > 1:
                 self._choose_new_patient()
                 self._set_patient_specific_competition(self.patient_id)
-
+                self._set_patient_specific_position(self.patient_id)
+        self.time = 0
+        self._set_initial_mutant_positions()
         if self.wt_random:
             self.initial_wt = \
                 np.random.random_integers(low=0, high=int(self.max_tumor_size), size=1)[0]
@@ -258,7 +261,7 @@ class SLvEnv(BaseEnv):
                 self.initial_mut = self.initial_mut*self.normalization_factor
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
-        self.time = 0
+
 
         self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)+1))
         self.trajectory[:, 0] = self.state
@@ -362,15 +365,48 @@ if __name__ == "__main__": # pragma: no cover
     grid = env.image
     obs = [0]
     print('before loop')
+    print(env.patient_id)
     for i in range(150):
         if i%2 == 0:
             act = 1
         else:
             act = 0
         obs, rew, term, trunc, _ = env.step(act)
-        print(env.mutant_normalized_position)
-        print(obs)
+        #print(env.mutant_normalized_position)
         if term or trunc:
             break
+    print(i)
+    anim = env.render()
+    env.reset()
+    grid = env.image
+    obs = [0]
+    print('before loop')
+    print(env.patient_id)
+    for i in range(150):
+        if i % 2 == 0:
+            act = 1
+        else:
+            act = 0
+        #print(env.mutant_normalized_position)
+        obs, rew, term, trunc, _ = env.step(act)
+        if term or trunc:
+            break
+    print(i)
+    anim = env.render()
+    env.reset()
+    grid = env.image
+    obs = [0]
+    print('before loop')
+    print(env.patient_id)
+    for i in range(150):
+        if i % 2 == 0:
+            act = 1
+        else:
+            act = 0
+        # print(env.mutant_normalized_position)
+        obs, rew, term, trunc, _ = env.step(act)
+        if term or trunc:
+            break
+    print(i)
     anim = env.render()
     #anim.save('test.mp4', fps)
