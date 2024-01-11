@@ -186,12 +186,6 @@ class LvEnv(BaseEnv):
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
 
-            if self.time >= self.max_time-1 or self.burden >= self.threshold_burden:
-                done = True
-                break
-            else:
-                done = False
-
             # get the reward
             rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
             reward += rewards.get_reward(self.state, self.time/self.max_time)
@@ -214,10 +208,10 @@ class LvEnv(BaseEnv):
                 raise NotImplementedError
         else:
             raise NotImplementedError
-        self.done = done
-
         terminate = self.terminate()
         truncate = self.truncate()
+        self.done = terminate or truncate
+
         return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):

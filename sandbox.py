@@ -20,17 +20,17 @@ def get_ttps(filename, timesteps=45):
 
 def main():
     PC_files_list = [
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_1_2.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_1_3.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_8.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_9.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_1_0.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_6.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_7.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_8.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_6.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_7.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_4_f_0_4.h5',
+        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_0_5.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_1_3.h5',
+        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_5.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_9.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_1_0.h5',
+        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_5.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_7.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_8.h5',
+        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_5.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_7.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_4_f_0_4.h5',
         'Evaluations/critical_threshold/PcEnvEvalfixed_pat_4_f_0_5.h5',
 
                         #'Evaluations/Pc/PcEnvEval_patient_80_no_treatment.h5',
@@ -58,8 +58,8 @@ def main():
     patient_4_name_list = [f'Patient {pat_x} No treatment', f'Patient {pat_x} MTD',
                     f'Patient {pat_x} AT50', f'Patient {pat_x} AT75', f'Patient {pat_x} AT100', f'Patient {pat_x} Random']
 
-    PC_name_list = ['89 f 1.2', '89 f 1.3', '135 f 0.8', '135 f 0.9', '135 f 1.0', '170 f 0.6',
-                    '170 f 0.7', '170 f 0.8', '210 f 0.6', '210 f 0.7', '295 f 0.4', '295 f 0.5']
+    PC_name_list = ['80 f 0.5', '135 f 0.5', '170 f 0.5',
+                    '210 f 0.5', '295 f 0.5']
 
     # PC_files_list = patient_4_files_list
     # PC_name_lsit = patient_4_name_list
@@ -109,34 +109,25 @@ def main():
 
 
 
-df = pd.read_hdf(f'Evaluations/SLvEnvEvalat65_slvenv_test.h5', key=f'run_0')
+df_06 = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_6.h5', key=f'run_14')
+df_07 = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_7.h5', key=f'run_14')
+df_08 = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_8.h5', key=f'run_14')
+
+
+df = pd.read_hdf(f'Evaluations/SLvEnvEval_best_reward_p111slvenv_sample_rew7.h5', key=f'run_14')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
 ax.set_title(f'AT65 Spatial LV')
-ax.set_yscale('log')
+# ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
 
-for i in [5,9,10]:
-    df = pd.read_hdf(f'Evaluations/Pc/PcEnvEval_patient_80_AT100.h5', key=f'run_{i}')
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-    ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-    ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-    ax.legend()
-    ax.set_title(f'AT100 PC')
-    ax.set_yscale('log')
-    treat = df['Treatment'].values
-    # replace 0s that are directly after 1 with 1s
-    #treat = np.where(treat == 0, np.roll(treat, 1), treat)
-    ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-    lw=2)
 
 #main()
 plt.show()

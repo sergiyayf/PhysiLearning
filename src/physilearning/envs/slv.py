@@ -79,12 +79,12 @@ class SLvEnv(BaseEnv):
         else:
             self.capacity = env_specific_params.get('carrying_capacity', 6500)
 
-        # get mutant radius
-        self.mutant_distance_to_front = env_specific_params.get('mutant_distance_to_front', 0.0)
         # 1 - wt, 2 - resistant
         if self.config['env']['patient_sampling']['enable']:
             self._set_patient_specific_competition(self.patient_id)
+            self._set_patient_specific_position(self.patient_id)
         else:
+            self.mutant_distance_to_front = env_specific_params.get('mutant_distance_to_front', 0.0)
             self.competition = [env_specific_params.get('competition_wt', 2.),
                                 env_specific_params.get('competition_mut', 1.)]
 
@@ -103,9 +103,10 @@ class SLvEnv(BaseEnv):
         self.max_competition = env_specific_params.get('max_competition', 3.0)
 
     def _set_patient_specific_competition(self, patient_id):
-        self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
-                            self.config['patients'][patient_id]['LvEnv']['competition_mut']]
-
+        self.competition = [self.config['patients'][patient_id]['SLvEnv']['competition_wt'],
+                            self.config['patients'][patient_id]['SLvEnv']['competition_mut']]
+    def _set_patient_specific_position(self, patient_id):
+        self.mutant_distance_to_front = self.config['patients'][patient_id]['SLvEnv']['mutant_distance_to_front']
     def _get_image(self, action: int):
         """
         Randomly sample a tumor inside of the image and return the image
@@ -192,30 +193,24 @@ class SLvEnv(BaseEnv):
         # grow_tumor
         reward = 0
         self.state[2] = action
-        for t in range(0, self.treatment_time_step):
-            # step time
-            self.time += 1
-            self.state[0] = self.grow(0, 1, self.growth_function_flag)
-            self.state[1] = self.grow(1, 0, self.growth_function_flag)
-            self.burden = np.sum(self.state[0:2])
+        # for t in range(0, self.treatment_time_step):
+        # step time
+        self.time += 1
+        self.state[0] = self.grow(0, 1, self.growth_function_flag)
+        self.state[1] = self.grow(1, 0, self.growth_function_flag)
+        self.burden = np.sum(self.state[0:2])
 
-            # record trajectory
-            #self.state[2] = action
-            self.trajectory[:, self.time] = self.state
+        # record trajectory
+        #self.state[2] = action
+        self.trajectory[:, self.time] = self.state
 
-            # check if done
-            if self.state[0] <= 0 and self.state[1] <= 0:
-                self.state = [0, 0, 0]
+        # check if done
+        if self.state[0] <= 0 and self.state[1] <= 0:
+            self.state = [0, 0, 0]
 
-            if self.time >= self.max_time-1 or self.burden >= self.threshold_burden:
-                done = True
-                break
-            else:
-                done = False
-
-            # get the reward
-            rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
-            reward += rewards.get_reward(self.state, self.time/self.max_time)
+        # get the reward
+        rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
+        reward += rewards.get_reward(self.state, self.time/self.max_time)
 
         info = {}
 
@@ -233,12 +228,16 @@ class SLvEnv(BaseEnv):
                 obs = {'vec': self.state, 'img': self.image}
             else:
                 raise NotImplementedError
+        elif self.observation_type == 'mutant_position':
+            if self.see_resistance:
+                obs = [self.state, self.mutant_normalized_position]
+            else:
+                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
         else:
             raise NotImplementedError
-        self.done = done
-
         terminate = self.terminate()
         truncate = self.truncate()
+        self.done = terminate or truncate
         return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):
@@ -247,7 +246,9 @@ class SLvEnv(BaseEnv):
             if len(self.patient_id_list) > 1:
                 self._choose_new_patient()
                 self._set_patient_specific_competition(self.patient_id)
-
+                self._set_patient_specific_position(self.patient_id)
+        self.time = 0
+        self._set_initial_mutant_positions()
         if self.wt_random:
             self.initial_wt = \
                 np.random.random_integers(low=0, high=int(self.max_tumor_size), size=1)[0]
@@ -260,7 +261,7 @@ class SLvEnv(BaseEnv):
                 self.initial_mut = self.initial_mut*self.normalization_factor
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
-        self.time = 0
+
 
         self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)+1))
         self.trajectory[:, 0] = self.state
@@ -279,8 +280,12 @@ class SLvEnv(BaseEnv):
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
+        elif self.observation_type == 'mutant_position':
+            if self.see_resistance:
+                obs = [self.state, self.mutant_normalized_position]
             else:
-                raise NotImplementedError
+                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
+
         else:
             raise NotImplementedError
 
@@ -291,12 +296,15 @@ class SLvEnv(BaseEnv):
                                         self.initial_wt / (self.capacity))
         ini_num_mut_to_sample = np.round(self.image_size * self.image_size * \
                                          self.initial_mut / (self.capacity))
-        large_radius = int(np.round(np.sqrt(ini_num_wt_to_sample + ini_num_mut_to_sample) / 2.6 * np.sqrt(2) + 1))
+        large_radius = int(np.round(np.sqrt(ini_num_wt_to_sample + ini_num_mut_to_sample) / 3.0 * np.sqrt(2) + 1))
         mutant_radius = large_radius - self.mutant_distance_to_front
         if self.time == 0:
             self.angle = np.random.uniform(0, 2 * np.pi)
         self.mutant_x = np.round(self.image_size / 2 + mutant_radius * np.cos(self.angle))
         self.mutant_y = np.round(self.image_size / 2 + mutant_radius * np.sin(self.angle))
+        radius = int(np.round(np.sqrt(ini_num_wt_to_sample) / 3.0 * np.sqrt(2) + 1))
+        dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
+        self.mutant_normalized_position = dist / radius
 
     def _competition_function(self, dist, growth_layer) -> float:
         if dist > growth_layer:
@@ -332,6 +340,7 @@ class SLvEnv(BaseEnv):
 
         radius = int(np.round(np.sqrt(num_wt_to_sample) / 3.0 * np.sqrt(2) + 1))
         dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
+        self.mutant_normalized_position = dist / radius
         growth_layer = self.growth_layer
         self._move_mutant(dist, growth_layer)
         competition = self._competition_function(dist, growth_layer)
@@ -354,14 +363,50 @@ if __name__ == "__main__": # pragma: no cover
     env = SLvEnv.from_yaml("../../../config.yaml")
     env.reset()
     grid = env.image
-
+    obs = [0]
+    print('before loop')
+    print(env.patient_id)
     for i in range(150):
-        if i% 2 == 0:
+        if i%2 == 0:
             act = 1
         else:
             act = 0
         obs, rew, term, trunc, _ = env.step(act)
+        #print(env.mutant_normalized_position)
         if term or trunc:
             break
+    print(i)
     anim = env.render()
-    # anim.save('test.mp4', fps)
+    env.reset()
+    grid = env.image
+    obs = [0]
+    print('before loop')
+    print(env.patient_id)
+    for i in range(150):
+        if i % 2 == 0:
+            act = 1
+        else:
+            act = 0
+        #print(env.mutant_normalized_position)
+        obs, rew, term, trunc, _ = env.step(act)
+        if term or trunc:
+            break
+    print(i)
+    anim = env.render()
+    env.reset()
+    grid = env.image
+    obs = [0]
+    print('before loop')
+    print(env.patient_id)
+    for i in range(150):
+        if i % 2 == 0:
+            act = 1
+        else:
+            act = 0
+        # print(env.mutant_normalized_position)
+        obs, rew, term, trunc, _ = env.step(act)
+        if term or trunc:
+            break
+    print(i)
+    anim = env.render()
+    #anim.save('test.mp4', fps)
