@@ -25,7 +25,7 @@ learning:
     model_kwargs:
       n_steps: 124
       verbose: 1
-      ent_coef: 0.02
+      ent_coef: 0.01
       clip_range: 0.01
       learning_rate: 1.e-4
 #      policy_kwargs:
@@ -35,12 +35,12 @@ learning:
 #          pi: [32, 32]
 #          vf: [32, 32]
     total_timesteps: 1.e+7
-    save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'SLvEnv_2_test_240109'
+    save_freq: 1.e+5 # 1.e+6 use string for best reward save, int for every n steps
+    model_save_prefix: 'another_slv_check_10012024_load'
     load:
-      enable_loading: 0
+      enable_loading: 1
       last_model: 0
-      saved_model_name: './Training/SavedModels/Lv_image_patient_sampling_test_best_reward'
+      saved_model_name: './Training/SavedModels/another_slv_check_10012024_3000000_steps'
 
 # Environment configuration
 env:
@@ -91,7 +91,7 @@ env:
     competition_mut: 0.0 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 39
+    mutant_distance_to_front: 29
     max_competition: 3.5
     growth_layer: 15
   # note this is not yet functional
@@ -132,12 +132,12 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: 'SLvEnv_test_240109'
-  step_to_load: '_final'
-  save_name: 'final_policy'
+  model_prefix: 'check_lv'
+  step_to_load: '_300000_steps'
+  save_name: 'applied_on_slv'
   # evaluation settings
   fixed_AT_protocol: 0
-  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  at_type: 'random' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.7
   num_episodes: 100
   evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'

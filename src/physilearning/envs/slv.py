@@ -192,24 +192,24 @@ class SLvEnv(BaseEnv):
         # grow_tumor
         reward = 0
         self.state[2] = action
-        for t in range(0, self.treatment_time_step):
-            # step time
-            self.time += 1
-            self.state[0] = self.grow(0, 1, self.growth_function_flag)
-            self.state[1] = self.grow(1, 0, self.growth_function_flag)
-            self.burden = np.sum(self.state[0:2])
+        # for t in range(0, self.treatment_time_step):
+        # step time
+        self.time += 1
+        self.state[0] = self.grow(0, 1, self.growth_function_flag)
+        self.state[1] = self.grow(1, 0, self.growth_function_flag)
+        self.burden = np.sum(self.state[0:2])
 
-            # record trajectory
-            #self.state[2] = action
-            self.trajectory[:, self.time] = self.state
+        # record trajectory
+        #self.state[2] = action
+        self.trajectory[:, self.time] = self.state
 
-            # check if done
-            if self.state[0] <= 0 and self.state[1] <= 0:
-                self.state = [0, 0, 0]
+        # check if done
+        if self.state[0] <= 0 and self.state[1] <= 0:
+            self.state = [0, 0, 0]
 
-            # get the reward
-            rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
-            reward += rewards.get_reward(self.state, self.time/self.max_time)
+        # get the reward
+        rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
+        reward += rewards.get_reward(self.state, self.time/self.max_time)
 
         info = {}
 

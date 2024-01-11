@@ -20,17 +20,17 @@ def get_ttps(filename, timesteps=45):
 
 def main():
     PC_files_list = [
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_1_2.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_1_3.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_8.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_9.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_1_0.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_6.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_7.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_8.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_6.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_7.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_4_f_0_4.h5',
+        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_0_5.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_1_3.h5',
+        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_5.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_9.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_1_0.h5',
+        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_5.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_7.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_8.h5',
+        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_5.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_7.h5',
+        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_4_f_0_4.h5',
         'Evaluations/critical_threshold/PcEnvEvalfixed_pat_4_f_0_5.h5',
 
                         #'Evaluations/Pc/PcEnvEval_patient_80_no_treatment.h5',
@@ -58,8 +58,8 @@ def main():
     patient_4_name_list = [f'Patient {pat_x} No treatment', f'Patient {pat_x} MTD',
                     f'Patient {pat_x} AT50', f'Patient {pat_x} AT75', f'Patient {pat_x} AT100', f'Patient {pat_x} Random']
 
-    PC_name_list = ['89 f 1.2', '89 f 1.3', '135 f 0.8', '135 f 0.9', '135 f 1.0', '170 f 0.6',
-                    '170 f 0.7', '170 f 0.8', '210 f 0.6', '210 f 0.7', '295 f 0.4', '295 f 0.5']
+    PC_name_list = ['80 f 0.5', '135 f 0.5', '170 f 0.5',
+                    '210 f 0.5', '295 f 0.5']
 
     # PC_files_list = patient_4_files_list
     # PC_name_lsit = patient_4_name_list
@@ -109,7 +109,7 @@ def main():
 
 
 
-df = pd.read_hdf(f'Evaluations/SLvEnvEval_best_policySLvEnv_test_240109.h5', key=f'run_1')
+df = pd.read_hdf(f'Evaluations/SLvEnvEval_applied_on_slvcheck_lv.h5', key=f'run_1')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
@@ -138,5 +138,5 @@ lw=2)
 #     ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 #     lw=2)
 
-#main()
+main()
 plt.show()
