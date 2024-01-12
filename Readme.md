@@ -1,7 +1,7 @@
 # PhysiLearning
 [![CI](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml)
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
-![version](https://img.shields.io/badge/version-0.3.0-blue)
+![version](https://img.shields.io/badge/version-0.3.1-blue)
 
 <img src="data/images/RL_treatment.gif" width="250" height="250" />
 
@@ -98,6 +98,11 @@ pytest tests/test_evaluate.py
 
 
 ## Changelog
+#### 0.3.1 Major Changes
+- Fix SLvEnv reset bugs. 
+- Change size limit to terminate instead of truncate
+- Implement mutant_position observation in SLvEnv
+
 #### 0.3.0 Major Changes
 - Update to sb3 v2 
 - Move environments from gym to gymnasium 
