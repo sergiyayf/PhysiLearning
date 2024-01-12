@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 10
+  cpus-per-task: 6
   time: '24:00:00'
   agent_buffer: 0
   recurrent:
@@ -25,20 +25,20 @@ learning:
     model_kwargs:
       n_steps: 124
       verbose: 1
-      ent_coef: 0.01
-      clip_range: 0.001
-      learning_rate: 1.e-5
+      ent_coef: 0.02
+      clip_range: 0.002
+      learning_rate: 5.e-6
 #      policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
 #        net_arch:
 #          pi: [32, 32]
 #          vf: [32, 32]
-    total_timesteps: 1.e+7
+    total_timesteps: 1.e+8
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'slvenv_sample_rew7'
+    model_save_prefix: 'reloaded_reduce_size'
     load:
-      enable_loading: 0
+      enable_loading: 1
       last_model: 0
       saved_model_name: './Training/SavedModels/slvenv_sample_rew7_best_reward'
 
@@ -68,14 +68,14 @@ env:
   treat_death_rate_wt: 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 7  # reward shaping flag for some predefined rewards
+  reward_shaping: 8  # reward shaping flag for some predefined rewards
   normalize: True
   normalize_to: 1.0
   image_size: 124 #84
   patient_sampling:
     enable: 1
     type: 'sequential' # 'random' # 'sequential'
-    patient_id: 111 # [1, 4, 55, 80, 93]
+    patient_id: 113 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -132,9 +132,9 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: 'slvenv_sample_rew7'
+  model_prefix: 'reloaded_reduce_size'
   step_to_load: '_best_reward'
-  save_name: 'best_reward_p111'
+  save_name: 'long_best_reward_p113'
   # evaluation settings
   fixed_AT_protocol: 0
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
