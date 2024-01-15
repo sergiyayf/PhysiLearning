@@ -372,41 +372,10 @@ if __name__ == "__main__": # pragma: no cover
         else:
             act = 0
         obs, rew, term, trunc, _ = env.step(act)
-        #print(env.mutant_normalized_position)
+        print(env.mutant_normalized_position)
         if term or trunc:
             break
     print(i)
     anim = env.render()
-    env.reset()
-    grid = env.image
-    obs = [0]
-    print('before loop')
-    print(env.patient_id)
-    for i in range(150):
-        if i % 2 == 0:
-            act = 1
-        else:
-            act = 0
-        #print(env.mutant_normalized_position)
-        obs, rew, term, trunc, _ = env.step(act)
-        if term or trunc:
-            break
-    print(i)
-    anim = env.render()
-    env.reset()
-    grid = env.image
-    obs = [0]
-    print('before loop')
-    print(env.patient_id)
-    for i in range(150):
-        if i % 2 == 0:
-            act = 1
-        else:
-            act = 0
-        # print(env.mutant_normalized_position)
-        obs, rew, term, trunc, _ = env.step(act)
-        if term or trunc:
-            break
-    print(i)
-    anim = env.render()
+
     #anim.save('test.mp4', fps)

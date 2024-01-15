@@ -88,6 +88,9 @@ class PcEnv(BaseEnv):
         self.running = False
         self._start_slurm_physicell_job_step()
 
+        self.mutant_x = 0
+        self.mutant_y = 0
+        self.mutant_normalized_position = 0
 
     def _bind_socket(self) -> None:
         """
@@ -198,6 +201,8 @@ class PcEnv(BaseEnv):
             num_wt_cells, num_mut_cells = self._get_cell_number(message)
         elif self.observation_type == 'number':
             num_wt_cells, num_mut_cells = self._get_cell_number(message)
+        elif self.observation_type == 'mutant_position':
+            num_wt_cells, num_mut_cells = self._get_cell_number(message)
         else:
             raise ValueError('Observation type not supported')
         # num_wt_cells, num_mut_cells = self._get_cell_number(message)
@@ -236,8 +241,7 @@ class PcEnv(BaseEnv):
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
-            else:
-                raise ValueError('Observation type not supported')
+
 
         elif self.observation_type == 'number':
             # record trajectory
@@ -263,9 +267,31 @@ class PcEnv(BaseEnv):
             #         self.socket.send(b"Stop treatment")
             #     elif action == 1:
             #         self.socket.send(b"Treat")
-
+        elif self.observation_type == 'mutant_position':
+            self.image = self._get_image_obs(message, action)
+            num_wt, num_mut = self._get_tumor_volume_from_image(self.image)
+            radius = int(np.round(np.sqrt(num_wt) / 3.0 * np.sqrt(2) + 1))
+            dist = radius - np.sqrt(
+                (self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
+            self.mutant_normalized_position = dist / radius
+            if self.see_resistance:
+                obs = [self.state, self.mutant_normalized_position]
+            else:
+                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
+            rewards = Reward(self.reward_shaping_flag)
+            reward = rewards.get_reward(self.state, self.time / self.max_time)
+            self.trajectory[:, int(self.time / self.treatment_time_step)] = self.state
         else:
             raise ValueError('Observation type not supported')
+
+        ### Here is the mutant position ding
+
+        # num_wt, num_mut = self._get_tumor_volume_from_image(self.image)
+        # radius = int(np.round(np.sqrt(num_wt) / 3.0 * np.sqrt(2) + 1))
+        # dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
+        # self.mutant_normalized_position = dist / radius
+
+        ######
         info = {}
         terminate = self.terminate()
         truncate = self.truncate()
@@ -320,6 +346,19 @@ class PcEnv(BaseEnv):
                 obs = {'vec': self.state, 'img': self.image}
             else:
                 raise ValueError('Observation type not supported')
+        elif self.observation_type == 'mutant_position':
+
+            num_wt, num_mut = self._get_tumor_volume_from_image(self.image)
+            radius = int(np.round(np.sqrt(num_wt) / 3.0 * np.sqrt(2) + 1))
+            dist = radius - np.sqrt(
+                (self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
+            self.mutant_normalized_position = dist / radius
+            if self.see_resistance:
+                obs = [self.state, self.mutant_normalized_position]
+            else:
+                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step) + 1))
+            self.trajectory[:, 0] = self.state
         else:
             raise ValueError('Observation type not supported')
 
@@ -395,6 +434,18 @@ class PcEnv(BaseEnv):
         t0_y = np.round(t0_y * self.image_size / self.domain_size)
         t1_x = np.round(t1_x * self.image_size / self.domain_size)
         t1_y = np.round(t1_y * self.image_size / self.domain_size)
+
+        # find radially largest t1 cell
+        if len(t1_x) > 0:
+            t1_r = np.sqrt((t1_x - self.image_size/2)**2 + (t1_y - self.image_size/2)**2)
+            t1_max_r = np.max(t1_r)
+            t1_max_r_index = np.argmax(t1_r)
+            self.mutant_x = t1_x[t1_max_r_index]
+            self.mutant_y = t1_y[t1_max_r_index]
+        else:
+            self.mutant_x = self.image_size/2
+            self.mutant_y = self.image_size/2
+
         # clean the image and make the new one
         if action:
             self.image = self.drug_color*np.ones((1, self.image_size, self.image_size), dtype=np.uint8)
@@ -417,9 +468,13 @@ if __name__ == '__main__': # pragma: no cover
     # env.reset()
     grid = env.image
     i = 0
-    while i < 10:
+    env.reset()
+    print('Normalized mutant position ',env.mutant_normalized_position)
+    while i < 2:
         act = 0  # env.action_space.sample()
-        env.step(act)
+        obs, rew, term, trunc, info = env.step(act)
         i += 1
+        print('Normalized mutant position ', env.mutant_normalized_position)
+        print('Observation', obs)
 
     anim = env.render()

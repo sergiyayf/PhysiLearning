@@ -127,7 +127,7 @@ treat = df['Treatment'].values
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
-fig.savefig('111.png')
+#fig.savefig('111.png')
 
 df = pd.read_hdf(f'Evaluations/SLvEnvEval_long_best_reward_p112reloaded_reduce_size.h5', key=f'run_14')
 fig, ax = plt.subplots()
@@ -142,7 +142,7 @@ treat = df['Treatment'].values
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
-fig.savefig('112.png')
+#fig.savefig('112.png')
 
 df = pd.read_hdf(f'Evaluations/SLvEnvEval_long_best_reward_p113reloaded_reduce_size.h5', key=f'run_14')
 fig, ax = plt.subplots()
@@ -157,82 +157,34 @@ treat = df['Treatment'].values
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
-fig.savefig('113.png')
+#fig.savefig('113.png')
 
-df = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_111_fixed_0_8.h5', key=f'run_14')
+df = pd.read_hdf(f'Evaluations/PcEnvEval_Pc_pat_4_slvenv_policy_testreloaded_reduce_size.h5', key=f'run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'111 fixed 0.8')
+ax.set_title(f'PC p 4')
 # ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
-fig.savefig('111_fixed_0_8.png')
 
-df = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_111_fixed_0_9.h5', key=f'run_14')
+df = pd.read_hdf(f'Evaluations/PcEnvEval_Pc_pat_80_slvenv_policy_testreloaded_reduce_size.h5', key=f'run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'111 fixed 0.9')
+ax.set_title(f'PC p 80')
 # ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
-fig.savefig('111_fixed_0_9.png')
-
-df = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_6.h5', key=f'run_14')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'112 fixed 0.6')
-# ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
-fig.savefig('112_fixed_0_6.png')
-
-df = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_7.h5', key=f'run_14')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'112 fixed 0.7')
-# ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
-fig.savefig('112_fixed_0_7.png')
-
-df = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_113_fixed_0_4.h5', key=f'run_14')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'113 fixed 0.4')
-# ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
-fig.savefig('113_fixed_0_4.png')
-
 #main()
 plt.show()

@@ -45,7 +45,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -71,11 +71,11 @@ env:
   reward_shaping: 8  # reward shaping flag for some predefined rewards
   normalize: True
   normalize_to: 1.0
-  image_size: 124 #84
+  image_size: 124 #84 #124
   patient_sampling:
     enable: 1
     type: 'sequential' # 'random' # 'sequential'
-    patient_id: 113 # [1, 4, 55, 80, 93]
+    patient_id: 80 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
@@ -96,7 +96,7 @@ env:
     growth_layer: 15
   # note this is not yet functional
   PcEnv:
-    domain_size: 1250
+    domain_size: 2050 #1250
     cpus_per_sim: 10
     transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
     transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
@@ -134,13 +134,13 @@ eval:
   path: './'
   model_prefix: 'reloaded_reduce_size'
   step_to_load: '_best_reward'
-  save_name: 'long_best_reward_p113'
+  save_name: 'Pc_pat_80_slvenv_policy_test'
   # evaluation settings
   fixed_AT_protocol: 0
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.4
-  num_episodes: 100
-  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  num_episodes: 1
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients
@@ -252,5 +252,71 @@ patients:
         value: './../paper_presims/patient_93/final'
     SLvEnv:
       mutant_distance_to_front: 20
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+
+  111:
+    initial_wt: 2761
+    initial_mut: 1
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_80/final'
+    SLvEnv:
+      mutant_distance_to_front: 20
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+
+  112:
+    initial_wt: 2761
+    initial_mut: 1
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_80/final'
+    SLvEnv:
+      mutant_distance_to_front: 25
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+
+  113:
+    initial_wt: 2761
+    initial_mut: 1
+    growth_rate_wt: 0.29 # 0.0175
+    growth_rate_mut: 0.438 # 0.0175
+    death_rate_wt: 0.0029
+    death_rate_mut: 0.00438
+    treat_death_rate_wt: 0.397 # 0.015
+    treat_death_rate_mut: 0.00 # 0.0
+    LvEnv:
+      carrying_capacity: 6500
+      competition_wt: 1.323 #2400.0
+      competition_mut: 0.336
+    PcEnv:
+      filename_chkpt:
+        parent_nodes: [ 'user_parameters' ]
+        value: './../paper_presims/patient_80/final'
+    SLvEnv:
+      mutant_distance_to_front: 30
       competition_wt: 1.323 #2400.0
       competition_mut: 0.336
