@@ -53,7 +53,7 @@ def test_normalization():
             mock.patch.object(PcEnv, '_receive_message') as mock_receive_message):
         env = PcEnv(observation_type='number', normalize=True, normalize_to=100, initial_wt=1, initial_mut=1,
                     max_tumor_size=2, see_resistance=True)
-        mock_receive_message.return_value = 'Type 0:1 t0_x: 0.0, t0_y: 0.0 Type 1:1 t1_x: 10.0, t1_y: 10.0'
+        mock_receive_message.return_value = 'Type 0:1 t0_x: 0.0, t0_y: 0.0, Type 1:1 t1_x: 10.0, t1_y: 10.0, '
         obs, _ = env.reset()
     assert env.state[0] == 50.0
     assert obs[0]+obs[1] == 100.0
