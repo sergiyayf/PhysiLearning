@@ -97,31 +97,6 @@ class BaseEnv(Env):
         elif self.action_type == 'continuous':
             self.action_space = Box(low=0, high=1, shape=(1,), dtype=np.float32)
         self.observation_type = observation_type
-        if self.observation_type == 'number':
-            if see_resistance:
-                self.observation_space = Box(low=0, high=2*self.threshold_burden, shape=(3,))
-            else:
-                self.observation_space = Box(low=0, high=2*self.threshold_burden, shape=(2,))
-        elif self.observation_type == 'image':
-            self.observation_space = Box(low=0, high=255,
-                                         shape=(1, image_size, image_size),
-                                         dtype=np.uint8)
-        elif self.observation_type == 'multiobs':
-            self.observation_space = spaces.Dict(
-                spaces={
-                    "vec": spaces.Box(low=0, high=2*self.threshold_burden, shape=(3,)),
-                    "img": spaces.Box(low=0, high=255,
-                                      shape=(1, image_size, image_size),
-                                      dtype=np.uint8)
-                        }
-            )
-        elif self.observation_type == 'mutant_position':
-            if see_resistance:
-                self.observation_space = Box(low=-2, high=2*self.threshold_burden, shape=(4,))
-            else:
-                self.observation_space = Box(low=-2, high=2*self.threshold_burden, shape=(3,))
-        else:
-            raise NotImplementedError
         # Image configurations
         self.image_size = image_size
         self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
@@ -144,24 +119,51 @@ class BaseEnv(Env):
         self.death_rate = [death_rate_wt, death_rate_mut]
         self.death_rate_treat = [treat_death_rate_wt, treat_death_rate_mut]
 
-        # trajectory for plotting
-        if self.observation_type == 'number':
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step) + 1))
-        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
-            self.image_trajectory = np.zeros(
-                (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step) + 1))
-            self.image_trajectory[:, :, 0] = self.image[0, :, :]
-
-        self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
-        self.trajectory[:, 0] = self.state
-
         # If patient sampling enabled set patient specific parameters
         if self.config is not None:
             if self.config['env']['patient_sampling']['enable']:
                 self._set_patient_params()
         else:
             self.config = {'env': {'patient_sampling': {'enable': False}}}
+
+        if self.observation_type == 'number':
+            if see_resistance:
+                self.observation_space = Box(low=0, high=2*self.threshold_burden, shape=(3,))
+            else:
+                self.observation_space = Box(low=0, high=2*self.threshold_burden, shape=(2,))
+        else:
+            self.image_trajectory = np.zeros(
+                (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
+            self.image_trajectory[:, :, 0] = self.image[0, :, :]
+            if self.observation_type == 'image':
+                self.observation_space = Box(low=0, high=255,
+                                             shape=(1, image_size, image_size),
+                                             dtype=np.uint8)
+            elif self.observation_type == 'multiobs':
+                self.observation_space = spaces.Dict(
+                    spaces={
+                        "vec": spaces.Box(low=0, high=2*self.threshold_burden, shape=(3,)),
+                        "img": spaces.Box(low=0, high=255,
+                                          shape=(1, image_size, image_size),
+                                          dtype=np.uint8)
+                            }
+                )
+            elif self.observation_type == 'mutant_position':
+                if see_resistance:
+                    self.observation_space = Box(low=-2, high=2*self.threshold_burden, shape=(4,))
+                else:
+                    self.observation_space = Box(low=-2, high=2*self.threshold_burden, shape=(3,))
+            else:
+                raise NotImplementedError
+
+        if self.observation_type == 'mutant_position':
+            self.mutant_normalized_position = 0
+            self.trajectory = np.zeros((np.shape(self.state)[0]+1, int(self.max_time) + 1))
+            self.trajectory[0:3, 0] = self.state
+            self.trajectory[3, 0] = self.mutant_normalized_position
+        else:
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
+            self.trajectory[:, 0] = self.state
 
         # Other
         self.done = False

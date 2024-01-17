@@ -88,103 +88,104 @@ class SLvEnv(BaseEnv):
             self.competition = [env_specific_params.get('competition_wt', 2.),
                                 env_specific_params.get('competition_mut', 1.)]
 
-        self.growth_function_flag = env_specific_params.get('growth_function_flag', 'delayed')
+        self.growth_function_flag = env_specific_params.get('growth_function_flag', 'instant')
 
-        self.trajectory[:, 0] = self.state
+        # self.trajectory[:, 0] = self.state # This is not needed, since it is correctly set in the super class
         self.real_step_count = 0
+        # self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
 
-        self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
-
+        # mutant position related parameters
         self.growth_layer = env_specific_params.get('growth_layer', 10)
+        self.max_competition = env_specific_params.get('max_competition', 3.0)
         self.mutant_x = 0
         self.mutant_y = 0
         self._set_initial_mutant_positions()
-        self.drug_color = 0
-        self.max_competition = env_specific_params.get('max_competition', 3.0)
+        # self.drug_color = 0
+
 
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['SLvEnv']['competition_wt'],
                             self.config['patients'][patient_id]['SLvEnv']['competition_mut']]
     def _set_patient_specific_position(self, patient_id):
         self.mutant_distance_to_front = self.config['patients'][patient_id]['SLvEnv']['mutant_distance_to_front']
-    def _get_image(self, action: int):
-        """
-        Randomly sample a tumor inside of the image and return the image
-        """
-        # estimate the number of cells to sample
-        num_wt_to_sample = np.round(self.image_size * self.image_size * \
-            self.state[0] / (self.capacity))
-        num_mut_to_sample = np.round(self.image_size * self.image_size * \
-            self.state[1] / (self.capacity))
+    # def _get_image(self, action: int):
+    #     """
+    #     Randomly sample a tumor inside of the image and return the image
+    #     """
+    #     # estimate the number of cells to sample
+    #     num_wt_to_sample = np.round(self.image_size * self.image_size * \
+    #         self.state[0] / (self.capacity))
+    #     num_mut_to_sample = np.round(self.image_size * self.image_size * \
+    #         self.state[1] / (self.capacity))
+    #
+    #     mut_x = self.mutant_x
+    #     mut_y = self.mutant_y
+    #
+    #     # Place the resistant cells in a circle around the mutant cell
+    #     radius = int(np.round(np.sqrt(num_mut_to_sample)/3.0*np.sqrt(2)+1))
+    #     if mut_x-radius<0:
+    #         min_x = 0
+    #     else:
+    #         min_x = mut_x-radius
+    #     if mut_y-radius<0:
+    #         min_y = 0
+    #     else:
+    #         min_y = mut_y-radius
+    #     if mut_x+radius>self.image_size:
+    #         max_x = self.image_size
+    #     else:
+    #         max_x = mut_x+radius
+    #     if mut_y+radius>self.image_size:
+    #         max_y = self.image_size
+    #     else:
+    #         max_y = mut_y+radius
+    #     x_range = np.arange(min_x, max_x)
+    #     y_range = np.arange(min_y, max_y)
+    #
+    #     xx, yy = np.meshgrid(x_range, y_range)
+    #     distances = (xx - mut_x) ** 2 + (yy - mut_y) ** 2
+    #     mask = distances <= radius ** 2
+    #     mut_x, mut_y = xx[mask], yy[mask]
+    #     # make sure positions are within the image
+    #     # mut_x, mut_y = mut_x[(mut_x >= 0) & (mut_x < self.image_size)], \
+    #     #                 mut_y[(mut_y >= 0) & (mut_y < self.image_size)]
+    #     if num_mut_to_sample <= 1e-2:
+    #         mut_x, mut_y = np.array([]), np.array([])
+    #     # remove until we have the right number
+    #     # random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
+    #     # mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
+    #
+    #     # put the senstitive cells inside of the circle of big radius, but not where resistant cells are
+    #     radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/3.0*np.sqrt(2)+1))
+    #     x_range = np.arange(max(self.image_size/2 - radius,0), min(self.image_size/2 + radius, self.image_size))
+    #     y_range = np.arange(max(self.image_size/2 - radius,0), min(self.image_size/2 + radius, self.image_size))
+    #     xx, yy = np.meshgrid(x_range, y_range)
+    #     distances = (xx - self.image_size/2) ** 2 + (yy - self.image_size/2) ** 2
+    #     mask = distances <= radius ** 2
+    #     wt_x, wt_y = xx[mask], yy[mask]
+    #
+    #     # populate the image
+    #     # clean the image and make the new one
+    #     if action:
+    #         self.image = self.drug_color * np.ones((1, self.image_size, self.image_size), dtype=np.uint8)
+    #     else:
+    #         self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
+    #
+    #     for x, y in zip(wt_x, wt_y):
+    #         # color wild-type differently if they are within the growth layer
+    #         threshold_radius = radius-self.growth_layer
+    #         distance_to_center = np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2)
+    #         if distance_to_center < threshold_radius:
+    #             self.image[0, int(x), int(y)] = self.wt_color
+    #         else:
+    #             self.image[0, int(x), int(y)] = self.wt_color-20
+    #         #self.image[0, int(x), int(y)] = self.wt_color
+    #     for x, y in zip(mut_x, mut_y):
+    #         self.image[0, int(x), int(y)] = self.mut_color
+    #
+    #     return self.image
 
-        mut_x = self.mutant_x
-        mut_y = self.mutant_y
-
-        # Place the resistant cells in a circle around the mutant cell
-        radius = int(np.round(np.sqrt(num_mut_to_sample)/3.0*np.sqrt(2)+1))
-        if mut_x-radius<0:
-            min_x = 0
-        else:
-            min_x = mut_x-radius
-        if mut_y-radius<0:
-            min_y = 0
-        else:
-            min_y = mut_y-radius
-        if mut_x+radius>self.image_size:
-            max_x = self.image_size
-        else:
-            max_x = mut_x+radius
-        if mut_y+radius>self.image_size:
-            max_y = self.image_size
-        else:
-            max_y = mut_y+radius
-        x_range = np.arange(min_x, max_x)
-        y_range = np.arange(min_y, max_y)
-
-        xx, yy = np.meshgrid(x_range, y_range)
-        distances = (xx - mut_x) ** 2 + (yy - mut_y) ** 2
-        mask = distances <= radius ** 2
-        mut_x, mut_y = xx[mask], yy[mask]
-        # make sure positions are within the image
-        # mut_x, mut_y = mut_x[(mut_x >= 0) & (mut_x < self.image_size)], \
-        #                 mut_y[(mut_y >= 0) & (mut_y < self.image_size)]
-        if num_mut_to_sample <= 1e-2:
-            mut_x, mut_y = np.array([]), np.array([])
-        # remove until we have the right number
-        # random_indices = np.random.randint(len(mut_x), size=int(num_mut_to_sample))
-        # mut_x, mut_y = mut_x[random_indices], mut_y[random_indices]
-
-        # put the senstitive cells inside of the circle of big radius, but not where resistant cells are
-        radius = int(np.round(np.sqrt(num_wt_to_sample+num_mut_to_sample)/3.0*np.sqrt(2)+1))
-        x_range = np.arange(max(self.image_size/2 - radius,0), min(self.image_size/2 + radius, self.image_size))
-        y_range = np.arange(max(self.image_size/2 - radius,0), min(self.image_size/2 + radius, self.image_size))
-        xx, yy = np.meshgrid(x_range, y_range)
-        distances = (xx - self.image_size/2) ** 2 + (yy - self.image_size/2) ** 2
-        mask = distances <= radius ** 2
-        wt_x, wt_y = xx[mask], yy[mask]
-
-        # populate the image
-        # clean the image and make the new one
-        if action:
-            self.image = self.drug_color * np.ones((1, self.image_size, self.image_size), dtype=np.uint8)
-        else:
-            self.image = np.zeros((1, self.image_size, self.image_size), dtype=np.uint8)
-
-        for x, y in zip(wt_x, wt_y):
-            # color wild-type differently if they are within the growth layer
-            threshold_radius = radius-self.growth_layer
-            distance_to_center = np.sqrt((x-self.image_size/2)**2 + (y-self.image_size/2)**2)
-            if distance_to_center < threshold_radius:
-                self.image[0, int(x), int(y)] = self.wt_color
-            else:
-                self.image[0, int(x), int(y)] = self.wt_color-20
-            #self.image[0, int(x), int(y)] = self.wt_color
-        for x, y in zip(mut_x, mut_y):
-            self.image[0, int(x), int(y)] = self.mut_color
-
-        return self.image
-
-    def step(self, action: int) -> Tuple[np.ndarray, float, bool, bool, dict]:
+    def step(self, action: int) -> Tuple[list, float, bool, bool, dict]:
         """
         Step in the environment that simulates tumor growth and treatment
         :param action: 0 - no treatment, 1 - treatment
@@ -200,11 +201,7 @@ class SLvEnv(BaseEnv):
         self.state[1] = self.grow(1, 0, self.growth_function_flag)
         self.burden = np.sum(self.state[0:2])
 
-        # record trajectory
-        #self.state[2] = action
-        self.trajectory[:, self.time] = self.state
-
-        # check if done
+        # check for tumor death
         if self.state[0] <= 0 and self.state[1] <= 0:
             self.state = [0, 0, 0]
 
@@ -215,20 +212,23 @@ class SLvEnv(BaseEnv):
         info = {}
 
         if self.observation_type == 'number':
+            self.trajectory[:, self.time] = self.state
             if self.see_resistance:
                 obs = self.state
             else:
                 obs = [np.sum(self.state[0:2]), self.state[2]]
-        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
-            self.image = self._get_image(action)
-            self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
-            if self.observation_type == 'image':
-                obs = self.image
-            elif self.observation_type == 'multiobs':
-                obs = {'vec': self.state, 'img': self.image}
-            else:
-                raise NotImplementedError
+        # elif self.observation_type == 'image' or self.observation_type == 'multiobs':
+        #     self.image = self._get_image(action)
+        #     self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
+        #     if self.observation_type == 'image':
+        #         obs = self.image
+        #     elif self.observation_type == 'multiobs':
+        #         obs = {'vec': self.state, 'img': self.image}
+        #     else:
+        #         raise NotImplementedError
         elif self.observation_type == 'mutant_position':
+            self.trajectory[0:3, self.time] = self.state
+            self.trajectory[3, self.time] = self.mutant_normalized_position
             if self.see_resistance:
                 obs = [self.state, self.mutant_normalized_position]
             else:
@@ -237,7 +237,7 @@ class SLvEnv(BaseEnv):
             raise NotImplementedError
         terminate = self.terminate()
         truncate = self.truncate()
-        self.done = terminate or truncate
+        # self.done = terminate or truncate
         return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):
@@ -262,25 +262,26 @@ class SLvEnv(BaseEnv):
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
 
-
-        self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)+1))
-        self.trajectory[:, 0] = self.state
-
         if self.observation_type == 'number':
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
+            self.trajectory[:, 0] = self.state
             if self.see_resistance:
                 obs = self.state
             else:
                 obs = [np.sum(self.state[0:2]), self.state[2]]
-        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
-            self.image = self._get_image(self.initial_drug)
-            self.image_trajectory = np.zeros(
-                (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
-            self.image_trajectory[:, :, 0] = self.image[0, :, :]
-            if self.observation_type == 'image':
-                obs = self.image
-            elif self.observation_type == 'multiobs':
-                obs = {'vec': self.state, 'img': self.image}
+        # elif self.observation_type == 'image' or self.observation_type == 'multiobs':
+        #     self.image = self._get_image(self.initial_drug)
+        #     self.image_trajectory = np.zeros(
+        #         (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
+        #     self.image_trajectory[:, :, 0] = self.image[0, :, :]
+        #     if self.observation_type == 'image':
+        #         obs = self.image
+        #     elif self.observation_type == 'multiobs':
+        #         obs = {'vec': self.state, 'img': self.image}
         elif self.observation_type == 'mutant_position':
+            self.trajectory = np.zeros((np.shape(self.state)[0]+1, int(self.max_time) + 1))
+            self.trajectory[0:3, 0] = self.state
+            self.trajectory[3, 0] = self.mutant_normalized_position
             if self.see_resistance:
                 obs = [self.state, self.mutant_normalized_position]
             else:
@@ -292,6 +293,8 @@ class SLvEnv(BaseEnv):
         return obs, {}
 
     def _set_initial_mutant_positions(self):
+        # TODO: change this to more accurate radius calculation, without image size
+        # TODO: Make sure normalized mutant position is non-negative
         ini_num_wt_to_sample = np.round(self.image_size * self.image_size * \
                                         self.initial_wt / (self.capacity))
         ini_num_mut_to_sample = np.round(self.image_size * self.image_size * \

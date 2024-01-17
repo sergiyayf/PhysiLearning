@@ -139,6 +139,7 @@ def simulate_patients(n_sims):
                            f'--export=ARG1,ARG2 simulate_patients_job.sh {i * 10} {i * 10 + 10}'
             subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
+
 @cli.command()
 def evaluate():
     """Submit a job to evaluate the trained model or how fixed AT protocol performs

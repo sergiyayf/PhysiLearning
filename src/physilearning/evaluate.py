@@ -149,7 +149,7 @@ class Evaluation:
             try:
                 model = Algorithm.load(model_name)
             except KeyError:
-                model = Algorithm.load(model_name, env=self.env, custom_objects =
+                model = Algorithm.load(model_name, env=self.env, custom_objects=
                 {'observation_space': self.env.observation_space, 'action_space': self.env.action_space})
 
         else:
@@ -164,13 +164,13 @@ class Evaluation:
                 if self.env.get_attr('time')[0] > 0:
                     obs = self.env.reset()
                 else:
-                    print ('Episode 0, already reset')
+                    print('Episode 0, already reset')
 
             else:
                 if self.env.unwrapped.time > 0:
                     obs, _ = self.env.reset()
                 else:
-                    print ('Episode 0, already reset')
+                    print('Episode 0, already reset')
             # obs = self.env.reset()
             done = False
             score = 0
@@ -212,11 +212,17 @@ class Evaluation:
         else:
             observation_type = self.env.observation_type
 
-        if observation_type == 'image':
+        if observation_type == 'image' or observation_type == 'multiobs':
             np.save(f'{save_name}_image_trajectory', self.image_trajectory)
             number_trajectory = self.trajectory
             df = pd.DataFrame(np.transpose(number_trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
             df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
+        elif observation_type == 'mutant_position':
+            df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment', 'Mutant Position'])
+            df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
+            if self.env.name == 'PcEnv':
+                np.save(f'{save_name}_image_trajectory', self.image_trajectory)
+
         else:
             df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
             df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
@@ -294,7 +300,7 @@ def evaluate(config_file='config.yaml') -> None:
     return
 
 
-if __name__ == '__main__': # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     # set dir to the root of the project
     os.chdir('/home/saif/Projects/PhysiLearning')
     evaluate(config_file='./config.yaml')
