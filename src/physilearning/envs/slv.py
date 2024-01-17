@@ -95,11 +95,10 @@ class SLvEnv(BaseEnv):
         # self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
 
         # mutant position related parameters
-        self.growth_layer = env_specific_params.get('growth_layer', 10)
-        self.max_competition = env_specific_params.get('max_competition', 3.0)
-        self.mutant_x = 0
-        self.mutant_y = 0
-        self._set_initial_mutant_positions()
+        self.growth_layer = env_specific_params.get('growth_layer', 150)
+        self.cell_volume = env_specific_params.get('cell_volume', 15)
+        self.radius = (np.sum(self.state[0:2]) * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
+        self.mutant_normalized_position = 1-self.mutant_distance_to_front/self.radius
         # self.drug_color = 0
 
 
@@ -292,22 +291,25 @@ class SLvEnv(BaseEnv):
 
         return obs, {}
 
-    def _set_initial_mutant_positions(self):
-        # TODO: change this to more accurate radius calculation, without image size
-        # TODO: Make sure normalized mutant position is non-negative
-        ini_num_wt_to_sample = np.round(self.image_size * self.image_size * \
-                                        self.initial_wt / (self.capacity))
-        ini_num_mut_to_sample = np.round(self.image_size * self.image_size * \
-                                         self.initial_mut / (self.capacity))
-        large_radius = int(np.round(np.sqrt(ini_num_wt_to_sample + ini_num_mut_to_sample) / 3.0 * np.sqrt(2) + 1))
-        mutant_radius = large_radius - self.mutant_distance_to_front
-        if self.time == 0:
-            self.angle = np.random.uniform(0, 2 * np.pi)
-        self.mutant_x = np.round(self.image_size / 2 + mutant_radius * np.cos(self.angle))
-        self.mutant_y = np.round(self.image_size / 2 + mutant_radius * np.sin(self.angle))
-        radius = int(np.round(np.sqrt(ini_num_wt_to_sample) / 3.0 * np.sqrt(2) + 1))
-        dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
-        self.mutant_normalized_position = dist / radius
+    # def _set_initial_mutant_positions(self):
+    #     # TODO: change this to more accurate radius calculation, without image size
+    #     # TODO: Make sure normalized mutant position is non-negative
+    #
+    #     radius = np.sqrt(np.sum(self.state[0:2])*self.cell_area/np.pi)
+    #     self.mutant_radial_position
+    #     ini_num_wt_to_sample = np.round(self.image_size * self.image_size * \
+    #                                     self.initial_wt / (self.capacity))
+    #     ini_num_mut_to_sample = np.round(self.image_size * self.image_size * \
+    #                                      self.initial_mut / (self.capacity))
+    #     large_radius = int(np.round(np.sqrt(ini_num_wt_to_sample + ini_num_mut_to_sample) / 3.0 * np.sqrt(2) + 1))
+    #     mutant_radius = large_radius - self.mutant_distance_to_front
+    #     if self.time == 0:
+    #         self.angle = np.random.uniform(0, 2 * np.pi)
+    #     self.mutant_x = np.round(self.image_size / 2 + mutant_radius * np.cos(self.angle))
+    #     self.mutant_y = np.round(self.image_size / 2 + mutant_radius * np.sin(self.angle))
+    #     radius = int(np.round(np.sqrt(ini_num_wt_to_sample) / 3.0 * np.sqrt(2) + 1))
+    #     dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
+    #     self.mutant_normalized_position = dist / radius
 
     def _competition_function(self, dist, growth_layer) -> float:
         if dist > growth_layer:
@@ -336,6 +338,7 @@ class SLvEnv(BaseEnv):
                 self.mutant_y += np.sign(np.sin(angle))
 
     def grow(self, i: int, j: int, flag: str) -> float:
+        # TODO: change this to more accurate radius calculation, without image size
 
         # instantaneous death rate increase by drug application
         num_wt_to_sample = np.round(self.image_size * self.image_size * \
