@@ -155,10 +155,10 @@ class Evaluation:
         else:
             final_score = np.zeros(num_episodes)
             model = None
-        if self._is_venv():
-            obs = self.env.reset()
-        else:
-            obs, _ = self.env.reset()
+        # if self._is_venv():
+        #     obs = self.env.reset()
+        # else:
+        #     obs, _ = self.env.reset()
         for episode in range(num_episodes):
             if self._is_venv():
                 if self.env.get_attr('time')[0] > 0:
@@ -171,7 +171,7 @@ class Evaluation:
                     obs, _ = self.env.reset()
                 else:
                     print('Episode 0, already reset')
-            # obs = self.env.reset()
+
             done = False
             score = 0
             while not done:

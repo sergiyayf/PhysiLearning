@@ -19,7 +19,7 @@ def get_cell_df(pymcds: pyMCDS.pyMCDS):
 
 def calculate_distance_to_front_cell(cells, front):
     for i in range(len(front)):
-        current_dist = np.sqrt((cells['position_x']-front[i, 0])**2 + (cells['position_y']-front[i, 1])**2)
+        current_dist = np.sqrt((cells['position_x']-front[i, 0])**2 + (cells['position_y']-front[i, 1])**2 + (cells['position_z']-front[i, 2])**2)
         if i == 0:
             dist = current_dist
         else:
@@ -32,30 +32,31 @@ def calculate_distance_to_front(cell_df: pd.DataFrame, front_cell_positions: np.
     Calculate distance to front for all cells in cell_df
     and append to the dataset
     """
-    xc, yc, R, residu = leastsq_circle(front_cell_positions[:, 0], front_cell_positions[:, 1])
+    # calculate average radius of cells at the front
+    R = np.mean(np.sqrt(front_cell_positions[:, 0]**2 + front_cell_positions[:, 1]**2 + front_cell_positions[:, 2]**2))
     cell_df = cell_df.copy()
 
-    cell_df['distance_to_front_circle'] = (np.sqrt((cell_df['position_x']-xc)**2 + (cell_df['position_y']-yc)**2)).values - R
+    cell_df['distance_to_front_circle'] = (np.sqrt((cell_df['position_x'])**2 + (cell_df['position_y'])**2 + (cell_df['position_z'])**2)).values - R
     cell_df['distance_to_front_cell'] = calculate_distance_to_front_cell(cell_df, front_cell_positions)
-    cell_df['distance_to_center'] = np.sqrt((cell_df['position_x'])**2 + (cell_df['position_y'])**2)
+    cell_df['distance_to_center'] = np.sqrt((cell_df['position_x'])**2 + (cell_df['position_y'])**2 + (cell_df['position_z'])**2)
 
     return cell_df
 
 
 if __name__ == '__main__':
 
-    sims = range(0, 1000, 1)
+    sims = range(26, 27, 1)
     distance_to_front_cell =  []
     distance_to_front_circle = []
     min_distance_to_front_cell = []
     per_sim_min_distance = []
     for sim in sims:
         # pymc = pyMCDS.pyMCDS('final.xml' ,f'../../data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
-        cell_info = pd.read_hdf('./../../data/simplified_data_1107_mid_mutation_rate.h5', key=f'PhysiCell_{sim}')
+        cell_info = pd.read_hdf('./../../data/presims_3d.h5', key=f'data/sim_{sim}')
         type_1_cells = cell_info[cell_info['cell_type'] == 1]
 
         cells_at_front = cell_info[cell_info['is_at_front'] == 1]
-        positions = cells_at_front[['position_x', 'position_y']].values
+        positions = cells_at_front[['position_x', 'position_y', 'position_z']].values
 
         type_1_cells = calculate_distance_to_front(type_1_cells, positions)
 
