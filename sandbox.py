@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def get_ttps(filename, timesteps=45):
+def get_ttps(filename, timesteps=10):
     ttps = []
-    for i in range(timesteps):
-        df = pd.read_hdf(filename, key='run_'+str(i))
+    for i in range(1,timesteps+1):
+        df = pd.read_hdf(filename+f'_{i}.h5', key='run_0')
         # find the largest index with non-zero Type 0 and Type 1
         nz = df[(df['Type 0'] + df['Type 1'] != 0)]
         if len(nz) > 0:
@@ -19,78 +19,16 @@ def get_ttps(filename, timesteps=45):
     return ttps
 
 def main():
-    PC_files_list = [
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_0_5.h5',
-        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_80_f_1_3.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_5.h5',
-        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_0_9.h5',
-        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_93_f_1_0.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_5.h5',
-        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_7.h5',
-        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_279_f_0_8.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_5.h5',
-        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_94_f_0_7.h5',
-        #'Evaluations/critical_threshold/PcEnvEvalfixed_pat_4_f_0_4.h5',
-        'Evaluations/critical_threshold/PcEnvEvalfixed_pat_4_f_0_5.h5',
-
-                        #'Evaluations/Pc/PcEnvEval_patient_80_no_treatment.h5',
-                        #'Evaluations/Pc/PcEnvEval_patient_80_mtd.h5',
-                        #'Evaluations/Pc/PcEnvEval_patient_80_AT50.h5',
-                        #'Evaluations/Pc/PcEnvEval_patient_80_AT75.h5',
-                        #'Evaluations/Pc/PcEnvEval_patient_80_AT100.h5',
-                        #'Evaluations/Pc/PcEnvEval_patient_80_random.h5',
-                        #'Evaluations/older_evals/lv_on_pc_2108_combined.h5',
-                        #'Evaluations/older_evals/PcEnvEval_pc_rl_1008_interruption_combined.h5',
-                        #'Evaluations/PcEnvEval_20231027_transfer.h5',
-                        #'data/results/eval_transfered_r0/PcEnvEval__transfer_r020231102_PC_transfer_r0_changed_callback_1.h5',
-                        #'Evaluations/PcEnvEval_20231103_transfer_r0to8.h5',
-                        #'data/results/eval_lv_r0/PcEnvEval__patient_93_no_treatment20231031_patient_80_add_noise_2.h5',
-                        #'data/results/eval_lv_r8/PcEnvEval__r8_lv_trained20231102_patient_80_r8_with_noise.h5',
-                     ]
-    pat_x = 93
-    patient_4_files_list = [f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_no_treatment.h5',
-                                f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_mtd.h5',
-                                f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_AT50.h5',
-                                f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_AT75.h5',
-                                f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_AT100.h5',
-                                f'data/training_patients_benchmarks/patient_{pat_x}_results/patient_{pat_x}_random.h5',
-                                ]
-    patient_4_name_list = [f'Patient {pat_x} No treatment', f'Patient {pat_x} MTD',
-                    f'Patient {pat_x} AT50', f'Patient {pat_x} AT75', f'Patient {pat_x} AT100', f'Patient {pat_x} Random']
-
-    PC_name_list = ['80 f 0.5', '135 f 0.5', '170 f 0.5',
-                    '210 f 0.5', '295 f 0.5']
-
-    # PC_files_list = patient_4_files_list
-    # PC_name_lsit = patient_4_name_list
-
-    LV_files_list = ['Evaluations/Lv/LvEnvEval_patient_80_no_treatment.h5',
-                        'Evaluations/Lv/LvEnvEval_patient_80_mtd.h5',
-                        'Evaluations/Lv/LvEnvEval_patient_80_AT50.h5',
-                        'Evaluations/Lv/LvEnvEval_patient_80_AT75.h5',
-                        'Evaluations/Lv/LvEnvEval_patient_80_AT100.h5',
-                        'Evaluations/Lv/LvEnvEval_patient_80_random.h5',
-                        'Evaluations/older_evals/LvEnvEvallv_2108_cont_2.h5',
-                        #'Evaluations/LvEnvEval_lv_noise20231106_patient_80_r8_with_noise_load.h5',
-                     ]
-    LV_name_lsit = ['LV No treatment', 'LV MTD',
-                    'LV AT50', 'LV AT75', 'LV AT100', 'LV Random', 'LV RL' ]
+    PC_files_list = ['data/3D_benchmarks/at100/PcEnvEvalsim_at100', 'data/3D_benchmarks/mtd/PcEnvEvalsim_mtd',
+                     'data/3D_benchmarks/no_therapy/PcEnvEvalsim_no_therapy']
+    PC_name_list = ['AT100', 'MTD', 'No therapy']
 
     PC_dict = {}
-    LV_dict = {}
-    combined = {}
     for i in range(len(PC_files_list)):
         PC_dict[PC_name_list[i]] = get_ttps(PC_files_list[i])
 
-    for i in range(len(LV_files_list)):
-        LV_dict[LV_name_lsit[i]] = get_ttps(LV_files_list[i])
-
-    for i in range(len(PC_files_list)):
-        combined[PC_files_list[i]] = get_ttps(PC_files_list[i])
-        # combined[LV_name_lsit[i]] = get_ttps(LV_files_list[i])
 
     PC_df = pd.DataFrame(PC_dict)
-    LV_df = pd.DataFrame(LV_dict)
     # combined_df = pd.DataFrame(combined)
 
     # box plot the distribution with scatter using seaborn
@@ -100,91 +38,34 @@ def main():
     # show mean as well
     ax.scatter(PC_df.mean().index, PC_df.mean(), marker='x', color='red', s=50, label='mean')
 
-    fig, ax = plt.subplots()
-    sns.boxplot(data=LV_df, ax=ax, width = 0.5)
-    sns.stripplot(data=LV_df, ax=ax, color='black', jitter=0.2, size=2.5)
-    # show mean as well
-    ax.scatter(LV_df.mean().index, LV_df.mean(), marker='x', color='red', s=50, label='mean')
 
-
-
-
-df_06 = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_6.h5', key=f'run_14')
-df_07 = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_7.h5', key=f'run_14')
-df_08 = pd.read_hdf(f'Evaluations/SLvEnvEvalslv_p_112_fixed_0_8.h5', key=f'run_14')
-
-
-df = pd.read_hdf(f'Evaluations/SLvEnvEval_long_best_reward_p111reloaded_reduce_size.h5', key=f'run_14')
+df = pd.read_hdf('data/3D_benchmarks/mtd/PcEnvEvalsim_mtd_4.h5', key=f'run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'111')
-# ax.set_yscale('log')
+ax.set_title(f'Mtd')
+ax.set_yscale('log')
+treat = df['Treatment'].values
+# replace 0s that are directly after 1 with 1s
+#treat = np.where(treat == 0, np.roll(treat, 1), treat)
+ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
+lw=2)
+
+df = pd.read_hdf('data/3D_benchmarks/at100/PcEnvEvalsim_at100_7.h5', key=f'run_0')
+fig, ax = plt.subplots()
+ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
+ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
+ax.legend()
+ax.set_title(f'at100')
+ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
 #fig.savefig('111.png')
-
-df = pd.read_hdf(f'Evaluations/SLvEnvEval_long_best_reward_p112reloaded_reduce_size.h5', key=f'run_14')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'112')
-# ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
-#fig.savefig('112.png')
-
-df = pd.read_hdf(f'Evaluations/SLvEnvEval_long_best_reward_p113reloaded_reduce_size.h5', key=f'run_14')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'113')
-# ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
-#fig.savefig('113.png')
-
-df = pd.read_hdf(f'Evaluations/PcEnvEval_Pc_pat_4_slvenv_policy_testreloaded_reduce_size.h5', key=f'run_0')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'PC p 4')
-# ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
-
-df = pd.read_hdf(f'Evaluations/PcEnvEval_Pc_pat_80_slvenv_policy_testreloaded_reduce_size.h5', key=f'run_0')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'PC p 80')
-# ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
-#main()
+main()
 plt.show()

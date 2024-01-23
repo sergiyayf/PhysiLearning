@@ -1,108 +1,105 @@
 import matplotlib as mpl
 mpl.use('TkAgg')
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from physicell_tools import pyMCDS
 import pandas as pd
-from physicell_tools.get_perifery import front_cells
-from physicell_tools.leastsquares import leastsq_circle
+from os import path
+import numpy as np
+import h5py
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
-def get_cell_df(pymcds: pyMCDS.pyMCDS):
-    """
-    Get cell_df from pyMCDS object
-    """
-    cell_df = pymcds.get_cell_df()
-    return cell_df
+dir = '/home/saif/Projects/PhysiLearning/data'
+hdf5_file = path.join(dir, 'presims_3d.h5')
 
 
-def calculate_distance_to_front_cell(cells, front):
-    for i in range(len(front)):
-        current_dist = np.sqrt((cells['position_x']-front[i, 0])**2 + (cells['position_y']-front[i, 1])**2 + (cells['position_z']-front[i, 2])**2)
-        if i == 0:
-            dist = current_dist
-        else:
-            dist = np.minimum(dist, current_dist)
-    return dist
+def get_n_clones(sims):
+    n_clones = []
+    for sim in sims:
+        df = pd.read_hdf(hdf5_file, key=f'data/clone_info_sim_{sim}')
+        n_clones.append(df['n_clones'].values[0])
+    return n_clones
+
+def radius(sims):
+    R = []
+    R_std = []
+    for sim in sims:
+        df = pd.read_hdf(hdf5_file, key=f'data/clone_info_sim_{sim}')
+        R.append(df['R'].values[0])
+        R_std.append(df['R_std'].values[0])
+    return R, R_std
+
+def get_core_shell_radius(sims):
+    R = []
+    R_std = []
+    for sim in sims:
+        df = pd.read_hdf(hdf5_file, key=f'data/clone_info_sim_{sim}')
+        R.append(df['R_core_shell'].values[0])
+        R_std.append(df['R_core_shell_std'].values[0])
+    return R, R_std
+
+def min_clone_to_front_distance(sims):
+    min_clone = []
+    for sim in sims:
+        df = pd.read_hdf(hdf5_file, key=f'data/clone_info_sim_{sim}')
+        min_clone.append(df['min_clone_to_front_distance'].values[0])
+    return min_clone
 
 
-def calculate_distance_to_front(cell_df: pd.DataFrame, front_cell_positions: np.array):
-    """
-    Calculate distance to front for all cells in cell_df
-    and append to the dataset
-    """
-    # calculate average radius of cells at the front
-    R = np.mean(np.sqrt(front_cell_positions[:, 0]**2 + front_cell_positions[:, 1]**2 + front_cell_positions[:, 2]**2))
-    cell_df = cell_df.copy()
+def get_all_clones_min_distance(sims):
+    dist_to_front = []
+    for sim in sims:
+        with h5py.File(hdf5_file) as f:
+            # check if sim exists
+            if f.get(f'data/clones/sim_{sim}') is None:
+                continue
+            else:
+                keys = f[f'data/clones/sim_{sim}'].keys()
 
-    cell_df['distance_to_front_circle'] = (np.sqrt((cell_df['position_x'])**2 + (cell_df['position_y'])**2 + (cell_df['position_z'])**2)).values - R
-    cell_df['distance_to_front_cell'] = calculate_distance_to_front_cell(cell_df, front_cell_positions)
-    cell_df['distance_to_center'] = np.sqrt((cell_df['position_x'])**2 + (cell_df['position_y'])**2 + (cell_df['position_z'])**2)
+                for key in keys:
+                    df = pd.read_hdf(hdf5_file, key=f'data/clones/sim_{sim}/{key}')
+                    dist_to_front.append(df['distance_to_front_cell'].min())
 
-    return cell_df
 
+    return dist_to_front
 
 if __name__ == '__main__':
+    n_clones= get_n_clones(range(1, 101))
+    R, R_std = radius(range(1, 101))
+    R_core_shell, R_core_shell_std = get_core_shell_radius(range(1, 101))
+    min_clone = min_clone_to_front_distance(range(1, 101))
+    all_dists_to_front = get_all_clones_min_distance(range(1, 101))
 
-    sims = range(26, 27, 1)
-    distance_to_front_cell =  []
-    distance_to_front_circle = []
-    min_distance_to_front_cell = []
-    per_sim_min_distance = []
-    for sim in sims:
-        # pymc = pyMCDS.pyMCDS('final.xml' ,f'../../data/raven_22_06_patient_sims/PhysiCell_{sim}/output')
-        cell_info = pd.read_hdf('./../../data/presims_3d.h5', key=f'data/sim_{sim}')
-        type_1_cells = cell_info[cell_info['cell_type'] == 1]
+    print('Median distance to front: ', np.median(all_dists_to_front))
 
-        cells_at_front = cell_info[cell_info['is_at_front'] == 1]
-        positions = cells_at_front[['position_x', 'position_y', 'position_z']].values
+    # plot distribution of distances to front
+    sns.histplot(all_dists_to_front)
 
-        type_1_cells = calculate_distance_to_front(type_1_cells, positions)
+    # plot number of clones distribution
+    plt.figure()
+    sns.histplot(n_clones)
 
-        unique_clones = type_1_cells['clone_ID'].unique()
-        _min_per_sim = []
-        for clone in unique_clones:
-            single_clone = type_1_cells[type_1_cells['clone_ID']==clone]
+    # plot radius distribution
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    sns.histplot(R, ax=ax)
+    ax.set_xlabel('Radius of sphere')
+    ax.set_ylabel('Count')
 
-            # get average distance to front
-            mean_dist_to_front_circle = single_clone['distance_to_front_circle'].mean()
-            mean_dist_to_front_cell = single_clone['distance_to_front_cell'].mean()
-            min_dist_to_front_cell = single_clone['distance_to_front_cell'].min()
-            _min_per_sim.append(min_dist_to_front_cell)
+    # plot core shell radius distribution
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    sns.histplot(R_core_shell, ax=ax)
+    ax.set_xlabel('Radius of core shell')
+    ax.set_ylabel('Count')
 
-            # add to list
-            distance_to_front_circle.append(mean_dist_to_front_circle)
-            distance_to_front_cell.append(mean_dist_to_front_cell)
-            min_distance_to_front_cell.append(min_dist_to_front_cell)
+    # plot growth layer distribution
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    growth_layer = np.array(R) - np.array(R_core_shell)
+    sns.histplot(growth_layer, ax=ax)
+    ax.set_xlabel('Radius of growth layer')
+    ax.set_ylabel('Count')
 
-        if len(_min_per_sim) > 0:
-            per_sim_min_distance.append(np.min(_min_per_sim))
-        else:
-            per_sim_min_distance.append(np.nan)
-
-    # plot histogram
-
-    fig1, ax1 = plt.subplots()
-    sns.histplot(data=distance_to_front_circle, ax=ax1, bins=20)
-    ax1.set_title('Distance from the center of the clone to the circle fit to the front cells')
-    ax1.set_xlabel('Distance to front circle')
-    ax1.set_ylabel('Number of clones')
-    #fig1.savefig('./../../data/figures/fig_s1a.png')
-
-    fig2, ax2 = plt.subplots()
-    sns.histplot(data=distance_to_front_cell, ax=ax2, bins=20)
-    ax2.set_title('Distance from the center of the clone to the closest front cell')
-    ax2.set_ylabel('Number of clones')
-    ax2.set_xlabel('Distance to front cell')
-    #fig2.savefig('./../../data/figures/fig_s1b.png')
-
-    fig3, ax3 = plt.subplots()
-    sns.histplot(data=min_distance_to_front_cell, ax=ax3, bins=20)
-    ax3.set_title('Distance from the outermost cell of a clone to the closest front cell')
-    ax3.set_xlabel('Distance to front cell')
-    ax3.set_ylabel('Number of clones')
-    #fig3.savefig('./../../data/figures/fig_s1c.png')
 
     plt.show()
 
