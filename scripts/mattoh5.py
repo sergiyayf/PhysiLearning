@@ -45,7 +45,7 @@ def calculate_distance_to_front(cell_df: pd.DataFrame, front_cell_positions: np.
 
 if __name__ == '__main__':
 
-    sims = [sim for sim in range(1, 101) if sim != 49]
+    sims = [49]
     distance_to_front_cell = []
     distance_to_front_circle = []
     min_distance_to_front_cell = []

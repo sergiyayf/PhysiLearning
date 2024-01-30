@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 dir = '/home/saif/Projects/PhysiLearning/data'
-hdf5_file = path.join(dir, 'presims_3d.h5')
+hdf5_file = path.join(dir, 'new_presims_3d.h5')
 
 
 def get_n_clones(sims):
@@ -74,7 +74,7 @@ def total_cell_count(sims):
 
 if __name__ == '__main__':
     # remove number 49
-    simulations = [sim for sim in range(1, 101) if sim != 49]
+    simulations = range(1, 101)
 
     n_clones= get_n_clones(simulations)
     R, R_std = radius(simulations)

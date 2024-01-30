@@ -549,6 +549,7 @@ int talk_to_pcenv(zmq::socket_t& socket) {
     zmq::message_t reply;
     // recieve a reply
     socket.recv(reply, zmq::recv_flags::none);
+
     // do treatment or not
     if (reply.to_string() == "Treat") {
         activate_drug_dc();

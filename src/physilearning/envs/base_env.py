@@ -269,7 +269,7 @@ class BaseEnv(Env):
         if response < 0:
             terminate = True
         elif self.state[0] + self.state[1] >= 2 * (np.sum(self.trajectory[0:2, 0])):
-            terminate = True
+            terminate = False
         else:
             terminate = False
         return terminate

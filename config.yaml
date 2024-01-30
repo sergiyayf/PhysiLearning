@@ -45,7 +45,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -54,11 +54,11 @@ env:
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
-  observation_type: 'mutant_position' # 'image' # 'number' # 'multiobs'
+  observation_type: 'number' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: True
   max_tumor_size: 4000 # 110000 # 4000
-  max_time: 120 # 120
+  max_time: 5 # 120
   initial_wt: 2761 #2761 # 74291 # 2761
   initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
@@ -73,7 +73,7 @@ env:
   normalize_to: 1.0
   image_size: 124 #84 #124
   patient_sampling:
-    enable: 1
+    enable: 0
     type: 'sequential' # 'random' # 'sequential'
     patient_id: 80 # [1, 4, 55, 80, 93]
 
@@ -112,7 +112,7 @@ env:
           value: 5
       enable_chkpt:
           parent_nodes: ['user_parameters']
-          value: 'true'
+          value: 'false'
       filename_chkpt:
           parent_nodes: ['user_parameters']
           value:  './../paper_presims/patient_80/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
@@ -130,16 +130,16 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
   model_prefix: 'reloaded_reduce_size'
   step_to_load: '_best_reward'
   save_name: 'Pc_pat_80_slvenv_policy_test'
   # evaluation settings
-  fixed_AT_protocol: 0
-  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  fixed_AT_protocol: 1
+  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.4
-  num_episodes: 1
+  num_episodes: 10
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 

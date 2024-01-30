@@ -260,6 +260,11 @@ int main( int argc, char* argv[] )
 				    break;
 				} else if (reset_status == 2) {
 				    while (reset_status != 1) {
+				        // sleep for 1 second
+				        time_t start_time = time(NULL);
+				        while (time(NULL) < start_time + 1) {
+				            // do nothing
+				        }
                         reset_status = talk_to_pcenv(socket);
                     }
                     break;
