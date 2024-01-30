@@ -12,7 +12,7 @@ def closest_node(node, nodes):
     return nodes[closest_index]
 
 
-def front_cells(cells):
+def front_cells(cells, clip_plane = 'xy'):
     """ this function takes cells dataframe as an input;
     it searches for the cells on the perifery by first creating a concave boundary of the colony, then interpolating points inbetween and at the end reiterating the procedure, for the new found points to fill the gaps between the cells
     it returns a (N,2) array, N is initially not known, it depends on the colony size of cells position,
@@ -20,8 +20,21 @@ def front_cells(cells):
     """
 
     # get polar cells coordinates
-    x_s = np.array(cells['position_x'])
-    y_s = np.array(cells['position_y'])
+    if clip_plane == 'xy':
+        first_coord = 'position_x'
+        second_coord = 'position_y'
+    elif clip_plane == 'xz':
+        first_coord = 'position_x'
+        second_coord = 'position_z'
+    elif clip_plane == 'yz':
+        first_coord = 'position_y'
+        second_coord = 'position_z'
+    else:
+        print('clip_plane not recognized, please use xy, xz or yz')
+        return
+
+    x_s = np.array(cells[first_coord])
+    y_s = np.array(cells[second_coord])
     rho, theta = cart2pol(x_s, y_s)
 
     # sort them radially
@@ -64,9 +77,9 @@ def front_cells(cells):
     for xxx, yyy in zip(xi, yi):
         pt = (xxx, yyy)
         Closest_points[k, 0], Closest_points[k, 1] = closest_node(pt, points);
-        find_a_cell = cells[cells['position_x'] == Closest_points[k, 0]];
+        find_a_cell = cells[cells[first_coord] == Closest_points[k, 0]];
         if len(find_a_cell) > 1:
-            find_a_cell = find_a_cell[find_a_cell['position_y'] == Closest_points[k, 1]];
+            find_a_cell = find_a_cell[find_a_cell[second_coord] == Closest_points[k, 1]];
         cell_type_array[k] = float(find_a_cell['cell_type'].iloc[0])
 
         k += 1;
@@ -79,6 +92,7 @@ def front_cells(cells):
     # plt.plot(points[:, 0], points[:, 1], 'ko', markersize=2)
     # plt.plot(Closest_points[:, 0], Closest_points[:, 1], 'ro', alpha=.25, markersize=10)
     # plt.plot(xi,yi,'g+',markersize=4)
+    # plt.show()
 
     # reiterate on that to get more cells from the boundary and dont have holes. so next is basicaly the same code
     rho2, theta2 = cart2pol(Closest_points[:, 0], Closest_points[:, 1]);
@@ -99,9 +113,9 @@ def front_cells(cells):
     for xxx, yyy in zip(xi, yi):
         pt = (xxx, yyy)
         Closest_points[k, 0], Closest_points[k, 1] = closest_node(pt, points);
-        find_a_cell = cells[cells['position_x'] == Closest_points[k, 0]];
+        find_a_cell = cells[cells[first_coord] == Closest_points[k, 0]];
         if len(find_a_cell) > 1:
-            find_a_cell = find_a_cell[find_a_cell['position_y'] == Closest_points[k, 1]];
+            find_a_cell = find_a_cell[find_a_cell[second_coord] == Closest_points[k, 1]];
         cell_type_array[k] = float(find_a_cell['cell_type'].iloc[0])
 
         k += 1;
@@ -114,12 +128,12 @@ def front_cells(cells):
     return Closest_points, cell_type_array;
 
 
-def VisualizeFront(cells):
+def visualize_front(cells):
     """ this function takes cell dataframe as an input and shows the cells, that are thought to be the front ones """
     clls = cells;
     x_pos = clls['position_x'];
     y_pos = clls['position_y'];
-    periferial_cells, cell_types = FrontCells(clls);
+    periferial_cells, cell_types = front_cells(clls);
     plt.figure()
     plt.plot(x_pos, y_pos, 'ko', markersize=2)
     plt.plot(periferial_cells[:, 0], periferial_cells[:, 1], 'ro', alpha=.25, markersize=10)

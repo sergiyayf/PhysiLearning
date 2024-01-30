@@ -62,14 +62,31 @@ def get_all_clones_min_distance(sims):
 
     return dist_to_front
 
+
+def total_cell_count(sims):
+    total_cells = []
+    for sim in sims:
+        df = pd.read_hdf(hdf5_file, key=f'data/cells/sim_{sim}')
+        total_cells.append(len(df))
+
+    return total_cells
+
+
 if __name__ == '__main__':
-    n_clones= get_n_clones(range(1, 101))
-    R, R_std = radius(range(1, 101))
-    R_core_shell, R_core_shell_std = get_core_shell_radius(range(1, 101))
-    min_clone = min_clone_to_front_distance(range(1, 101))
-    all_dists_to_front = get_all_clones_min_distance(range(1, 101))
+    # remove number 49
+    simulations = [sim for sim in range(1, 101) if sim != 49]
+
+    n_clones= get_n_clones(simulations)
+    R, R_std = radius(simulations)
+    R_core_shell, R_core_shell_std = get_core_shell_radius(simulations)
+    min_clone = min_clone_to_front_distance(simulations)
+    all_dists_to_front = get_all_clones_min_distance(simulations)
+    total_cells = total_cell_count(simulations)
 
     print('Median distance to front: ', np.median(all_dists_to_front))
+    print('Max total cells: ', np.max(total_cells))
+    print('Number of nans: ', np.sum(np.isnan(min_clone)))
+    print('Number of zeros: ', np.sum(np.array(min_clone) == 0))
 
     # plot distribution of distances to front
     sns.histplot(all_dists_to_front)

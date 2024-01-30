@@ -45,7 +45,7 @@ def calculate_distance_to_front(cell_df: pd.DataFrame, front_cell_positions: np.
 
 if __name__ == '__main__':
 
-    sims = range(1, 101, 1)
+    sims = [sim for sim in range(1, 101) if sim != 49]
     distance_to_front_cell = []
     distance_to_front_circle = []
     min_distance_to_front_cell = []
@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     for sim in sims:
 
-        pymcds = pyMCDS.pyMCDS('output00000120.xml' ,f'./PhysiCell/full_finals/sim_{sim}/')
+        pymcds = pyMCDS.pyMCDS('output00000120.xml' ,f'../data/all_presims/sim_{sim}/')
         cell_df = pymcds.get_cell_df()
         cell_df['is_at_front'] = np.zeros_like(cell_df['position_x'])
         cell_df['core_shell'] = np.zeros_like(cell_df['position_x'])
@@ -132,7 +132,7 @@ if __name__ == '__main__':
                                          'is_at_front', 'cell_type', 'elapsed_time_in_phase',
                                          'total_volume', 'pressure', 'transition_rate', 'core_shell']]
 
-        simplified.to_hdf('presims_3d.h5', key=f'data/cells/sim_{sim}')
+        simplified.to_hdf('new_presims_3d.h5', key=f'data/cells/sim_{sim}')
 
         cell_info = simplified
         type_1_cells = cell_info[cell_info['cell_type'] == 1]
@@ -153,7 +153,7 @@ if __name__ == '__main__':
             min_dist_to_front_cell = single_clone['distance_to_front_cell'].min()
 
             # save to hdf5 file
-            single_clone.to_hdf('presims_3d.h5', key=f'data/clones/sim_{sim}/clone_{int(clone)-1}')
+            single_clone.to_hdf('new_presims_3d.h5', key=f'data/clones/sim_{sim}/clone_{int(clone)-1}')
 
 
             _min_per_sim.append(min_dist_to_front_cell)
@@ -189,4 +189,4 @@ if __name__ == '__main__':
         clone_df = pd.DataFrame({'sim': sim, 'R': R, 'R_std': R_std, 'R_core_shell': R_core_shell, 'R_core_shell_std': R_core_shell_std,
                                  'n_clones': n_clones, 'min_clone_to_front_distance': min_clone}, index=[0])
 
-        clone_df.to_hdf('presims_3d.h5', key=f'data/clone_info_sim_{sim}')
+        clone_df.to_hdf('new_presims_3d.h5', key=f'data/clone_info_sim_{sim}')

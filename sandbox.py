@@ -46,7 +46,7 @@ ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
 ax.set_title(f'Mtd')
-ax.set_yscale('log')
+#ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
@@ -60,7 +60,7 @@ ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
 ax.set_title(f'at100')
-ax.set_yscale('log')
+#ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
 #treat = np.where(treat == 0, np.roll(treat, 1), treat)
