@@ -101,10 +101,10 @@ void create_cell_types( void )
 	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
 	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
 	
- 	cell_defaults.parameters.o2_proliferation_saturation = 30.0;
-	cell_defaults.parameters.o2_proliferation_threshold = 8.0;
-	cell_defaults.parameters.o2_necrosis_threshold = 2.0;
-	cell_defaults.parameters.o2_necrosis_max = 0.0;
+ 	cell_defaults.parameters.o2_proliferation_saturation = parameters.doubles("o2_proliferation_saturation");
+	cell_defaults.parameters.o2_proliferation_threshold = parameters.doubles("o2_proliferation_threshold");
+	cell_defaults.parameters.o2_necrosis_threshold = parameters.doubles("o2_necrosis_threshold");
+	cell_defaults.parameters.o2_necrosis_max = parameters.doubles("o2_necrosis_max");
 	cell_defaults.custom_data.add_variable( "treatment" , "dimensionless", 0.0 );
 	/*
 	   This parses the cell definitions in the XML config file. 

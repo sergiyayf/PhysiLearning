@@ -58,7 +58,7 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: True
   max_tumor_size: 4000 # 110000 # 4000
-  max_time: 5 # 120
+  max_time: 120 # 120
   initial_wt: 2761 #2761 # 74291 # 2761
   initial_mut: 1
   growth_rate_wt: 0.29 # 0.0175
@@ -112,7 +112,7 @@ env:
           value: 5
       enable_chkpt:
           parent_nodes: ['user_parameters']
-          value: 'false'
+          value: 'true'
       filename_chkpt:
           parent_nodes: ['user_parameters']
           value:  './../paper_presims/patient_80/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
@@ -121,7 +121,7 @@ env:
           value: 720
       treatment_strength:
           parent_nodes: ['user_parameters']
-          value: 3.0e2 # 3.0e2 or 6.0e2
+          value: 30.0e2 # 3.0e2 or 6.0e2
 
   # LatticeBased environment settings
   GridEnv:
@@ -134,7 +134,7 @@ eval:
   path: './'
   model_prefix: 'reloaded_reduce_size'
   step_to_load: '_best_reward'
-  save_name: 'Pc_pat_80_slvenv_policy_test'
+  save_name: 'progression_test'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'

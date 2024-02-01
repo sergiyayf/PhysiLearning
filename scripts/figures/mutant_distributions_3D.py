@@ -73,7 +73,7 @@ def total_cell_count(sims):
 
 
 if __name__ == '__main__':
-    # remove number 49
+
     simulations = range(1, 101)
 
     n_clones= get_n_clones(simulations)
@@ -88,33 +88,50 @@ if __name__ == '__main__':
     print('Number of nans: ', np.sum(np.isnan(min_clone)))
     print('Number of zeros: ', np.sum(np.array(min_clone) == 0))
 
+    # Get simulation id with closest to median distance to front
+    median_dist = np.median(all_dists_to_front)
+    closest_median_sim = np.nanargmin(np.abs(np.array(min_clone) - median_dist))
+    print('Simulation with closest median distance to front: ', closest_median_sim)
+
+    # Same for 25th and 75th percentile
+    percentile_25 = np.percentile(all_dists_to_front, 25)
+    closest_25_sim = np.nanargmin(np.abs(np.array(min_clone) - percentile_25))
+    print('Simulation with closest 25th percentile distance to front: ', closest_25_sim)
+
+    percentile_75 = np.percentile(all_dists_to_front, 75)
+    closest_75_sim = np.nanargmin(np.abs(np.array(min_clone) - percentile_75))
+    print('Simulation with closest 75th percentile distance to front: ', closest_75_sim)
+
+
     # plot distribution of distances to front
+    fig, ax = plt.subplots()
     sns.histplot(all_dists_to_front)
+    ax.set_xlabel('Distance to front')
+    ax.set_ylabel('Count')
 
     # plot number of clones distribution
-    plt.figure()
+    fig2, ax = plt.subplots()
     sns.histplot(n_clones)
+    ax.set_xlabel('Number of clones')
+    ax.set_ylabel('Count')
 
     # plot radius distribution
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    fig3, ax = plt.subplots()
     sns.histplot(R, ax=ax)
     ax.set_xlabel('Radius of sphere')
     ax.set_ylabel('Count')
 
     # plot core shell radius distribution
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    fig4, ax = plt.subplots()
     sns.histplot(R_core_shell, ax=ax)
     ax.set_xlabel('Radius of core shell')
     ax.set_ylabel('Count')
 
     # plot growth layer distribution
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    fig5, ax = plt.subplots()
     growth_layer = np.array(R) - np.array(R_core_shell)
     sns.histplot(growth_layer, ax=ax)
-    ax.set_xlabel('Radius of growth layer')
+    ax.set_xlabel('Growth layer width')
     ax.set_ylabel('Count')
 
 

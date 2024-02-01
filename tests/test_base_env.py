@@ -87,14 +87,14 @@ def test_range_sampling():
 
 
 def test_truncate():
-    env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False)
+    env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False, max_tumor_size=15)
     trunc = env.truncate()
     assert trunc == False
     env.state = [20, 5, 0]
     trunc = env.truncate()
     term = env.terminate()
-    assert term
-    assert not trunc
+    assert not term
+    assert trunc
 
 
 def test_measure_response():
