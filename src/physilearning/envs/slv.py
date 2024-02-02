@@ -247,7 +247,7 @@ class SLvEnv(BaseEnv):
                 self._set_patient_specific_competition(self.patient_id)
                 self._set_patient_specific_position(self.patient_id)
         self.time = 0
-        self._set_initial_mutant_positions()
+        #self._set_initial_mutant_positions()
         if self.wt_random:
             self.initial_wt = \
                 np.random.random_integers(low=0, high=int(self.max_tumor_size), size=1)[0]

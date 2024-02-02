@@ -102,12 +102,45 @@ if __name__ == '__main__':
     closest_75_sim = np.nanargmin(np.abs(np.array(min_clone) - percentile_75))
     print('Simulation with closest 75th percentile distance to front: ', closest_75_sim)
 
+    # simulation id with largest distance to front
+    largest_dist = np.max(min_clone)
+    largest_dist_sim = np.nanargmax(min_clone)
+    print('Simulation with largest distance to front: ', largest_dist_sim)
+
 
     # plot distribution of distances to front
     fig, ax = plt.subplots()
     sns.histplot(all_dists_to_front)
     ax.set_xlabel('Distance to front')
     ax.set_ylabel('Count')
+
+    # plot cumulative distribution of distances to front
+    fig, ax = plt.subplots()
+    sns.ecdfplot(all_dists_to_front)
+    ax.set_xlabel('Distance to front')
+    ax.set_ylabel('Count')
+
+    # plot cumulative distribution of distances to front in log log
+    fig, ax = plt.subplots()
+    # normalize distance to front to 1
+    all_dists_to_front = np.array(all_dists_to_front) / np.max(all_dists_to_front)
+    inverted = 1-np.array(all_dists_to_front)
+    sns.ecdfplot(inverted, ax=ax)
+    # plot powerlaw fit
+    x = np.linspace(np.min(inverted), np.max(inverted), 100)
+    y = x**(2)
+    ax.plot(x, y, color='r', label=r'$y = x^2$')
+    y = x**(3)
+    ax.plot(x, y, color='g', label=r'$y = x^3$')
+
+    ax.set_xlabel('Normalized distance to center')
+    ax.set_ylabel('Cumulative probability')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.legend()
+
+
+
 
     # plot number of clones distribution
     fig2, ax = plt.subplots()
