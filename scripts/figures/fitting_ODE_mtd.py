@@ -27,7 +27,7 @@ def plot_data(ax, lw=2, title="Initial data"):
     return ax
 
 def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
-    cols = ['c_s', 'c_r']
+    cols = ['r_r', 'Delta_s']
     row = trace_df.iloc[row_idx, :][cols].values
 
     theta = row
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        './../../Evaluations/PcEnvEvalpatient_80_AT_at_baseline.h5', key='run_25')
+        './../../data/3D_benchmarks/mtd/mtd_all.h5', key='run_25')
     # find the index when all of the data is 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
 
@@ -116,6 +116,8 @@ if __name__ == '__main__':
     plot_data(ax, title="Original treatment")
     # append treatmentd schedule with two zeros from the beginning, delete last 2
     treatment_schedule = np.array([np.int32(i) for i in np.array(df['Treatment'].values[0:sim_end:1])])
+    # shfit by 1 to the right
+    treatment_schedule = np.roll(treatment_schedule, -1)
     # find ends of treatment
     treatment_ends = np.where(np.diff(treatment_schedule) == -1)[0]
     # replace ends of treatment with 1
@@ -125,9 +127,9 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(12, 4))
     plot_data(ax, title="PC raw data")
 
-    consts_fit = {'Delta_r': 0.0, 'K': 6500, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.424, 'Delta_s': 0.399, 'r_s': 0.291}
-    params_fit = {'c_s': 1.64, 'c_r': 0.4}
+    consts_fit = {'Delta_r': 0.0, 'K': 4.66, 'delta_r': 0.01, 'delta_s': 0.01,
+                  'r_s': 0.065, 'c_s': 0.0, 'c_r': 0.0}
+    params_fit = {'r_r': 0.333, 'Delta_s': 0.080 }
 
     theta_fit = list(params_fit.values())
 
@@ -151,16 +153,17 @@ if __name__ == '__main__':
         # alpha = pm.TruncatedNormal("alpha", mu=theta[0], sigma=0.1, lower=0, initval=theta[0])
         # r_r = pm.Uniform("r_r", lower=0, upper=1, initval=theta_fit[0])
         # r_s = pm.Uniform("r_s", lower=0, upper=1, initval=theta_fit[1])
-        # r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
+        r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
+        Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
+        # c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
+        # c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
         #r_s = pm.TruncatedNormal("r_s", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=0, initval=theta_fit[2])
 
         sigma = pm.HalfNormal("sigma", 10)
 
         # Ode solution function
         ode_solution = pytensor_forward_model_matrix(
-            pm.math.stack([c_s, c_r])
+            pm.math.stack([r_r, Delta_s])
         )
 
         # Likelihood
@@ -171,11 +174,11 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 10000
+    draws = 1000
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
     trace = trace_DEM
-    trace.to_json('./../../data/SI_data/patient_80_cycling_LV_inference_Data.json')
+    #trace.to_json('./../../data/SI_data/patient_80_cycling_LV_inference_Data.json')
 
     plot_finals()
     plt.show()

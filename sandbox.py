@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def get_ttps(filename, timesteps=10):
+def get_ttps(filename, timesteps=100):
     ttps = []
-    for i in range(1,timesteps+1):
-        df = pd.read_hdf(filename+f'_{i}.h5', key='run_0')
+    for i in range(timesteps):
+        df = pd.read_hdf(filename, key=f'run_{i}')
         # find the largest index with non-zero Type 0 and Type 1
         nz = df[(df['Type 0'] + df['Type 1'] != 0)]
         if len(nz) > 0:
@@ -19,9 +19,11 @@ def get_ttps(filename, timesteps=10):
     return ttps
 
 def main():
-    PC_files_list = ['data/3D_benchmarks/at100/PcEnvEvalsim_at100', 'data/3D_benchmarks/mtd/PcEnvEvalsim_mtd',
-                     'data/3D_benchmarks/no_therapy/PcEnvEvalsim_no_therapy']
-    PC_name_list = ['AT100', 'MTD', 'No therapy']
+    PC_files_list = ['data/3D_benchmarks/no_treatment/no_treatment_all.h5',
+                     'data/3D_benchmarks/mtd/mtd_all.h5',
+                     'data/3D_benchmarks/at100/at100_all.h5',
+                     ]
+    PC_name_list = ['No therapy', 'MTD', 'AT100']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -39,13 +41,13 @@ def main():
     ax.scatter(PC_df.mean().index, PC_df.mean(), marker='x', color='red', s=50, label='mean')
 
 
-df = pd.read_hdf('data/at_100_evals/run_5.h5', key=f'run_0')
+df = pd.read_hdf('data/3D_benchmarks/at100/at100_all.h5', key=f'run_0')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'at100 r1')
+ax.set_title(f'at100 r0')
 ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
@@ -53,13 +55,13 @@ treat = df['Treatment'].values
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
 
-df = pd.read_hdf('data/at_100_evals/run_6.h5', key=f'run_0')
+df = pd.read_hdf('data/3D_benchmarks/at100/at100_all.h5', key=f'run_10')
 fig, ax = plt.subplots()
 ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
 ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
 ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
 ax.legend()
-ax.set_title(f'at100 r2')
+ax.set_title(f'at100 r10')
 ax.set_yscale('log')
 treat = df['Treatment'].values
 # replace 0s that are directly after 1 with 1s
@@ -67,5 +69,5 @@ treat = df['Treatment'].values
 ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
 lw=2)
 
-#main()
+main()
 plt.show()

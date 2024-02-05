@@ -22,14 +22,14 @@ class ODEModel:
             self,
             y0: list or np.ndarray or tuple = (0.045, 0.005),
             params: dict =  {'r_s': 0.03, 'r_r': 0.03, 'delta_s': 0.0003, 'delta_r': 0.0003},
-            consts: dict = {'c_s': 1, 'c_r': 1, 'K': 1.5, 'Delta_r': 0, 'Delta_s': 0.15},
+            consts: dict = {'c_ss': 1, 'c_rr': 1, 'c_sr': 1, 'c_rs':1, 'K': 1.5, 'Delta_r': 0, 'Delta_s': 0.15},
             tmin: int = 0,
             tmax: int = 100,
             dt: float = 0.1,
             treatment_schedule: list or np.array = None,
             time: list or np.array = None,
             theta: list = [0.03, 0.03, 0.0003, 0.0003],
-            const_values = [1, 1, 1.5, 0, 0.15],
+            const_values = [1, 1, 1, 1, 1.5, 0, 0.15],
     ) -> None:
         self.rhs = self.LV
         self.y0 = y0
@@ -95,14 +95,14 @@ class ODEModel:
             prm[key] = value
 
         # check if all parameters are specified in either theta or self.const
-        list_of_all_parameters = ['r_s', 'r_r', 'delta_s', 'delta_r', 'c_s', 'c_r', 'K', 'Delta_s', 'Delta_r']
+        list_of_all_parameters = ['r_s', 'r_r', 'delta_s', 'delta_r', 'c_ss', 'c_rr', 'c_rs', 'c_sr', 'K', 'Delta_s', 'Delta_r']
         for parameter in list_of_all_parameters:
             if parameter not in prm:
                 raise ValueError('Parameter {} not found in parameters dictionary'.format(parameter))
 
         # equations
-        dx_dt = s*(prm['r_s']*(1-(s+r*prm['c_r'])/prm['K'])-prm['Delta_s']*self.treatment-prm['delta_s']*prm['r_s'])
-        dy_dt = r*(prm['r_r']*(1-(r+s*prm['c_s'])/prm['K'])-prm['Delta_r']*self.treatment-prm['delta_r']*prm['r_r'])
+        dx_dt = s*(prm['r_s']*(1-(s*prm['c_ss']+r*prm['c_rs'])/prm['K'])-prm['delta_s']*prm['r_s'])*(1-self.treatment)-prm['Delta_s']*self.treatment
+        dy_dt = r*(prm['r_r']*(1-(r*prm['c_rr']+s*prm['c_sr'])/prm['K'])-prm['Delta_r']*self.treatment-prm['delta_r']*prm['r_r'])
 
         return [dx_dt, dy_dt]
 
@@ -137,6 +137,8 @@ class ODEModel:
                 sol = self.solve(time)
                 solution = np.append(solution, sol[1:], axis=0)
             self.y0 = solution[-1]
+        # replace all negative values with 0
+        solution[solution < 0] = 0
 
         return solution
 
