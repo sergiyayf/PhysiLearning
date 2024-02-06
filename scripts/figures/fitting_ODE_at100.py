@@ -27,7 +27,7 @@ def plot_data(ax, lw=2, title="Initial data"):
     return ax
 
 def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
-    cols = ['c_s', 'c_r', 'K']
+    cols = ['c_s', 'c_r', 'Delta_s']
     row = trace_df.iloc[row_idx, :][cols].values
 
     theta = row
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        './../../data/3D_benchmarks/at100/at100_all.h5', key='run_25')
+        './../../data/3D_benchmarks/at100/at100_all.h5', key='run_1')
     # find the index when all of the data is 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
 
@@ -128,8 +128,8 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.127, 'Delta_s': 0.066, 'r_s': 0.090, 'c_ss': 0.0, 'c_rr': 0.0, 'c_sr': 0.0, 'c_rs': 0.0}
-    params_fit = {'c_s': 0.50, 'c_r': 1.0, 'K': 4.66}
+                  'r_r': 0.228, 'K': 2.976, 'r_s': 0.073 }
+    params_fit = {'c_s': 3.289, 'c_r': 1.031, 'Delta_s': 3.139}
 
     theta_fit = list(params_fit.values())
 
@@ -154,16 +154,16 @@ if __name__ == '__main__':
         # r_r = pm.Uniform("r_r", lower=0, upper=1, initval=theta_fit[0])
         # r_s = pm.Uniform("r_s", lower=0, upper=1, initval=theta_fit[1])
         # r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
+        c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0.01, upper=5, initval=theta_fit[0])
+        c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0.01, upper=5, initval=theta_fit[1])
         #r_s = pm.TruncatedNormal("r_s", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=0, initval=theta_fit[2])
-        K = pm.TruncatedNormal("K", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=0, initval=theta_fit[2])
+        Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=1.0, initval=theta_fit[2])
 
         sigma = pm.HalfNormal("sigma", 10)
 
         # Ode solution function
         ode_solution = pytensor_forward_model_matrix(
-            pm.math.stack([c_s, c_r, K])
+            pm.math.stack([c_s, c_r, Delta_s])
         )
 
         # Likelihood
@@ -174,9 +174,9 @@ if __name__ == '__main__':
 
     sampler = "DEMetropolis"
     chains = 8
-    draws = 10
+    draws = 1000
     with model:
-        trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains)
+        trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=8)
     trace = trace_DEM
     #trace.to_json('./../../data/SI_data/patient_80_cycling_LV_inference_Data.json')
 

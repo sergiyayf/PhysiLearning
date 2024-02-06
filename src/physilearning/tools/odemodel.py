@@ -95,14 +95,14 @@ class ODEModel:
             prm[key] = value
 
         # check if all parameters are specified in either theta or self.const
-        list_of_all_parameters = ['r_s', 'r_r', 'delta_s', 'delta_r', 'c_ss', 'c_rr', 'c_rs', 'c_sr', 'K', 'Delta_s', 'Delta_r']
+        list_of_all_parameters = ['r_s', 'r_r', 'delta_s', 'delta_r', 'c_s', 'c_r', 'K', 'Delta_s', 'Delta_r']
         for parameter in list_of_all_parameters:
             if parameter not in prm:
                 raise ValueError('Parameter {} not found in parameters dictionary'.format(parameter))
 
         # equations
-        dx_dt = s*(prm['r_s']*(1-(s*prm['c_ss']+r*prm['c_rs'])/prm['K'])-prm['delta_s']*prm['r_s'])*(1-self.treatment)-prm['Delta_s']*self.treatment
-        dy_dt = r*(prm['r_r']*(1-(r*prm['c_rr']+s*prm['c_sr'])/prm['K'])-prm['Delta_r']*self.treatment-prm['delta_r']*prm['r_r'])
+        dx_dt = s*(prm['r_s']*(1-(s+r*prm['c_r'])/prm['K'])*(1-self.treatment*prm['Delta_s'])-prm['delta_s']*prm['r_s'])
+        dy_dt = r*(prm['r_r']*(1-(r+s*prm['c_s'])/prm['K'])-prm['Delta_r']*self.treatment-prm['delta_r']*prm['r_r'])
 
         return [dx_dt, dy_dt]
 
