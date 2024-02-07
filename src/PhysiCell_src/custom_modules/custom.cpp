@@ -530,14 +530,14 @@ int talk_to_pcenv(zmq::socket_t& socket) {
     data.append(t0_pos_x);
     data.append(" t0_y: ");
     data.append(t0_pos_y);
-    //data.append(" z: ");
-    //data.append(t0_pos_z);
+    data.append(" t0_z: ");
+    data.append(t0_pos_z);
     data.append(" t1_x: ");
     data.append(t1_pos_x);
     data.append(" t1_y: ");
     data.append(t1_pos_y);
-    //data.append(" z: ");
-    //data.append(t1_pos_z);
+    data.append(" t1_z: ");
+    data.append(t1_pos_z);
 
     // send the request t0 the server
     zmq::message_t request(data.size());

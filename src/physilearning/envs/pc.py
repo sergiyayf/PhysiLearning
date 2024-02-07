@@ -11,6 +11,7 @@ import time
 from physilearning.reward import Reward
 import platform
 from physilearning.tools.xml_reader import CfgRead
+from physicell_tools.get_perifery import front_cells
 
 
 class PcEnv(BaseEnv):
@@ -219,23 +220,9 @@ class PcEnv(BaseEnv):
         if self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image_obs(message, action)
             self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
-
-            done = self._check_done(burden_type='number', total_cell_number=self.state[0] + self.state[1],
-                                    message=message)
             self.trajectory[:, int(self.time/self.treatment_time_step)] = self.state
             rewards = Reward(self.reward_shaping_flag)
             reward = rewards.get_reward(self.state, self.time/self.max_time)
-
-            # if done:
-            #     print('Done')
-            #     self.socket.send(b"End simulation")
-            #     self.socket.close()
-            #     self.context.term()
-            # else:
-            #     if action == 0:
-            #         self.socket.send(b"Stop treatment")
-            #     elif action == 1:
-            #         self.socket.send(b"Treat")
 
             if self.observation_type == 'image':
                 obs = self.image
@@ -255,18 +242,6 @@ class PcEnv(BaseEnv):
             else:
                 obs = [np.sum(self.state[0:2]), self.state[2]]
 
-            # if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
-            #     done = True
-            #     self.socket.send(b"End simulation")
-            #     self.socket.close()
-            #     self.context.term()
-            #
-            # else:
-            #     done = False
-            #     if action == 0:
-            #         self.socket.send(b"Stop treatment")
-            #     elif action == 1:
-            #         self.socket.send(b"Treat")
         elif self.observation_type == 'mutant_position':
             self.image = self._get_image_obs(message, action)
             num_wt, num_mut = self._get_tumor_volume_from_image(self.image)
@@ -283,13 +258,6 @@ class PcEnv(BaseEnv):
             self.trajectory[:, int(self.time / self.treatment_time_step)] = self.state
         else:
             raise ValueError('Observation type not supported')
-
-        ### Here is the mutant position ding
-
-        # num_wt, num_mut = self._get_tumor_volume_from_image(self.image)
-        # radius = int(np.round(np.sqrt(num_wt) / 3.0 * np.sqrt(2) + 1))
-        # dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
-        # self.mutant_normalized_position = dist / radius
 
         ######
         info = {}
@@ -364,25 +332,6 @@ class PcEnv(BaseEnv):
 
         return obs, {}
 
-    def _check_done(self, burden_type: str, **kwargs) -> bool:
-        """
-        Check if the episode is done: if the tumor is too big or the time is too long
-        :param burden_type: type of burden to check
-        :return: if the episode is done
-        """
-
-        if burden_type == 'number':
-            num_wt_cells, num_mut_cells = self._get_cell_number(kwargs['message'])
-            total_cell_number = num_wt_cells + num_mut_cells
-        else:
-            num_wt_cells = np.sum(kwargs['image'] == self.wt_color)
-            num_mut_cells = np.sum(kwargs['image'] == self.mut_color)
-            total_cell_number = num_wt_cells + num_mut_cells
-
-        if total_cell_number > self.threshold_burden or self.time >= self.max_time:
-            return True
-        else:
-            return False
 
     def _get_tumor_volume_from_image(self, state: np.ndarray) -> tuple:
         """
@@ -406,6 +355,46 @@ class PcEnv(BaseEnv):
         type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
         type1 = re.findall(r'%s(\d+)' % "Type 1:", message)
         return int(type0[0]), int(type1[0])
+
+
+    def _get_df_from_message(self, message) -> pd.DataFrame:
+        t0_start_x = message.find('t0_x:') + len('t0_x:')
+        t0_end_x = message.find('t0_y:')
+        t0_x = message[t0_start_x:t0_end_x].split(',')
+        t0_x = np.array([float(x) for x in t0_x[0:-1]])
+        t0_start_y = message.find('t0_y:') + len('t0_y:')
+        t0_end_y = message.find('t0_z:')
+        t0_y = message[t0_start_y:t0_end_y].split(',')
+        t0_y = np.array([float(y) for y in t0_y[0:-1]])
+        t0_start_z = message.find('t0_z:') + len('t0_z:')
+        t0_end_z = message.find('t1_x:')
+        t0_z = message[t0_start_z:t0_end_z].split(',')
+        t0_z = np.array([float(z) for z in t0_z[0:-1]])
+
+        t1_start_x = message.find('t1_x:') + len('t1_x:')
+        t1_end_x = message.find('t1_y:')
+        t1_x = message[t1_start_x:t1_end_x].split(',')
+        t1_x = np.array([float(x)  for x in t1_x[0:-1]])
+        t1_start_y = message.find('t1_y:') + len('t1_y:')
+        t1_end_y = message.find('t1_z:')
+        t1_y = message[t1_start_y:t1_end_y].split(',')
+        t1_y = np.array([float(y) for y in t1_y[0:-1]])
+        t1_start_z = message.find('t1_z:') + len('t1_z:')
+        t1_z = message[t1_start_z:].split(',')
+        t1_z = np.array([float(z) for z in t1_z[0:-1]])
+
+        # create data frame with positions and types of cells
+        t0 = pd.DataFrame({'position_x': t0_x, 'position_y': t0_y, 'position_z': t0_z, 'cell_type': 0})
+        t1 = pd.DataFrame({'position_x': t1_x, 'position_y': t1_y, 'position_z': t1_z, 'cell_type': 1})
+        cells = pd.concat([t0, t1])
+        # set unique indices
+        cells.index = range(len(cells))
+
+        return cells
+
+    def _calculate_distance_to_front(self, df):
+        positions, types = front_cells(df)
+        return positions
 
     def _get_image_obs(self, message: str, action: int) -> np.ndarray:
         """

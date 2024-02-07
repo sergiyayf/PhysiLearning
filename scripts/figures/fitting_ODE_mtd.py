@@ -127,9 +127,9 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(12, 4))
     plot_data(ax, title="PC raw data")
 
-    consts_fit = {'Delta_r': 0.0, 'Delta_s': 3.139, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_s': 0.073, 'c_s': 3.289, 'c_r': 1.031}
-    params_fit = {'r_r': 0.223, 'K': 2.76}
+    consts_fit = {'Delta_r': 0.0, 'Delta_s': 3.142, 'delta_r': 0.01, 'delta_s': 0.01,
+                  'r_s': 0.072, 'c_s': 3.381, 'c_r': 1.15}
+    params_fit = {'r_r': 0.228, 'K': 2.969}
 
     theta_fit = list(params_fit.values())
 
@@ -153,8 +153,8 @@ if __name__ == '__main__':
         # alpha = pm.TruncatedNormal("alpha", mu=theta[0], sigma=0.1, lower=0, initval=theta[0])
         # r_r = pm.Uniform("r_r", lower=0, upper=1, initval=theta_fit[0])
         # r_s = pm.Uniform("r_s", lower=0, upper=1, initval=theta_fit[1])
-        r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        K = pm.TruncatedNormal("K", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0.5, initval=theta_fit[1])
+        r_r = pm.Normal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], initval=theta_fit[0])
+        K = pm.Normal("K", mu=theta_fit[1], sigma=0.1*theta_fit[1], initval=theta_fit[1])
         # c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
         # c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
         #r_s = pm.TruncatedNormal("r_s", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=0, initval=theta_fit[2])
@@ -176,9 +176,9 @@ if __name__ == '__main__':
     chains = 8
     draws = 1000
     with model:
-        trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=8)
+        trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    #trace.to_json('./../../data/SI_data/patient_80_cycling_LV_inference_Data.json')
+    #trace.to_json('./../../data/SI_data/3D_patient_86_mtd_LV_inference_Data2.json')
 
     plot_finals()
     plt.show()

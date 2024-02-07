@@ -77,8 +77,8 @@ def plot_finals():
     theta = [mean_params[key] for key in params_fit.keys()]
     sol = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
-    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Mean)")
-    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Mean)")
+    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Mean)")
+    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Mean)")
     ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Mean)")
     ax.legend()
     ax.set_title('Mean parameters')
@@ -128,8 +128,8 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.223, 'Delta_s': 3.139, 'c_s': 3.289, 'c_r': 1.031, 'K': 2.76}
-    params_fit = {'r_s': 0.075}
+                  'r_r': 0.228, 'Delta_s': 3.142, 'c_s': 3.381, 'c_r': 1.15, 'K': 2.969}
+    params_fit = {'r_s': 0.073}
 
     theta_fit = list(params_fit.values())
 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
     with pm.Model() as model:
         # Priors
-        r_s = pm.TruncatedNormal("r_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
+        r_s = pm.Normal("r_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], initval=theta_fit[0])
         # K = pm.TruncatedNormal("K", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
 
         sigma = pm.HalfNormal("sigma", 10)
@@ -169,9 +169,9 @@ if __name__ == '__main__':
     chains = 8
     draws = 1000
     with model:
-        trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=8)
+        trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    #trace.to_json('./../../data/SI_data/patient_80_cycling_LV_inference_Data.json')
+    #trace.to_json('./../../data/SI_data/3D_patient_86_no_treatment_LV_inference_Data2.json')
 
     plot_finals()
     plt.show()

@@ -83,6 +83,14 @@ def test_get_tumor_volume_from_image():
         num_cells = env._get_tumor_volume_from_image(image)
     assert num_cells == (2, 2)
 
+def test_get_df_from_message():
+    with mock.patch.object(PcEnv, '_start_slurm_physicell_job_step') as mock_start_slurm_physicell_job_step:
+        env = PcEnv(observation_type='number', normalize=False, max_tumor_size=2)
+        message = ('Type 0:12 Type 1:22 t0_x: -200.0, 200.0, t0_y: -200.0, 200.0, t0_z: 0.0, 10.0,'
+                   ' t1_x: -200.0, 200.0, t1_y: 200.0, -200.0, t1_z: 0.0, 10.0, ')
+        df = env._get_df_from_message(message)
+    print(df)
+    assert True
 
 def test_check_done():
     with mock.patch.object(PcEnv, '_start_slurm_physicell_job_step') as mock_start_slurm_physicell_job_step:

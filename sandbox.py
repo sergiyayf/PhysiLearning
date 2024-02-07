@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def get_ttps(filename, timesteps=100):
+def get_ttps(filename, timesteps=90):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
@@ -22,8 +22,9 @@ def main():
     PC_files_list = ['data/3D_benchmarks/no_treatment/no_treatment_all.h5',
                      'data/3D_benchmarks/mtd/mtd_all.h5',
                      'data/3D_benchmarks/at100/at100_all.h5',
+                     'data/3D_benchmarks/random/random_all.h5'
                      ]
-    PC_name_list = ['No therapy', 'MTD', 'AT100']
+    PC_name_list = ['No therapy', 'MTD', 'AT100', 'Random']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):

@@ -77,9 +77,9 @@ def plot_finals():
     theta = [mean_params[key] for key in params_fit.keys()]
     sol = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
-    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Mean)")
-    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Mean)")
-    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Mean)")
+    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Mean)")
+    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Mean)")
+    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="--", markersize=14, label="Total (Mean)")
     ax.legend()
     ax.set_title('Mean parameters')
 
@@ -88,6 +88,8 @@ def plot_finals():
     median_params = {}
     for key in params_fit.keys():
         median_params[key] = trace.get('posterior').to_dataframe()[key].median()
+        print(key, median_params[key])
+
     theta = [median_params[key] for key in params_fit.keys()]
     sol = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
@@ -128,8 +130,8 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.228, 'K': 2.976, 'r_s': 0.073 }
-    params_fit = {'c_s': 3.289, 'c_r': 1.031, 'Delta_s': 3.139}
+                  'r_r': 0.227, 'K': 3.162, 'r_s': 0.072 }
+    params_fit = {'c_s': 3.381, 'c_r': 1.15, 'Delta_s': 3.142}
 
     theta_fit = list(params_fit.values())
 
@@ -154,10 +156,10 @@ if __name__ == '__main__':
         # r_r = pm.Uniform("r_r", lower=0, upper=1, initval=theta_fit[0])
         # r_s = pm.Uniform("r_s", lower=0, upper=1, initval=theta_fit[1])
         # r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0.01, upper=5, initval=theta_fit[0])
-        c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0.01, upper=5, initval=theta_fit[1])
+        c_s = pm.Normal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], initval=theta_fit[0])
+        c_r = pm.Normal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], initval=theta_fit[1])
         #r_s = pm.TruncatedNormal("r_s", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=0, initval=theta_fit[2])
-        Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=1.0, initval=theta_fit[2])
+        Delta_s = pm.Normal("Delta_s", mu=theta_fit[2], sigma=0.1*theta_fit[2], initval=theta_fit[2])
 
         sigma = pm.HalfNormal("sigma", 10)
 
@@ -176,9 +178,9 @@ if __name__ == '__main__':
     chains = 8
     draws = 1000
     with model:
-        trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=8)
+        trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    #trace.to_json('./../../data/SI_data/patient_80_cycling_LV_inference_Data.json')
+    #trace.to_json('./../../data/SI_data/3D_patient_86_at100_LV_inference_Data2.json')
 
     plot_finals()
     plt.show()
