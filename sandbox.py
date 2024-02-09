@@ -5,8 +5,22 @@ mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 
+def plot(df, title, scale='linear'):
+    fig, ax = plt.subplots()
+    ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
+    ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
+    ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
+    ax.legend()
+    ax.set_title(title)
+    ax.set_yscale(scale)
+    treat = df['Treatment'].values
+    # replace 0s that are directly after 1 with 1s
+    treat = np.where(treat == 0, np.roll(treat, 1), treat)
+    ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
+    lw=2)
+    return ax
 
-def get_ttps(filename, timesteps=90):
+def get_ttps(filename, timesteps=100):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
@@ -60,35 +74,19 @@ def main():
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
 
-
-df = pd.read_hdf('data/3D_benchmarks/at100/at100_all.h5', key=f'run_0')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'at100 r0')
-ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
+df = pd.read_hdf('data/3D_benchmarks/at100/at100_all.h5', key=f'run_1')
+plot(df, 'at100 PC')
 
 df = pd.read_hdf('Evaluations/LvEnvEvalat100_check_params_LV.h5', key=f'run_0')
-fig, ax = plt.subplots()
-ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
-ax.legend()
-ax.set_title(f'at100 r0')
-ax.set_yscale('log')
-treat = df['Treatment'].values
-# replace 0s that are directly after 1 with 1s
-#treat = np.where(treat == 0, np.roll(treat, 1), treat)
-ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-lw=2)
+plot(df, 'LV at100')
 
+df = pd.read_hdf('data/3D_benchmarks/no_treatment/no_treatment_all.h5', key=f'run_1')
+plot(df, 'no treatment PC' )
 
+df = pd.read_hdf('Evaluations/LvEnvEvalno_treatment_check_params_LV.h5', key=f'run_0')
+plot(df, 'LV no treatment')
+
+df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1.4.h5', key=f'run_0')
+plot(df, 'LV fixed 1.4')
 main()
 plt.show()
