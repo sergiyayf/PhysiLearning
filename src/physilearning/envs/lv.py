@@ -263,9 +263,8 @@ class LvEnv(BaseEnv):
         if flag == 'instant':
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-                            self.death_rate[i] -
-                            self.death_rate_treat[i] * self.state[2])
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
+                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
         # one time step delay in treatment effect
         elif flag == 'delayed':
             treat = self.state[2]
