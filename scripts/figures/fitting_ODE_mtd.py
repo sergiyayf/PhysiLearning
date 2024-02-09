@@ -27,7 +27,7 @@ def plot_data(ax, lw=2, title="Initial data"):
     return ax
 
 def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
-    cols = ['r_r', 'K']
+    cols = ['r_r']
     row = trace_df.iloc[row_idx, :][cols].values
 
     theta = row
@@ -127,58 +127,74 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(12, 4))
     plot_data(ax, title="PC raw data")
 
-    consts_fit = {'Delta_r': 0.0, 'Delta_s': 3.142, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_s': 0.072, 'c_s': 3.381, 'c_r': 1.15}
-    params_fit = {'r_r': 0.228, 'K': 2.969}
+    consts_fit = {'Delta_r': 0.0, 'Delta_s': 3.156, 'delta_r': 0.01, 'delta_s': 0.01,
+                  'r_s': 0.076, 'c_s': 2.785, 'c_r': 8.624, 'K': 2.44}
+    params_fit = {'r_r': 0.228}
+    sigmas = [0.001]
+    iteration = 1
+    accuracy = 0.0
+    tune_draws = 1000
+    final_draws = 10000
+    while accuracy < 0.95:
+        theta_fit = list(params_fit.values())
+        sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
+                       params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
 
+        with pm.Model() as model:
+            # Priors
+            r_r = pm.Normal("r_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0])
+            sigma = pm.HalfNormal("sigma", 10)
+            # Ode solution function
+            ode_solution = pytensor_forward_model_matrix(
+                pm.math.stack([r_r])
+            )
+            # Likelihood
+            pm.Normal("Y_obs", mu=ode_solution, sigma=sigma, observed=data[["x", "y"]].values)
+
+        # Variable list to give to the sample step parameter
+        vars_list = list(model.values_to_rvs.keys())[:-1]
+        sampler = "DEMetropolis"
+        chains = 8
+        draws = tune_draws
+        with model:
+            trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
+        trace = trace_DEM
+        params_old = params_fit
+        trace_df = az.summary(trace)
+        params_new = {}
+        for key in params_fit.keys():
+            params_new[key] = trace_df.loc[key, 'mean']
+        sigmas = [max(trace_df.loc[key, 'sd'],0.001) for key in params_fit.keys()]
+        params_fit = params_new
+
+        # calculate accuracy as the difference between the old and new parameters
+        accuracy_list = []
+        for key in params_fit.keys():
+            accuracy_list.append(1 - abs(params_old[key] - params_new[key]) / params_old[key])
+        accuracy = np.min(accuracy_list)
+        print("Accuracy: ", accuracy)
+
+        print("Iteration: ", iteration)
+        iteration += 1
     theta_fit = list(params_fit.values())
-
-    sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
-                   params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
-    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Initial guess)")
-    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Initial guess)")
-
-    initial_conditions = least_squares(ode_model_resid, x0=list(params_fit.values()), bounds=(0.0,np.inf))
-    #params_fit = {'c_s': initial_conditions.x[0], 'c_r': initial_conditions.x[1]}
-    theta_fit = list(params_fit.values())
-
-    sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
-                    params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
-    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Least squares)")
-    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Least squares)")
-    ax.legend()
-
     with pm.Model() as model:
         # Priors
-        # alpha = pm.TruncatedNormal("alpha", mu=theta[0], sigma=0.1, lower=0, initval=theta[0])
-        # r_r = pm.Uniform("r_r", lower=0, upper=1, initval=theta_fit[0])
-        # r_s = pm.Uniform("r_s", lower=0, upper=1, initval=theta_fit[1])
-        r_r = pm.Normal("r_r", mu=theta_fit[0], sigma=0.1*theta_fit[0], initval=theta_fit[0])
-        K = pm.Normal("K", mu=theta_fit[1], sigma=0.1*theta_fit[1], initval=theta_fit[1])
-        # c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=0.1*theta_fit[0], lower=0, initval=theta_fit[0])
-        # c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=0.1*theta_fit[1], lower=0, initval=theta_fit[1])
-        #r_s = pm.TruncatedNormal("r_s", mu=theta_fit[2], sigma=0.1*theta_fit[2], lower=0, initval=theta_fit[2])
-
+        r_r = pm.Normal("r_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0])
         sigma = pm.HalfNormal("sigma", 10)
-
         # Ode solution function
         ode_solution = pytensor_forward_model_matrix(
-            pm.math.stack([r_r, K])
+            pm.math.stack([r_r])
         )
-
         # Likelihood
         pm.Normal("Y_obs", mu=ode_solution, sigma=sigma, observed=data[["x", "y"]].values)
-
     # Variable list to give to the sample step parameter
     vars_list = list(model.values_to_rvs.keys())[:-1]
-
     sampler = "DEMetropolis"
     chains = 8
-    draws = 1000
+    draws = final_draws
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    #trace.to_json('./../../data/SI_data/3D_patient_86_mtd_LV_inference_Data2.json')
-
+    trace.to_json('./../../data/SI_data/3D_patient_86_mtd_LV_inference_Data.json')
     plot_finals()
     plt.show()
