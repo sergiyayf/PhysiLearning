@@ -103,9 +103,15 @@ if __name__ == '__main__':
     # Get data
     df = pd.read_hdf(
         './../../data/3D_benchmarks/no_treatment/no_treatment_all.h5', key='run_1')
+    initial_size = df['Type 0'][0] + df['Type 1'][0]
+    truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.5)]
+    index = truncated.index[1]
+    # replace df with zeros after index
+    df.loc[index:, 'Type 0'] = 0
+    df.loc[index:, 'Type 1'] = 0
+    df.loc[index:, 'Treatment'] = 0
     # find the index when all of the data is 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
-
     data = pd.DataFrame(dict(
         time=df.index.values[0:sim_end:1],
         x=df['Type 0'].values[0:sim_end:1],
@@ -131,14 +137,14 @@ if __name__ == '__main__':
     #               'r_r': 0.23, 'Delta_s': 3.143, 'c_s': 2.791, 'c_r': 3.381, 'K': 2.44}
     # params_fit = {'r_s': 0.077}
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.228, 'Delta_s': 3.156, 'c_s': 2.785, 'c_r': 8.624, 'K': 2.44}
-    params_fit = {'r_s': 0.076}
+                  'r_r': 0.205, 'Delta_s': 3.156, 'c_s': 2.297, 'c_r': 4.953, 'K': 2.44}
+    params_fit = {'r_s': 0.074}
     sigmas = [0.001]
     iteration = 1
     accuracy = 0.0
-    tune_draws = 1000
+    tune_draws = 5000
     final_draws = 10000
-    while accuracy < 0.95:
+    while accuracy < 0.99:
         theta_fit = list(params_fit.values())
         sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
                         params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
@@ -203,6 +209,6 @@ if __name__ == '__main__':
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    trace.to_json('./../../data/SI_data/3D_patient_86_no_treatment_LV_inference_Data.json')
+    trace.to_json('./../../data/SI_data/3D_patient_86_no_treatment_LV_inference_Data_1_5_threshold.json')
     plot_finals()
     plt.show()

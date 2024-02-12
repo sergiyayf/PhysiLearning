@@ -102,7 +102,14 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        './../../data/3D_benchmarks/mtd/mtd_all.h5', key='run_0')
+        './../../data/3D_benchmarks/new_mtd/mtd_all.h5', key='run_3')
+    initial_size = df['Type 0'][0] + df['Type 1'][0]
+    truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.5)]
+    index = truncated.index[1]
+    # replace df with zeros after index
+    df.loc[index:, 'Type 0'] = 0
+    df.loc[index:, 'Type 1'] = 0
+    df.loc[index:, 'Treatment'] = 0
     # find the index when all of the data is 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
 
@@ -128,14 +135,14 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'Delta_s': 3.156, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_s': 0.076, 'c_s': 2.785, 'c_r': 8.624, 'K': 2.44}
-    params_fit = {'r_r': 0.228}
-    sigmas = [0.001]
+                  'r_s': 0.074, 'c_s': 2.297, 'c_r': 4.953, 'K': 2.44}
+    params_fit = {'r_r': 0.205}
+    sigmas = [0.01]
     iteration = 1
     accuracy = 0.0
     tune_draws = 1000
     final_draws = 10000
-    while accuracy < 0.95:
+    while accuracy < 0.99:
         theta_fit = list(params_fit.values())
         sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
                        params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
@@ -195,6 +202,6 @@ if __name__ == '__main__':
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    trace.to_json('./../../data/SI_data/3D_patient_86_mtd_LV_inference_Data.json')
+    trace.to_json('./../../data/SI_data/3D_patient_86_mtd_LV_inference_Data_1_5_threshold.json')
     plot_finals()
     plt.show()

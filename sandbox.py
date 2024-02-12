@@ -7,6 +7,13 @@ import numpy as np
 
 def plot(df, title, scale='linear'):
     fig, ax = plt.subplots()
+    initial_size = df['Type 0'][0] + df['Type 1'][0]
+    truncated = df[((df['Type 0'] + df['Type 1'])/initial_size > 1.5)]
+    index = truncated.index[1]
+    # replace df with zeros after index
+    df.loc[index:, 'Type 0'] = 0
+    df.loc[index:, 'Type 1'] = 0
+    df.loc[index:, 'Treatment'] = 0
     ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
     ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
     ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
@@ -20,22 +27,24 @@ def plot(df, title, scale='linear'):
     lw=2)
     return ax
 
-def get_ttps(filename, timesteps=100):
+def get_ttps(filename, timesteps=40):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
         # find the largest index with non-zero Type 0 and Type 1
-        nz = df[(df['Type 0'] + df['Type 1'] != 0)]
+        initial_size = df['Type 0'][0] + df['Type 1'][0]
+        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 1.5)]
         if len(nz) > 0:
-            ttps.append(nz.index[-1])
+            # append index when type 0 + type 1 is larger than 1.5
+            ttps.append(nz.index[0])
         else:
             ttps.append(0)
     return ttps
 
 def main():
     PC_files_list = ['data/3D_benchmarks/no_treatment/no_treatment_all.h5',
-                     'data/3D_benchmarks/mtd/mtd_all.h5',
-                     'data/3D_benchmarks/at100/at100_all.h5',
+                     'data/3D_benchmarks/new_mtd/mtd_all.h5',
+                     'data/3D_benchmarks/new_at100/at100_all.h5',
                      'data/3D_benchmarks/random/random_all.h5'
                      ]
     PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC Random']
@@ -74,19 +83,22 @@ def main():
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
 
-df = pd.read_hdf('data/3D_benchmarks/at100/at100_all.h5', key=f'run_1')
+df = pd.read_hdf('data/3D_benchmarks/new_at100/at100_all.h5', key=f'run_3')
 plot(df, 'at100 PC')
 
-df = pd.read_hdf('Evaluations/LvEnvEvalat100_check_params_LV.h5', key=f'run_0')
-plot(df, 'LV at100')
+df = pd.read_hdf('data/3D_benchmarks/new_mtd/mtd_all.h5', key=f'run_0')
+plot(df, 'mtd PC')
 
-df = pd.read_hdf('data/3D_benchmarks/no_treatment/no_treatment_all.h5', key=f'run_1')
-plot(df, 'no treatment PC' )
-
-df = pd.read_hdf('Evaluations/LvEnvEvalno_treatment_check_params_LV.h5', key=f'run_0')
-plot(df, 'LV no treatment')
-
-df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1.4.h5', key=f'run_0')
-plot(df, 'LV fixed 1.4')
+# df = pd.read_hdf('Evaluations/LvEnvEvalat100_check_params_LV.h5', key=f'run_0')
+# plot(df, 'LV at100')
+#
+# df = pd.read_hdf('data/3D_benchmarks/no_treatment/no_treatment_all.h5', key=f'run_1')
+# plot(df, 'no treatment PC' )
+#
+# df = pd.read_hdf('Evaluations/LvEnvEvalno_treatment_check_params_LV.h5', key=f'run_0')
+# plot(df, 'LV no treatment')
+#
+# df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1.4.h5', key=f'run_0')
+# plot(df, 'LV fixed 1.4')
 main()
 plt.show()

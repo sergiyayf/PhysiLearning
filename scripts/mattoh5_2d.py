@@ -44,17 +44,18 @@ def calculate_distance_to_front(cell_df: pd.DataFrame, front_cell_positions: np.
 
 
 if __name__ == '__main__':
-
-    sims = range(1, 30)
+    sims = range(1, 1400)
+    # remove numbers 588 - 600
+    sims = [x for x in sims if x < 588 or x > 600]
     distance_to_front_cell = []
     distance_to_front_circle = []
     min_distance_to_front_cell = []
     per_sim_min_distance = []
-    sim = 987
+    sim = 1
     for simulation in sims:
         if sim > 1000:
             break
-        pymcds = pyMCDS.pyMCDS('final.xml' ,f'../data/2d_extras_2/sim_{simulation}/')
+        pymcds = pyMCDS.pyMCDS('final.xml' ,f'../data/2D_presims_higher_mut_rate/sim_{simulation}/')
         cell_df = pymcds.get_cell_df()
         if len(cell_df) > 0:
             cell_df['is_at_front'] = np.zeros_like(cell_df['position_x'])
