@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 300
-  cpus-per-task: 6
+  cpus-per-task: 1
   time: '24:00:00'
   agent_buffer: 0
   recurrent:
@@ -24,19 +24,21 @@ learning:
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
       n_steps: 124
+      batch_size: 64
+      n_epochs: 10
       verbose: 1
-      ent_coef: 0.02
-      clip_range: 0.005
-      learning_rate: 5.e-5
+      ent_coef: 0.01
+      clip_range: 0.001
+      learning_rate: 5.e-6
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
-          pi: [32, 32]
-          vf: [32, 32]
-    total_timesteps: 1.e+8
+          pi: [128, 128]
+          vf: [128, 128]
+    total_timesteps: 1.e+7
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '09022024_3D_LV_mela_train_vfs_max_1_5_initial_size_rew_0_run_1'
+    model_save_prefix: '14022024_3D_LV_mela_train_2_norm_100_lr5e6_rew_2_vfs'
     load:
       enable_loading: 0
       last_model: 0
@@ -58,19 +60,19 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: True
   max_tumor_size: 61828 #100000 # 110000 # 4000
-  max_time: 120 # 120
+  max_time: 150 # 120
   initial_wt: 41219 #2761 # 74291 # 2761
   initial_mut: 8
-  growth_rate_wt: 0.076 # 0.29 # 0.0175
-  growth_rate_mut: 0.228 # 0.438 # 0.0175
+  growth_rate_wt: 0.074 # 0.29 # 0.0175
+  growth_rate_mut: 0.205 # 0.438 # 0.0175
   death_rate_wt: 0.01 #0.0029
   death_rate_mut: 0.01 #0.00438
   treat_death_rate_wt: 3.156 # 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 0 # reward shaping flag for some predefined rewards
+  reward_shaping: 2 # reward shaping flag for some predefined rewards
   normalize: True
-  normalize_to: 1.0
+  normalize_to: 100.0
   image_size: 124 #84 #124
   patient_sampling:
     enable: 0
@@ -80,8 +82,8 @@ env:
   # LV environment settings
   LvEnv:
     carrying_capacity: 244000 # 6500
-    competition_wt: 2.785 # 1.323 #2400.0
-    competition_mut: 8.7 # 0.0 #0.336
+    competition_wt: 2.297 # 1.323 #2400.0
+    competition_mut: 4.967 # 0.0 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
@@ -134,7 +136,7 @@ eval:
   path: './'
   model_prefix: 'reloaded_reduce_size'
   step_to_load: '_best_reward'
-  save_name: 'fixed_1.4'
+  save_name: 'fixed_1_4_updated'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'

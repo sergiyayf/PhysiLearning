@@ -7,7 +7,8 @@ import numpy as np
 from physicell_tools import pyMCDS
 from physicell_tools.get_perifery import front_cells
 import pandas as pd
-
+import subprocess
+import time
 
 def get_cell_df(pymcds: pyMCDS.pyMCDS):
     """
@@ -156,3 +157,16 @@ if __name__ == '__main__':
 
             clone_df.to_hdf('presims_2d.h5', key=f'data/clone_info_sim_{sim}')
             sim +=1
+
+            # rename folder with new number and wait to finish
+            if simulation > sim:
+                command = [f'mv ../data/2D_presims_higher_mut_rate/sim_{simulation} ../data/2D_presims_higher_mut_rate/sim_{sim}']
+                subprocess.run(command, shell=True)
+                time.sleep(5)
+
+
+        else:
+            # remove the folder
+            command = [f'rm -r ../data/2D_presims_higher_mut_rate/sim_{simulation}']
+            subprocess.run(command, shell=True)
+            time.sleep(5)

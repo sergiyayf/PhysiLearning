@@ -8,8 +8,9 @@ import numpy as np
 def plot(df, title, scale='linear'):
     fig, ax = plt.subplots()
     initial_size = df['Type 0'][0] + df['Type 1'][0]
-    truncated = df[((df['Type 0'] + df['Type 1'])/initial_size > 1.5)]
-    index = truncated.index[1]
+    truncated = df[((df['Type 0'] + df['Type 1'])/initial_size >= 1.5)]
+    print(truncated)
+    index = truncated.index[0]
     # replace df with zeros after index
     df.loc[index:, 'Type 0'] = 0
     df.loc[index:, 'Type 1'] = 0
@@ -55,10 +56,10 @@ def main():
 
     PC_df = pd.DataFrame(PC_dict)
 
-    LV_files_list = ['./Evaluations/LvEnvEvalno_treatment_check_params_LV.h5',
-                        './Evaluations/LvEnvEvalmtd_check_params_LV.h5',
-                        './Evaluations/LvEnvEvalat100_check_params_LV.h5',
-                        './Evaluations/LvEnvEvalrandom_check_params_LV.h5'
+    LV_files_list = ['./Evaluations/LvEnvEvalfixed_1_4_updated.h5',
+                        './Evaluations/LvEnvEvalmtd_1_5.h5',
+                        './Evaluations/LvEnvEvalat100_1_5.h5',
+                        './Evaluations/LvEnvEvalrandom_1_5.h5'
                         ]
     LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV Random']
 
@@ -89,11 +90,12 @@ plot(df, 'at100 PC')
 df = pd.read_hdf('data/3D_benchmarks/new_mtd/mtd_all.h5', key=f'run_0')
 plot(df, 'mtd PC')
 
-# df = pd.read_hdf('Evaluations/LvEnvEvalat100_check_params_LV.h5', key=f'run_0')
-# plot(df, 'LV at100')
-#
-# df = pd.read_hdf('data/3D_benchmarks/no_treatment/no_treatment_all.h5', key=f'run_1')
-# plot(df, 'no treatment PC' )
+df = pd.read_hdf('Evaluations/LvEnvEvalat100_1_5.h5', key=f'run_0')
+plot(df, 'LV at100')
+
+df = pd.read_hdf('Evaluations/LvEnvEvalmtd_1_5.h5', key=f'run_0')
+plot(df, 'LV mtd')
+
 #
 # df = pd.read_hdf('Evaluations/LvEnvEvalno_treatment_check_params_LV.h5', key=f'run_0')
 # plot(df, 'LV no treatment')

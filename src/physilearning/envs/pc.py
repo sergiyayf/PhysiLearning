@@ -253,7 +253,7 @@ class PcEnv(BaseEnv):
                 obs = [self.state, self.mutant_normalized_position]
             else:
                 obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
-            rewards = Reward(self.reward_shaping_flag)
+            rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
             reward = rewards.get_reward(self.state, self.time / self.max_time)
             self.trajectory[:, int(self.time / self.treatment_time_step)] = self.state
         else:

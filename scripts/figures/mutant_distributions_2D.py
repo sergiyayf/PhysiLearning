@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 dir = '/home/saif/Projects/PhysiLearning/data'
-hdf5_file = path.join(dir, '2d_presims.h5')
+hdf5_file = path.join(dir, 'presims_2d.h5')
 
 
 def get_n_clones(sims):
@@ -92,6 +92,7 @@ if __name__ == '__main__':
     median_dist = np.median(all_dists_to_front)
     closest_median_sim = np.nanargmin(np.abs(np.array(min_clone) - median_dist))
     print('Simulation with closest median distance to front: ', closest_median_sim)
+    print('Total cells in this simulation: ', total_cells[closest_median_sim])
 
     # Same for 25th and 75th percentile
     percentile_25 = np.percentile(all_dists_to_front, 25)

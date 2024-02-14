@@ -8,12 +8,12 @@ class Reward:
         # +1 for each time step
         if self.reward_shaping_flag == 0:
             reward = 1
-        # 1 - number of sensitive cells
+        # 1 - 0.5 * treatment
         elif self.reward_shaping_flag == 1:
-            reward = 1 - obs[0]
+            reward = 1 - 0.5*obs[2]
         # 1 - number of resistant cells
         elif self.reward_shaping_flag == 2:
-            reward = 1 - obs[1]
+            reward = 1 - 0.5*(obs[0]+obs[1])/self.normalization - 0.5*obs[2]
         # 1 - total number of cells
         elif self.reward_shaping_flag == 3:
             reward = 1 - obs[0] - obs[1]
@@ -37,9 +37,7 @@ class Reward:
 
         # reward for decreasing probability of dyingr
         elif self.reward_shaping_flag == 6:
-            reward = 1 - 0.5 * (obs[0] + obs[1])
-            if sum(obs[0:2]) < 1.e-3:
-                reward += 2
+            reward = 1 - 0.5 * (obs[0] + obs[1])/self.normalization - 0.5 * obs[2]
         elif self.reward_shaping_flag == 7:
             reward = obs[0]
         elif self.reward_shaping_flag == 8:
