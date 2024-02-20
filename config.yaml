@@ -47,7 +47,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -56,10 +56,10 @@ env:
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
-  observation_type: 'number' # 'image' # 'number' # 'multiobs'
+  observation_type: 'mutant_position' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: True
-  max_tumor_size: 100000 #61828 #100000 # 110000 # 4000
+  max_tumor_size: 61828 #100000 # 110000 # 4000
   max_time: 150 # 120
   initial_wt: 41219 #2761 # 74291 # 2761
   initial_mut: 8
@@ -72,7 +72,7 @@ env:
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
   normalize: True
-  normalize_to: 100.0
+  normalize_to: 1000.0
   image_size: 124 #84 #124
   patient_sampling:
     enable: 0
@@ -88,14 +88,14 @@ env:
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
   SLvEnv:
-    carrying_capacity: 6500
-    competition_wt: 1.323 #2400.0
-    competition_mut: 0.0 #0.336
+    carrying_capacity: 244000
+    competition_wt: 2.297 #2400.0
+    competition_mut: 4.967 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 20
-    max_competition: 3.5
-    growth_layer: 15
+    mutant_distance_to_front: 150
+    cell_volume: 2144
+    growth_layer: 150
   # note this is not yet functional
   PcEnv:
     domain_size: 2050 #1250
@@ -136,13 +136,13 @@ eval:
   path: './data/raven_run_logs/new_run_23'
   model_prefix: '16022024_3D_LV_raven_rew_0'
   step_to_load: '_best_reward'
-  save_name: 'fixed_1_9'
+  save_name: 'at100_slvenv'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.9
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.0
   num_episodes: 100
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients

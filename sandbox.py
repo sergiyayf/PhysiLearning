@@ -85,35 +85,43 @@ def main():
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
 
-df = pd.read_hdf('data/3D_benchmarks/new_at100/at100_all.h5', key=f'run_3')
-plot(df, 'at100 PC')
-
-df = pd.read_hdf('data/3D_benchmarks/new_mtd/mtd_all.h5', key=f'run_0')
-plot(df, 'mtd PC')
-
-df = pd.read_hdf('Evaluations/LvEnvEvalat100_1_5.h5', key=f'run_0')
-plot(df, 'LV at100')
-
-df = pd.read_hdf('Evaluations/LvEnvEval_raven_cont16022024_3D_LV_raven_load.h5', key=f'run_0')
-plot(df, 'LV raven cont')
-
-df = pd.read_hdf('Evaluations/LvEnvEval_raven_run_815022024_3D_LV_raven_load.h5', key=f'run_10')
-plot(df, 'LV policy nt')
-
-df = pd.read_hdf('data/raven_run_logs/new_run_22/Evaluations/LvEnvEval_raven_22_run16022024_3D_LV_raven_rew_0.h5','run_20')
-plot(df, 'LV policy 22')
-
-df = pd.read_hdf('data/raven_run_logs/new_run_23/Evaluations/LvEnvEval_raven_23_run16022024_3D_LV_raven_rew_0.h5','run_20')
-plot(df, 'LV policy 23')
+# df = pd.read_hdf('data/3D_benchmarks/new_at100/at100_all.h5', key=f'run_3')
+# plot(df, 'at100 PC', scale='log')
 #
+# df = pd.read_hdf('data/3D_benchmarks/new_mtd/mtd_all.h5', key=f'run_0')
+# plot(df, 'mtd PC')
+# 
+# df = pd.read_hdf('Evaluations/LvEnvEvalat100_1_5.h5', key=f'run_0')
+# plot(df, 'LV at100', scale='log')
+
+# df = pd.read_hdf('Evaluations/LvEnvEval_raven_cont16022024_3D_LV_raven_load.h5', key=f'run_0')
+# plot(df, 'LV raven cont')
+#
+# df = pd.read_hdf('Evaluations/LvEnvEval_raven_run_815022024_3D_LV_raven_load.h5', key=f'run_10')
+# plot(df, 'LV policy nt')
+#
+# df = pd.read_hdf('data/raven_run_logs/new_run_22/Evaluations/LvEnvEval_raven_22_run16022024_3D_LV_raven_rew_0.h5','run_20')
+# plot(df, 'LV policy 22')
+#
+# df = pd.read_hdf('data/raven_run_logs/new_run_23/Evaluations/LvEnvEval_raven_23_run16022024_3D_LV_raven_rew_0.h5','run_20')
+# plot(df, 'LV policy 23')
+# #
 # df = pd.read_hdf('Evaluations/LvEnvEvalno_treatment_check_params_LV.h5', key=f'run_0')
 # plot(df, 'LV no treatment')
 #
-df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1_4_updated.h5', key=f'run_0')
-plot(df, 'LV fixed 1.4')
+# df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1_4_updated.h5', key=f'run_0')
+# plot(df, 'LV fixed 1.4')
+#
+# df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1_9.h5', key=f'run_0')
+# plot(df, 'LV fixed 1.9')
 
-df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1_9.h5', key=f'run_0')
-plot(df, 'LV fixed 1.9')
+df = pd.read_hdf('Evaluations/SLvEnvEvalat100_slvenv.h5', key=f'run_0')
+plot(df, 'SLV at100 log', scale='log')
+df = pd.read_hdf('Evaluations/SLvEnvEvalat100_slvenv.h5', key=f'run_0')
+plot(df, 'SLV at100 lin')
+
+# df = pd.read_hdf('Evaluations/SLvEnvEvalfixed_1_4_slvenv.h5', key=f'run_0')
+# plot(df, 'SLV fixed_1_4')
 
 main()
 plt.show()

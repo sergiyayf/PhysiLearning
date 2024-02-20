@@ -89,7 +89,6 @@ class LvEnv(BaseEnv):
         self.growth_function_flag = env_specific_params.get('growth_function_flag', 'delayed')
 
         self.trajectory[:, 0] = self.state
-        self.real_step_count = 0
 
         self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
 
@@ -213,7 +212,7 @@ class LvEnv(BaseEnv):
         return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):
-        self.real_step_count += 1
+
         if self.config['env']['patient_sampling']['enable']:
             if len(self.patient_id_list) > 1:
                 self._choose_new_patient()
