@@ -23,33 +23,33 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
-      n_steps: 124
+      n_steps: 512
       batch_size: 64
       n_epochs: 10
       verbose: 1
-      ent_coef: 0.01
-      clip_range: 0.001
-      learning_rate: 5.e-6
+      ent_coef: 0.001
+      clip_range: 0.0001
+      learning_rate: 1.e-6
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
           pi: [128, 128]
           vf: [128, 128]
-    total_timesteps: 1.e+7
+    total_timesteps: 2.e+6
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '14022024_3D_LV_mela_train_2_norm_100_lr5e6_rew_2_vfs'
+    model_save_prefix: '16022024_test_norm_1_high_lr'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/slvenv_sample_rew7_best_reward'
+      saved_model_name: './Training/SavedModels/15022024_3D_LV_mela_train_load_enabled_best_reward'
 
 # Environment configuration
 env:
   # general env settings
   type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: True
+  wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -59,7 +59,7 @@ env:
   observation_type: 'number' # 'image' # 'number' # 'multiobs'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: True
-  max_tumor_size: 61828 #100000 # 110000 # 4000
+  max_tumor_size: 100000 #61828 #100000 # 110000 # 4000
   max_time: 150 # 120
   initial_wt: 41219 #2761 # 74291 # 2761
   initial_mut: 8
@@ -70,7 +70,7 @@ env:
   treat_death_rate_wt: 3.156 # 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 2 # reward shaping flag for some predefined rewards
+  reward_shaping: 0 # reward shaping flag for some predefined rewards
   normalize: True
   normalize_to: 100.0
   image_size: 124 #84 #124
@@ -133,14 +133,14 @@ env:
 eval:
   most_recent: 0
   from_file: 0
-  path: './'
-  model_prefix: 'reloaded_reduce_size'
+  path: './data/raven_run_logs/new_run_23'
+  model_prefix: '16022024_3D_LV_raven_rew_0'
   step_to_load: '_best_reward'
-  save_name: 'fixed_1_4_updated'
+  save_name: 'fixed_1_9'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.4
+  threshold: 1.9
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 

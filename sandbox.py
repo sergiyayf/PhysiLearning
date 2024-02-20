@@ -5,16 +5,17 @@ mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot(df, title, scale='linear'):
+def plot(df, title, scale='linear', truncate=False):
     fig, ax = plt.subplots()
-    initial_size = df['Type 0'][0] + df['Type 1'][0]
-    truncated = df[((df['Type 0'] + df['Type 1'])/initial_size >= 1.5)]
-    print(truncated)
-    index = truncated.index[0]
-    # replace df with zeros after index
-    df.loc[index:, 'Type 0'] = 0
-    df.loc[index:, 'Type 1'] = 0
-    df.loc[index:, 'Treatment'] = 0
+    if truncate:
+        initial_size = df['Type 0'][0] + df['Type 1'][0]
+        truncated = df[((df['Type 0'] + df['Type 1'])/initial_size >= 1.5)]
+        print(truncated)
+        index = truncated.index[0]
+        # replace df with zeros after index
+        df.loc[index:, 'Type 0'] = 0
+        df.loc[index:, 'Type 1'] = 0
+        df.loc[index:, 'Treatment'] = 0
     ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
     ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
     ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
@@ -56,7 +57,7 @@ def main():
 
     PC_df = pd.DataFrame(PC_dict)
 
-    LV_files_list = ['./Evaluations/LvEnvEvalfixed_1_4_updated.h5',
+    LV_files_list = ['./Evaluations/LvEnvEval_raven_run_815022024_3D_LV_raven_load.h5',
                         './Evaluations/LvEnvEvalmtd_1_5.h5',
                         './Evaluations/LvEnvEvalat100_1_5.h5',
                         './Evaluations/LvEnvEvalrandom_1_5.h5'
@@ -93,14 +94,26 @@ plot(df, 'mtd PC')
 df = pd.read_hdf('Evaluations/LvEnvEvalat100_1_5.h5', key=f'run_0')
 plot(df, 'LV at100')
 
-df = pd.read_hdf('Evaluations/LvEnvEvalmtd_1_5.h5', key=f'run_0')
-plot(df, 'LV mtd')
+df = pd.read_hdf('Evaluations/LvEnvEval_raven_cont16022024_3D_LV_raven_load.h5', key=f'run_0')
+plot(df, 'LV raven cont')
 
+df = pd.read_hdf('Evaluations/LvEnvEval_raven_run_815022024_3D_LV_raven_load.h5', key=f'run_10')
+plot(df, 'LV policy nt')
+
+df = pd.read_hdf('data/raven_run_logs/new_run_22/Evaluations/LvEnvEval_raven_22_run16022024_3D_LV_raven_rew_0.h5','run_20')
+plot(df, 'LV policy 22')
+
+df = pd.read_hdf('data/raven_run_logs/new_run_23/Evaluations/LvEnvEval_raven_23_run16022024_3D_LV_raven_rew_0.h5','run_20')
+plot(df, 'LV policy 23')
 #
 # df = pd.read_hdf('Evaluations/LvEnvEvalno_treatment_check_params_LV.h5', key=f'run_0')
 # plot(df, 'LV no treatment')
 #
-# df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1.4.h5', key=f'run_0')
-# plot(df, 'LV fixed 1.4')
+df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1_4_updated.h5', key=f'run_0')
+plot(df, 'LV fixed 1.4')
+
+df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1_9.h5', key=f'run_0')
+plot(df, 'LV fixed 1.9')
+
 main()
 plt.show()
