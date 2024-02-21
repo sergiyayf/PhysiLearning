@@ -47,7 +47,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -56,7 +56,7 @@ env:
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
-  observation_type: 'mutant_position' # 'image' # 'number' # 'multiobs' # 'mutant_position'
+  observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: True
   max_tumor_size: 61828 #100000 # 110000 # 4000
@@ -132,17 +132,17 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
-  path: './data/raven_run_logs/new_run_23'
-  model_prefix: '16022024_3D_LV_raven_rew_0'
+  from_file: 1
+  path: './data/raven_run_logs/cont_22_run_4'
+  model_prefix: '19022024_run_22_load_4'
   step_to_load: '_best_reward'
-  save_name: 'at100_slvenv'
+  save_name: 'cont_4_rav'
   # evaluation settings
-  fixed_AT_protocol: 1
+  fixed_AT_protocol: 0
   at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.0
   num_episodes: 100
-  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'same' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients
