@@ -47,9 +47,10 @@ def main():
     PC_files_list = ['data/3D_benchmarks/no_treatment/no_treatment_all.h5',
                      'data/3D_benchmarks/new_mtd/mtd_all.h5',
                      'data/3D_benchmarks/new_at100/at100_all.h5',
+                     'data/3D_benchmarks/fixed_1_4/fixed_1_4_all.h5',
                      'data/3D_benchmarks/random/random_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC Random']
+    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC fixed 1.4', 'PC Random']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -60,9 +61,10 @@ def main():
     LV_files_list = ['./Evaluations/LvEnvEvalno_treatment_1_5.h5',
                         './Evaluations/LvEnvEvalmtd_1_5.h5',
                         './Evaluations/LvEnvEvalat100_1_5.h5',
+                        './Evaluations/LvEnvEvalfixed_1_4_1_5.h5',
                         './Evaluations/LvEnvEvalrandom_1_5.h5'
                         ]
-    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV Random']
+    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV Fixed 1.4', 'LV Random']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -111,12 +113,13 @@ plot(df, 'LV cont 22 1 ')
 
 df = pd.read_hdf('data/raven_run_logs/cont_22_run_4/Evaluations/LvEnvEval_cont_4_rav19022024_run_22_load_4.h5','run_20')
 plot(df, 'LV cont 22 2')
+
 # #
 # df = pd.read_hdf('Evaluations/LvEnvEvalno_treatment_check_params_LV.h5', key=f'run_0')
 # plot(df, 'LV no treatment')
 #
-# df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1_4_updated.h5', key=f'run_0')
-# plot(df, 'LV fixed 1.4')
+df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1_4_1_5.h5', key=f'run_0')
+plot(df, 'LV fixed 1.4')
 #
 # df = pd.read_hdf('Evaluations/LvEnvEvalfixed_1_9.h5', key=f'run_0')
 # plot(df, 'LV fixed 1.9')

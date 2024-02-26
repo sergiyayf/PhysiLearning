@@ -23,26 +23,26 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
-      n_steps: 1024
-      batch_size: 64
-      n_epochs: 5
+      n_steps: 2056
+      batch_size: 256
+      n_epochs: 10
       verbose: 1
-      ent_coef: 0.2
-      clip_range: 0.001
-      learning_rate: 2.e-4
+      ent_coef: 0.00001
+      clip_range: 0.01
+      learning_rate: 1.e-6
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
-          pi: [256, 256]
-          vf: [256, 256]
-    total_timesteps: 1.e+7
-    save_freq: 1.e+6 # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '21022024_mela_try_reproduce_and_beat_1'
+          pi: [64, 64]
+          vf: [64, 64]
+    total_timesteps: 1.e+6
+    save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
+    model_save_prefix: '23022024_mela_2d_test_4_cuda_cont'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/15022024_3D_LV_mela_train_load_enabled_best_reward'
+      saved_model_name: './Training/SavedModels/23022024_mela_2d_test_4_cuda_best_reward'
 
 # Environment configuration
 env:
@@ -59,15 +59,15 @@ env:
   observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
-  max_tumor_size: 61828 #100000 # 110000 # 4000
+  max_tumor_size: 3086 #100000 # 110000 # 4000
   max_time: 150 # 120
-  initial_wt: 41219 #2761 # 74291 # 2761
-  initial_mut: 8
-  growth_rate_wt: 0.074 # 0.29 # 0.0175
-  growth_rate_mut: 0.205 # 0.438 # 0.0175
+  initial_wt: 1539 #2761 # 74291 # 2761
+  initial_mut: 4
+  growth_rate_wt: 0.083 # 0.29 # 0.0175
+  growth_rate_mut: 0.223 # 0.438 # 0.0175
   death_rate_wt: 0.01 #0.0029
   death_rate_mut: 0.01 #0.00438
-  treat_death_rate_wt: 3.156 # 0.36 # 0.397 # 0.015
+  treat_death_rate_wt: 6.07 # 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
@@ -81,9 +81,9 @@ env:
 
   # LV environment settings
   LvEnv:
-    carrying_capacity: 244000 # 6500
-    competition_wt: 2.297 # 1.323 #2400.0
-    competition_mut: 4.967 # 0.0 #0.336
+    carrying_capacity: 3906 # 6500
+    competition_wt: 1.795 # 1.323 #2400.0
+    competition_mut: 3.319 # 0.0 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
@@ -117,7 +117,7 @@ env:
           value: 'true'
       filename_chkpt:
           parent_nodes: ['user_parameters']
-          value:  './../paper_presims/patient_80/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
+          value:  './../paper_presims/2d_patient_285/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
       treatment_time_step:
           parent_nodes: ['user_parameters']
           value: 720
@@ -132,17 +132,17 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
-  path: './data/raven_run_logs/cont_22_run_4'
-  model_prefix: '19022024_run_22_load_4'
+  from_file: 1
+  path: './'
+  model_prefix: '23022024_mela_2d_test_4_cuda'
   step_to_load: '_best_reward'
-  save_name: 'fixed_1_4_1_5'
+  save_name: '_2d_model_23_solved'
   # evaluation settings
-  fixed_AT_protocol: 1
-  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.4
+  fixed_AT_protocol: 0
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.0
   num_episodes: 100
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'same' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients
