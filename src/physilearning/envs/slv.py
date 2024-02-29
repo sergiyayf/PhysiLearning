@@ -92,11 +92,22 @@ class SLvEnv(BaseEnv):
         # self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
 
         # mutant position related parameters
+        self.dimension = env_specific_params.get('dimension', 2)
         self.growth_layer = env_specific_params.get('growth_layer', 150)
-        self.cell_volume = env_specific_params.get('cell_volume', 15)
-        self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
+        self.cell_volume = env_specific_params.get('cell_volume', 2144)
+        if self.dimension == 2:
+            # calculate the cell area from volume
+            self.cell_radius = (self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
+            self.cell_area = np.pi * self.cell_radius ** 2
+            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_area / np.pi) ** (1 / 2)
+        elif self.dimension == 3:
+            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
+        else:
+            raise ValueError('Dimension should be 2 or 3')
+
         self.mutant_radial_position = self.radius - self.mutant_distance_to_front
         self.mutant_normalized_position = self.mutant_radial_position/self.radius
+
         # self.drug_color = 0
 
 
@@ -180,7 +191,10 @@ class SLvEnv(BaseEnv):
                 self.initial_mut = self.initial_mut*self.normalization_factor
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
-        self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
+        if self.dimension == 2:
+            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_area / np.pi) ** (1 / 2)
+        elif self.dimension == 3:
+            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
         self.mutant_radial_position = self.radius - self.mutant_distance_to_front
         self.mutant_normalized_position = self.mutant_radial_position / self.radius
 
@@ -238,12 +252,15 @@ class SLvEnv(BaseEnv):
             mv = 0
         elif dist > 0:
             mv = 1-dist/growth_layer
+        elif dist == 0:
+            mv = 0
+            self.mutant_radial_position = self.radius
         else:
             mv = 0
 
         if np.random.uniform() < mv:
             # move mutant on the grid radially outward
-            self.mutant_radial_position += 2*(3*self.cell_volume/(4*np.pi))**(1/3)
+            self.mutant_radial_position += 0.25*(3*self.cell_volume/(4*np.pi))**(1/3)
             self.mutant_normalized_position = self.mutant_radial_position/self.radius
             if self.mutant_normalized_position > 1:
                 self.mutant_normalized_position = 1
@@ -254,7 +271,10 @@ class SLvEnv(BaseEnv):
 
     def grow(self, i: int, j: int, flag: str) -> float:
         # instantaneous death rate increase by drug application
-        self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
+        if self.dimension == 2:
+            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_area / np.pi) ** (1 / 2)
+        elif self.dimension == 3:
+            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
         dist = (1 - self.mutant_normalized_position) * self.radius
         growth_layer = self.growth_layer
         self._move_mutant(dist, growth_layer)
@@ -279,12 +299,18 @@ if __name__ == "__main__": # pragma: no cover
     print('before loop')
     print('env_state', env.state)
     print(env.patient_id)
+    rad = []
+    mut_rad_pos = []
+    treat = []
     for i in range(150):
-        if i%2 == 0:
+        if i%4 == 0:
             act = 1
         else:
             act = 0
         obs, rew, term, trunc, _ = env.step(act)
+        rad.append(env.radius)
+        mut_rad_pos.append(env.mutant_radial_position)
+        treat.append(act)
         print('mut normalized pos',env.mutant_normalized_position)
         print('mutant radial pos', env.mutant_radial_position)
         print('radius', env.radius)
@@ -292,5 +318,13 @@ if __name__ == "__main__": # pragma: no cover
         if term or trunc:
             break
     print(i)
-
+    from matplotlib import pyplot as plt
+    fig, ax = plt.subplots()
+    ax.plot(rad, label='radius')
+    ax.plot(mut_rad_pos, label='mutant_radial_position')
+    ax.fill_between(range(len(treat)), max(rad), max(rad) * 1.1, where=treat, color='red', alpha=0.3, label='treatment')
+    ax.set_xlabel('time')
+    ax.set_ylabel('radius')
+    ax.legend()
+    plt.show()
     #anim.save('test.mp4', fps)

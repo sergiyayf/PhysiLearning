@@ -47,7 +47,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -88,14 +88,15 @@ env:
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
   SLvEnv:
-    carrying_capacity: 244000
-    competition_wt: 2.297 #2400.0
-    competition_mut: 4.967 #0.336
+    carrying_capacity: 3906
+    competition_wt: 1.772 #2400.0
+    competition_mut: 3.408 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 150
+    mutant_distance_to_front: 70
     cell_volume: 2144
     growth_layer: 150
+    dimension: 2
   # note this is not yet functional
   PcEnv:
     domain_size: 2050 #1250
