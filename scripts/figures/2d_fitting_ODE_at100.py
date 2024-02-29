@@ -104,10 +104,10 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        './../../data/2D_benchmarks/at100/2d_at100_all.h5', key='run_4')
+        './../../data/2D_benchmarks/at100/2d_at100_all.h5', key='run_29')
     # find the index when all of the data is 0
     initial_size = df['Type 0'][0] + df['Type 1'][0]
-    truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.2)]
+    truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.33)]
     index = truncated.index[1]
     # replace df with zeros after index
     df.loc[index:, 'Type 0'] = 0
@@ -135,9 +135,9 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.221, 'K': 1.27, 'r_s': 0.083 }
-    params_fit = {'c_s': 1.795, 'c_r': 3.319, 'Delta_s': 5.964}
-    sigmas = [0.002, 0.011, 0.003]
+                  'r_r': 0.216, 'K': 1.27, 'r_s': 0.087 }
+    params_fit = {'c_s': 1.772, 'c_r': 3.408, 'Delta_s': 5.837}
+    sigmas = [0.002, 0.022, 0.004]
     iteration = 1
     accuracy = 0.0
     tune_draws = 1000
@@ -216,7 +216,7 @@ if __name__ == '__main__':
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    trace.to_json('./../../data/SI_data/2D_patient_x_at100_LV_inference_Data_1_2_threshold.json')
+    trace.to_json('./../../data/SI_data/2D_patient_x_at100_LV_inference_Data_1_33_threshold.json')
     plot_finals()
     plt.show()
 

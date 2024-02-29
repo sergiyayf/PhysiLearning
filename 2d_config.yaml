@@ -59,15 +59,15 @@ env:
   observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
-  max_tumor_size: 3086 #100000 # 110000 # 4000
-  max_time: 150 # 120
+  max_tumor_size: 2053 # 2006 #3086 #100000 # 110000 # 4000
+  max_time: 250 # 120
   initial_wt: 1539 #2761 # 74291 # 2761
   initial_mut: 4
-  growth_rate_wt: 0.083 # 0.29 # 0.0175
-  growth_rate_mut: 0.223 # 0.438 # 0.0175
+  growth_rate_wt: 0.087 #0.085 - 1.3# 0.083 # 0.29 # 0.0175
+  growth_rate_mut: 0.216 #0.219 - 1.3# 0.223 # 0.438 # 0.0175
   death_rate_wt: 0.01 #0.0029
   death_rate_mut: 0.01 #0.00438
-  treat_death_rate_wt: 6.07 # 0.36 # 0.397 # 0.015
+  treat_death_rate_wt: 5.837 #5.986 - 1.3 # 6.07 # 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
@@ -82,8 +82,8 @@ env:
   # LV environment settings
   LvEnv:
     carrying_capacity: 3906 # 6500
-    competition_wt: 1.795 # 1.323 #2400.0
-    competition_mut: 3.319 # 0.0 #0.336
+    competition_wt: 1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
+    competition_mut: 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
@@ -132,17 +132,17 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
   model_prefix: '23022024_mela_2d_test_4_cuda'
   step_to_load: '_best_reward'
-  save_name: '_2d_model_23_solved'
+  save_name: '_2d_fixed_1_25'
   # evaluation settings
-  fixed_AT_protocol: 0
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.0
+  fixed_AT_protocol: 1
+  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.250
   num_episodes: 100
-  evaluate_on: 'same' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 
 # Predefined parameters for particular patients

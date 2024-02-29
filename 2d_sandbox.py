@@ -9,7 +9,7 @@ def plot(df, title, scale='linear', truncate=False):
     fig, ax = plt.subplots()
     if truncate:
         initial_size = df['Type 0'][0] + df['Type 1'][0]
-        truncated = df[((df['Type 0'] + df['Type 1'])/initial_size >= 1.2)]
+        truncated = df[((df['Type 0'] + df['Type 1'])/initial_size >= 1.3)]
         print(truncated)
         if len(truncated) > 0:
             index = truncated.index[0]
@@ -30,18 +30,19 @@ def plot(df, title, scale='linear', truncate=False):
     lw=2)
     return ax
 
-def get_ttps(filename, timesteps=100):
+def get_ttps(filename, timesteps=90):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
         # find the largest index with non-zero Type 0 and Type 1
         initial_size = df['Type 0'][0] + df['Type 1'][0]
-        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 1.5)]
+        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 1.33)]
         if len(nz) > 0:
             # append index when type 0 + type 1 is larger than 1.5
             ttps.append(nz.index[0])
         else:
-            ttps.append(150)
+            ttps.append(len(df))
+
     return ttps
 
 def main():
@@ -51,11 +52,10 @@ def main():
                      'data/2D_benchmarks/at100/2d_at100_all.h5',
                      'data/2D_benchmarks/fixed_1_1/2d_fixed_1_1_all.h5',
                      'data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5',
-                     'data/2D_benchmarks/fixed_1_3/2d_fixed_1_3_all.h5',
-                     'data/2D_benchmarks/fixed_1_4/2d_fixed_1_4_all.h5',
+                     'data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5',
                      'data/2D_benchmarks/random/2d_random_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT50', 'PC AT100', 'PC fixed 1.1', 'PC fixed 1.2', 'PC fixed 1.3', 'PC fixed 1.4', 'PC Random']
+    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT50', 'PC AT100', 'PC fixed 1.1', 'PC fixed 1.2', 'PC fixed 1.25', 'PC Random']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -69,12 +69,11 @@ def main():
                         './Evaluations/LvEnvEval_2d_at100.h5',
                         './Evaluations/LvEnvEval_2d_fixed_1_1.h5',
                         './Evaluations/LvEnvEval_2d_fixed_1_2.h5',
-                        './Evaluations/LvEnvEval_2d_fixed_1_3.h5',
-                        './Evaluations/LvEnvEval_2d_fixed_1_4.h5',
+                        './Evaluations/LvEnvEval_2d_fixed_1_25.h5',
                         './Evaluations/LvEnvEval_2d_random.h5'
 
                         ]
-    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT50', 'LV AT100', 'LV fixed 1.1', 'LV fixed 1.2', 'LV fixed 1.3', 'LV fixed 1.4', 'LV Random']
+    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT50', 'LV AT100', 'LV fixed 1.1', 'LV fixed 1.2', 'LV fixed 1.25', 'LV Random']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -96,7 +95,7 @@ def main():
     # show mean as well
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
-
+    return combined_df
 # df = pd.read_hdf('data/3D_benchmarks/new_at100/at100_all.h5', key=f'run_3')
 # plot(df, 'at100 PC', scale='log')
 
@@ -112,11 +111,11 @@ def main():
 # df = pd.read_hdf('Evaluations/LvEnvEval_2d_fixed_1_2.h5', key=f'run_10')
 # plot(df, 'fixed 1.2 LV', scale='log', truncate=False)
 
-df = pd.read_hdf('data/2D_benchmarks/fixed_1_3/2d_fixed_1_3_all.h5', key=f'run_10')
-plot(df, 'fixed 1.3 PC', scale='log', truncate=False)
+df = pd.read_hdf('data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5', key=f'run_1')
+plot(df, 'fixed 1.25 PC', scale='log', truncate=False)
 
-df = pd.read_hdf('Evaluations/LvEnvEval_2d_fixed_1_3.h5', key=f'run_10')
-plot(df, 'fixed 1.3 LV', scale='log', truncate=False)
+df = pd.read_hdf('Evaluations/temp/LvEnvEval_2d_fixed_1_4.h5', key=f'run_1')
+plot(df, 'fixed 1.4 LV', scale='linear', truncate=False)
 
 # df = pd.read_hdf('./data/2D_benchmarks/at100/2d_at100_all.h5', key=f'run_4')
 # plot(df, 'at100 PC', scale='log', truncate=True)
@@ -127,5 +126,5 @@ plot(df, 'fixed 1.3 LV', scale='log', truncate=False)
 # df = pd.read_hdf('./Evaluations/LvEnvEval__2d_model_23_solved23022024_mela_2d_test_4_cuda.h5', key=f'run_0')
 # plot(df, 'RL LV', scale='linear', truncate=False)
 
-main()
+combined_df = main()
 plt.show()
