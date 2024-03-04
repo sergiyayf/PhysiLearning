@@ -29,13 +29,13 @@ def plot(df, title, scale='linear', truncate=False):
     lw=2)
     return ax
 
-def get_ttps(filename, timesteps=100):
+def get_ttps(filename, timesteps=50):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
         # find the largest index with non-zero Type 0 and Type 1
         initial_size = df['Type 0'][0] + df['Type 1'][0]
-        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 2.0)]
+        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 2.4)]
         if len(nz) > 0:
             # append index when type 0 + type 1 is larger than 1.5
             ttps.append(nz.index[0])
@@ -47,7 +47,7 @@ def main():
     PC_files_list = ['data/3D_benchmarks/no_treatment/no_treatment_all.h5',
                      'data/3D_benchmarks/mtd/mtd_all.h5',
                      'data/3D_benchmarks/at100/at100_all.h5',
-                     'data/3D_benchmarks/fixed_1_4/fixed_1_4_all.h5',
+                     'data/3D_benchmarks/fixed_2_25/fixed_2_25_all.h5',
                      'data/3D_benchmarks/rl_model_on_PC/rl_model_on_PC_all.h5',
                      #'data/3D_benchmarks/random/random_all.h5'
                      ]

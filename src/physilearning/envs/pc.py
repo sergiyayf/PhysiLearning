@@ -74,7 +74,9 @@ class PcEnv(BaseEnv):
                          treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
                          )
-
+        # check supported observation spaces
+        if self.observation_type not in ['number', 'image', 'multiobs', 'mutant_position']:
+            raise ValueError('Observation type not supported')
         # PhysiCell specific
         self.domain_size = env_specific_params.get('domain_size', 1250)
         self.job_name = job_name
@@ -89,8 +91,10 @@ class PcEnv(BaseEnv):
         self.running = False
         self._start_slurm_physicell_job_step()
 
-        self.mutant_x = 0
-        self.mutant_y = 0
+        self.dimension = 2
+        self.radius = 0
+        self.growth_layer = 0
+        self.mutant_radial_position = 0
         self.mutant_normalized_position = 0
 
     def _bind_socket(self) -> None:
@@ -198,15 +202,7 @@ class PcEnv(BaseEnv):
         self.time += self.treatment_time_step
         # get tumor updated state
         message = self._receive_message()
-        if self.observation_type == 'image' or self.observation_type == 'multiobs':
-            num_wt_cells, num_mut_cells = self._get_cell_number(message)
-        elif self.observation_type == 'number':
-            num_wt_cells, num_mut_cells = self._get_cell_number(message)
-        elif self.observation_type == 'mutant_position':
-            num_wt_cells, num_mut_cells = self._get_cell_number(message)
-        else:
-            raise ValueError('Observation type not supported')
-        # num_wt_cells, num_mut_cells = self._get_cell_number(message)
+        num_wt_cells, num_mut_cells = self._get_cell_number(message)
 
         if self.normalize:
             self.state[0] = num_wt_cells * self.normalization_factor
@@ -221,21 +217,17 @@ class PcEnv(BaseEnv):
             self.image = self._get_image_obs(message, action)
             self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
             self.trajectory[:, int(self.time/self.treatment_time_step)] = self.state
-            rewards = Reward(self.reward_shaping_flag)
-            reward = rewards.get_reward(self.state, self.time/self.max_time)
 
             if self.observation_type == 'image':
                 obs = self.image
             elif self.observation_type == 'multiobs':
                 obs = {'vec': self.state, 'img': self.image}
-
+            else:
+                raise ValueError('Observation type not supported')
 
         elif self.observation_type == 'number':
             # record trajectory
             self.trajectory[:, int(self.time/self.treatment_time_step)] = self.state
-            # get the reward
-            rewards = Reward(self.reward_shaping_flag)
-            reward = rewards.get_reward(self.state, self.time/self.max_time)
 
             if self.see_resistance:
                 obs = self.state
@@ -243,24 +235,17 @@ class PcEnv(BaseEnv):
                 obs = [np.sum(self.state[0:2]), self.state[2]]
 
         elif self.observation_type == 'mutant_position':
-            self.image = self._get_image_obs(message, action)
-            num_wt, num_mut = self._get_tumor_volume_from_image(self.image)
-            radius = int(np.round(np.sqrt(num_wt) / 3.0 * np.sqrt(2) + 1))
-            dist = radius - np.sqrt(
-                (self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
-            self.mutant_normalized_position = dist / radius
-            if self.see_resistance:
-                obs = [self.state, self.mutant_normalized_position]
-            else:
-                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
-            rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
-            reward = rewards.get_reward(self.state, self.time / self.max_time)
-            self.trajectory[:, int(self.time / self.treatment_time_step)] = self.state
+            # measure tumor radius
+            cell_df = self._get_df_from_message(message)
+            self.radius = self._measure_tumor_radius(cell_df)
+
+
         else:
             raise ValueError('Observation type not supported')
 
-        ######
         info = {}
+        rewards = Reward(self.reward_shaping_flag)
+        reward = rewards.get_reward(self.state, self.time / self.max_time)
         terminate = self.terminate()
         truncate = self.truncate()
         if terminate or truncate:
@@ -332,6 +317,12 @@ class PcEnv(BaseEnv):
 
         return obs, {}
 
+    def _measure_tumor_radius(self, cell_df):
+        """
+        Measure the tumor radius
+        """
+        positions, types = front_cells(cell_df)
+        return positions
 
     def _get_tumor_volume_from_image(self, state: np.ndarray) -> tuple:
         """

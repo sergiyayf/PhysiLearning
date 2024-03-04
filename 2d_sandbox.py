@@ -112,10 +112,13 @@ def main():
 # plot(df, 'fixed 1.2 LV', scale='log', truncate=False)
 
 df = pd.read_hdf('data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5', key=f'run_1')
-plot(df, 'fixed 1.25 PC', scale='log', truncate=False)
+plot(df, 'fixed 1.25 PC', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('Evaluations/temp/LvEnvEval_2d_fixed_1_4.h5', key=f'run_1')
+# plot(df, 'fixed 1.4 LV', scale='linear', truncate=False)
 
-df = pd.read_hdf('Evaluations/temp/LvEnvEval_2d_fixed_1_4.h5', key=f'run_1')
-plot(df, 'fixed 1.4 LV', scale='linear', truncate=False)
+df = pd.read_hdf('./data/2D_benchmarks/rl_model_2902_mela/2d_rl_model_2902_mela_all.h5', key=f'run_0')
+plot(df, 'RL LV', scale='linear', truncate=False)
 
 # df = pd.read_hdf('./data/2D_benchmarks/at100/2d_at100_all.h5', key=f'run_4')
 # plot(df, 'at100 PC', scale='log', truncate=True)

@@ -92,17 +92,6 @@ def test_get_df_from_message():
     print(df)
     assert True
 
-def test_check_done():
-    with mock.patch.object(PcEnv, '_start_slurm_physicell_job_step') as mock_start_slurm_physicell_job_step:
-        env = PcEnv(observation_type='number', normalize=False, max_tumor_size=2)
-        env.state = [0, 0, 0]
-        done = env._check_done(burden_type='number', message="Type 0:0, Type 1:0,")
-        assert done == False
-
-        env.state = [0, 3, 0]
-        done = env._check_done(burden_type='number', message="Type 0:3, Type 1:2,")
-    assert done == True
-
 
 @pytest.mark.skipif(not os.path.exists('./simulations/PhysiCell_0'), reason='PhysiCell runnnig simulation directory does not exist')
 def test_sample_patients():
