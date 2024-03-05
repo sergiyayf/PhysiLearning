@@ -218,10 +218,8 @@ class Evaluation:
             df = pd.DataFrame(np.transpose(number_trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
             df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
         elif observation_type == 'mutant_position':
-            df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment', 'Mutant Position'])
+            df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment', 'Mutant Position', 'Radius'])
             df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
-            if self.env.name == 'PcEnv':
-                np.save(f'{save_name}_image_trajectory', self.image_trajectory)
 
         else:
             df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment'])

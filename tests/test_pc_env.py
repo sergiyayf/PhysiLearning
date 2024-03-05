@@ -93,6 +93,15 @@ def test_get_df_from_message():
     assert True
 
 
+def test_measure_radius():
+    with mock.patch.object(PcEnv, '_start_slurm_physicell_job_step') as mock_start_slurm_physicell_job_step:
+        env = PcEnv(observation_type='number', normalize=False, max_tumor_size=2)
+        message = ('Type 0:12 Type 1:22 t0_x: -200.0, 200.0, t0_y: -200.0, 200.0, t0_z: 0.0, 0.0,'
+                   ' t1_x: -200.0, 200.0, t1_y: 200.0, -200.0, t1_z: 0.0, 0.0, ')
+        df = env._get_df_from_message(message)
+        radius = env._measure_radius()
+    assert radius-np.sqrt(200**2+200**2) < 1.e-3
+
 @pytest.mark.skipif(not os.path.exists('./simulations/PhysiCell_0'), reason='PhysiCell runnnig simulation directory does not exist')
 def test_sample_patients():
     """

@@ -91,9 +91,9 @@ class PcEnv(BaseEnv):
         self.running = False
         self._start_slurm_physicell_job_step()
 
+        self.cell_df = pd.DataFrame()
         self.dimension = 2
         self.radius = 0
-        self.growth_layer = 0
         self.mutant_radial_position = 0
         self.mutant_normalized_position = 0
 
@@ -237,8 +237,19 @@ class PcEnv(BaseEnv):
         elif self.observation_type == 'mutant_position':
             # measure tumor radius
             cell_df = self._get_df_from_message(message)
-            self.radius = self._measure_tumor_radius(cell_df)
-
+            self.radius = self._measure_radius()
+            mutants_df = cell_df[cell_df['cell_type'] == 1]
+            mut_dist_dict= self._calculate_distances_to_front(mutants_df)
+            min_mut_dist = mut_dist_dict['min_front_distance']
+            self.mutant_normalized_position = 1 - min_mut_dist / self.radius
+            self.trajectory[0:3, int(self.time/self.treatment_time_step)] = self.state
+            self.trajectory[3, int(self.time/self.treatment_time_step)] = self.mutant_normalized_position
+            self.trajectory[4, int(self.time/self.treatment_time_step)] = self.radius
+            if self.see_resistance:
+                obs = self.state
+                obs.append(self.mutant_normalized_position)
+            else:
+                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
 
         else:
             raise ValueError('Observation type not supported')
@@ -278,7 +289,7 @@ class PcEnv(BaseEnv):
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
-        self.image = self._get_image_obs(message, 0)
+
         if self.observation_type == 'number':
             if self.see_resistance:
                 obs = self.state
@@ -287,6 +298,7 @@ class PcEnv(BaseEnv):
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
             self.trajectory[:, 0] = self.state
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
+            self.image = self._get_image_obs(message, action=0)
             self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)+1))
             self.image_trajectory[:, :, 0] = self.image[0, :, :]
@@ -301,28 +313,45 @@ class PcEnv(BaseEnv):
                 raise ValueError('Observation type not supported')
         elif self.observation_type == 'mutant_position':
 
-            num_wt, num_mut = self._get_tumor_volume_from_image(self.image)
-            radius = int(np.round(np.sqrt(num_wt) / 3.0 * np.sqrt(2) + 1))
-            dist = radius - np.sqrt(
-                (self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
-            self.mutant_normalized_position = dist / radius
+            cell_df = self._get_df_from_message(message)
+            self.radius = self._measure_radius()
+            mutants_df = cell_df[cell_df['cell_type'] == 1]
+            mut_dist_dict = self._calculate_distances_to_front(mutants_df)
+            min_mut_dist = mut_dist_dict['min_front_distance']
+            self.mutant_normalized_position = 1 - min_mut_dist / self.radius
+            self.trajectory = np.zeros(
+                (np.shape(self.state)[0]+2, int(self.max_time / self.treatment_time_step)+1))
+            self.trajectory[0:3, 0] = self.state
+            self.trajectory[3, 0] = self.mutant_normalized_position
+            self.trajectory[4, 0] = self.radius
             if self.see_resistance:
-                obs = [self.state, self.mutant_normalized_position]
+                obs = self.state
+                obs.append(self.mutant_normalized_position)
             else:
                 obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step) + 1))
-            self.trajectory[:, 0] = self.state
         else:
             raise ValueError('Observation type not supported')
 
         return obs, {}
 
-    def _measure_tumor_radius(self, cell_df):
+    def _measure_radius(self):
         """
-        Measure the tumor radius
+        Measure the tumor radius. Try getting cells in convex hull and calculate average radius. If not possible,
+        get the largest radial position of cells.
         """
-        positions, types = front_cells(cell_df)
-        return positions
+        # get front cells if colony is large enough
+        try:
+            positions, types = front_cells(self.cell_df)
+            self.cell_df.loc[self.cell_df['position_x'].isin(positions[:, 0]), 'is_at_front'] = 1
+            radius = np.mean(np.sqrt(positions[:, 0] ** 2 + positions[:, 1] ** 2 + positions[:, 2] ** 2))
+            # catch error if covex hull not possible get the largest radial position of cell.
+        except:
+            positions = self.cell_df[['position_x', 'position_y', 'position_z']].values
+            radius = np.max(np.sqrt(positions[:, 0] ** 2 + positions[:, 1] ** 2 + positions[:, 2] ** 2))
+        self.radius = radius
+
+        return radius
+
 
     def _get_tumor_volume_from_image(self, state: np.ndarray) -> tuple:
         """
@@ -346,7 +375,6 @@ class PcEnv(BaseEnv):
         type0 = re.findall(r'%s(\d+)' % "Type 0:", message)
         type1 = re.findall(r'%s(\d+)' % "Type 1:", message)
         return int(type0[0]), int(type1[0])
-
 
     def _get_df_from_message(self, message) -> pd.DataFrame:
         t0_start_x = message.find('t0_x:') + len('t0_x:')
@@ -380,12 +408,32 @@ class PcEnv(BaseEnv):
         cells = pd.concat([t0, t1])
         # set unique indices
         cells.index = range(len(cells))
-
+        self.cell_df = cells
+        self.cell_df['is_at_front'] = np.zeros_like(self.cell_df['position_x'])
         return cells
 
-    def _calculate_distance_to_front(self, df):
-        positions, types = front_cells(df)
-        return positions
+    def _calculate_distances_to_front(self, dataframe):
+        df = dataframe.copy()
+        df.loc[:,'distance_to_center'] = (np.sqrt(
+            (df['position_x']) ** 2 + (df['position_y']) ** 2 + (df['position_z']) ** 2)).values
+        front_cell_positions = self.cell_df[self.cell_df['is_at_front'] == 1][['position_x', 'position_y', 'position_z']].values
+        for i in range(len(front_cell_positions)):
+            current_dist = np.sqrt(
+                (df['position_x'] - front_cell_positions[i, 0]) ** 2 + (df['position_y'] - front_cell_positions[i, 1]) ** 2 + (
+                            df['position_z'] - front_cell_positions[i, 2]) ** 2)
+            if i == 0:
+                dist = current_dist
+            else:
+                dist = np.minimum(dist, current_dist)
+        df.loc[:,'distance_to_front_cell'] = dist
+        # calculate average and minimum distances to front_
+        avg_front_distance = np.mean(df['distance_to_front_cell'])
+        min_front_distance = np.min(df['distance_to_front_cell'])
+        avg_center_distance = np.mean(df['distance_to_center'])
+        min_center_distance = np.min(df['distance_to_center'])
+        dists = {'avg_front_distance': avg_front_distance, 'min_front_distance': min_front_distance,
+                 'avg_center_distance': avg_center_distance, 'min_center_distance': min_center_distance}
+        return dists
 
     def _get_image_obs(self, message: str, action: int) -> np.ndarray:
         """
@@ -395,37 +443,10 @@ class PcEnv(BaseEnv):
         :param message: message received from the PhysiCell simulation
         :return: image observation
         """
-        t0_start_index = message.find('t0_x:') + len('t0_x:')
-        t0_end_index = message.find('t0_y:')
-        t0_x = message[t0_start_index:t0_end_index].split(',')
-        t0_x = np.array([float(x) + self.domain_size / 2 for x in t0_x[0:-1]])
-        t0_y = message[t0_end_index + len('t0_y:'):message.find('t1_x:')].split(',')
-        t0_y = np.array([float(y) + self.domain_size / 2 for y in t0_y[0:-1]])
-
-        t1_start_index = message.find('t1_x:') + len('t1_x:')
-        t1_end_index = message.find('t1_y:')
-        t1_x = message[t1_start_index:t1_end_index].split(',')
-        t1_x = np.array([float(x) + self.domain_size / 2 for x in t1_x[0:-1]])
-        t1_y = message[t1_end_index + len('t1_y:'):].split(',')
-        t1_y = np.array([float(y) + self.domain_size / 2 for y in t1_y[0:-1]])
-
-        # normalize the coordinates to the image size
-        t0_x = np.round(t0_x * self.image_size / self.domain_size)
-        t0_y = np.round(t0_y * self.image_size / self.domain_size)
-        t1_x = np.round(t1_x * self.image_size / self.domain_size)
-        t1_y = np.round(t1_y * self.image_size / self.domain_size)
-
-        # find radially largest t1 cell
-        if len(t1_x) > 0:
-            t1_r = np.sqrt((t1_x - self.image_size/2)**2 + (t1_y - self.image_size/2)**2)
-            t1_max_r = np.max(t1_r)
-            t1_max_r_index = np.argmax(t1_r)
-            self.mutant_x = t1_x[t1_max_r_index]
-            self.mutant_y = t1_y[t1_max_r_index]
-        else:
-            self.mutant_x = self.image_size/2
-            self.mutant_y = self.image_size/2
-
+        t0_x = self.cell_df[self.cell_df['cell_type'] == 0]['position_x'].values
+        t0_y = self.cell_df[self.cell_df['cell_type'] == 0]['position_y'].values
+        t1_x = self.cell_df[self.cell_df['cell_type'] == 1]['position_x'].values
+        t1_y = self.cell_df[self.cell_df['cell_type'] == 1]['position_y'].values
         # clean the image and make the new one
         if action:
             self.image = self.drug_color*np.ones((1, self.image_size, self.image_size), dtype=np.uint8)

@@ -101,7 +101,7 @@ void create_cell_types( void )
 	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
 	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
 	
- 	cell_defaults.parameters.o2_proliferation_saturation = parameters.doubles("o2_proliferation_saturation");
+	cell_defaults.parameters.o2_proliferation_saturation = parameters.doubles("o2_proliferation_saturation");
 	cell_defaults.parameters.o2_proliferation_threshold = parameters.doubles("o2_proliferation_threshold");
 	cell_defaults.parameters.o2_necrosis_threshold = parameters.doubles("o2_necrosis_threshold");
 	cell_defaults.parameters.o2_necrosis_max = parameters.doubles("o2_necrosis_max");
@@ -160,7 +160,7 @@ void set_circular_boundary_conditions( void ) {
     std::vector<double> center_by_indices = {(double)microenvironment.mesh.x_coordinates.size()/2, (double)microenvironment.mesh.y_coordinates.size()/2, (double)microenvironment.mesh.z_coordinates.size()/2}; // find center voxel
     double system_radius = (double)microenvironment.mesh.x_coordinates.size()/2-1.0;
 	// if there are more substrates, resize accordingly
-	std::vector<double> bc_vector = {46.0, 40.0} ;
+	std::vector<double> bc_vector = {38.0, 38.0} ;
 	for (unsigned int k = 0; k< microenvironment.mesh.z_coordinates.size(); k++) {
 		// loop through y
 		for (unsigned int j = 0; j< microenvironment.mesh.y_coordinates.size() ; j++) {
@@ -549,7 +549,6 @@ int talk_to_pcenv(zmq::socket_t& socket) {
     zmq::message_t reply;
     // recieve a reply
     socket.recv(reply, zmq::recv_flags::none);
-
     // do treatment or not
     if (reply.to_string() == "Treat") {
         activate_drug_dc();

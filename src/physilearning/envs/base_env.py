@@ -158,9 +158,10 @@ class BaseEnv(Env):
 
         if self.observation_type == 'mutant_position':
             self.mutant_normalized_position = 0
-            self.trajectory = np.zeros((np.shape(self.state)[0]+1, int(self.max_time) + 1))
+            self.trajectory = np.zeros((np.shape(self.state)[0]+2, int(self.max_time) + 1))
             self.trajectory[0:3, 0] = self.state
             self.trajectory[3, 0] = self.mutant_normalized_position
+            self.trajectory[4, 0] = 0
         else:
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
             self.trajectory[:, 0] = self.state
