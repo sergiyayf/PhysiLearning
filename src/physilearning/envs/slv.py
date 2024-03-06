@@ -139,7 +139,7 @@ class SLvEnv(BaseEnv):
 
         # get the reward
         rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
-        reward += rewards.get_reward(self.state, self.time/self.max_time)
+        reward += rewards.get_reward(self.state, self.time/self.max_time, self.threshold_burden)
 
         info = {}
 

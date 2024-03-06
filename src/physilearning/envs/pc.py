@@ -12,6 +12,7 @@ from physilearning.reward import Reward
 import platform
 from physilearning.tools.xml_reader import CfgRead
 from physicell_tools.get_perifery import front_cells
+from physicell_tools.leastsquares import leastsq_circle
 
 
 class PcEnv(BaseEnv):
@@ -256,7 +257,7 @@ class PcEnv(BaseEnv):
 
         info = {}
         rewards = Reward(self.reward_shaping_flag)
-        reward = rewards.get_reward(self.state, self.time / self.max_time)
+        reward = rewards.get_reward(self.state, self.time / self.max_time, self.threshold_burden)
         terminate = self.terminate()
         truncate = self.truncate()
         if terminate or truncate:
@@ -343,7 +344,8 @@ class PcEnv(BaseEnv):
         try:
             positions, types = front_cells(self.cell_df)
             self.cell_df.loc[self.cell_df['position_x'].isin(positions[:, 0]), 'is_at_front'] = 1
-            radius = np.mean(np.sqrt(positions[:, 0] ** 2 + positions[:, 1] ** 2 + positions[:, 2] ** 2))
+            #radius = np.mean(np.sqrt(positions[:, 0] ** 2 + positions[:, 1] ** 2 + positions[:, 2] ** 2))
+            xc, yc, radius, res = leastsq_circle(positions[:, 0], positions[:, 1])
             # catch error if covex hull not possible get the largest radial position of cell.
         except:
             positions = self.cell_df[['position_x', 'position_y', 'position_z']].values
@@ -351,7 +353,6 @@ class PcEnv(BaseEnv):
         self.radius = radius
 
         return radius
-
 
     def _get_tumor_volume_from_image(self, state: np.ndarray) -> tuple:
         """
@@ -443,10 +444,13 @@ class PcEnv(BaseEnv):
         :param message: message received from the PhysiCell simulation
         :return: image observation
         """
-        t0_x = self.cell_df[self.cell_df['cell_type'] == 0]['position_x'].values
-        t0_y = self.cell_df[self.cell_df['cell_type'] == 0]['position_y'].values
-        t1_x = self.cell_df[self.cell_df['cell_type'] == 1]['position_x'].values
-        t1_y = self.cell_df[self.cell_df['cell_type'] == 1]['position_y'].values
+        if self.cell_df.empty:
+            self.cell_df = self._get_df_from_message(message)
+        t0_x = (self.cell_df[self.cell_df['cell_type'] == 0]['position_x'].values+self.domain_size/2)/self.domain_size*self.image_size
+        t0_y = (self.cell_df[self.cell_df['cell_type'] == 0]['position_y'].values+self.domain_size/2)/self.domain_size*self.image_size
+        t1_x = (self.cell_df[self.cell_df['cell_type'] == 1]['position_x'].values+self.domain_size/2)/self.domain_size*self.image_size
+        t1_y = (self.cell_df[self.cell_df['cell_type'] == 1]['position_y'].values+self.domain_size/2)/self.domain_size*self.image_size
+
         # clean the image and make the new one
         if action:
             self.image = self.drug_color*np.ones((1, self.image_size, self.image_size), dtype=np.uint8)

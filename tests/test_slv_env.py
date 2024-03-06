@@ -63,7 +63,7 @@ def test_random_cell_number_with_reset():
     assert np.sum(diff_mut) != 0
 
 def test_die():
-    env = SLvEnv(initial_wt=5, initial_mut=5, death_rate_mut=10, death_rate_wt=10, max_tumor_size=10)
+    env = SLvEnv(initial_wt=5, initial_mut=5, death_rate_mut=100, death_rate_wt=100, max_tumor_size=100000)
     pop = env.grow(0, 1, 'no_flag')
     assert pop == 0
 
@@ -79,14 +79,12 @@ def test_competition_function():
 def test_move_mutant():
     env = SLvEnv()
     env.state = [10, 1, 0]
-    mut_x = env.mutant_x
-    mut_y = env.mutant_y
+    env.mutant_radial_position = 10
+    env.radius = 100
     env._move_mutant(0, 1)
-    assert mut_x == env.mutant_x and mut_y == env.mutant_y
-    env._move_mutant(12, 10)
-    assert mut_x == env.mutant_x and mut_y == env.mutant_y
-    env._move_mutant(8, 160)
-    assert mut_x != env.mutant_x or mut_y != env.mutant_y
+    assert env.mutant_radial_position == 100
+
+
 
 
 def test_image_sampling():

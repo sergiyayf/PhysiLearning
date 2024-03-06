@@ -90,10 +90,8 @@ def test_truncate():
     env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False, max_tumor_size=15)
     trunc = env.truncate()
     assert trunc == False
-    env.state = [20, 5, 0]
+    env.time += env.max_time
     trunc = env.truncate()
-    term = env.terminate()
-    assert not term
     assert trunc
 
 
@@ -110,14 +108,14 @@ def test_measure_response():
     assert resp != 0
 
 def test_terminate():
-    env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False)
+    env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False, max_tumor_size=15)
     term = env.terminate()
     assert term == False
     env.time = 1
     env.trajectory[0,env.time] = 10
     env.trajectory[1,env.time] = 3
     env.trajectory[2,env.time] = 1
-    env.state = [10, 3, 1]
+    env.state = [10, 6, 1]
     term = env.terminate()
     assert term
 

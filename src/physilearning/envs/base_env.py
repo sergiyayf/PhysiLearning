@@ -269,7 +269,7 @@ class BaseEnv(Env):
         # response = self.measure_response()
         # if response < 0 and np.sum(self.state[0:2]) >= np.sum(self.trajectory[0:2, 0]):
         #     terminate = False
-        if self.state[0] + self.state[1] >= self.threshold_burden:
+        if np.sum(self.state[0:2]) >= 1.33*np.sum(self.trajectory[0:2, 0]):
             terminate = True
         else:
             terminate = False

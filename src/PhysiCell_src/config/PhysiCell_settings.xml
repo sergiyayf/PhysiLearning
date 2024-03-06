@@ -379,7 +379,7 @@
         <drug_death_threshold type="double" units="mmHg" description="drug concentration at which death starts">18</drug_death_threshold>
         <treatment_start type="int" units="min" description="">200160</treatment_start>
         <treatment_end type="int" units="min" description="">230040</treatment_end>
-	<mutation_rate type="double" units="none" description="">0.0</mutation_rate> <!-- 0.001 --> 
+	<mutation_rate type="double" units="none" description="">0.0</mutation_rate>  
         <number_of_resistant_cells type="int" units="none" description="">5</number_of_resistant_cells>
         <number_of_susceptible_cells type="int" units="none" description="">45</number_of_susceptible_cells>
         <treatment type="bool" units="none" description="">false</treatment>

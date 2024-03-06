@@ -159,7 +159,7 @@ class GridEnv(BaseEnv):
             self.done = self._check_done(burden_type='number', total_cell_number=num_wt_cells+num_mut_cells)
             self.trajectory[:, int(self.time / self.treatment_time_step) - 1] = self.state
             rewards = Reward(self.reward_shaping_flag)
-            reward = rewards.get_reward(self.state, self.time / self.max_time)
+            reward = rewards.get_reward(self.state, self.time / self.max_time, self.threshold_burden)
             if self.observation_type == 'image':
                 obs = self.image
             elif self.observation_type == 'multiobs':
@@ -170,7 +170,7 @@ class GridEnv(BaseEnv):
         elif self.observation_type == 'number':
             self.trajectory[:, int(self.time / self.treatment_time_step) - 1] = self.state
             rewards = Reward(self.reward_shaping_flag)
-            reward = rewards.get_reward(self.state, self.time / self.max_time)
+            reward = rewards.get_reward(self.state, self.time / self.max_time, self.threshold_burden)
             obs = self.state
             if self.time >= self.max_time or np.sum(self.state[0:2]) >= self.threshold_burden:
                 self.done = True

@@ -130,6 +130,19 @@ def main():
 # plot(df, 'RL LV', scale='linear', truncate=False)
 
 df = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_no_treat_position_test.h5', key=f'run_2')
-df_mtd = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_mtd_position_test.h5', key=f'run_1')
+df_at100 = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_at100_position_test.h5', key=f'run_1')
+df_fixed = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_fixed_1_2_position_test.h5', key=f'run_0')
+df_mtd = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_mtd_2_position_test.h5', key=f'run_1')
+
+fig, ax = plt.subplots()
+ax.plot(df_at100.index, df_at100['Radius'], label='rad')
+ax.plot(df_at100.index, df_at100['Mutant Position']*df_at100['Radius'], label='mutant')
+ax.fill_between(df_at100.index, max(df_at100['Radius'])+10, max(df_at100['Radius'])+100, where=df_at100['Treatment']==1, color='orange', label='drug')
+
+fig, ax = plt.subplots()
+ax.plot(df_fixed.index, df_fixed['Radius'], label='rad')
+ax.plot(df_fixed.index, df_fixed['Mutant Position']*df_fixed['Radius'], label='mutant')
+ax.fill_between(df_fixed.index, max(df_fixed['Radius'])+10, max(df_fixed['Radius'])+100, where=df_fixed['Treatment']==1, color='orange', label='drug')
+ax.set_title('Fixed 1.2')
 #combined_df = main()
 plt.show()
