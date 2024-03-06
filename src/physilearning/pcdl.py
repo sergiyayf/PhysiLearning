@@ -96,8 +96,8 @@ def main(jobid, port):
     print("Listener initiated")
     while True:
         message = listener.get_data()
-        listener.write_to_hdf(message=message, path=f'pcdl_data_job_{jobid}_port_{port}.h5')
-        print(listener.message_to_df(message))
+        listener.write_to_hdf(message=message, path=f'./Evaluations/sim_full_data/pcdl_data_job_{jobid}_port_{port}.h5')
+        #print(listener.message_to_df(message))
 
 
 if __name__ == '__main__':

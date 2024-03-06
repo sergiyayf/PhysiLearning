@@ -137,13 +137,14 @@ eval:
   path: './'
   model_prefix: '29022024_mela_2d_newest'
   step_to_load: '_best_reward'
-  save_name: '_2d_pc_fixed_1_2_position_test'
+  save_name: '_2d_pc_pcdl_test'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.2
   num_episodes: 5
   evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  pcdl: True
 
 
 # Predefined parameters for particular patients

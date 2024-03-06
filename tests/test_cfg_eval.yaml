@@ -40,7 +40,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'GridEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
   wrap: 0
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -49,7 +49,7 @@ env:
     channels_order: 'first'
 
   # general simulation settings
-  observation_type: 'image' # 'image' # 'number'
+  observation_type: 'number' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   max_tumor_size: 4000

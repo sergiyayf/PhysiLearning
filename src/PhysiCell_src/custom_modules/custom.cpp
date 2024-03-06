@@ -606,8 +606,8 @@ std::string get_relevant_cell_info() {
                 data.append(";");
                 data.append(pos_z);
                 data.append(";");
-                data.append(barcode);
-                data.append(";");
+                //data.append(barcode);
+                //data.append(";");
                 data.append(cell_type);
                 data.append(";");
                 data.append(elapsed_time_in_phase);

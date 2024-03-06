@@ -153,7 +153,11 @@ def evaluate():
         pc_conf = config['env']['PcEnv']['xml']
         change_pc_config(pc_conf, n_envs)
     click.echo('Evaluating')
-    eval_command = 'cd ./scripts && sbatch evaluation_job.sh'
+    if config['eval']['evaluate_on'] == 'PcEnv' and config['eval']['pcdl']:
+        eval_command = 'cd ./scripts && sbatch evaluation_pcdl_job.sh'
+    else:
+        eval_command = 'cd ./scripts && sbatch evaluation_job.sh'
+
     subprocess.Popen([eval_command], shell=True, stdout=subprocess.PIPE)
 
 
