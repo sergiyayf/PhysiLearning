@@ -80,6 +80,16 @@ env:
     growth_function_flag: 'delayed' # flag for growth function 0 - for delayed death, 1 - for immediate
     image_sampling_type: 'random' # 'dense' # 'random'
 
+  SLvEnv:
+    carrying_capacity: 3906
+    competition_wt: 1.772 #2400.0
+    competition_mut: 3.408 #0.336
+    growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
+    image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
+    mutant_distance_to_front: 120
+    cell_volume: 2144
+    growth_layer: 150
+    dimension: 2
   # note this is not yet functional
   PcEnv:
     domain_size: 1250

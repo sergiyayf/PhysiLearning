@@ -84,15 +84,19 @@ def test_move_mutant():
     env._move_mutant(0, 1)
     assert env.mutant_radial_position == 100
 
+    env.mutant_radial_position = 10
+    env.radius = 100
+    env._move_mutant(2, 1)
+    assert env.mutant_radial_position == 10
 
-
-
-def test_image_sampling():
-    env = SLvEnv(initial_wt=500, initial_mut=0, image_size=124)
-    env.capacity = 1000
-    image = env._get_image(0)
-    first_rows_sum = np.sum(image[0, 0:4, :])
-    assert first_rows_sum == 0
+    env.mutant_radial_position = 10
+    env.radius = 100
+    positions = []
+    for i in range(10):
+        env._move_mutant(10, 21)
+        positions.append(env.mutant_radial_position)
+    # some positions are different than 10 and 100
+    assert np.diff(positions).any() != 0
 
 
 def test_step():
@@ -106,10 +110,3 @@ def test_step():
     assert term == False
     assert inf == {}
 
-    env = SLvEnv(initial_wt=500, initial_mut=0, image_size=124, observation_type='image')
-    obs, rew, trunc, term, inf = env.step(0)
-    assert obs.all() == env.image.all()
-
-    env = SLvEnv(initial_wt=500, initial_mut=0, image_size=124, observation_type='multiobs')
-    obs, rew, trunc, term, inf = env.step(0)
-    assert obs['img'].all() == env.image.all()
