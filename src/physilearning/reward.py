@@ -42,6 +42,8 @@ class Reward:
                 reward += 2
         elif self.reward_shaping_flag == 7:
             reward = obs[0]
+        elif self.reward_shaping_flag == 8:
+            reward = 1 - 0.5*obs[0]
         else:
             raise ValueError("reward_shaping_flag not recognized")
 

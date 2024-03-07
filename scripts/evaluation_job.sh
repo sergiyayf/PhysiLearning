@@ -12,9 +12,9 @@
 # Number of nodes and MPI tasks per node:
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem=20000MB
+#SBATCH --mem=8000MB
 #for OpenMP:
-#SBATCH --cpus-per-task=72
+#SBATCH --cpus-per-task=40
 #
 #SBATCH --mail-type=none
 #SBATCH --mail-user=saif@mpl.mpg.de

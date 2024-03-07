@@ -85,16 +85,13 @@ class LvEnv(BaseEnv):
         else:
             self.competition = [env_specific_params.get('competition_wt', 2.),
                                 env_specific_params.get('competition_mut', 1.)]
+
         self.growth_function_flag = env_specific_params.get('growth_function_flag', 'delayed')
 
         self.trajectory[:, 0] = self.state
         self.real_step_count = 0
 
         self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
-    
-    def _set_patient_specific_competition(self, patient_id):
-        self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
-                            self.config['patients'][patient_id]['LvEnv']['competition_mut']]
 
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
@@ -168,6 +165,7 @@ class LvEnv(BaseEnv):
         Step in the environment that simulates tumor growth and treatment
         :param action: 0 - no treatment, 1 - treatment
         """
+
         # grow_tumor
         reward = 0
         self.state[2] = action
@@ -187,7 +185,7 @@ class LvEnv(BaseEnv):
                 self.state = [0, 0, 0]
 
             # get the reward
-            rewards = Reward(self.reward_shaping_flag, normalization=self.threshold_burden)
+            rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
             reward += rewards.get_reward(self.state, self.time/self.max_time)
 
         info = {}
@@ -234,6 +232,7 @@ class LvEnv(BaseEnv):
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
+
         self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)+1))
         self.trajectory[:, 0] = self.state
 
@@ -264,9 +263,8 @@ class LvEnv(BaseEnv):
         if flag == 'instant':
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-                            self.death_rate[i] -
-                            self.death_rate_treat[i] * self.state[2])
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
+                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
         # one time step delay in treatment effect
         elif flag == 'delayed':
             treat = self.state[2]

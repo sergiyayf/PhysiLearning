@@ -130,13 +130,13 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0 
   path: './'
   model_prefix: 'slvenv_sample_rew7'
   step_to_load: '_best_reward'
   save_name: 'best_reward_p111'
   # evaluation settings
-  fixed_AT_protocol: 0
+  fixed_AT_protocol: 1
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.4
   num_episodes: 100

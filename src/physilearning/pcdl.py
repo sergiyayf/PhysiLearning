@@ -70,8 +70,11 @@ class PhysiCellDataListener:
         truncated_message = message[start_idx:end_idx]
         list_of_str_params = truncated_message.split(',')
         integer_params = ['ID', 'barcode', 'type']
+        string_params = ['sequence']
         if parameter in integer_params:
             return [int(x) for x in list_of_str_params]
+        elif parameter in string_params:
+            return [x for x in list_of_str_params]
         else:
             return [float(x) for x in list_of_str_params]
 
@@ -81,8 +84,8 @@ class PhysiCellDataListener:
         """
         time = re.findall(r'\d+', message)[0]
         df = self.message_to_df(message)
-        if str(time) == '0':
-            self.run += 1
+        #if str(time) == '0':
+        self.run += 1
         df.to_hdf(path, f'run_{self.run}/time_{time}')
         return
 

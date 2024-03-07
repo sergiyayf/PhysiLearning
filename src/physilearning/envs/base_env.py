@@ -266,10 +266,11 @@ class BaseEnv(Env):
         """
         Termination condition
         """
-        response = self.measure_response()
-        if response < 0:
-            terminate = True
-        elif self.state[0] + self.state[1] >= 2 * (np.sum(self.trajectory[0:2, 0])):
+        #response = self.measure_response()
+
+        #if response < 0:
+        #    terminate = False
+        if self.state[0] + self.state[1] >= 1.33*(np.sum(self.trajectory[0:2, 0])):
             terminate = True
         else:
             terminate = False
