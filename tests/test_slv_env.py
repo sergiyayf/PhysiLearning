@@ -26,7 +26,7 @@ def test_normalization():
 
 
 def test_random_cell_number():
-    env = SLvEnv(initial_wt=5)
+    env = SLvEnv(initial_wt=5, normalize=False)
     assert env.initial_wt == 5
     env.reset()
     assert env.state[0] == 5

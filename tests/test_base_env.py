@@ -11,10 +11,12 @@ def test_construct_base_env():
 
 def test_observation_space():
     obs_space = 'number'
-    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=True)
-    box = Box(low=0, high=40, shape=(3,))
+    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=True,
+                  initial_wt=10, initial_mut=2, max_tumor_size=1.5)
+    box = Box(low=0, high=30, shape=(3,))
     assert (env.observation_space == box)
-    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=False)
+    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=False,
+                  initial_wt=10, initial_mut=2, max_tumor_size=2.0)
     box = Box(low=0, high=40, shape=(2,))
     assert (env.observation_space == box)
     obs_space = 'image'
@@ -22,7 +24,8 @@ def test_observation_space():
     box = Box(low=0, high=255, shape=(1, 124, 124), dtype=np.uint8)
     assert (env.observation_space == box)
     obs_space = 'multiobs'
-    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, image_size=124)
+    env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, image_size=124,
+                  initial_wt=10, initial_mut=2, max_tumor_size=2.0)
     box1 = Box(low=0, high=40, shape=(3,))
     box2 = Box(low=0, high=255, shape=(1, 124, 124), dtype=np.uint8)
     assert (env.observation_space['vec']==box1)
@@ -108,14 +111,14 @@ def test_measure_response():
     assert resp != 0
 
 def test_terminate():
-    env = BaseEnv(initial_wt=10, initial_mut=2, normalize=False, max_tumor_size=15)
+    env = BaseEnv(initial_wt=8, initial_mut=2, normalize=False, max_tumor_size=1.1)
     term = env.terminate()
     assert term == False
     env.time = 1
     env.trajectory[0,env.time] = 10
     env.trajectory[1,env.time] = 3
     env.trajectory[2,env.time] = 1
-    env.state = [10, 6, 1]
+    env.state = [10, 2, 1]
     term = env.terminate()
     assert term
 

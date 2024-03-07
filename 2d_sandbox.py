@@ -147,5 +147,8 @@ ax.set_title('Fixed 1.2')
 
 df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_punish_model06032204_mela_vfs_punish.h5', key=f'run_0')
 plot(df, 'LV punish', scale='linear', truncate=False)
+
+df = pd.read_hdf('./Evaluations/LvEnvEval_job_3007_2d_lv_norm_test_at100.h5', key=f'run_0')
+plot(df, 'LV norm_test', scale='linear', truncate=False)
 combined_df = main()
 plt.show()

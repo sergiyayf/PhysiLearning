@@ -280,11 +280,19 @@ class PcEnv(BaseEnv):
         self._send_message('Reset')
 
         message = self._receive_message()
-        self.initial_wt, self.initial_mut = self._get_cell_number(message)
+        initial_wt, initial_mut = self._get_cell_number(message)
 
         if self.normalize:
-            self.initial_wt *= self.normalization_factor
-            self.initial_mut *= self.normalization_factor
+            self.normalization_factor = self.normalize_to / (initial_mut + initial_wt)
+            self.threshold_burden = self.normalize_to*self.max_tumor_size
+            self.initial_wt = initial_wt * self.normalization_factor
+            self.initial_mut = initial_mut * self.normalization_factor
+
+        else:
+            self.threshold_burden = self.max_tumor_size * (initial_mut + initial_wt)
+            self.initial_wt = initial_wt
+            self.initial_mut = initial_mut
+            self.normalization_factor = 1
 
         # self._send_message('Start simulation')
 

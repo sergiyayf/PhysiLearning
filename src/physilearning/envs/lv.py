@@ -95,6 +95,7 @@ class LvEnv(BaseEnv):
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
                             self.config['patients'][patient_id]['LvEnv']['competition_mut']]
+        self.capacity = self.config['patients'][patient_id]['LvEnv']['carrying_capacity']*self.normalization_factor
 
     def _get_image(self, action: int):
         """

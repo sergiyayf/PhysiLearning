@@ -114,6 +114,7 @@ class SLvEnv(BaseEnv):
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['SLvEnv']['competition_wt'],
                             self.config['patients'][patient_id]['SLvEnv']['competition_mut']]
+        self.capacity = self.config['patients'][patient_id]['SLvEnv']['carrying_capacity'] * self.normalization_factor
     def _set_patient_specific_position(self, patient_id):
         self.mutant_distance_to_front = self.config['patients'][patient_id]['SLvEnv']['mutant_distance_to_front']
 

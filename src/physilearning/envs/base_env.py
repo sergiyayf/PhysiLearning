@@ -75,16 +75,17 @@ class BaseEnv(Env):
             raise ValueError("patient_id must be an integer or a list of integers")
         # Normalization
         self.normalize = normalize
+        self.normalize_to = normalize_to
         self.max_tumor_size = max_tumor_size
 
         if self.normalize:
-            self.normalization_factor = normalize_to / max_tumor_size
-            self.threshold_burden = normalize_to
+            self.normalization_factor = normalize_to / (initial_mut + initial_wt)
+            self.threshold_burden = normalize_to*max_tumor_size
             self.initial_wt = initial_wt * self.normalization_factor
             self.initial_mut = initial_mut * self.normalization_factor
 
         else:
-            self.threshold_burden = max_tumor_size
+            self.threshold_burden = max_tumor_size*(initial_mut + initial_wt)
             self.initial_wt = initial_wt
             self.initial_mut = initial_mut
             self.normalization_factor = 1
@@ -128,9 +129,9 @@ class BaseEnv(Env):
 
         if self.observation_type == 'number':
             if see_resistance:
-                self.observation_space = Box(low=0, high=2*self.threshold_burden, shape=(3,))
+                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(3,))
             else:
-                self.observation_space = Box(low=0, high=2*self.threshold_burden, shape=(2,))
+                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(2,))
         else:
             self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
@@ -142,7 +143,7 @@ class BaseEnv(Env):
             elif self.observation_type == 'multiobs':
                 self.observation_space = spaces.Dict(
                     spaces={
-                        "vec": spaces.Box(low=0, high=2*self.threshold_burden, shape=(3,)),
+                        "vec": spaces.Box(low=0, high=self.threshold_burden, shape=(3,)),
                         "img": spaces.Box(low=0, high=255,
                                           shape=(1, image_size, image_size),
                                           dtype=np.uint8)
@@ -150,9 +151,9 @@ class BaseEnv(Env):
                 )
             elif self.observation_type == 'mutant_position':
                 if see_resistance:
-                    self.observation_space = Box(low=-2, high=2*self.threshold_burden, shape=(4,))
+                    self.observation_space = Box(low=0, high=self.threshold_burden, shape=(4,))
                 else:
-                    self.observation_space = Box(low=-2, high=2*self.threshold_burden, shape=(3,))
+                    self.observation_space = Box(low=0, high=self.threshold_burden, shape=(3,))
             else:
                 raise NotImplementedError
 
@@ -204,8 +205,13 @@ class BaseEnv(Env):
         """
         Set parameters of presimulated patients
         """
-        self.initial_mut = self.config['patients'][self.patient_id]['initial_mut']*self.normalization_factor
-        self.initial_wt = self.config['patients'][self.patient_id]['initial_wt']*self.normalization_factor
+        self.initial_mut = self.config['patients'][self.patient_id]['initial_mut']
+        self.initial_wt = self.config['patients'][self.patient_id]['initial_wt']
+        if self.normalize:
+            self.normalization_factor = self.normalize_to / (self.initial_mut + self.initial_wt)
+            self.initial_wt = self.initial_wt * self.normalization_factor
+            self.initial_mut = self.initial_mut * self.normalization_factor
+
         self.growth_rate = [self.config['patients'][self.patient_id]['growth_rate_wt'],
                             self.config['patients'][self.patient_id]['growth_rate_mut']]
         self.death_rate = [self.config['patients'][self.patient_id]['death_rate_wt'],
@@ -269,7 +275,7 @@ class BaseEnv(Env):
         # response = self.measure_response()
         # if response < 0 and np.sum(self.state[0:2]) >= np.sum(self.trajectory[0:2, 0]):
         #     terminate = False
-        if np.sum(self.state[0:2]) >= 1.33*np.sum(self.trajectory[0:2, 0]):
+        if np.sum(self.state[0:2]) >= self.threshold_burden:
             terminate = True
         else:
             terminate = False

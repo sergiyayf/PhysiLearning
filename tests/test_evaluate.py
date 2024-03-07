@@ -14,7 +14,7 @@ def test_at_fixed(env_type):
     Test fixed adaptive therapy evaluation
     """
     EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
-    env = EnvClass(normalize_to=10, max_tumor_size=10, initial_wt=3, initial_mut=1)
+    env = EnvClass(normalize_to=4, max_tumor_size=10, initial_wt=3, initial_mut=1)
     env.observation_type = 'number'
     env.reset()
     env.step(0)
@@ -55,7 +55,7 @@ def test_zhang_et_al(env_type):
     Test Zhang et al adaptive therapy evaluation
     """
     EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
-    env = EnvClass(normalize_to=10, max_tumor_size=10, initial_wt=3, initial_mut=1, observation_type='number')
+    env = EnvClass(normalize_to=4, max_tumor_size=10, initial_wt=3, initial_mut=1, observation_type='number')
     env.observation_type = 'number'
     env.reset()
     env.step(0)
@@ -78,7 +78,7 @@ def test_image_trajectory_zhang_et_al(env_type):
     Test Zhang et al adaptive therapy evaluation with image observation
     """
     EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
-    env = EnvClass(normalize_to=10, max_tumor_size=10, initial_wt=3, initial_mut=1, observation_type='image')
+    env = EnvClass(normalize_to=4, max_tumor_size=10, initial_wt=3, initial_mut=1, observation_type='image')
     env.reset()
     env.step(0)
     env.state[0] = 1

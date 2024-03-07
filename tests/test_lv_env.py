@@ -14,7 +14,7 @@ def test_observation_space():
 
 
 def test_random_cell_number():
-    env = LvEnv(initial_wt=5)
+    env = LvEnv(initial_wt=5, normalize=False)
     assert env.initial_wt == 5
     env.reset()
     assert env.state[0] == 5
@@ -127,7 +127,7 @@ def test_patient_sampling():
 
 def test_delayed_growth_with_noise():
     np.random.seed(0)
-    env = LvEnv()
+    env = LvEnv(normalize=True, normalize_to=1000, initial_wt=1400)
     env.reset()
     pop_size = env.grow(1,0,'delayed')
     env.reset()
@@ -142,7 +142,7 @@ def test_delayed_growth_with_noise():
     assert pop_size-np.mean(pop_sizes_with_noise) < 1.e-2
 
 def test_image_sampling():
-    env = LvEnv(initial_wt=500, initial_mut=0, image_size=124)
+    env = LvEnv(normalize=False, initial_wt=500, initial_mut=0, image_size=124)
     env.capacity = 500
     env.image_sampling_type = 'random'
     image = env._get_image(0)
