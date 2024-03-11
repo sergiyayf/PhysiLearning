@@ -23,13 +23,13 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
-      n_steps: 1024
+      n_steps: 2056
       batch_size: 128
       n_epochs: 10
       verbose: 1
-      ent_coef: 0.001
-      clip_range: 0.002
-      learning_rate: 1.e-6
+      ent_coef: 0.000001
+      clip_range: 0.02
+      learning_rate: 1.e-5
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
@@ -38,9 +38,9 @@ learning:
           vf: [128, 128]
     total_timesteps: 1.e+8
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '07032024_mela_vfs_punish_cont'
+    model_save_prefix: '08032024_mela_vfs'
     load:
-      enable_loading: 1
+      enable_loading: 0
       last_model: 0
       saved_model_name: './Training/SavedModels/06032204_mela_vfs_punish_best_reward'
 
@@ -49,7 +49,7 @@ env:
   # general env settings
   type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: False
+  wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -133,17 +133,17 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: '06032204_mela_vfs_punish'
+  model_prefix: '08032024_cobra_2d_t_5_2'
   step_to_load: '_best_reward'
-  save_name: '_2d_lv_norm_test_at100'
+  save_name: '_2d_lv_cobrat_t_5_2'
   # evaluation settings
-  fixed_AT_protocol: 1
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.0
-  num_episodes: 5
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  fixed_AT_protocol: 0
+  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.25
+  num_episodes: 100
+  evaluate_on: 'same' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: True
 
 

@@ -53,9 +53,10 @@ def main():
                      'data/2D_benchmarks/fixed_1_1/2d_fixed_1_1_all.h5',
                      'data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5',
                      'data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5',
+                     'data/2D_benchmarks/v032_rl/2d_v032_rl_all.h5',
                      'data/2D_benchmarks/random/2d_random_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT50', 'PC AT100', 'PC fixed 1.1', 'PC fixed 1.2', 'PC fixed 1.25', 'PC Random']
+    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT50', 'PC AT100', 'PC fixed 1.1', 'PC fixed 1.2', 'PC fixed 1.25', 'A RL', 'PC Random']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -70,10 +71,11 @@ def main():
                         './Evaluations/LvEnvEval_2d_fixed_1_1.h5',
                         './Evaluations/LvEnvEval_2d_fixed_1_2.h5',
                         './Evaluations/LvEnvEval_2d_fixed_1_25.h5',
+                        './Evaluations/LvEnvEval__2d_rl_29022024_mela_2d_newest.h5',
                         './Evaluations/LvEnvEval_2d_random.h5'
 
                         ]
-    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT50', 'LV AT100', 'LV fixed 1.1', 'LV fixed 1.2', 'LV fixed 1.25', 'LV Random']
+    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT50', 'LV AT100', 'LV fixed 1.1', 'LV fixed 1.2', 'LV fixed 1.25', 'LV A RL', 'LV Random']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -96,59 +98,46 @@ def main():
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
     return combined_df
-# df = pd.read_hdf('data/3D_benchmarks/new_at100/at100_all.h5', key=f'run_3')
-# plot(df, 'at100 PC', scale='log')
-
-# df = pd.read_hdf('data/2D_benchmarks/fixed_1_1/2d_fixed_1_1_all.h5', key=f'run_10')
-# plot(df, 'fixed 1.1 PC', scale='log', truncate=False)
 #
-# df = pd.read_hdf('Evaluations/LvEnvEval_2d_fixed_1_1.h5', key=f'run_10')
-# plot(df, 'fixed 1.1 LV', scale='log', truncate=False)
+# df = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_no_treat_position_test.h5', key=f'run_2')
+# df_at100 = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_at100_position_test.h5', key=f'run_1')
+# df_fixed = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_fixed_1_2_position_test.h5', key=f'run_0')
+# df_mtd = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_mtd_2_position_test.h5', key=f'run_1')
 #
-# df = pd.read_hdf('data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5', key=f'run_10')
-# plot(df, 'fixed 1.2 PC', scale='log', truncate=False)
+# fig, ax = plt.subplots()
+# ax.plot(df_at100.index, df_at100['Radius'], label='rad')
+# ax.plot(df_at100.index, df_at100['Mutant Position']*df_at100['Radius'], label='mutant')
+# ax.fill_between(df_at100.index, max(df_at100['Radius'])+10, max(df_at100['Radius'])+100, where=df_at100['Treatment']==1, color='orange', label='drug')
 #
-# df = pd.read_hdf('Evaluations/LvEnvEval_2d_fixed_1_2.h5', key=f'run_10')
-# plot(df, 'fixed 1.2 LV', scale='log', truncate=False)
+# fig, ax = plt.subplots()
+# ax.plot(df_fixed.index, df_fixed['Radius'], label='rad')
+# ax.plot(df_fixed.index, df_fixed['Mutant Position']*df_fixed['Radius'], label='mutant')
+# ax.fill_between(df_fixed.index, max(df_fixed['Radius'])+10, max(df_fixed['Radius'])+100, where=df_fixed['Treatment']==1, color='orange', label='drug')
+# ax.set_title('Fixed 1.2')
 
-#df = pd.read_hdf('data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5', key=f'run_1')
-#plot(df, 'fixed 1.25 PC', scale='linear', truncate=False)
-#
-# df = pd.read_hdf('Evaluations/temp/LvEnvEval_2d_fixed_1_4.h5', key=f'run_1')
-# plot(df, 'fixed 1.4 LV', scale='linear', truncate=False)
+df = pd.read_hdf('./Evaluations/LvEnvEval_2d_fixed_1_25.h5', key=f'run_0')
+plot(df, 'LV fixed 1.25', scale='linear', truncate=False)
 
-#df = pd.read_hdf('./data/2D_benchmarks/rl_model_2902_mela/2d_rl_model_2902_mela_all.h5', key=f'run_0')
-#plot(df, 'RL LV', scale='linear', truncate=False)
+df = pd.read_hdf('./data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5', key=f'run_0')
+plot(df, 'PC fixed 1.25', scale='linear', truncate=False)
 
-# df = pd.read_hdf('./data/2D_benchmarks/at100/2d_at100_all.h5', key=f'run_4')
-# plot(df, 'at100 PC', scale='log', truncate=True)
-#
-# df = pd.read_hdf('./data/2D_benchmarks/mtd/2d_mtd_all.h5', key=f'run_3')
-# plot(df, 'mtd PC', scale='linear', truncate=True)
-#
-# df = pd.read_hdf('./Evaluations/LvEnvEval__2d_model_23_solved23022024_mela_2d_test_4_cuda.h5', key=f'run_0')
-# plot(df, 'RL LV', scale='linear', truncate=False)
+df_lv = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_5_208032024_cobra_2d_t_5_2.h5', key=f'run_0')
+plot(df_lv, 'LV cobrat t_5_2', scale='linear', truncate=False)
 
-df = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_no_treat_position_test.h5', key=f'run_2')
-df_at100 = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_at100_position_test.h5', key=f'run_1')
-df_fixed = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_fixed_1_2_position_test.h5', key=f'run_0')
-df_mtd = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_mtd_2_position_test.h5', key=f'run_1')
+df_pc = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_5_115rew08032024_cobra_2d_t_5_2.h5', key=f'run_0')
+plot(df_pc, 'PC cobrat t_5_2', scale='linear', truncate=False)
 
-fig, ax = plt.subplots()
-ax.plot(df_at100.index, df_at100['Radius'], label='rad')
-ax.plot(df_at100.index, df_at100['Mutant Position']*df_at100['Radius'], label='mutant')
-ax.fill_between(df_at100.index, max(df_at100['Radius'])+10, max(df_at100['Radius'])+100, where=df_at100['Treatment']==1, color='orange', label='drug')
+df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_9_208032024_cobra_2d_t_9_2.h5', key=f'run_0')
+plot(df, 'LV cobrat t_9_2', scale='linear', truncate=False)
 
-fig, ax = plt.subplots()
-ax.plot(df_fixed.index, df_fixed['Radius'], label='rad')
-ax.plot(df_fixed.index, df_fixed['Mutant Position']*df_fixed['Radius'], label='mutant')
-ax.fill_between(df_fixed.index, max(df_fixed['Radius'])+10, max(df_fixed['Radius'])+100, where=df_fixed['Treatment']==1, color='orange', label='drug')
-ax.set_title('Fixed 1.2')
+df = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_5_110rew08032024_cobra_2d_t_9_2.h5', key=f'run_0')
+plot(df, 'PC cobrat t_9_2', scale='linear', truncate=False)
 
-df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_punish_model06032204_mela_vfs_punish.h5', key=f'run_0')
-plot(df, 'LV punish', scale='linear', truncate=False)
+df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_10_208032024_cobra_2d_t_10_2.h5', key=f'run_0')
+plot(df, 'LV cobrat t_10_2', scale='linear', truncate=False)
 
-df = pd.read_hdf('./Evaluations/LvEnvEval_job_3007_2d_lv_norm_test_at100.h5', key=f'run_0')
-plot(df, 'LV norm_test', scale='linear', truncate=False)
+df = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_10_125rew08032024_cobra_2d_t_10_2.h5', key=f'run_0')
+plot(df, 'PC cobrat t_10_2', scale='linear', truncate=False)
+
 combined_df = main()
 plt.show()

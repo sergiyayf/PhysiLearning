@@ -265,6 +265,15 @@ class LvEnv(BaseEnv):
                            (1 + self.growth_rate[i] *
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
                             (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
+        elif flag == 'instant_with_noise':
+            new_pop_size = self.state[i] * \
+                           (1 + self.growth_rate[i] *
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
+                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
+            # add noise
+            new_pop_size += np.random.normal(0, 0.01*new_pop_size, 1)[0]
+            if new_pop_size < 10*self.normalization_factor and self.death_rate_treat[i]*self.state[2] > 0:
+                new_pop_size = 0
         # one time step delay in treatment effect
         elif flag == 'delayed':
             treat = self.state[2]
