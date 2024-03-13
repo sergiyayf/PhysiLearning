@@ -162,6 +162,7 @@ class SLvEnv(BaseEnv):
         elif self.observation_type == 'mutant_position':
             self.trajectory[0:3, self.time] = self.state
             self.trajectory[3, self.time] = self.mutant_normalized_position
+            self.trajectory[4, self.time] = self.radius
             if self.see_resistance:
                 obs = [self.state, self.mutant_normalized_position]
             else:
@@ -208,9 +209,10 @@ class SLvEnv(BaseEnv):
                 obs = [np.sum(self.state[0:2]), self.state[2]]
 
         elif self.observation_type == 'mutant_position':
-            self.trajectory = np.zeros((np.shape(self.state)[0]+1, int(self.max_time) + 1))
+            self.trajectory = np.zeros((np.shape(self.state)[0]+2, int(self.max_time) + 1))
             self.trajectory[0:3, 0] = self.state
             self.trajectory[3, 0] = self.mutant_normalized_position
+            self.trajectory[4, 0] = self.radius
             if self.see_resistance:
                 obs = [self.state, self.mutant_normalized_position]
             else:
@@ -245,7 +247,11 @@ class SLvEnv(BaseEnv):
         if dist > growth_layer:
             return (self.capacity-self.state[1])/self.state[0]
         else:
-            return (self.capacity-self.state[1])/self.state[0]*dist/growth_layer
+            comp = (self.capacity-self.state[1])/self.state[0]*(dist/growth_layer)**(1/40)
+            if comp < 1:
+                return 1
+            else:
+                return comp
 
     def _move_mutant(self, dist, growth_layer) -> float:
 
@@ -259,9 +265,9 @@ class SLvEnv(BaseEnv):
         else:
             mv = 0
 
-        if np.random.uniform() < mv:
+        if np.random.uniform() < mv**8.0:
             # move mutant on the grid radially outward
-            self.mutant_radial_position += 0.25*(3*self.cell_volume/(4*np.pi))**(1/3)
+            self.mutant_radial_position += np.random.normal(4.5*self.cell_radius*mv, 0.1*self.cell_radius) #*(3*self.cell_volume/(4*np.pi))**(1/3)
             self.mutant_normalized_position = self.mutant_radial_position/self.radius
             if self.mutant_normalized_position > 1:
                 self.mutant_normalized_position = 1
@@ -285,6 +291,8 @@ class SLvEnv(BaseEnv):
                        (1 + self.growth_rate[i] *
                         (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
                         (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
+
+        # new_pop_size += np.random.normal(0, 0.01*new_pop_size)
         if new_pop_size < 0:
             new_pop_size = 0
 

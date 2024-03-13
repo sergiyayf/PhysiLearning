@@ -23,26 +23,26 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
-      n_steps: 2056
-      batch_size: 256
+      n_steps: 256
+      batch_size: 64
       n_epochs: 10
       verbose: 1
-      ent_coef: 0.00001
-      clip_range: 0.01
-      learning_rate: 1.e-6
+      ent_coef: 0.01
+      clip_range: 0.02
+      learning_rate: 1.e-4
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
-          pi: [64, 64]
-          vf: [64, 64]
-    total_timesteps: 1.e+6
+          pi: [128, 128]
+          vf: [128, 128]
+    total_timesteps: 1.e+8
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '23022024_mela_2d_test_4_cuda_cont'
+    model_save_prefix: '1103_add_noise_no_vfs'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/23022024_mela_2d_test_4_cuda_best_reward'
+      saved_model_name: './Training/SavedModels/1103_add_noise_test_mela_1_best_reward'
 
 # Environment configuration
 env:
@@ -59,7 +59,7 @@ env:
   observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
-  max_tumor_size: 2053 # 2006 #3086 #100000 # 110000 # 4000
+  max_tumor_size: 1.33 # 2006 #3086 #100000 # 110000 # 4000
   max_time: 250 # 120
   initial_wt: 1539 #2761 # 74291 # 2761
   initial_mut: 4
@@ -71,7 +71,7 @@ env:
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
-  normalize: True
+  normalize: False
   normalize_to: 1000.0
   image_size: 124 #84 #124
   patient_sampling:
@@ -84,18 +84,19 @@ env:
     carrying_capacity: 3906 # 6500
     competition_wt: 1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
     competition_mut: 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
-    growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
+    growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
   SLvEnv:
-    carrying_capacity: 244000
-    competition_wt: 2.297 #2400.0
-    competition_mut: 4.967 #0.336
+    carrying_capacity: 3906
+    competition_wt: 1.772 #2400.0
+    competition_mut: 3.408 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 150
+    mutant_distance_to_front: 120
     cell_volume: 2144
     growth_layer: 150
+    dimension: 2
   # note this is not yet functional
   PcEnv:
     domain_size: 2050 #1250
@@ -117,13 +118,13 @@ env:
           value: 'true'
       filename_chkpt:
           parent_nodes: ['user_parameters']
-          value:  './../paper_presims/2d_patient_285/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
+          value:  './../paper_presims/patient_285/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
       treatment_time_step:
           parent_nodes: ['user_parameters']
           value: 720
       treatment_strength:
           parent_nodes: ['user_parameters']
-          value: 30.0e2 # 3.0e2 or 6.0e2
+          value: 6.0e2 # 3.0e2 or 6.0e2
 
   # LatticeBased environment settings
   GridEnv:
@@ -134,15 +135,16 @@ eval:
   most_recent: 0
   from_file: 0
   path: './'
-  model_prefix: '23022024_mela_2d_test_4_cuda'
+  model_prefix: '08032024_cobra_2d_t_5_2'
   step_to_load: '_best_reward'
-  save_name: '_2d_fixed_1_25'
+  save_name: '2d_fixed_1_2_noised'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.250
+  threshold: 1.2
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  pcdl: True
 
 
 # Predefined parameters for particular patients

@@ -23,13 +23,13 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
-      n_steps: 2056
-      batch_size: 128
+      n_steps: 256
+      batch_size: 64
       n_epochs: 10
       verbose: 1
-      ent_coef: 0.000001
+      ent_coef: 0.01
       clip_range: 0.02
-      learning_rate: 1.e-5
+      learning_rate: 1.e-4
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
@@ -38,25 +38,25 @@ learning:
           vf: [128, 128]
     total_timesteps: 1.e+8
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '08032024_mela_vfs'
+    model_save_prefix: '1103_add_noise_no_vfs'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/06032204_mela_vfs_punish_best_reward'
+      saved_model_name: './Training/SavedModels/1103_add_noise_test_mela_1_best_reward'
 
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: True
+  wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
-  observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
+  observation_type: 'mutant_position' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   max_tumor_size: 1.33 # 2006 #3086 #100000 # 110000 # 4000
@@ -71,7 +71,7 @@ env:
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
-  normalize: True
+  normalize: False
   normalize_to: 1000.0
   image_size: 124 #84 #124
   patient_sampling:
@@ -84,7 +84,7 @@ env:
     carrying_capacity: 3906 # 6500
     competition_wt: 1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
     competition_mut: 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
-    growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
+    growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
   SLvEnv:
@@ -93,9 +93,9 @@ env:
     competition_mut: 3.408 #0.336
     growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 120
+    mutant_distance_to_front: 70 # 92
     cell_volume: 2144
-    growth_layer: 150
+    growth_layer: 150 # 110
     dimension: 2
   # note this is not yet functional
   PcEnv:
@@ -133,17 +133,17 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
   model_prefix: '08032024_cobra_2d_t_5_2'
   step_to_load: '_best_reward'
-  save_name: '_2d_lv_cobrat_t_5_2'
+  save_name: '2d_slvenv_fixed_1_0'
   # evaluation settings
-  fixed_AT_protocol: 0
+  fixed_AT_protocol: 1
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.25
+  threshold: 1.0
   num_episodes: 100
-  evaluate_on: 'same' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: True
 
 

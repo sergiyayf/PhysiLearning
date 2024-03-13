@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 dir = '/home/saif/Projects/PhysiLearning/data'
-hdf5_file = path.join(dir, 'new_presims_3d.h5')
+hdf5_file = path.join(dir, '3d_full_presims_30_days.h5')
 
 
 def get_n_clones(sims):

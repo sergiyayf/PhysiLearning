@@ -115,29 +115,32 @@ def main():
 # ax.fill_between(df_fixed.index, max(df_fixed['Radius'])+10, max(df_fixed['Radius'])+100, where=df_fixed['Treatment']==1, color='orange', label='drug')
 # ax.set_title('Fixed 1.2')
 
-df = pd.read_hdf('./Evaluations/LvEnvEval_2d_fixed_1_25.h5', key=f'run_0')
-plot(df, 'LV fixed 1.25', scale='linear', truncate=False)
+df = pd.read_hdf('./Evaluations/LvEnvEval_2d_fixed_1_2.h5', key=f'run_0')
+plot(df, 'LV fixed 1.2', scale='linear', truncate=False)
+#
+df = pd.read_hdf('./data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5', key=f'run_0')
+plot(df, 'PC fixed 1.2', scale='linear', truncate=True)
+#
+# df_lv = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_5_208032024_cobra_2d_t_5_2.h5', key=f'run_0')
+# plot(df_lv, 'LV cobrat t_5_2', scale='linear', truncate=False)
+#
+# df_pc = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_5_115rew08032024_cobra_2d_t_5_2.h5', key=f'run_0')
+# plot(df_pc, 'PC cobrat t_5_2', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_9_208032024_cobra_2d_t_9_2.h5', key=f'run_0')
+# plot(df, 'LV cobrat t_9_2', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_5_110rew08032024_cobra_2d_t_9_2.h5', key=f'run_0')
+# plot(df, 'PC cobrat t_9_2', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_10_208032024_cobra_2d_t_10_2.h5', key=f'run_0')
+# plot(df, 'LV cobrat t_10_2', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_10_125rew08032024_cobra_2d_t_10_2.h5', key=f'run_0')
+# plot(df, 'PC cobrat t_10_2', scale='linear', truncate=False)
 
-df = pd.read_hdf('./data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5', key=f'run_0')
-plot(df, 'PC fixed 1.25', scale='linear', truncate=False)
-
-df_lv = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_5_208032024_cobra_2d_t_5_2.h5', key=f'run_0')
-plot(df_lv, 'LV cobrat t_5_2', scale='linear', truncate=False)
-
-df_pc = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_5_115rew08032024_cobra_2d_t_5_2.h5', key=f'run_0')
-plot(df_pc, 'PC cobrat t_5_2', scale='linear', truncate=False)
-
-df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_9_208032024_cobra_2d_t_9_2.h5', key=f'run_0')
-plot(df, 'LV cobrat t_9_2', scale='linear', truncate=False)
-
-df = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_5_110rew08032024_cobra_2d_t_9_2.h5', key=f'run_0')
-plot(df, 'PC cobrat t_9_2', scale='linear', truncate=False)
-
-df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_10_208032024_cobra_2d_t_10_2.h5', key=f'run_0')
-plot(df, 'LV cobrat t_10_2', scale='linear', truncate=False)
-
-df = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_10_125rew08032024_cobra_2d_t_10_2.h5', key=f'run_0')
-plot(df, 'PC cobrat t_10_2', scale='linear', truncate=False)
+df = pd.read_hdf('./Evaluations/LvEnvEval_job_30162d_fixed_1_2_noised.h5', key=f'run_0')
+plot(df, 'LV fixed 1.2 with noise', scale='linear', truncate=False)
 
 combined_df = main()
 plt.show()
