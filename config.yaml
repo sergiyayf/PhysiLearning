@@ -137,11 +137,11 @@ eval:
   path: './'
   model_prefix: '08032024_cobra_2d_t_5_2'
   step_to_load: '_best_reward'
-  save_name: '2d_slvenv_fixed_1_0'
+  save_name: '2d_slvenv_fixed_1_2'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.0
+  threshold: 1.2
   num_episodes: 100
   evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: True

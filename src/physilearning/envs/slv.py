@@ -247,7 +247,7 @@ class SLvEnv(BaseEnv):
         if dist > growth_layer:
             return (self.capacity-self.state[1])/self.state[0]
         else:
-            comp = (self.capacity-self.state[1])/self.state[0]*(dist/growth_layer)**(1/40)
+            comp = (self.capacity-self.state[1])/self.state[0]*(1-self.mutant_normalized_position)**(1/35)
             if comp < 1:
                 return 1
             else:
@@ -255,20 +255,22 @@ class SLvEnv(BaseEnv):
 
     def _move_mutant(self, dist, growth_layer) -> float:
 
-        if dist > growth_layer:
+        # first try deterministic move;
+        # Parameters are from the fit to velocity profile
+        L = 5.84
+        x0 = 40.85 #80.85
+        k = 0.2 #0.044
+        if dist <= 0:
             mv = 0
-        elif dist > 0:
-            mv = 1-dist/growth_layer
-        elif dist == 0:
-            mv = 0
-            self.mutant_radial_position = self.radius
         else:
-            mv = 0
-
-        if np.random.uniform() < mv**8.0:
-            # move mutant on the grid radially outward
-            self.mutant_radial_position += np.random.normal(4.5*self.cell_radius*mv, 0.1*self.cell_radius) #*(3*self.cell_volume/(4*np.pi))**(1/3)
-            self.mutant_normalized_position = self.mutant_radial_position/self.radius
+            mv = L / (1 + np.exp(k*(dist-x0)))
+            print('dist: ',dist)
+            print('mv: ',mv)
+        if np.random.rand() < (dist/growth_layer):
+            self.mutant_radial_position += np.random.normal(mv, 1) # *(3*self.cell_volume/(4*np.pi))**(1/3)
+            if (self.mutant_radial_position > self.radius):
+                self.mutant_radial_position = self.radius
+            self.mutant_normalized_position = self.mutant_radial_position / self.radius
             if self.mutant_normalized_position > 1:
                 self.mutant_normalized_position = 1
             elif self.mutant_normalized_position < 0:
@@ -284,7 +286,9 @@ class SLvEnv(BaseEnv):
             self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
         dist = (1 - self.mutant_normalized_position) * self.radius
         growth_layer = self.growth_layer
-        self._move_mutant(dist, growth_layer)
+        #don't move under treatment
+        if not self.state[2]:
+            self._move_mutant(dist, growth_layer)
         competition = self._competition_function(dist, growth_layer)
         self.competition[0] = competition
         new_pop_size = self.state[i] * \
@@ -308,11 +312,19 @@ if __name__ == "__main__": # pragma: no cover
     print('before loop')
     print('env_state', env.state)
     print(env.patient_id)
+    print('mut normalized pos', env.mutant_normalized_position)
+    print('mutant radial pos', env.mutant_radial_position)
+    print('radius', env.radius)
+    print('comp', env.competition)
     rad = []
     mut_rad_pos = []
     treat = []
-    for i in range(150):
-        if i%4 == 0:
+    wt = []
+    mut = []
+    ini_size = env.state[0]+env.state[1]
+
+    for i in range(250):
+        if obs[0] > 1.0*ini_size:
             act = 1
         else:
             act = 0
@@ -320,6 +332,8 @@ if __name__ == "__main__": # pragma: no cover
         rad.append(env.radius)
         mut_rad_pos.append(env.mutant_radial_position)
         treat.append(act)
+        wt.append(env.state[0])
+        mut.append(env.state[1])
         print('mut normalized pos',env.mutant_normalized_position)
         print('mutant radial pos', env.mutant_radial_position)
         print('radius', env.radius)
@@ -336,4 +350,15 @@ if __name__ == "__main__": # pragma: no cover
     ax.set_ylabel('radius')
     ax.legend()
     plt.show()
+
+    fig, ax = plt.subplots()
+    ax.plot(np.array(wt)+np.array(mut), label='tot')
+    ax.plot(mut, label='mut')
+    ax.fill_between(range(len(treat)), max(rad), max(rad) * 1.1, where=treat, color='red', alpha=0.3, label='treatment')
+    ax.set_xlabel('time')
+    ax.set_ylabel('number')
+    ax.set_yscale('log')
+    ax.legend()
+    plt.show()
+
     #anim.save('test.mp4', fps)
