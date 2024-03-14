@@ -83,11 +83,31 @@ def main():
 
     LV_df = pd.DataFrame(LV_dict)
 
+    SLV_files_list = ['./Evaluations/SLvEnvEval__2d_slvenv_no_treatment.h5',
+                        './Evaluations/SLvEnvEval__2d_slvenv_mtd.h5',
+                        './Evaluations/SLvEnvEval__2d_slvenv_at50.h5',
+                        './Evaluations/SLvEnvEval__2d_slvenv_at100.h5',
+                        './Evaluations/SLvEnvEval__2d_slvenv_fixed_1_1.h5',
+                        './Evaluations/SLvEnvEval__2d_slvenv_fixed_1_2.h5',
+                        './Evaluations/SLvEnvEval__2d_slvenv_fixed_1_25.h5',
+                        './Evaluations/SLvEnvEval__2d_slvenv_fixed_1_25.h5',
+                        './Evaluations/SLvEnvEval__2d_slvenv_rand.h5'
+                        ]
+    SLV_name_list = ['SLV No therapy', 'SLV MTD', 'SLV AT50', 'SLV AT100', 'SLV fixed 1.1',
+                     'SLV fixed 1.2', 'SLV fixed 1.25', 'SLV A RL', 'SLV Random']
+
+    SLV_dict = {}
+    for i in range(len(SLV_files_list)):
+        SLV_dict[SLV_name_list[i]] = get_ttps(SLV_files_list[i])
+
+    SLV_df = pd.DataFrame(SLV_dict)
+
     # combine the two dataframes
     combined = {}
     for i in range(len(PC_name_list)):
         combined[PC_name_list[i]] = PC_df[PC_name_list[i]]
         combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
+        combined[SLV_name_list[i]] = SLV_df[SLV_name_list[i]]
     combined_df = pd.DataFrame(combined)
 
     # box plot the distribution with scatter using seaborn
@@ -98,22 +118,7 @@ def main():
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
     return combined_df
-#
-# df = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_no_treat_position_test.h5', key=f'run_2')
-# df_at100 = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_at100_position_test.h5', key=f'run_1')
-# df_fixed = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_fixed_1_2_position_test.h5', key=f'run_0')
-# df_mtd = pd.read_hdf('./Evaluations/PcEnvEval_2d_pc_mtd_2_position_test.h5', key=f'run_1')
-#
-# fig, ax = plt.subplots()
-# ax.plot(df_at100.index, df_at100['Radius'], label='rad')
-# ax.plot(df_at100.index, df_at100['Mutant Position']*df_at100['Radius'], label='mutant')
-# ax.fill_between(df_at100.index, max(df_at100['Radius'])+10, max(df_at100['Radius'])+100, where=df_at100['Treatment']==1, color='orange', label='drug')
-#
-# fig, ax = plt.subplots()
-# ax.plot(df_fixed.index, df_fixed['Radius'], label='rad')
-# ax.plot(df_fixed.index, df_fixed['Mutant Position']*df_fixed['Radius'], label='mutant')
-# ax.fill_between(df_fixed.index, max(df_fixed['Radius'])+10, max(df_fixed['Radius'])+100, where=df_fixed['Treatment']==1, color='orange', label='drug')
-# ax.set_title('Fixed 1.2')
+
 
 df = pd.read_hdf('./Evaluations/LvEnvEval_2d_fixed_1_2.h5', key=f'run_0')
 plot(df, 'LV fixed 1.2', scale='linear', truncate=False)
@@ -121,26 +126,19 @@ plot(df, 'LV fixed 1.2', scale='linear', truncate=False)
 df = pd.read_hdf('./data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5', key=f'run_0')
 plot(df, 'PC fixed 1.2', scale='linear', truncate=True)
 #
-# df_lv = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_5_208032024_cobra_2d_t_5_2.h5', key=f'run_0')
-# plot(df_lv, 'LV cobrat t_5_2', scale='linear', truncate=False)
-#
-# df_pc = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_5_115rew08032024_cobra_2d_t_5_2.h5', key=f'run_0')
-# plot(df_pc, 'PC cobrat t_5_2', scale='linear', truncate=False)
-#
-# df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_9_208032024_cobra_2d_t_9_2.h5', key=f'run_0')
-# plot(df, 'LV cobrat t_9_2', scale='linear', truncate=False)
-#
-# df = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_5_110rew08032024_cobra_2d_t_9_2.h5', key=f'run_0')
-# plot(df, 'PC cobrat t_9_2', scale='linear', truncate=False)
-#
-# df = pd.read_hdf('./Evaluations/LvEnvEval__2d_lv_cobrat_t_10_208032024_cobra_2d_t_10_2.h5', key=f'run_0')
-# plot(df, 'LV cobrat t_10_2', scale='linear', truncate=False)
-#
-# df = pd.read_hdf('./Evaluations/PcEnvEval_rl_t_10_125rew08032024_cobra_2d_t_10_2.h5', key=f'run_0')
-# plot(df, 'PC cobrat t_10_2', scale='linear', truncate=False)
 
 df = pd.read_hdf('./Evaluations/LvEnvEval_job_30162d_fixed_1_2_noised.h5', key=f'run_0')
 plot(df, 'LV fixed 1.2 with noise', scale='linear', truncate=False)
+
+df = pd.read_hdf('./data/2D_benchmarks/at100/2d_at100_all.h5', key=f'run_0')
+plot(df, 'PC at100', scale='log', truncate=False)
+
+df = pd.read_hdf('./Evaluations/SLvEnvEval__2d_slvenv_mtd.h5', key=f'run_0')
+plot(df, 'SLV mtd run 0', scale='linear', truncate=False)
+
+df = pd.read_hdf('./Evaluations/SLvEnvEval__2d_slvenv_rand.h5', key=f'run_12')
+plot(df, 'SLV mtd random', scale='linear', truncate=False)
+
 
 combined_df = main()
 plt.show()

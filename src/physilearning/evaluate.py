@@ -293,9 +293,13 @@ def evaluate(config_file='config.yaml') -> None:
         fixed = general_config['eval']['fixed_AT_protocol']
         at_type = general_config['eval']['at_type']
         threshold = general_config['eval']['threshold']
+        if env_type == 'PcEnv':
+            job_name = 'job_'+str(sys.argv[1])
+        else:
+            job_name = '_'
         evaluation.run_environment(model_name='None', num_episodes=general_config['eval']['num_episodes'],
                                    save_path=os.path.join('.', 'Evaluations'),
-                                   save_name=env_type+'Eval_job_'+str(sys.argv[1])+save_name, fixed_therapy=fixed,
+                                   save_name=env_type+'Eval_'+job_name+save_name, fixed_therapy=fixed,
                                    fixed_therapy_kwargs={'at_type': at_type, 'threshold': threshold})
     return
 
