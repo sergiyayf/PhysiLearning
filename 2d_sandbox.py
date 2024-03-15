@@ -120,21 +120,24 @@ def main():
     return combined_df
 
 
-df = pd.read_hdf('./Evaluations/LvEnvEval_2d_fixed_1_2.h5', key=f'run_0')
-plot(df, 'LV fixed 1.2', scale='linear', truncate=False)
+# df = pd.read_hdf('./Evaluations/LvEnvEval_2d_fixed_1_2.h5', key=f'run_0')
+# plot(df, 'LV fixed 1.2', scale='linear', truncate=False)
+# #
+# df = pd.read_hdf('./data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5', key=f'run_0')
+# plot(df, 'PC fixed 1.2', scale='linear', truncate=True)
+# #
 #
-df = pd.read_hdf('./data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5', key=f'run_0')
-plot(df, 'PC fixed 1.2', scale='linear', truncate=True)
-#
-
-df = pd.read_hdf('./Evaluations/LvEnvEval_job_30162d_fixed_1_2_noised.h5', key=f'run_0')
-plot(df, 'LV fixed 1.2 with noise', scale='linear', truncate=False)
+# df = pd.read_hdf('./Evaluations/LvEnvEval_job_30162d_fixed_1_2_noised.h5', key=f'run_0')
+# plot(df, 'LV fixed 1.2 with noise', scale='linear', truncate=False)
 
 df = pd.read_hdf('./data/2D_benchmarks/at100/2d_at100_all.h5', key=f'run_0')
 plot(df, 'PC at100', scale='log', truncate=False)
 
 df = pd.read_hdf('./Evaluations/SLvEnvEval__2d_slvenv_mtd.h5', key=f'run_0')
 plot(df, 'SLV mtd run 0', scale='linear', truncate=False)
+
+df = pd.read_hdf('./Evaluations/SLvEnvEval__2d_slvenv_at50.h5', key=f'run_0')
+plot(df, 'SLV at50 run 0', scale='linear', truncate=False)
 
 df = pd.read_hdf('./Evaluations/SLvEnvEval__2d_slvenv_rand.h5', key=f'run_12')
 plot(df, 'SLV mtd random', scale='linear', truncate=False)

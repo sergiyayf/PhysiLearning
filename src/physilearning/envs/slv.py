@@ -164,9 +164,9 @@ class SLvEnv(BaseEnv):
             self.trajectory[3, self.time] = self.mutant_normalized_position
             self.trajectory[4, self.time] = self.radius
             if self.see_resistance:
-                obs = [self.state, self.mutant_normalized_position]
+                obs = [self.state, self.mutant_normalized_position*self.normalization_factor]
             else:
-                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
+                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position*self.normalization_factor]
         else:
             raise NotImplementedError
         terminate = self.terminate()
@@ -214,9 +214,9 @@ class SLvEnv(BaseEnv):
             self.trajectory[3, 0] = self.mutant_normalized_position
             self.trajectory[4, 0] = self.radius
             if self.see_resistance:
-                obs = [self.state, self.mutant_normalized_position]
+                obs = [self.state, self.mutant_normalized_position*self.normalization_factor]
             else:
-                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
+                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position*self.normalization_factor]
 
         else:
             raise NotImplementedError
@@ -247,9 +247,9 @@ class SLvEnv(BaseEnv):
         if dist > growth_layer:
             return (self.capacity-self.state[1])/self.state[0]
         else:
-            comp = (self.capacity-self.state[1])/self.state[0]*(1-self.mutant_normalized_position)**(1/40)
-            if comp < 1:
-                return 1
+            comp = (self.capacity-self.state[1])/self.state[0]*(1-self.mutant_normalized_position)**(1/35)
+            if comp < self.config['env'][self.name]['competition_wt']:
+                return self.config['env'][self.name]['competition_wt']
             else:
                 return comp
 
@@ -258,23 +258,24 @@ class SLvEnv(BaseEnv):
         # first try deterministic move;
         # Parameters are from the fit to velocity profile
         L = 5.84
-        x0 = 50.0 #80.85
-        k = 0.3 #0.044
+        x0 = 30.0 #80.85
+        k = 0.1 #0.044
         if dist <= 0:
-            mv = 0
+            self.mutant_normalized_position = 1
+            self.mutant_radial_position = self.radius
         else:
             mv = L / (1 + np.exp(k*(dist-x0)))
-            print('dist: ',dist)
-            print('mv: ',mv)
-        if np.random.rand() < self.mutant_normalized_position:
-            self.mutant_radial_position += mv # np.random.normal(mv, 2*mv+1) # *(3*self.cell_volume/(4*np.pi))**(1/3)
-        if (self.mutant_radial_position > self.radius):
-            self.mutant_radial_position = self.radius
-        self.mutant_normalized_position = self.mutant_radial_position / self.radius
-        if self.mutant_normalized_position > 1:
-            self.mutant_normalized_position = 1
-        elif self.mutant_normalized_position < 0:
-            self.mutant_normalized_position = 0
+            # print('dist: ',dist)
+            # print('mv: ',mv)
+            if np.random.rand() < self.mutant_normalized_position:
+                self.mutant_radial_position += np.random.normal(mv, 2*mv+1) # *(3*self.cell_volume/(4*np.pi))**(1/3)
+            if (self.mutant_radial_position > self.radius):
+                self.mutant_radial_position = self.radius
+            self.mutant_normalized_position = self.mutant_radial_position / self.radius
+            if self.mutant_normalized_position > 1:
+                self.mutant_normalized_position = 1
+            elif self.mutant_normalized_position < 0:
+                self.mutant_normalized_position = 0
 
         return self.mutant_normalized_position
 
@@ -326,11 +327,11 @@ if __name__ == "__main__": # pragma: no cover
     ini_size = env.state[0]+env.state[1]
 
     for i in range(250):
-        if obs[0] > 1.2*ini_size:
+        if obs[0] > 1.10*ini_size:
             act = 1
         else:
             act = 0
-        act=1
+        # act=1
         obs, rew, term, trunc, _ = env.step(act)
         rad.append(env.radius)
         mut_rad_pos.append(env.mutant_radial_position)
