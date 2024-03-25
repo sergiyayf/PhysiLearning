@@ -130,18 +130,14 @@ def main():
 # df = pd.read_hdf('./Evaluations/LvEnvEval_job_30162d_fixed_1_2_noised.h5', key=f'run_0')
 # plot(df, 'LV fixed 1.2 with noise', scale='linear', truncate=False)
 
-df = pd.read_hdf('./data/2D_benchmarks/at100/2d_at100_all.h5', key=f'run_0')
-plot(df, 'PC at100', scale='log', truncate=False)
+df = pd.read_hdf('./Evaluations/SLvEnvEval_p1112203_slvenv_rew_6_3.h5', key=f'run_0')
+plot(df, 'SLV p 111 ', scale='linear', truncate=False)
 
-df = pd.read_hdf('./Evaluations/SLvEnvEval__2d_slvenv_mtd.h5', key=f'run_0')
-plot(df, 'SLV mtd run 0', scale='linear', truncate=False)
+df = pd.read_hdf('./Evaluations/SLvEnvEval_p1122203_slvenv_rew_6_3.h5', key=f'run_0')
+plot(df, 'SLV p 112 ', scale='linear', truncate=False)
 
-df = pd.read_hdf('./Evaluations/SLvEnvEval__2d_slvenv_at50.h5', key=f'run_0')
-plot(df, 'SLV at50 run 0', scale='linear', truncate=False)
-
-df = pd.read_hdf('./Evaluations/SLvEnvEval__2d_slvenv_rand.h5', key=f'run_12')
-plot(df, 'SLV mtd random', scale='linear', truncate=False)
-
+df = pd.read_hdf('./Evaluations/SLvEnvEval_p1132203_slvenv_rew_6_3.h5', key=f'run_0')
+plot(df, 'SLV p 113 ', scale='linear', truncate=False)
 
 combined_df = main()
 plt.show()

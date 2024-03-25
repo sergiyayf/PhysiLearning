@@ -14,7 +14,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=3000MB
 #for OpenMP:
-#SBATCH --cpus-per-task=14
+#SBATCH --cpus-per-task=7
 #
 #SBATCH --mail-type=none
 #SBATCH --mail-user=saif@mpl.mpg.de
@@ -27,8 +27,8 @@ module load use.own
 module load physilearning
 # Export
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
-export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
+#export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # for pinning threads correctly:
-export OMP_PLACES=cores
+export OMP_PLACES=threads
 
-srun --ntasks=1 --cpus-per-task=1 --mem-per-cpu=500 python3 ./src/physilearning/evaluate.py ${SLURM_JOBID}
+srun --ntasks=1 --exclusive --cpus-per-task=2 --mem-per-cpu=500 python3 ./src/physilearning/evaluate.py ${SLURM_JOBID}
