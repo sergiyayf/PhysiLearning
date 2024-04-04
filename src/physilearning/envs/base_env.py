@@ -129,9 +129,9 @@ class BaseEnv(Env):
 
         if self.observation_type == 'number':
             if see_resistance:
-                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(3,))
-            else:
                 self.observation_space = Box(low=0, high=self.threshold_burden, shape=(2,))
+            else:
+                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(1,))
         else:
             self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
@@ -170,7 +170,7 @@ class BaseEnv(Env):
         # Other
         self.done = False
         self.reward_shaping_flag = reward_shaping_flag
-        self.fig, self.ax = plt.subplots()
+        # self.fig, self.ax = plt.subplots()
 
     @classmethod
     def from_yaml(cls, yaml_file: str, **kwargs):

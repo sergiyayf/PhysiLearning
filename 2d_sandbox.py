@@ -30,7 +30,7 @@ def plot(df, title, scale='linear', truncate=False):
     lw=2)
     return ax
 
-def get_ttps(filename, timesteps=90):
+def get_ttps(filename, timesteps=100):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
@@ -50,13 +50,20 @@ def main():
                      'data/2D_benchmarks/mtd/2d_mtd_all.h5',
                      'data/2D_benchmarks/at50/2d_at50_all.h5',
                      'data/2D_benchmarks/at100/2d_at100_all.h5',
-                     'data/2D_benchmarks/fixed_1_1/2d_fixed_1_1_all.h5',
-                     'data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5',
-                     'data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5',
-                     'data/2D_benchmarks/v032_rl/2d_v032_rl_all.h5',
-                     'data/2D_benchmarks/random/2d_random_all.h5'
+                     # 'data/2D_benchmarks/fixed_1_1/2d_fixed_1_1_all.h5',
+                     # 'data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5',
+                     #'data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5',
+                     'data/2D_benchmarks/x6/2d_x6_all.h5',
+                     # 'data/2D_benchmarks/x7_t6/2d_x7_t6_all.h5',
+                     # 'data/2D_benchmarks/x8_t3/2d_x8_t3_all.h5',
+                     #
+                     'data/2D_benchmarks/slvenv_agent_1/2d_slvenv_agent_1_all.h5',
+                     'data/2D_benchmarks/x8_t2/2d_x8_t2_all.h5',
+                     #'./Evaluations/LvEnvEval_ref72803_x7_noise_refine_7_punish20.h5',
+                     #'data/2D_benchmarks/random/2d_random_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT50', 'PC AT100', 'PC fixed 1.1', 'PC fixed 1.2', 'PC fixed 1.25', 'A RL', 'PC Random']
+    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT50', 'PC AT100', #'PC fixed 1.1', 'PC fixed 1.2',
+                    'PC x6', 'PC slvenv 1', 'PC x8 t2']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -68,14 +75,19 @@ def main():
                         './Evaluations/LvEnvEval_2d_mtd.h5',
                         './Evaluations/LvEnvEval_2d_at50.h5',
                         './Evaluations/LvEnvEval_2d_at100.h5',
-                        './Evaluations/LvEnvEval_2d_fixed_1_1.h5',
-                        './Evaluations/LvEnvEval_2d_fixed_1_2.h5',
-                        './Evaluations/LvEnvEval_2d_fixed_1_25.h5',
-                        './Evaluations/LvEnvEval__2d_rl_29022024_mela_2d_newest.h5',
-                        './Evaluations/LvEnvEval_2d_random.h5'
+                        # './Evaluations/LvEnvEval_2d_fixed_1_1.h5',
+                        # './Evaluations/LvEnvEval_2d_fixed_1_2.h5',
+                        # './Evaluations/LvEnvEval_2d_fixed_1_25.h5',
+                        './Evaluations/LvEnvEval_greatest_agent_run2703_test_x6.h5',
+                        # './Evaluations/LvEnvEval_x8_t2_l5_on_lvnoise2803_x8_cobra_t2_5.h5',
+                        #
+                        './Evaluations/LvEnvEval_x8_t7_l3_on_lvnoise3103_x8_cobra_t7_load_3.h5',
+                        './Evaluations/LvEnvEval_x8_t2_l5_on_lvnoise2803_x8_cobra_t2_5.h5',
+                        #'./Evaluations/LvEnvEval_2d_random.h5'
 
                         ]
-    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT50', 'LV AT100', 'LV fixed 1.1', 'LV fixed 1.2', 'LV fixed 1.25', 'LV A RL', 'LV Random']
+    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT50', 'LV AT100',# 'LV fixed 1.1', 'LV fixed 1.2',
+                    'LV x6 RL', 'LV x8 t7', 'LV x8 t2']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -83,18 +95,18 @@ def main():
 
     LV_df = pd.DataFrame(LV_dict)
 
-    SLV_files_list = ['./Evaluations/SLvEnvEval__2d_slvenv_no_treatment.h5',
-                        './Evaluations/SLvEnvEval__2d_slvenv_mtd.h5',
-                        './Evaluations/SLvEnvEval__2d_slvenv_at50.h5',
-                        './Evaluations/SLvEnvEval__2d_slvenv_at100.h5',
-                        './Evaluations/SLvEnvEval__2d_slvenv_fixed_1_1.h5',
-                        './Evaluations/SLvEnvEval__2d_slvenv_fixed_1_2.h5',
-                        './Evaluations/SLvEnvEval__2d_slvenv_fixed_1_25.h5',
-                        './Evaluations/SLvEnvEval__2d_slvenv_fixed_1_25.h5',
-                        './Evaluations/SLvEnvEval__2d_slvenv_rand.h5'
+    SLV_files_list = ['./Evaluations/SLvEnvEval__no_treatment.h5',
+                        './Evaluations/SLvEnvEval__mtd.h5',
+                        './Evaluations/SLvEnvEval__at50.h5',
+                        './Evaluations/SLvEnvEval__at100.h5',
+                        './Evaluations/SLvEnvEval__fixed_1_1.h5',
+                        './Evaluations/SLvEnvEval__fixed_1_2.h5',
+                        './Evaluations/SLvEnvEval__slvenv_agent_on_itself_20304_slvenv_train_try.h5',
+                        # './Evaluations/SLvEnvEval__2d_slvenv_fixed_1_25.h5',
+                        # './Evaluations/SLvEnvEval__2d_slvenv_rand.h5'
                         ]
     SLV_name_list = ['SLV No therapy', 'SLV MTD', 'SLV AT50', 'SLV AT100', 'SLV fixed 1.1',
-                     'SLV fixed 1.2', 'SLV fixed 1.25', 'SLV A RL', 'SLV Random']
+                     'SLV fixed 1.2', 'SLV agent on itself']
 
     SLV_dict = {}
     for i in range(len(SLV_files_list)):
@@ -129,15 +141,19 @@ def main():
 #
 # df = pd.read_hdf('./Evaluations/LvEnvEval_job_30162d_fixed_1_2_noised.h5', key=f'run_0')
 # plot(df, 'LV fixed 1.2 with noise', scale='linear', truncate=False)
+sims = range(1, 7)
+# for sim in sims:
+#     df = pd.read_hdf('data/2D_benchmarks/x8_t3/2d_x8_t3_all.h5', key=f'run_{sim}')
+#     plot(df, f'x8 PC {sim}', scale='log', truncate=False)
+#
+# for sim in sims:
+#     df = pd.read_hdf('./data/2D_benchmarks/x6/2d_x6_all.h5', key=f'run_{sim}')
+#     plot(df, f'x6 {sim}', scale='linear', truncate=False)
 
-df = pd.read_hdf('./Evaluations/SLvEnvEval_p1112203_slvenv_rew_6_3.h5', key=f'run_0')
-plot(df, 'SLV p 111 ', scale='linear', truncate=False)
+for sim in sims:
+    df = pd.read_hdf('./data/2D_benchmarks/slvenv_agent_1/2d_slvenv_agent_1_all.h5', key=f'run_{sim}')
+    plot(df, f'slvenv PC {sim}', scale='log', truncate=False)
 
-df = pd.read_hdf('./Evaluations/SLvEnvEval_p1122203_slvenv_rew_6_3.h5', key=f'run_0')
-plot(df, 'SLV p 112 ', scale='linear', truncate=False)
-
-df = pd.read_hdf('./Evaluations/SLvEnvEval_p1132203_slvenv_rew_6_3.h5', key=f'run_0')
-plot(df, 'SLV p 113 ', scale='linear', truncate=False)
 
 combined_df = main()
 plt.show()

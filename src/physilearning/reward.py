@@ -8,7 +8,7 @@ class Reward:
     def get_reward(self, obs, time_normalized, threshold):
         # +1 for each time step
         if np.sum(obs[:2]) >= threshold and obs[2] == 0:
-            reward = -10
+            reward = -20
         else:
             if self.reward_shaping_flag == 0:
                 reward = 1

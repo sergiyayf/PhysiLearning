@@ -192,9 +192,9 @@ class LvEnv(BaseEnv):
 
         if self.observation_type == 'number':
             if self.see_resistance:
-                obs = self.state
+                obs = self.state[0:2]
             else:
-                obs = [np.sum(self.state[0:2]), self.state[2]]
+                obs = [np.sum(self.state[0:2])]
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(action)
             self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
@@ -238,9 +238,9 @@ class LvEnv(BaseEnv):
 
         if self.observation_type == 'number':
             if self.see_resistance:
-                obs = self.state
+                obs = self.state[0:2]
             else:
-                obs = [np.sum(self.state[0:2]), self.state[2]]
+                obs = [np.sum(self.state[0:2])]
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(self.initial_drug)
             self.image_trajectory = np.zeros(
@@ -271,7 +271,10 @@ class LvEnv(BaseEnv):
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
                             (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
             # add noise
-            new_pop_size += np.random.normal(0, 0.01*new_pop_size, 1)[0]
+            rand = np.random.normal(0, 0.01*new_pop_size, 1)[0]
+            if np.abs(rand)> 2*0.01*new_pop_size:
+                rand = 2*0.01*new_pop_size*np.sign(rand)
+            new_pop_size += rand
             if new_pop_size < 10*self.normalization_factor and self.death_rate_treat[i]*self.state[2] > 0:
                 new_pop_size = 0
         # one time step delay in treatment effect

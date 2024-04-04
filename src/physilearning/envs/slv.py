@@ -108,6 +108,9 @@ class SLvEnv(BaseEnv):
         self.mutant_radial_position = self.radius - self.mutant_distance_to_front
         self.mutant_normalized_position = self.mutant_radial_position/self.radius
 
+        # fitting competition implementation
+        self.competition_exponent = 0.2 # 1/35
+
         # self.drug_color = 0
 
 
@@ -244,14 +247,17 @@ class SLvEnv(BaseEnv):
     #     self.mutant_normalized_position = dist / radius
 
     def _competition_function(self, dist, growth_layer) -> float:
-        if dist > growth_layer:
-            return (self.capacity-self.state[1])/self.state[0]
-        else:
-            comp = (self.capacity-self.state[1])/self.state[0]*(1-self.mutant_normalized_position)**(1/35)
-            if comp < self.config['env'][self.name]['competition_wt']:
-                return self.config['env'][self.name]['competition_wt']
+        if self.state[0] > 0:
+            if dist > growth_layer:
+                return (self.capacity-self.state[1])/self.state[0]
             else:
-                return comp
+                comp = (self.capacity-self.state[1])/self.state[0]*(1-self.mutant_normalized_position)**(self.competition_exponent)
+                if comp < self.config['env'][self.name]['competition_wt']:
+                    return self.config['env'][self.name]['competition_wt']
+                else:
+                    return comp
+        else:
+            return self.config['env'][self.name]['competition_wt']
 
     def _move_mutant(self, dist, growth_layer) -> float:
 
@@ -264,7 +270,8 @@ class SLvEnv(BaseEnv):
             self.mutant_normalized_position = 1
             self.mutant_radial_position = self.radius
         else:
-            mv = L / (1 + np.exp(k*(dist-x0)))
+            #mv = L / (1 + np.exp(k*(dist-x0)))
+            mv = (-0.0565 * dist + 4.76)*np.heaviside(-0.0565 * dist + 4.76, 1)
             # print('dist: ',dist)
             # print('mv: ',mv)
             if np.random.rand() < self.mutant_normalized_position:
@@ -298,7 +305,17 @@ class SLvEnv(BaseEnv):
                        (1 + self.growth_rate[i] *
                         (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
                         (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
-
+        if new_pop_size < 0:
+            new_pop_size = 0
+        if flag == 'instant':
+            pass
+        elif flag == 'instant_with_noise':
+            rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
+            if np.abs(rand) > 2 * 0.01 * new_pop_size:
+                rand = 2 * 0.01 * new_pop_size * np.sign(rand)
+            new_pop_size += rand
+            if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+                new_pop_size = 0
         # new_pop_size += np.random.normal(0, 0.01*new_pop_size)
         if new_pop_size < 0:
             new_pop_size = 0
@@ -327,7 +344,7 @@ if __name__ == "__main__": # pragma: no cover
     ini_size = env.state[0]+env.state[1]
 
     for i in range(250):
-        if obs[0] > 1.10*ini_size:
+        if obs[0] > 1.0*ini_size:
             act = 1
         else:
             act = 0
