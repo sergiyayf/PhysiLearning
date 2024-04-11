@@ -102,9 +102,9 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        './../../data/3D_benchmarks/no_treatment/no_treatment_all.h5', key='run_1')
+        '../../../data/2D_benchmarks/no_treatment/2d_no_treatment_all.h5', key='run_1')
     initial_size = df['Type 0'][0] + df['Type 1'][0]
-    truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.5)]
+    truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.33)]
     index = truncated.index[1]
     # replace df with zeros after index
     df.loc[index:, 'Type 0'] = 0
@@ -136,13 +136,14 @@ if __name__ == '__main__':
     # consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
     #               'r_r': 0.23, 'Delta_s': 3.143, 'c_s': 2.791, 'c_r': 3.381, 'K': 2.44}
     # params_fit = {'r_s': 0.077}
+    # carrying capacity defiend as number of cells in 1000 diameter spheroid
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.205, 'Delta_s': 3.156, 'c_s': 2.297, 'c_r': 4.953, 'K': 2.44}
-    params_fit = {'r_s': 0.074}
+                  'r_r': 0.221, 'c_s': 1.774, 'c_r': 3.406, 'Delta_s': 5.841, 'K': 1.27}
+    params_fit = {'r_s': 0.087}
     sigmas = [0.001]
     iteration = 1
     accuracy = 0.0
-    tune_draws = 5000
+    tune_draws = 1000
     final_draws = 10000
     while accuracy < 0.99:
         theta_fit = list(params_fit.values())
@@ -209,6 +210,6 @@ if __name__ == '__main__':
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    trace.to_json('./../../data/SI_data/3D_patient_86_no_treatment_LV_inference_Data_1_5_threshold.json')
+    trace.to_json('./../../data/SI_data/2D_patient_x_no_treatment_LV_inference_Data_1_33_threshold.json')
     plot_finals()
     plt.show()

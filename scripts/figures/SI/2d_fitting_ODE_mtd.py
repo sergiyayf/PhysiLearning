@@ -3,7 +3,7 @@ mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from physilearning.tools.abstractedodemodel import ODEModel
+from physilearning.tools.odemodel import ODEModel
 import arviz as az
 from pytensor.compile.ops import as_op
 import pytensor.tensor as pt
@@ -77,9 +77,9 @@ def plot_finals():
     theta = [mean_params[key] for key in params_fit.keys()]
     sol = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
-    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Mean)")
-    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Mean)")
-    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="--", markersize=14, label="Total (Mean)")
+    ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Mean)")
+    ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Mean)")
+    ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Mean)")
     ax.legend()
     ax.set_title('Mean parameters')
 
@@ -88,8 +88,6 @@ def plot_finals():
     median_params = {}
     for key in params_fit.keys():
         median_params[key] = trace.get('posterior').to_dataframe()[key].median()
-        print(key, median_params[key])
-
     theta = [median_params[key] for key in params_fit.keys()]
     sol = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
@@ -104,8 +102,7 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        './../../data/2D_benchmarks/mtd/2d_mtd_all.h5', key='run_4')
-    # find the index when all of the data is 0
+        '../../../data/2D_benchmarks/mtd/2d_mtd_all.h5', key='run_4')
     initial_size = df['Type 0'][0] + df['Type 1'][0]
     truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.33)]
     index = truncated.index[1]
@@ -113,9 +110,7 @@ if __name__ == '__main__':
     df.loc[index:, 'Type 0'] = 0
     df.loc[index:, 'Type 1'] = 0
     df.loc[index:, 'Treatment'] = 0
-    # normallize to the initial total value
-    df['Type 0'] = df['Type 0'] / initial_size
-    df['Type 1'] = df['Type 1'] / initial_size
+    # find the index when all of the data is 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
 
     data = pd.DataFrame(dict(
@@ -132,20 +127,22 @@ if __name__ == '__main__':
     treatment_schedule = np.roll(treatment_schedule, -1)
     # find ends of treatment
     treatment_ends = np.where(np.diff(treatment_schedule) == -1)[0]
+    # replace ends of treatment with 1
+    # treatment_schedule[treatment_ends + 1] = 1
 
     # Plot data
     fig, ax = plt.subplots(figsize=(12, 4))
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_s': 0.088, 'c_s': 0.02, 'c_r': 1.0, 'Delta_s': 5.841, 'K': 2.53}
-    params_fit = {'r_r': 0.14}
-    sigmas = [0.02]
+                  'r_s': 0.087, 'c_s': 1.774, 'c_r': 3.406, 'Delta_s': 5.841, 'K': 1.27}
+    params_fit = {'r_r': 0.216}
+    sigmas = [0.002]
     iteration = 1
     accuracy = 0.0
-    tune_draws = 100
-    final_draws = 100
-    while accuracy < 0.950:
+    tune_draws = 1000
+    final_draws = 10000
+    while accuracy < 0.99:
         theta_fit = list(params_fit.values())
         sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
                        params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
@@ -167,15 +164,14 @@ if __name__ == '__main__':
         chains = 8
         draws = tune_draws
         with model:
-            trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains,
-                                  cores=16)
+            trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
         trace = trace_DEM
         params_old = params_fit
         trace_df = az.summary(trace)
         params_new = {}
         for key in params_fit.keys():
             params_new[key] = trace_df.loc[key, 'mean']
-        sigmas = [max(trace_df.loc[key, 'sd'], 0.001) for key in params_fit.keys()]
+        sigmas = [max(trace_df.loc[key, 'sd'],0.001) for key in params_fit.keys()]
         params_fit = params_new
 
         # calculate accuracy as the difference between the old and new parameters
@@ -198,7 +194,6 @@ if __name__ == '__main__':
         )
         # Likelihood
         pm.Normal("Y_obs", mu=ode_solution, sigma=sigma, observed=data[["x", "y"]].values)
-
     # Variable list to give to the sample step parameter
     vars_list = list(model.values_to_rvs.keys())[:-1]
     sampler = "DEMetropolis"
@@ -207,7 +202,6 @@ if __name__ == '__main__':
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    #trace.to_json('./../../data/SI_data/SLV2D_patient_x_mtd_SLV_inference_Data_1_33_threshold.json')
+    trace.to_json('./../../data/SI_data/2D_patient_x_mtd_LV_inference_Data_1_33_threshold.json')
     plot_finals()
     plt.show()
-

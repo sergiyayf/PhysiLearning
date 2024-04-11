@@ -3,6 +3,7 @@ from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
 from typing import Tuple
 import time
+from scipy.stats import truncnorm
 
 
 class SLvEnv(BaseEnv):
@@ -150,9 +151,9 @@ class SLvEnv(BaseEnv):
         if self.observation_type == 'number':
             self.trajectory[:, self.time] = self.state
             if self.see_resistance:
-                obs = self.state
+                obs = self.state[0:2]
             else:
-                obs = [np.sum(self.state[0:2]), self.state[2]]
+                obs = [np.sum(self.state[0:2])]
         # elif self.observation_type == 'image' or self.observation_type == 'multiobs':
         #     self.image = self._get_image(action)
         #     self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
@@ -207,9 +208,9 @@ class SLvEnv(BaseEnv):
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
             self.trajectory[:, 0] = self.state
             if self.see_resistance:
-                obs = self.state
+                obs = self.state[0:2]
             else:
-                obs = [np.sum(self.state[0:2]), self.state[2]]
+                obs = [np.sum(self.state[0:2])]
 
         elif self.observation_type == 'mutant_position':
             self.trajectory = np.zeros((np.shape(self.state)[0]+2, int(self.max_time) + 1))
@@ -271,7 +272,8 @@ class SLvEnv(BaseEnv):
             self.mutant_radial_position = self.radius
         else:
             #mv = L / (1 + np.exp(k*(dist-x0)))
-            mv = (-0.0565 * dist + 4.76)*np.heaviside(-0.0565 * dist + 4.76, 1)
+            #mv = (-0.0565 * dist + 4.76)*np.heaviside(-0.0565 * dist + 4.76, 1)
+            mv = (-0.065 * dist + 5.007) * np.heaviside(-0.065 * dist + 5.007, 1)
             # print('dist: ',dist)
             # print('mv: ',mv)
             if np.random.rand() < self.mutant_normalized_position:
@@ -301,22 +303,41 @@ class SLvEnv(BaseEnv):
         self._move_mutant(dist, growth_layer)
         competition = self._competition_function(dist, growth_layer)
         self.competition[0] = competition
-        new_pop_size = self.state[i] * \
-                       (1 + self.growth_rate[i] *
-                        (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
-                        (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
-        if new_pop_size < 0:
+
+        ###########
+        # trying out exponential resistance.
+        if i == 0:
+            new_pop_size = self.state[i] * \
+                           (1 + self.growth_rate[i] *
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
+                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
+        else:
+            #
+            if self.state[0] > self.state[1]:
+                growth_rate = 0.139*np.exp(-0.0173*dist) - 0.033
+                #growth_rate = (-0.000998 * dist + 0.1227) * np.heaviside(-0.000998 * dist + 0.1227, 1) - 0.033
+            else:
+                growth_rate = self.growth_rate[i]
+            #growth_rate = 0.168*np.exp(-0.0148*dist) #- 0.033
+            # new_pop_size = self.state[i] * \
+            #                (1 + growth_rate *
+            #                 (1 - (self.state[i] + self.state[j]) / self.capacity) *
+            #                 (1 - self.death_rate_treat[i] * self.state[2]) - 0.033)
+            new_pop_size = self.state[i] * (1+growth_rate)
+        if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
             new_pop_size = 0
+        #new_pop_size += np.random.normal(0, 0.01*new_pop_size)
+
+        ################
+
         if flag == 'instant':
             pass
         elif flag == 'instant_with_noise':
-            rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
-            if np.abs(rand) > 2 * 0.01 * new_pop_size:
-                rand = 2 * 0.01 * new_pop_size * np.sign(rand)
+            rand = truncnorm(loc=0, scale=0.00528*new_pop_size, a=-0.02/0.00528, b=0.02/0.00528).rvs()
             new_pop_size += rand
             if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
                 new_pop_size = 0
-        # new_pop_size += np.random.normal(0, 0.01*new_pop_size)
+
         if new_pop_size < 0:
             new_pop_size = 0
 
@@ -344,11 +365,11 @@ if __name__ == "__main__": # pragma: no cover
     ini_size = env.state[0]+env.state[1]
 
     for i in range(250):
-        if obs[0] > 1.0*ini_size:
+        if obs[0] > 1.20*ini_size:
             act = 1
         else:
             act = 0
-        # act=1
+        #act=1
         obs, rew, term, trunc, _ = env.step(act)
         rad.append(env.radius)
         mut_rad_pos.append(env.mutant_radial_position)
@@ -364,22 +385,32 @@ if __name__ == "__main__": # pragma: no cover
     print(i)
     from matplotlib import pyplot as plt
     fig, ax = plt.subplots()
+    norm = rad[0]
+    rad = rad / norm
+    mut_rad_pos = mut_rad_pos / norm
+    mut0 = mut[0]
+    wt0 = wt[0]
+    mut = np.array(mut)/(mut0+wt0)
+    wt = np.array(wt)/(mut0+wt0)
     ax.plot(rad, label='radius')
     ax.plot(mut_rad_pos, label='mutant_radial_position')
-    ax.fill_between(range(len(treat)), max(rad), max(rad) * 1.1, where=treat, color='red', alpha=0.3, label='treatment')
+    ax.plot(mut, label='mut', color='red')
+    ax.fill_between(range(len(treat)), max(rad), max(rad) * 1.1, where=treat, color='orange', alpha=0.3, label='treatment')
     ax.set_xlabel('time')
     ax.set_ylabel('radius')
     ax.legend()
+    ax.set_xlim(0, 250)
     plt.show()
 
     fig, ax = plt.subplots()
     ax.plot(np.array(wt)+np.array(mut), label='tot')
     ax.plot(mut, label='mut')
-    ax.fill_between(range(len(treat)), max(rad), max(rad) * 1.1, where=treat, color='red', alpha=0.3, label='treatment')
+    ax.fill_between(range(len(treat)), max(rad), max(rad) * 1.1, where=treat, color='orange', alpha=0.3, label='treatment')
     ax.set_xlabel('time')
     ax.set_ylabel('number')
     ax.set_yscale('log')
     ax.legend()
+    ax.set_xlim(0, 250)
     plt.show()
 
     #anim.save('test.mp4', fps)

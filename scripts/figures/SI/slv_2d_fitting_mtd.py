@@ -27,7 +27,7 @@ def plot_data(ax, lw=2, title="Initial data"):
     return ax
 
 def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
-    cols = ['c_s']
+    cols = ['r_r']
     row = trace_df.iloc[row_idx, :][cols].values
 
     theta = row
@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        './../../data/2D_benchmarks/at100/2d_at100_all.h5', key='run_29')
+        '../../../data/2D_benchmarks/mtd/2d_mtd_all.h5', key='run_4')
     # find the index when all of the data is 0
     initial_size = df['Type 0'][0] + df['Type 1'][0]
     truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.33)]
@@ -138,75 +138,63 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.216, 'K': 2.53, 'r_s': 0.087, 'c_r': 3.408, 'Delta_s': 5.837}
-    params_fit = {'c_s': 0.07}
-    sigmas = [0.01]
+                  'r_s': 0.088, 'c_s': 0.02, 'c_r': 1.0, 'Delta_s': 5.841, 'K': 2.53}
+    params_fit = {'r_r': 0.14}
+    sigmas = [0.02]
     iteration = 1
     accuracy = 0.0
-    tune_draws = 1000
-    final_draws = 1000
-    while accuracy < 0.90:
+    tune_draws = 100
+    final_draws = 100
+    while accuracy < 0.950:
         theta_fit = list(params_fit.values())
-
-        sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
-                        params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
+        sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
+                       params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
 
         with pm.Model() as model:
             # Priors
-            c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=0.0001, upper=1.0)
-            # c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=0.0, upper=10.0)
-            # Delta_s = pm.Normal("Delta_s", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2])
-
+            r_r = pm.Normal("r_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0])
             sigma = pm.HalfNormal("sigma", 10)
-
             # Ode solution function
             ode_solution = pytensor_forward_model_matrix(
-                pm.math.stack([c_s])
+                pm.math.stack([r_r])
             )
-
             # Likelihood
             pm.Normal("Y_obs", mu=ode_solution, sigma=sigma, observed=data[["x", "y"]].values)
 
         # Variable list to give to the sample step parameter
         vars_list = list(model.values_to_rvs.keys())[:-1]
-
         sampler = "DEMetropolis"
         chains = 8
         draws = tune_draws
         with model:
-            trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
+            trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains,
+                                  cores=16)
         trace = trace_DEM
         params_old = params_fit
         trace_df = az.summary(trace)
         params_new = {}
         for key in params_fit.keys():
             params_new[key] = trace_df.loc[key, 'mean']
-        sigmas = [max(trace_df.loc[key, 'sd'],0.001) for key in params_fit.keys()]
+        sigmas = [max(trace_df.loc[key, 'sd'], 0.001) for key in params_fit.keys()]
         params_fit = params_new
 
         # calculate accuracy as the difference between the old and new parameters
         accuracy_list = []
         for key in params_fit.keys():
-            accuracy_list.append(1-abs(params_old[key] - params_new[key])/params_old[key])
+            accuracy_list.append(1 - abs(params_old[key] - params_new[key]) / params_old[key])
         accuracy = np.min(accuracy_list)
         print("Accuracy: ", accuracy)
 
         print("Iteration: ", iteration)
-        iteration+=1
-
-
-    # final
+        iteration += 1
     theta_fit = list(params_fit.values())
     with pm.Model() as model:
         # Priors
-        c_s = pm.TruncatedNormal("c_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=0.0001, upper=1.0)
-        # c_r = pm.Normal("c_r", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1])
-        # Delta_s = pm.Normal("Delta_s", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2])
+        r_r = pm.Normal("r_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0])
         sigma = pm.HalfNormal("sigma", 10)
-
         # Ode solution function
         ode_solution = pytensor_forward_model_matrix(
-            pm.math.stack([c_s])
+            pm.math.stack([r_r])
         )
         # Likelihood
         pm.Normal("Y_obs", mu=ode_solution, sigma=sigma, observed=data[["x", "y"]].values)
@@ -219,7 +207,7 @@ if __name__ == '__main__':
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    #trace.to_json('./../../data/SI_data/SLV2D_patient_x_at100_SLV_inference_Data_1_33_threshold.json')
+    #trace.to_json('./../../data/SI_data/SLV2D_patient_x_mtd_SLV_inference_Data_1_33_threshold.json')
     plot_finals()
     plt.show()
 

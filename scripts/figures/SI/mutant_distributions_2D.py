@@ -8,8 +8,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-dir = '/home/saif/Projects/PhysiLearning/data'
-hdf5_file = path.join(dir, '3d_full_presims_30_days.h5')
+dir = '/data'
+hdf5_file = path.join(dir, 'presims_2d.h5')
 
 
 def get_n_clones(sims):
@@ -74,7 +74,7 @@ def total_cell_count(sims):
 
 if __name__ == '__main__':
 
-    simulations = range(1, 101)
+    simulations = range(1, 1001)
 
     n_clones= get_n_clones(simulations)
     R, R_std = radius(simulations)
@@ -92,6 +92,7 @@ if __name__ == '__main__':
     median_dist = np.median(all_dists_to_front)
     closest_median_sim = np.nanargmin(np.abs(np.array(min_clone) - median_dist))
     print('Simulation with closest median distance to front: ', closest_median_sim)
+    print('Total cells in this simulation: ', total_cells[closest_median_sim])
 
     # Same for 25th and 75th percentile
     percentile_25 = np.percentile(all_dists_to_front, 25)
