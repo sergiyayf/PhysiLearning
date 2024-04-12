@@ -94,31 +94,6 @@ plot(df, 'at100 PC', scale='linear')
 
 df = pd.read_hdf('Evaluations/LvEnvEval_3d_fixed_1_9.h5', key=f'run_0')
 plot(df, 'LV fixed 1.9', scale='linear')
-#
-# df = pd.read_hdf('data/3D_benchmarks/new_mtd/mtd_all.h5', key=f'run_0')
-# plot(df, 'mtd PC')
-# 
-# df = pd.read_hdf('Evaluations/LvEnvEvalat100_1_5.h5', key=f'run_0')
-# plot(df, 'LV at100', scale='log')
-
-# df = pd.read_hdf('Evaluations/LvEnvEval_raven_cont16022024_3D_LV_raven_load.h5', key=f'run_0')
-# plot(df, 'LV raven cont')
-# #
-# df = pd.read_hdf('Evaluations/LvEnvEval_raven_run_815022024_3D_LV_raven_load.h5', key=f'run_10')
-# plot(df, 'LV policy nt')
-
-# df = pd.read_hdf('data/raven_run_logs/new_run_22/Evaluations/LvEnvEval_raven_22_run16022024_3D_LV_raven_rew_0.h5','run_20')
-# plot(df, 'LV policy 22')
-#
-# df = pd.read_hdf('data/raven_run_logs/new_run_23/Evaluations/LvEnvEval_raven_23_run16022024_3D_LV_raven_rew_0.h5','run_20')
-# plot(df, 'LV policy 23')
-#
-# df = pd.read_hdf('data/raven_run_logs/cont_22_run_4/Evaluations/LvEnvEval_cont_4_rav19022024_run_22_load_4.h5','run_0')
-# plot(df, 'LV cont 22 1 ')
-#
-# df = pd.read_hdf('data/raven_run_logs/cont_22_run_4/Evaluations/LvEnvEval_cont_4_rav19022024_run_22_load_4.h5','run_20')
-# plot(df, 'LV cont 22 2')
-
 
 main()
 plt.show()

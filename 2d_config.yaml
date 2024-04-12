@@ -1,4 +1,4 @@
-# Version 0.3.4
+# Version 0.3.5
 # global configuration
 global:
   machine: 'mela' # 'mela' # 'raven'
@@ -23,9 +23,9 @@ learning:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
-      n_steps: 256
+      n_steps: 4086
       batch_size: 64
-      n_epochs: 10
+      n_epochs: 15
       verbose: 1
       ent_coef: 0.01
       clip_range: 0.02
@@ -149,116 +149,6 @@ eval:
 
 # Predefined parameters for particular patients
 patients:
-  1:
-    initial_wt: 2766
-    initial_mut: 0
-    growth_rate_wt: 0.231 # 0.0175
-    growth_rate_mut: 0.343 # 0.0175
-    death_rate_wt: 0.00231
-    death_rate_mut: 0.00343
-    treat_death_rate_wt: 0.333 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 6500
-      competition_wt: 1.423 #2400.0
-      competition_mut: 0.391
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_1/final'
-    SLvEnv:
-      mutant_distance_to_front: 20
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-
-  4:
-    initial_wt: 2961
-    initial_mut: 1
-    growth_rate_wt: 0.285 # 0.0175
-    growth_rate_mut: 0.313 # 0.0175
-    death_rate_wt: 0.00285
-    death_rate_mut: 0.00313
-    treat_death_rate_wt: 0.384 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 6500
-      competition_wt: 1.694 #2400.0
-      competition_mut: 0.485
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_4/final'
-    SLvEnv:
-      mutant_distance_to_front: 20
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-
-  55:
-    initial_wt: 2558
-    initial_mut: 3
-    growth_rate_wt: 0.223 # 0.0175
-    growth_rate_mut: 0.431 # 0.0175
-    death_rate_wt: 0.00223
-    death_rate_mut: 0.00431
-    treat_death_rate_wt: 0.237 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 6500
-      competition_wt: 0.013 #2400.0
-      competition_mut: 0.363
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_55/final'
-    SLvEnv:
-      mutant_distance_to_front: 20
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-
-  80:
-    initial_wt: 2761
-    initial_mut: 1
-    growth_rate_wt: 0.29 # 0.0175
-    growth_rate_mut: 0.438 # 0.0175
-    death_rate_wt: 0.0029
-    death_rate_mut: 0.00438
-    treat_death_rate_wt: 0.397 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 6500
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_80/final'
-    SLvEnv:
-      mutant_distance_to_front: 20
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-
-  93:
-    initial_wt: 2807
-    initial_mut: 1
-    growth_rate_wt: 0.255 # 0.0175
-    growth_rate_mut: 0.448 # 0.0175
-    death_rate_wt: 0.00255
-    death_rate_mut: 0.00448
-    treat_death_rate_wt: 0.366 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 6500
-      competition_wt: 2.265 #2400.0
-      competition_mut: 0.135
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_93/final'
-    SLvEnv:
-      mutant_distance_to_front: 20
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-
   111:
     initial_wt: 2761
     initial_mut: 1

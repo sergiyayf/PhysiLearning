@@ -154,15 +154,7 @@ class SLvEnv(BaseEnv):
                 obs = self.state[0:2]
             else:
                 obs = [np.sum(self.state[0:2])]
-        # elif self.observation_type == 'image' or self.observation_type == 'multiobs':
-        #     self.image = self._get_image(action)
-        #     self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
-        #     if self.observation_type == 'image':
-        #         obs = self.image
-        #     elif self.observation_type == 'multiobs':
-        #         obs = {'vec': self.state, 'img': self.image}
-        #     else:
-        #         raise NotImplementedError
+
         elif self.observation_type == 'mutant_position':
             self.trajectory[0:3, self.time] = self.state
             self.trajectory[3, self.time] = self.mutant_normalized_position
@@ -228,12 +220,10 @@ class SLvEnv(BaseEnv):
         return obs, {}
 
     def _move_mutant(self, dist, growth_layer) -> float:
+        """
+        Move the mutant cell towards the front of the tumor depending on the distance from the front
+        """
 
-        # first try deterministic move;
-        # Parameters are from the fit to velocity profile
-        L = 5.84
-        x0 = 30.0 #80.85
-        k = 0.1 #0.044
         if dist <= 0:
             self.mutant_normalized_position = 1
             self.mutant_radial_position = self.radius
@@ -241,8 +231,7 @@ class SLvEnv(BaseEnv):
             #mv = L / (1 + np.exp(k*(dist-x0)))
             #mv = (-0.0565 * dist + 4.76)*np.heaviside(-0.0565 * dist + 4.76, 1)
             mv = (-0.065 * dist + 5.007) * np.heaviside(-0.065 * dist + 5.007, 1)
-            # print('dist: ',dist)
-            # print('mv: ',mv)
+
             if np.random.rand() < self.mutant_normalized_position:
                 self.mutant_radial_position += np.random.normal(mv, 2*mv+1) # *(3*self.cell_volume/(4*np.pi))**(1/3)
             if (self.mutant_radial_position > self.radius):
@@ -261,7 +250,7 @@ class SLvEnv(BaseEnv):
             self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_area / np.pi) ** (1 / 2)
         elif self.dimension == 3:
             self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
-        #dist = (1 - self.mutant_normalized_position) * self.radius
+
         if self.mutant_normalized_position >= 1:
             dist = 0
         else:
@@ -269,8 +258,6 @@ class SLvEnv(BaseEnv):
         growth_layer = self.growth_layer
         self._move_mutant(dist, growth_layer)
 
-        ###########
-        # trying out exponential resistance.
         if i == 0:
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
@@ -279,21 +266,15 @@ class SLvEnv(BaseEnv):
         else:
             #
             if self.state[0] > self.state[1]:
+                # fitted growth rate minus base death rate
                 growth_rate = 0.139*np.exp(-0.0173*dist) - 0.033
                 #growth_rate = (-0.000998 * dist + 0.1227) * np.heaviside(-0.000998 * dist + 0.1227, 1) - 0.033
             else:
                 growth_rate = self.growth_rate[i]
-            #growth_rate = 0.168*np.exp(-0.0148*dist) #- 0.033
-            # new_pop_size = self.state[i] * \
-            #                (1 + growth_rate *
-            #                 (1 - (self.state[i] + self.state[j]) / self.capacity) *
-            #                 (1 - self.death_rate_treat[i] * self.state[2]) - 0.033)
+
             new_pop_size = self.state[i] * (1+growth_rate)
         if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
             new_pop_size = 0
-        #new_pop_size += np.random.normal(0, 0.01*new_pop_size)
-
-        ################
 
         if flag == 'instant':
             pass
@@ -310,18 +291,12 @@ class SLvEnv(BaseEnv):
 
 
 if __name__ == "__main__": # pragma: no cover
+    # for debugging the environment and checking its behavior under various treatments without job submission
     # set random seed
     np.random.seed(int(time.time()))
     env = SLvEnv.from_yaml("../../../config.yaml")
     env.reset()
     obs = [0]
-    print('before loop')
-    print('env_state', env.state)
-    print(env.patient_id)
-    print('mut normalized pos', env.mutant_normalized_position)
-    print('mutant radial pos', env.mutant_radial_position)
-    print('radius', env.radius)
-    print('comp', env.competition)
     rad = []
     mut_rad_pos = []
     treat = []
@@ -341,13 +316,9 @@ if __name__ == "__main__": # pragma: no cover
         treat.append(act)
         wt.append(env.state[0])
         mut.append(env.state[1])
-        print('mut normalized pos',env.mutant_normalized_position)
-        print('mutant radial pos', env.mutant_radial_position)
-        print('radius', env.radius)
-        print('comp', env.competition)
         if term or trunc:
             break
-    print(i)
+
     from matplotlib import pyplot as plt
     fig, ax = plt.subplots()
     norm = rad[0]

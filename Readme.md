@@ -1,7 +1,7 @@
 # PhysiLearning
 [![CI](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml)
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
-![version](https://img.shields.io/badge/version-0.3.4-blue)
+![version](https://img.shields.io/badge/version-0.3.5-blue)
 
 <img src="data/images/RL_treatment.gif" width="250" height="250" />
 
@@ -98,6 +98,11 @@ pytest tests/test_evaluate.py
 
 
 ## Changelog
+#### 0.3.5 Major Changes
+- Implement corrected abstracted model with position dependent mutant growth rate and motion 
+- Remove treatment application from agent's observation 
+- Change noise to truncated Gaussian, fitted to PhysiCell simulations. 
+
 #### 0.3.4 Major Changes
 - Normalize observation to initial instead of final value
 

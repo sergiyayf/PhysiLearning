@@ -7,9 +7,9 @@ author = 'Serhii'
 email = 'serhii.aif@mpl.mpg.de'
 description = 'A package for reinforcement learning in adaptive therapy'
 name = 'physilearning'
-year = '2023'
+year = '2024'
 url = ''
-version = '0.3.1'
+version = '0.3.5'
 
 setup(
     name=name,
