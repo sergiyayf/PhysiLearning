@@ -134,17 +134,17 @@ env:
 eval:
   most_recent: 0
   from_file: 1
-  path: './'
-  model_prefix: '0904_slvenv_fitted_number_train_t2'
+  path: './data/newer_trains_savings'
+  model_prefix: '1104_s1_t5'
   step_to_load: '_best_reward'
-  save_name: 'slv_t2'
+  save_name: '_'
   # evaluation settings
   fixed_AT_protocol: 0
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.50
+  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.25
   num_episodes: 100
-  evaluate_on: 'same' # 'PcEnv' # 'LvEnv' # 'GridEnv'
-  pcdl: True
+  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  pcdl: False
 
 
 # Predefined parameters for particular patients

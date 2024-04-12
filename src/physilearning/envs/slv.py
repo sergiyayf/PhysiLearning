@@ -227,39 +227,6 @@ class SLvEnv(BaseEnv):
 
         return obs, {}
 
-    # def _set_initial_mutant_positions(self):
-    #     # TODO: change this to more accurate radius calculation, without image size
-    #     # TODO: Make sure normalized mutant position is non-negative
-    #
-    #     radius = np.sqrt(np.sum(self.state[0:2])*self.cell_area/np.pi)
-    #     self.mutant_radial_position
-    #     ini_num_wt_to_sample = np.round(self.image_size * self.image_size * \
-    #                                     self.initial_wt / (self.capacity))
-    #     ini_num_mut_to_sample = np.round(self.image_size * self.image_size * \
-    #                                      self.initial_mut / (self.capacity))
-    #     large_radius = int(np.round(np.sqrt(ini_num_wt_to_sample + ini_num_mut_to_sample) / 3.0 * np.sqrt(2) + 1))
-    #     mutant_radius = large_radius - self.mutant_distance_to_front
-    #     if self.time == 0:
-    #         self.angle = np.random.uniform(0, 2 * np.pi)
-    #     self.mutant_x = np.round(self.image_size / 2 + mutant_radius * np.cos(self.angle))
-    #     self.mutant_y = np.round(self.image_size / 2 + mutant_radius * np.sin(self.angle))
-    #     radius = int(np.round(np.sqrt(ini_num_wt_to_sample) / 3.0 * np.sqrt(2) + 1))
-    #     dist = radius - np.sqrt((self.mutant_x - self.image_size / 2) ** 2 + (self.mutant_y - self.image_size / 2) ** 2)
-    #     self.mutant_normalized_position = dist / radius
-
-    def _competition_function(self, dist, growth_layer) -> float:
-        if self.state[0] > 0:
-            if dist > growth_layer:
-                return (self.capacity-self.state[1])/self.state[0]
-            else:
-                comp = (self.capacity-self.state[1])/self.state[0]*(1-self.mutant_normalized_position)**(self.competition_exponent)
-                if comp < self.config['env'][self.name]['competition_wt']:
-                    return self.config['env'][self.name]['competition_wt']
-                else:
-                    return comp
-        else:
-            return self.config['env'][self.name]['competition_wt']
-
     def _move_mutant(self, dist, growth_layer) -> float:
 
         # first try deterministic move;
@@ -301,8 +268,6 @@ class SLvEnv(BaseEnv):
             dist = self.radius - self.mutant_radial_position
         growth_layer = self.growth_layer
         self._move_mutant(dist, growth_layer)
-        competition = self._competition_function(dist, growth_layer)
-        self.competition[0] = competition
 
         ###########
         # trying out exponential resistance.

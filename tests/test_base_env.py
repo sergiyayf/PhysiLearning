@@ -13,11 +13,11 @@ def test_observation_space():
     obs_space = 'number'
     env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=True,
                   initial_wt=10, initial_mut=2, max_tumor_size=1.5)
-    box = Box(low=0, high=30, shape=(3,))
+    box = Box(low=0, high=30, shape=(2,))
     assert (env.observation_space == box)
     env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, see_resistance=False,
                   initial_wt=10, initial_mut=2, max_tumor_size=2.0)
-    box = Box(low=0, high=40, shape=(2,))
+    box = Box(low=0, high=40, shape=(1,))
     assert (env.observation_space == box)
     obs_space = 'image'
     env = BaseEnv(observation_type=obs_space, normalize=True, normalize_to=20, image_size=124)

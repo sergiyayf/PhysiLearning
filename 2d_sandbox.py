@@ -80,7 +80,7 @@ def main():
                         './Evaluations/LvEnvEval_2d_at100.h5',
                         './Evaluations/LvEnvEval_2d_fixed_1_1.h5',
                         './Evaluations/LvEnvEval_2d_fixed_1_2.h5',
-                        './Evaluations/LvEnvEval_2d_fixed_1_25.h5',
+                        './Evaluations/LvEnvEval__test_corrected_noise_lv.h5',
                         './Evaluations/LvEnvEval_greatest_agent_run2703_test_x6.h5',
                         # './Evaluations/LvEnvEval_x8_t2_l5_on_lvnoise2803_x8_cobra_t2_5.h5',
                         #

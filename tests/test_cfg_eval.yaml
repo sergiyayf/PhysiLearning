@@ -42,7 +42,7 @@ env:
   # general env settings
   type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   n_envs: 1
-  wrap: 0
+  wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -134,7 +134,7 @@ eval:
   threshold: 0.5
   num_episodes: 1
   step_to_load: '_best_reward'
-  save_name: '_test'
+  save_name: 'test'
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
 
 

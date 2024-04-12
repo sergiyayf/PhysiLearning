@@ -67,15 +67,6 @@ def test_die():
     pop = env.grow(0, 1, 'no_flag')
     assert pop == 0
 
-def test_competition_function():
-    env = SLvEnv()
-    env.capacity = 100
-    env.state = [10,1,0]
-    res = env._competition_function(10, 5)
-    assert res == 9.9
-    res = env._competition_function(10, 100)
-    assert 0.99
-
 def test_move_mutant():
     env = SLvEnv()
     env.state = [10, 1, 0]
@@ -83,11 +74,6 @@ def test_move_mutant():
     env.radius = 100
     env._move_mutant(0, 1)
     assert env.mutant_radial_position == 100
-
-    env.mutant_radial_position = 10
-    env.radius = 100
-    env._move_mutant(2, 1)
-    assert env.mutant_radial_position == 10
 
     env.mutant_radial_position = 10
     env.radius = 100

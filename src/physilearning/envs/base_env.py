@@ -322,7 +322,7 @@ class BaseEnv(Env):
         -------
 
         """
-
+        self.fig, self.ax = plt.subplots()
         if self.observation_type == 'number':
             pass
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
