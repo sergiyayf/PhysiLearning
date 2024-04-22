@@ -571,6 +571,9 @@ int talk_to_pcenv(zmq::socket_t& socket) {
 
 std::string get_relevant_cell_info() {
     // try to change cell position to string;
+    static int cycle_start_index = live.find_phase_index( PhysiCell_constants::live );
+    static int cycle_end_index = live.find_phase_index( PhysiCell_constants::live );
+
 				std::string data{"<Cells> \n"};
 				std::string IDs{"ID: "};
 				std::string pos_x{"x: "};
@@ -579,6 +582,7 @@ std::string get_relevant_cell_info() {
 				std::string barcode{"barcode: "};
 				std::string cell_type{"type: "};
 				std::string elapsed_time_in_phase{"elapsed_time_in_phase: "};
+				std::transition_rate{"transition_rate: "};
 
 					for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) {
 					    IDs.append(std::to_string((*all_cells)[cells_it]->ID));
@@ -596,6 +600,8 @@ std::string get_relevant_cell_info() {
 					    cell_type.append(",");
 					    elapsed_time_in_phase.append(std::to_string((*all_cells)[cells_it]->phenotype.cycle.data.elapsed_time_in_phase));
 					    elapsed_time_in_phase.append(",");
+					    transition_rate.append(std::to_string((*all_cells)[cells_it]->phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index)));
+					    transition_rate.append(",");
 
 				}
                 data.append(IDs);
@@ -611,6 +617,8 @@ std::string get_relevant_cell_info() {
                 data.append(cell_type);
                 data.append(";");
                 data.append(elapsed_time_in_phase);
+                data.append(";");
+                data.append(transition_rate);
                 data.append(";");
                 data.append("end:");
 
