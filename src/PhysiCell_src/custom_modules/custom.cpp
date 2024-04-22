@@ -582,7 +582,7 @@ std::string get_relevant_cell_info() {
 				std::string barcode{"barcode: "};
 				std::string cell_type{"type: "};
 				std::string elapsed_time_in_phase{"elapsed_time_in_phase: "};
-				std::transition_rate{"transition_rate: "};
+				std::string transition_rate{"transition_rate: "};
 
 					for (int cells_it = 0; cells_it < (*all_cells).size(); cells_it++) {
 					    IDs.append(std::to_string((*all_cells)[cells_it]->ID));
