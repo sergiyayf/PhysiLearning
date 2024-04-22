@@ -9,7 +9,7 @@ def plot(df, title, scale='linear', truncate=False):
     fig, ax = plt.subplots()
     if truncate:
         initial_size = df['Type 0'][0] + df['Type 1'][0]
-        truncated = df[((df['Type 0'] + df['Type 1'])/initial_size >= 2.0)]
+        truncated = df[((df['Type 0'] + df['Type 1'])/initial_size >= 1.4)]
         print(truncated)
         index = truncated.index[0]
         # replace df with zeros after index
@@ -51,7 +51,7 @@ def main():
                      'data/3D_benchmarks/rl_model_on_PC/rl_model_on_PC_all.h5',
                      #'data/3D_benchmarks/random/random_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC fixed 1.4', 'PC RL model']
+    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC fixed 2.25', 'PC RL model']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -89,11 +89,14 @@ def main():
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
 
-df = pd.read_hdf('data/3D_benchmarks/at100/at100_all.h5', key=f'run_3')
-plot(df, 'at100 PC', scale='linear')
+# df = pd.read_hdf('data/3D_benchmarks/at100/at100_all.h5', key=f'run_3')
+# plot(df, 'at100 PC', scale='linear')
+#
+# df = pd.read_hdf('Evaluations/LvEnvEval_3d_fixed_1_9.h5', key=f'run_0')
+# plot(df, 'LV fixed 1.9', scale='linear')
 
-df = pd.read_hdf('Evaluations/LvEnvEval_3d_fixed_1_9.h5', key=f'run_0')
-plot(df, 'LV fixed 1.9', scale='linear')
+df = pd.read_hdf('data/3D_benchmarks/rl_model_on_PC/rl_model_on_PC_all.h5', key=f'run_0')
+plot(df, 'RL model on PC', scale='linear', truncate=False)
 
 main()
 plt.show()

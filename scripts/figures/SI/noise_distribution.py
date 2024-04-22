@@ -10,7 +10,8 @@ type_0 = []
 for time in range(1,6):
     for i in range(100):
         df = pd.read_hdf('/home/saif/Projects/PhysiLearning/data/2D_benchmarks/no_treatment/2d_no_treatment_all.h5', key=f'run_{i}')
-        type_0.append((df['Type 0'].values[time]-df['Type 0'].values[time-1])/df['Type 0'].values[time])
+        # df = pd.read_hdf('/home/saif/Projects/PhysiLearning/data/2D_benchmarks/at100/2d_at100_all.h5', key=f'run_{i}')
+        type_0.append((df['Type 0'].values[time]-df['Type 0'].values[time-1])/df['Type 0'].values[time-1])
 
 # plot the distribution
 tpye_0 = np.array(type_0)
@@ -34,4 +35,14 @@ ax.legend()
 ax.set_title('Distribution of noise')
 ax.set_xlabel('Noise strength (relative to previous time step)')
 ax.set_ylabel('Frequency')
+
+fig, ax = plt.subplots()
+# plot normal distribution
+x = np.linspace(-0.05, 0.05, 100)
+mean = 0
+std = 0.01
+y = 1/(std * np.sqrt(2 * np.pi)) * np.exp( - (x - mean)**2 / (2 * std**2))
+
+ax.plot(x, y, label='Normal distribution', color = 'red')
+ax.legend()
 plt.show()

@@ -53,20 +53,22 @@ def main():
                      'data/2D_benchmarks/fixed_1_1/2d_fixed_1_1_all.h5',
                      'data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5',
                      'data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5',
-                     #'data/2D_benchmarks/x6/2d_x6_all.h5',
+                     'data/2D_benchmarks/x6/2d_x6_all.h5',
+                     'data/2D_benchmarks/n1_t4/2d_n1_t4_all.h5',
+                     'data/2D_benchmarks/s1_t4/2d_s1_t4_all.h5',
                      # 'data/2D_benchmarks/x7_t6/2d_x7_t6_all.h5',
                      # 'data/2D_benchmarks/x8_t3/2d_x8_t3_all.h5',
                      #
                      #'data/2D_benchmarks/slvenv_agent_1/2d_slvenv_agent_1_all.h5',
                      #'data/2D_benchmarks/x8_t2/2d_x8_t2_all.h5',
                      # './data/2D_benchmarks/interm_slvenv_t2/2d_interm_slvenv_t2_all.h5',
-                     './data/2D_benchmarks/slv_t3/2d_slv_t3_all.h5',
+                     # './data/2D_benchmarks/slv_t3/2d_slv_t3_all.h5',
                      #'./Evaluations/LvEnvEval_ref72803_x7_noise_refine_7_punish20.h5',
                      'data/2D_benchmarks/random/2d_random_all.h5'
                      ]
     PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT50', 'PC AT100', 'PC fixed 1.1', 'PC fixed 1.2',
                     #'PC x6', 'PC slvenv 1',
-                    'PC fixed 1.25', 'PC x8t2', 'PC rand']
+                    'PC fixed 1.25', 'PC x6', 'PC n1', 'PC s1', 'PC rand']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -82,6 +84,8 @@ def main():
                         './Evaluations/LvEnvEval_2d_fixed_1_2.h5',
                         './Evaluations/LvEnvEval__test_corrected_noise_lv.h5',
                         './Evaluations/LvEnvEval_greatest_agent_run2703_test_x6.h5',
+                        './data/newer_trains_savings/Evaluations/LvEnvEval_nn1104_n1_t4.h5',
+                        './data/newer_trains_savings/Evaluations/LvEnvEval_nn1104_s1_t4.h5',
                         # './Evaluations/LvEnvEval_x8_t2_l5_on_lvnoise2803_x8_cobra_t2_5.h5',
                         #
                         #'./Evaluations/LvEnvEval_x8_t7_l3_on_lvnoise3103_x8_cobra_t7_load_3.h5',
@@ -91,7 +95,7 @@ def main():
                         ]
     LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT50', 'LV AT100', 'LV fixed 1.1', 'LV fixed 1.2',
                     #'LV x6 RL', 'LV x8 t7',
-                    'LV fixed 1.25', 'LV x6 agent', 'LV rand']
+                    'LV fixed 1.25', 'LV x6 agent', 'LV n1', 'LV s1', 'LV rand']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -124,7 +128,7 @@ def main():
     for i in range(len(PC_name_list)):
         combined[PC_name_list[i]] = PC_df[PC_name_list[i]]
         combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
-        combined[SLV_name_list[i]] = SLV_df[SLV_name_list[i]]
+        # combined[SLV_name_list[i]] = SLV_df[SLV_name_list[i]]
     combined_df = pd.DataFrame(combined)
 
     # box plot the distribution with scatter using seaborn
@@ -146,10 +150,14 @@ def main():
 #
 # df = pd.read_hdf('./Evaluations/LvEnvEval_job_30162d_fixed_1_2_noised.h5', key=f'run_0')
 # plot(df, 'LV fixed 1.2 with noise', scale='linear', truncate=False)
-sims = range(1, 2)
+sims = range(1, 8)
 for sim in sims:
-    df = pd.read_hdf('./data/2D_benchmarks/slv_t3/2d_slv_t3_all.h5', key=f'run_{sim}')
-    plot(df, f'slvenv on PC {sim}', scale='linear', truncate=False)
+    df = pd.read_hdf('./data/2D_benchmarks/n1_t4/2d_n1_t4_all.h5', key=f'run_{sim}')
+    plot(df, f'n1 on PC {sim}', scale='linear', truncate=False)
+
+    df = pd.read_hdf('./data/2D_benchmarks/s1_t4/2d_s1_t4_all.h5', key=f'run_{sim}')
+    plot(df, f's1 on PC {sim}', scale='linear', truncate=False)
+
 #
 # for sim in sims:
 #     df = pd.read_hdf('./data/2D_benchmarks/x6/2d_x6_all.h5', key=f'run_{sim}')

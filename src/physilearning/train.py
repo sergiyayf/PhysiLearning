@@ -1,5 +1,7 @@
 import os
 import sys
+
+import numpy as np
 import yaml
 import importlib
 import multiprocessing as mp
@@ -14,7 +16,6 @@ from physilearning.envs.base_env import BaseEnv
 import time
 
 from typing import List, Callable, Optional, Dict, Any
-
 
 def make_env(
     EnvClass: BaseEnv,
