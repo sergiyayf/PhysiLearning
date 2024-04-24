@@ -231,9 +231,9 @@ class PcEnv(BaseEnv):
             self.trajectory[:, int(self.time/self.treatment_time_step)] = self.state
 
             if self.see_resistance:
-                obs = self.state
+                obs = self.state[0:2]
             else:
-                obs = [np.sum(self.state[0:2]), self.state[2]]
+                obs = [np.sum(self.state[0:2])]
 
         elif self.observation_type == 'mutant_position':
             # measure tumor radius
@@ -301,9 +301,9 @@ class PcEnv(BaseEnv):
 
         if self.observation_type == 'number':
             if self.see_resistance:
-                obs = self.state
+                obs = self.state[0:2]
             else:
-                obs = [np.sum(self.state[0:2]), self.state[2]]
+                obs = [np.sum(self.state[0:2])]
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
             self.trajectory[:, 0] = self.state
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':

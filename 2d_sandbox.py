@@ -45,17 +45,33 @@ def get_ttps(filename, timesteps=100):
 
     return ttps
 
+def get_mutant_proportions(filename, timesteps=100):
+    mutant_proportions = []
+    for i in range(timesteps):
+        df = pd.read_hdf(filename, key=f'run_{i}')
+        initial_size = df['Type 0'][0] + df['Type 1'][0]
+        # mutant_proportions.append(df['Type 1'].values[-1]/(df['Type 0'].values[-1] + df['Type 1'].values[-1]))
+        nz = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.33)]
+        if len(nz) > 0:
+            mutant_proportions.append(nz['Type 1'].values[0] / (nz['Type 0'].values[0] + nz['Type 1'].values[0]))
+        else:
+            mutant_proportions.append(df['Type 1'].values[-1] / (df['Type 0'].values[-1] + df['Type 1'].values[-1]))
+    return mutant_proportions
+
 def main():
-    PC_files_list = ['data/2D_benchmarks/no_treatment/2d_no_treatment_all.h5',
-                     'data/2D_benchmarks/mtd/2d_mtd_all.h5',
-                     'data/2D_benchmarks/at50/2d_at50_all.h5',
-                     'data/2D_benchmarks/at100/2d_at100_all.h5',
-                     'data/2D_benchmarks/fixed_1_1/2d_fixed_1_1_all.h5',
-                     'data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5',
-                     'data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5',
+    PC_files_list = [
+                    # 'data/2D_benchmarks/no_treatment/2d_no_treatment_all.h5',
+                    #  'data/2D_benchmarks/mtd/2d_mtd_all.h5',
+                    #  'data/2D_benchmarks/at50/2d_at50_all.h5',
+                    #  'data/2D_benchmarks/at100/2d_at100_all.h5',
+                    #  'data/2D_benchmarks/fixed_1_1/2d_fixed_1_1_all.h5',
+                    #  'data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5',
+                    #  'data/2D_benchmarks/fixed_1_25/2d_fixed_1_25_all.h5',
                      'data/2D_benchmarks/x6/2d_x6_all.h5',
-                     'data/2D_benchmarks/n1_t4/2d_n1_t4_all.h5',
-                     'data/2D_benchmarks/s1_t4/2d_s1_t4_all.h5',
+                     'data/2D_benchmarks/n2_t4_l3/2d_n2_t4_l3_all.h5',
+                     'data/2D_benchmarks/s2_t5_l3/2d_s2_t5_l3_all.h5',
+                     # 'data/2D_benchmarks/n1_t4/2d_n1_t4_all.h5',
+                     # 'data/2D_benchmarks/s1_t4/2d_s1_t4_all.h5',
                      # 'data/2D_benchmarks/x7_t6/2d_x7_t6_all.h5',
                      # 'data/2D_benchmarks/x8_t3/2d_x8_t3_all.h5',
                      #
@@ -64,17 +80,56 @@ def main():
                      # './data/2D_benchmarks/interm_slvenv_t2/2d_interm_slvenv_t2_all.h5',
                      # './data/2D_benchmarks/slv_t3/2d_slv_t3_all.h5',
                      #'./Evaluations/LvEnvEval_ref72803_x7_noise_refine_7_punish20.h5',
-                     'data/2D_benchmarks/random/2d_random_all.h5'
+                     #'data/2D_benchmarks/random/2d_random_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT50', 'PC AT100', 'PC fixed 1.1', 'PC fixed 1.2',
-                    #'PC x6', 'PC slvenv 1',
-                    'PC fixed 1.25', 'PC x6', 'PC n1', 'PC s1', 'PC rand']
+    PC_name_list = [
+        #'PC No therapy', 'PC MTD', 'PC AT50', 'PC AT100', 'PC fixed 1.1', 'PC fixed 1.2',
+                    'PC x6', 'PC n2', 'PC s2',
+                    #'PC fixed 1.25', 'PC x6', 'PC n1', 'PC s1', 'PC rand'
+    ]
 
     PC_dict = {}
+    mut_prop_dict = {}
     for i in range(len(PC_files_list)):
         PC_dict[PC_name_list[i]] = get_ttps(PC_files_list[i])
+        mut_prop_dict[PC_name_list[i]] = get_mutant_proportions(PC_files_list[i])
+
+    # classify the mutant proportions into 3 categories, low, medium and high
+    classified_mut_prop = {}
+    for i in range(len(PC_name_list)):
+        classified_mut_prop[PC_name_list[i]] = np.zeros(len(mut_prop_dict[PC_name_list[i]]))
+        for j in range(len(mut_prop_dict[PC_name_list[i]])):
+            if mut_prop_dict[PC_name_list[i]][j] < 0.01 and PC_dict[PC_name_list[i]][j] < 251:
+                classified_mut_prop[PC_name_list[i]][j] = 0
+            elif mut_prop_dict[PC_name_list[i]][j] < 0.5 and PC_dict[PC_name_list[i]][j] < 251:
+                classified_mut_prop[PC_name_list[i]][j] = 1
+            elif mut_prop_dict[PC_name_list[i]][j] >= 0.5 and PC_dict[PC_name_list[i]][j] < 251:
+                classified_mut_prop[PC_name_list[i]][j] = 2
+            else:
+                classified_mut_prop[PC_name_list[i]][j] = 3
+
+    # pie chart classification
+
+    for i in range(len(PC_name_list)):
+        fig, ax = plt.subplots()
+        ax.pie([np.sum(classified_mut_prop[PC_name_list[i]] == 0),
+                np.sum(classified_mut_prop[PC_name_list[i]] == 1),
+                np.sum(classified_mut_prop[PC_name_list[i]] == 2),
+                np.sum(classified_mut_prop[PC_name_list[i]] == 3)],
+               labels=['premature progression', 'resistance rise', 'resistance > 50%', 'resistance contained'], autopct='%1.1f%%', startangle=90)
+        ax.set_title(PC_name_list[i])
+
 
     PC_df = pd.DataFrame(PC_dict)
+    mut_prop_df = pd.DataFrame(mut_prop_dict)
+
+    # plot the mutant proportions against pc
+    fig, ax = plt.subplots()
+    for i in range(len(PC_name_list)):
+        ax.scatter(mut_prop_df[PC_name_list[i]], PC_df[PC_name_list[i]], label=PC_name_list[i])
+    # ax.scatter(mut_prop_df[PC_name_list[0]], PC_df[PC_name_list[0]], label=PC_name_list[0])
+    ax.set_title('Mutant proportions against PC')
+    ax.legend()
 
     LV_files_list = ['./Evaluations/LvEnvEval_2d_no_treatment.h5',
                         './Evaluations/LvEnvEval_2d_mtd.h5',
@@ -127,7 +182,7 @@ def main():
     combined = {}
     for i in range(len(PC_name_list)):
         combined[PC_name_list[i]] = PC_df[PC_name_list[i]]
-        combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
+        #combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
         # combined[SLV_name_list[i]] = SLV_df[SLV_name_list[i]]
     combined_df = pd.DataFrame(combined)
 
@@ -140,32 +195,14 @@ def main():
 
     return combined_df
 
-
-# df = pd.read_hdf('./Evaluations/LvEnvEval_2d_fixed_1_2.h5', key=f'run_0')
-# plot(df, 'LV fixed 1.2', scale='linear', truncate=False)
-# #
-# df = pd.read_hdf('./data/2D_benchmarks/fixed_1_2/2d_fixed_1_2_all.h5', key=f'run_0')
-# plot(df, 'PC fixed 1.2', scale='linear', truncate=True)
-# #
-#
-# df = pd.read_hdf('./Evaluations/LvEnvEval_job_30162d_fixed_1_2_noised.h5', key=f'run_0')
-# plot(df, 'LV fixed 1.2 with noise', scale='linear', truncate=False)
-sims = range(1, 8)
+sims = range(1, 21)
 for sim in sims:
-    df = pd.read_hdf('./data/2D_benchmarks/n1_t4/2d_n1_t4_all.h5', key=f'run_{sim}')
-    plot(df, f'n1 on PC {sim}', scale='linear', truncate=False)
+    df = pd.read_hdf('data/2D_benchmarks/n2_t4_l3/2d_n2_t4_l3_all.h5', key=f'run_{sim}')
+    plot(df, f'n2 on PC {sim}', scale='linear', truncate=False)
 
-    df = pd.read_hdf('./data/2D_benchmarks/s1_t4/2d_s1_t4_all.h5', key=f'run_{sim}')
-    plot(df, f's1 on PC {sim}', scale='linear', truncate=False)
+    # df = pd.read_hdf('./data/2D_benchmarks/s1_t4/2d_s1_t4_all.h5', key=f'run_{sim}')
+    # plot(df, f's1 on PC {sim}', scale='linear', truncate=False)
 
-#
-# for sim in sims:
-#     df = pd.read_hdf('./data/2D_benchmarks/x6/2d_x6_all.h5', key=f'run_{sim}')
-#     plot(df, f'x6 {sim}', scale='linear', truncate=False)
-#
-# for sim in sims:
-#     df = pd.read_hdf('./data/2D_benchmarks/interm_slvenv_t2/2d_interm_slvenv_t2_all.h5', key=f'run_{sim}')
-#     plot(df, f'SLV agent {sim}', scale='linear', truncate=False)
 
 
 combined_df = main()

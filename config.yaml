@@ -137,7 +137,7 @@ eval:
   path: './'
   model_prefix: '2703_test_x6'
   step_to_load: '_best_reward'
-  save_name: '_x6_on_noise'
+  save_name: '__testing_error__'
   # evaluation settings
   fixed_AT_protocol: 0
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'

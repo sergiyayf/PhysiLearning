@@ -96,7 +96,11 @@ class Trainer:
         env_type = self.env_type
         EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
         if env_type == 'PcEnv':
-            env_kwargs = {'port': '0', 'job_name': sys.argv[1]}
+            if len(sys.argv) < 2:
+                job_name = '1'
+            else:
+                job_name = sys.argv[1]
+            env_kwargs = {'port': '0', 'job_name': job_name}
         else:
             env_kwargs = {}
 

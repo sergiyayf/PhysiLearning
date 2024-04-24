@@ -90,10 +90,11 @@ def plot(fig, ax):
     # show mean as well
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=20, label='mean')
 
-    return b
+    return
 
 if __name__ == '__main__':
     # setup pwd
-    os.chdir('/Users/saif/Desktop/Serhii/Projects/PhysiLearning')
+    # os.chdir('/Users/saif/Desktop/Serhii/Projects/PhysiLearning')
+    os.chdir('/home/saif/Projects/PhysiLearning')
     fig, ax = plt.subplots(figsize=(290 / 72, 160 / 72), constrained_layout=True)
     figure_setup(fig, ax, save_figure = False)
