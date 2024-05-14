@@ -29,29 +29,27 @@ def plot(df, title, scale='linear', truncate=False):
     lw=2)
     return ax
 
-def get_ttps(filename, timesteps=50):
+def get_ttps(filename, timesteps=100):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
         # find the largest index with non-zero Type 0 and Type 1
         initial_size = df['Type 0'][0] + df['Type 1'][0]
-        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 2.4)]
+        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 1.5)]
         if len(nz) > 0:
             # append index when type 0 + type 1 is larger than 1.5
             ttps.append(nz.index[0])
         else:
-            ttps.append(0)
+            ttps.append(len(df))
     return ttps
 
 def main():
-    PC_files_list = ['data/3D_benchmarks/no_treatment/no_treatment_all.h5',
-                     'data/3D_benchmarks/mtd/mtd_all.h5',
-                     'data/3D_benchmarks/at100/at100_all.h5',
-                     'data/3D_benchmarks/fixed_2_25/fixed_2_25_all.h5',
-                     'data/3D_benchmarks/rl_model_on_PC/rl_model_on_PC_all.h5',
+    PC_files_list = ['data/3D_benchmarks/p62/p62_no_treat/p62_no_treat_all.h5',
+                     'data/3D_benchmarks/p62/p62_mtd/p62_mtd_all.h5',
+                     'data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5',
                      #'data/3D_benchmarks/random/random_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC fixed 2.25', 'PC RL model']
+    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -78,7 +76,7 @@ def main():
     combined = {}
     for i in range(len(PC_name_list)):
         combined[PC_name_list[i]] = PC_df[PC_name_list[i]]
-        combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
+        # combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
     combined_df = pd.DataFrame(combined)
 
     # box plot the distribution with scatter using seaborn
@@ -94,9 +92,24 @@ def main():
 #
 # df = pd.read_hdf('Evaluations/LvEnvEval_3d_fixed_1_9.h5', key=f'run_0')
 # plot(df, 'LV fixed 1.9', scale='linear')
+#
+# df = pd.read_hdf('data/3D_benchmarks/rl_model_on_PC/rl_model_on_PC_all.h5', key=f'run_0')
+# plot(df, 'RL model on PC', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('data/temp/multp_x6/run_1.h5', key=f'run_0')
+# plot(df, 'x6 model on PC x6 ', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('data/temp/PcEnvEval__s2t5_pc_pat_1_test1504_s2_t5_l3.h5', key=f'run_0')
+# plot(df, 's2 agent on 3D p3', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('data/2D_benchmarks/n2_t4_l3/2d_n2_t4_l3_all.h5', key=f'run_7')
+# plot(df, 'PC n2t4', scale='linear', truncate=False)
 
-df = pd.read_hdf('data/3D_benchmarks/rl_model_on_PC/rl_model_on_PC_all.h5', key=f'run_0')
-plot(df, 'RL model on PC', scale='linear', truncate=False)
+
+df = pd.read_hdf(f'data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_34')
+plot(df, 'PC at100', scale='linear', truncate=False)
+# df = pd.read_hdf('data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_0')
+# plot(df, 'RL model on PC', scale='linear', truncate=False)
 
 main()
 plt.show()

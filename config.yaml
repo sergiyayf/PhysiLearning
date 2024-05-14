@@ -135,9 +135,9 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: '2703_test_x6'
+  model_prefix: '2204_n3_t3_l2'
   step_to_load: '_best_reward'
-  save_name: '__testing_error__'
+  save_name: '_20240425_agents_comparison_noise_LV_'
   # evaluation settings
   fixed_AT_protocol: 0
   at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
@@ -145,90 +145,3 @@ eval:
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False
-
-
-# Predefined parameters for particular patients
-patients:
-  111:
-    initial_wt: 1539 #2761 # 74291 # 2761
-    initial_mut: 4
-    growth_rate_wt: 0.087 #0.085 - 1.3# 0.083 # 0.29 # 0.0175
-    growth_rate_mut: 0.216 #0.219 - 1.3# 0.223 # 0.438 # 0.0175
-    death_rate_wt: 0.01 #0.0029
-    death_rate_mut: 0.01 #0.00438
-    treat_death_rate_wt: 5.837 #5.986 - 1.3 # 6.07 # 0.36 # 0.397 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 6500
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_80/final'
-    SLvEnv:
-      carrying_capacity: 3906
-      competition_wt: 1.772 #2400.0
-      competition_mut: 3.408 #0.336
-      growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
-      image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-      mutant_distance_to_front: 65 # 92
-      cell_volume: 2144
-      growth_layer: 150 # 110
-      dimension: 2
-
-  112:
-    initial_wt: 1539 #2761 # 74291 # 2761
-    initial_mut: 4
-    growth_rate_wt: 0.087 #0.085 - 1.3# 0.083 # 0.29 # 0.0175
-    growth_rate_mut: 0.216 #0.219 - 1.3# 0.223 # 0.438 # 0.0175
-    death_rate_wt: 0.01 #0.0029
-    death_rate_mut: 0.01 #0.00438
-    treat_death_rate_wt: 5.837 #5.986 - 1.3 # 6.07 # 0.36 # 0.397 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 6500
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_80/final'
-    SLvEnv:
-      carrying_capacity: 3906
-      competition_wt: 1.772 #2400.0
-      competition_mut: 3.408 #0.336
-      growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
-      image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-      mutant_distance_to_front: 95 # 92
-      cell_volume: 2144
-      growth_layer: 150 # 110
-      dimension: 2
-
-  113:
-    initial_wt: 1539 #2761 # 74291 # 2761
-    initial_mut: 4
-    growth_rate_wt: 0.087 #0.085 - 1.3# 0.083 # 0.29 # 0.0175
-    growth_rate_mut: 0.216 #0.219 - 1.3# 0.223 # 0.438 # 0.0175
-    death_rate_wt: 0.01 #0.0029
-    death_rate_mut: 0.01 #0.00438
-    treat_death_rate_wt: 5.837 #5.986 - 1.3 # 6.07 # 0.36 # 0.397 # 0.015
-    treat_death_rate_mut: 0.00 # 0.0
-    LvEnv:
-      carrying_capacity: 3906
-      competition_wt: 1.323 #2400.0
-      competition_mut: 0.336
-    PcEnv:
-      filename_chkpt:
-        parent_nodes: [ 'user_parameters' ]
-        value: './../paper_presims/patient_80/final'
-    SLvEnv:
-      carrying_capacity: 3906
-      competition_wt: 1.772 #2400.0
-      competition_mut: 3.408 #0.336
-      growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
-      image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-      mutant_distance_to_front: 150 # 92
-      cell_volume: 2144
-      growth_layer: 150 # 110
-      dimension: 2

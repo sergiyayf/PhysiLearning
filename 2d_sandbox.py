@@ -195,15 +195,6 @@ def main():
 
     return combined_df
 
-sims = range(1, 21)
-for sim in sims:
-    df = pd.read_hdf('data/2D_benchmarks/n2_t4_l3/2d_n2_t4_l3_all.h5', key=f'run_{sim}')
-    plot(df, f'n2 on PC {sim}', scale='linear', truncate=False)
-
-    # df = pd.read_hdf('./data/2D_benchmarks/s1_t4/2d_s1_t4_all.h5', key=f'run_{sim}')
-    # plot(df, f's1 on PC {sim}', scale='linear', truncate=False)
-
-
 
 combined_df = main()
 plt.show()

@@ -6,11 +6,13 @@ import numpy as np
 import h5py
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
+os.chdir('/home/saif/Projects/PhysiLearning')
 
-
-dir = '/data'
+dir = './data'
 hdf5_file = path.join(dir, '3d_full_presims_30_days.h5')
-
+# dir = './data/temp'
+# hdf5_file = path.join(dir, 'presims_3d_28days.h5')
 
 def get_n_clones(sims):
     n_clones = []
@@ -101,6 +103,10 @@ if __name__ == '__main__':
     percentile_75 = np.percentile(all_dists_to_front, 75)
     closest_75_sim = np.nanargmin(np.abs(np.array(min_clone) - percentile_75))
     print('Simulation with closest 75th percentile distance to front: ', closest_75_sim)
+
+    percentile_65 = np.percentile(all_dists_to_front, 65)
+    closest_65_sim = np.nanargmin(np.abs(np.array(min_clone) - percentile_65))
+    print('Simulation with closest 65th percentile distance to front: ', closest_65_sim)
 
     # simulation id with largest distance to front
     largest_dist = np.max(min_clone)
