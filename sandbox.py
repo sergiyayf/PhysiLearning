@@ -9,7 +9,7 @@ def plot(df, title, scale='linear', truncate=False):
     fig, ax = plt.subplots()
     if truncate:
         initial_size = df['Type 0'][0] + df['Type 1'][0]
-        truncated = df[((df['Type 0'] + df['Type 1'])/initial_size >= 1.4)]
+        truncated = df[((df['Type 0'] + df['Type 1'])/initial_size >= 1.5)]
         print(truncated)
         index = truncated.index[0]
         # replace df with zeros after index
@@ -24,9 +24,9 @@ def plot(df, title, scale='linear', truncate=False):
     ax.set_yscale(scale)
     treat = df['Treatment'].values
     # replace 0s that are directly after 1 with 1s
-    treat = np.where(treat == 0, np.roll(treat, 1), treat)
-    ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
-    lw=2)
+    #treat = np.where(treat == 0, np.roll(treat, -1), treat)
+    ax.fill_between(df.index, 1.0, 1.25, where=treat == 1, color='orange', label='drug',
+                       lw=2)
     return ax
 
 def get_ttps(filename, timesteps=100):
@@ -47,9 +47,10 @@ def main():
     PC_files_list = ['data/3D_benchmarks/p62/p62_no_treat/p62_no_treat_all.h5',
                      'data/3D_benchmarks/p62/p62_mtd/p62_mtd_all.h5',
                      'data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5',
+                     'data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5',
                      #'data/3D_benchmarks/random/random_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100']
+    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC AT100_repeat']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -57,14 +58,15 @@ def main():
 
     PC_df = pd.DataFrame(PC_dict)
 
-    LV_files_list = ['./Evaluations/temp/LvEnvEvalno_treatment_1_5.h5',
-                        './Evaluations/temp/LvEnvEvalmtd_1_5.h5',
-                        './Evaluations/temp/LvEnvEvalat100_1_5.h5',
-                        './Evaluations/temp/LvEnvEvalfixed_1_4_1_5.h5',
-                        './Evaluations/LvEnvEval_3d_cont_4_rav19022024_run_22_load_4.h5',
+    LV_files_list = ['./Evaluations/LvEnvEval__3d_lvp62_no_treatment.h5',
+                     './Evaluations/LvEnvEval__3d_lvp62_mtd.h5',
+                     './Evaluations/LvEnvEval__3d_lvp62_at100.h5',
+                     './Evaluations/LvEnvEval__3d_lvp62_fixed_1_4.h5',
+                        # './Evaluations/temp/LvEnvEvalfixed_1_4_1_5.h5',
+                        # './Evaluations/LvEnvEval_3d_cont_4_rav19022024_run_22_load_4.h5',
                         #'./Evaluations/LvEnvEvalrandom_1_5.h5'
                         ]
-    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV Fixed 1.4', 'RL']
+    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV fixed 1.4']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -72,11 +74,27 @@ def main():
 
     LV_df = pd.DataFrame(LV_dict)
 
+    SLV_files_list = ['./Evaluations/SLvEnvEval__3d_slvp62_no_treatment.h5',
+                     './Evaluations/SLvEnvEval__3d_slvp62_mtd.h5',
+                     './Evaluations/SLvEnvEval__3d_slvp62_at100.h5',
+                     './Evaluations/SLvEnvEval__3d_slvp62_fixed_1_4.h5',
+                     # './Evaluations/temp/LvEnvEvalfixed_1_4_1_5.h5',
+                     # './Evaluations/LvEnvEval_3d_cont_4_rav19022024_run_22_load_4.h5',
+                     # './Evaluations/LvEnvEvalrandom_1_5.h5'
+                     ]
+    SLV_name_list = ['SLV No therapy', 'SLV MTD', 'SLV AT100', 'SLV fixed 1.4']
+
+    SLV_dict = {}
+    for i in range(len(SLV_files_list)):
+        SLV_dict[SLV_name_list[i]] = get_ttps(SLV_files_list[i])
+
+    SLV_df = pd.DataFrame(SLV_dict)
     # combine the two dataframes
     combined = {}
     for i in range(len(PC_name_list)):
         combined[PC_name_list[i]] = PC_df[PC_name_list[i]]
-        # combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
+        combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
+        combined[SLV_name_list[i]] = SLV_df[SLV_name_list[i]]
     combined_df = pd.DataFrame(combined)
 
     # box plot the distribution with scatter using seaborn
@@ -106,10 +124,25 @@ def main():
 # plot(df, 'PC n2t4', scale='linear', truncate=False)
 
 
-df = pd.read_hdf(f'data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_34')
-plot(df, 'PC at100', scale='linear', truncate=False)
-# df = pd.read_hdf('data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_0')
-# plot(df, 'RL model on PC', scale='linear', truncate=False)
+# df = pd.read_hdf(f'data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_34')
+# plot(df, 'PC at100', scale='linear', truncate=False)
+df = pd.read_hdf('data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_65')
+plot(df, 'at100 PC', scale='linear', truncate=False)
+
+df = pd.read_hdf('data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_65')
+plot(df, 'at100 PC', scale='log', truncate=False)
+
+df = pd.read_hdf('Evaluations/LvEnvEval__3d_lvp62_at100.h5', key=f'run_0')
+plot(df, 'LV at100', scale='linear', truncate=False)
+
+df = pd.read_hdf('Evaluations/LvEnvEval_3d_lvp62_det_agent1405_check_3d_lv_agent_p_62_t_1.h5', key=f'run_0')
+plot(df, 'LV agent lv', scale='linear', truncate=False)
+
+df = pd.read_hdf('Evaluations/SLvEnvEval__3d_slvp62_at100.h5', key=f'run_10')
+plot(df, 'SLV at100', scale='linear', truncate=False)
+
+df = pd.read_hdf('Evaluations/SLvEnvEval__3d_slvp62_at100.h5', key=f'run_10')
+plot(df, 'SLV at100', scale='log', truncate=False)
 
 main()
 plt.show()

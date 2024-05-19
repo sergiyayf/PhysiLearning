@@ -108,3 +108,84 @@ def plot_radial_velocity(ax, average_projections, std_proj, bin_size, **kwargs):
     ax.set_ylabel('Normal velocity magnitude')
     ax.set_title('Instant radial velocity')
     plt.show()
+
+
+def run_3d_is_at_front(df):
+    cell_df = df.rename(columns={'x': 'position_x', 'y': 'position_y', 'z': 'position_z', 'type': 'cell_type'})
+    if len(cell_df) > 0:
+        cell_df['is_at_front'] = np.zeros_like(cell_df['position_x'])
+        cell_df['core_shell'] = np.zeros_like(cell_df['position_x'])
+        cell_diameter = 14
+        growth_threshold = 1e-5
+        # slice through z axis to find cells at front
+        z = -500
+        while not z > 500:
+            cells_in_slice = cell_df[(cell_df['position_z'] > z) & (cell_df['position_z'] < z + cell_diameter)]
+            if len(cells_in_slice) == 0:
+                z += cell_diameter
+                continue
+            elif len(cells_in_slice) < 10:
+                cell_df.loc[cell_df['position_z'].isin(cells_in_slice['position_z']), 'is_at_front'] = 1
+                z += cell_diameter
+                continue
+            else:
+                positions, types = front_cells(cells_in_slice)
+                cell_df.loc[cell_df['position_x'].isin(positions[:, 0]), 'is_at_front'] = 1
+                z += cell_diameter
+
+        # slice through y axis
+        y = -500
+        while not y > 500:
+            cells_in_slice = cell_df[(cell_df['position_y'] > y) & (cell_df['position_y'] < y + cell_diameter)]
+            if len(cells_in_slice) == 0:
+                y += cell_diameter
+                continue
+            elif len(cells_in_slice) < 10:
+                cell_df.loc[cell_df['position_y'].isin(cells_in_slice['position_y']), 'is_at_front'] = 1
+                y += cell_diameter
+                continue
+            else:
+                positions, types = front_cells(cells_in_slice, clip_plane='xz')
+                cell_df.loc[cell_df['position_x'].isin(positions[:, 0]), 'is_at_front'] = 1
+                y += cell_diameter
+
+        # repeat for the non-growing cells
+        non_growing_cells = cell_df[cell_df['transition_rate'] < growth_threshold]
+
+        z = -500
+        while not z > 500:
+            cells_in_slice = non_growing_cells[
+                (non_growing_cells['position_z'] > z) & (non_growing_cells['position_z'] < z + cell_diameter)]
+            if len(cells_in_slice) == 0:
+                z += cell_diameter
+                continue
+            elif len(cells_in_slice) < 10:
+                cell_df.loc[cell_df['position_z'].isin(cells_in_slice['position_z']), 'core_shell'] = 1
+                z += cell_diameter
+                continue
+            else:
+                positions, types = front_cells(cells_in_slice)
+                cell_df.loc[cell_df['position_x'].isin(positions[:, 0]), 'core_shell'] = 1
+                z += cell_diameter
+
+        # slice through y axis
+        y = -500
+        while not y > 500:
+            cells_in_slice = non_growing_cells[
+                (non_growing_cells['position_y'] > y) & (non_growing_cells['position_y'] < y + cell_diameter)]
+            if len(cells_in_slice) == 0:
+                y += cell_diameter
+                continue
+            elif len(cells_in_slice) < 10:
+                cell_df.loc[cell_df['position_y'].isin(cells_in_slice['position_y']), 'core_shell'] = 1
+                y += cell_diameter
+                continue
+            else:
+                positions, types = front_cells(cells_in_slice, clip_plane='xz')
+                cell_df.loc[cell_df['position_x'].isin(positions[:, 0]), 'core_shell'] = 1
+                y += cell_diameter
+
+    cells_at_front = cell_df[cell_df['is_at_front'] == 1]
+    front_cell_positions = cells_at_front[['position_x', 'position_y', 'position_z']].values
+    cell_df = calculate_distance_to_front(cell_df, front_cell_positions)
+    return cell_df

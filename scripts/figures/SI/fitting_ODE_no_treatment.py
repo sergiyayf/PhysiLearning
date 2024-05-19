@@ -138,14 +138,14 @@ if __name__ == '__main__':
     # params_fit = {'r_s': 0.077}
     # K = 463 - tumor from 300 microns N = 100 to 500 microns
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.214, 'Delta_s': 3.156, 'c_s': 1.0, 'c_r': 1.0, 'K': 463}
+                  'r_r': 0.213, 'Delta_s': 17.998, 'c_s': 1.433, 'c_r': 1.119, 'K': 463}
     params_fit = {'r_s': 0.078}
     sigmas = [0.005]
     iteration = 1
     accuracy = 0.0
-    tune_draws = 500
-    final_draws = 1000
-    while accuracy < 0.95:
+    tune_draws = 1000
+    final_draws = 10000
+    while accuracy < 0.99:
         theta_fit = list(params_fit.values())
         sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
                         params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
@@ -210,6 +210,6 @@ if __name__ == '__main__':
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    #trace.to_json('./../../data/SI_data/3D_patient_62_no_treatment_LV_inference_Data_1_5_threshold.json')
+    trace.to_json('../../../data/SI_data/3D_patient_62_no_treatment_LV_inference_Data_1_5_threshold.json')
     plot_finals()
     plt.show()

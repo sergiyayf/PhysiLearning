@@ -27,7 +27,7 @@ def plot_data(ax, lw=2, title="Initial data"):
     return ax
 
 def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
-    cols = ['c_s', 'c_r', 'Delta_s']
+    cols = ['c_s', 'c_r']
     row = trace_df.iloc[row_idx, :][cols].values
 
     theta = row
@@ -135,14 +135,14 @@ if __name__ == '__main__':
     plot_data(ax, title="PC raw data")
 
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_r': 0.214, 'K': 463, 'r_s': 0.078 }
-    params_fit = {'c_s': 1.0, 'c_r': 1.0, 'Delta_s': 3.156}
-    sigmas = [0.5, 0.5, 0.1]
+                  'r_r': 0.213, 'K': 463, 'r_s': 0.078, 'Delta_s': 18.000}
+    params_fit = {'c_s': 1.433, 'c_r': 1.119}
+    sigmas = [0.007, 0.07]
     iteration = 1
     accuracy = 0.0
-    tune_draws = 100
-    final_draws = 500
-    while accuracy < 0.90:
+    tune_draws = 1000
+    final_draws = 10000
+    while accuracy < 0.99:
         theta_fit = list(params_fit.values())
 
         sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
@@ -152,13 +152,12 @@ if __name__ == '__main__':
             # Priors
             c_s = pm.Normal("c_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0])
             c_r = pm.Normal("c_r", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1])
-            Delta_s = pm.Normal("Delta_s", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2])
-
+            # Delta_s = pm.Normal("Delta_s", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2])
             sigma = pm.HalfNormal("sigma", 10)
 
             # Ode solution function
             ode_solution = pytensor_forward_model_matrix(
-                pm.math.stack([c_s, c_r, Delta_s])
+                pm.math.stack([c_s, c_r])
             )
 
             # Likelihood
@@ -198,12 +197,12 @@ if __name__ == '__main__':
         # Priors
         c_s = pm.Normal("c_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0])
         c_r = pm.Normal("c_r", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1])
-        Delta_s = pm.Normal("Delta_s", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2])
+        # Delta_s = pm.Normal("Delta_s", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2])
         sigma = pm.HalfNormal("sigma", 10)
 
         # Ode solution function
         ode_solution = pytensor_forward_model_matrix(
-            pm.math.stack([c_s, c_r, Delta_s])
+            pm.math.stack([c_s, c_r])
         )
         # Likelihood
         pm.Normal("Y_obs", mu=ode_solution, sigma=sigma, observed=data[["x", "y"]].values)
@@ -216,7 +215,7 @@ if __name__ == '__main__':
     with model:
         trace_DEM = pm.sample(step=[pm.DEMetropolis(vars_list)], tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
-    #trace.to_json('./../../data/SI_data/3D_patient_62_at100_LV_inference_Data_1_5_threshold.json')
+    trace.to_json('../../../data/SI_data/3D_patient_62_at100_LV_inference_Data_1_5_threshold.json')
     plot_finals()
     plt.show()
 

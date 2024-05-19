@@ -1,20 +1,20 @@
 # Version 0.3.5
 # global configuration
 global:
-  machine: 'raven' # 'mela' # 'raven'
+  machine: 'mela' # 'mela' # 'raven'
   evaluate_after: 0
 
 # job configuration important for training
 job:
   nodes: 1
   ntasks: 1
-  mem-per-task: 2000
-  cpus-per-task: 2
+  mem-per-task: 300
+  cpus-per-task: 1
   time: '24:00:00'
   agent_buffer: 0
   recurrent:
     enable: 0
-    n_jobs: 2
+    n_jobs: 3
 
 # Reinforcement learning configuration
 learning:
@@ -31,25 +31,25 @@ learning:
       clip_range: 0.001
       learning_rate: 1.e-5
       policy_kwargs:
-#        features_extractor_kwargs:
-#          cnn_output_dim: 16
+        #        features_extractor_kwargs:
+        #          cnn_output_dim: 16
         net_arch:
-          pi: [64, 64]
-          vf: [64, 64]
+          pi: [ 64, 64 ]
+          vf: [ 64, 64 ]
     total_timesteps: 3.e+7
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '0904_slv_num1_load_1'
+    model_save_prefix: '1405_check_3d_lv_agent_p_62_t_1'
     load:
-      enable_loading: 1
+      enable_loading: 0
       last_model: 0
       saved_model_name: './Training/SavedModels/0904_slv_num1_best_reward'
 
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: True
+  wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 8
@@ -59,44 +59,44 @@ env:
   observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
-  max_tumor_size: 1.33 # 2006 #3086 #100000 # 110000 # 4000
-  max_time: 250 # 120
-  initial_wt: 1539 #2761 # 74291 # 2761
-  initial_mut: 4
-  growth_rate_wt: 0.087 #0.085 - 1.3# 0.083 # 0.29 # 0.0175
-  growth_rate_mut: 0.216 #0.219 - 1.3# 0.223 # 0.438 # 0.0175
+  max_tumor_size: 1.50 #61828 #100000 # 110000 # 4000
+  max_time: 170 # 120
+  initial_wt: 45870 #99.99782 #41219 #2761 # 74291 # 2761
+  initial_mut: 1 #0.00218 #8
+  growth_rate_wt: 0.078 #0.074 # 0.29 # 0.0175
+  growth_rate_mut: 0.213 #0.205 # 0.438 # 0.0175
   death_rate_wt: 0.01 #0.0029
   death_rate_mut: 0.01 #0.00438
-  treat_death_rate_wt: 5.837 #5.986 - 1.3 # 6.07 # 0.36 # 0.397 # 0.015
+  treat_death_rate_wt: 8255 #17.998 #3.156 # 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
   normalize: True
-  normalize_to: 100.0
+  normalize_to: 1000.0
   image_size: 124 #84 #124
   patient_sampling:
     enable: 0
     type: 'sequential' # 'random' # 'sequential'
-    patient_id: [113] # [1, 4, 55, 80, 93]
+    patient_id: 80 # [1, 4, 55, 80, 93]
 
   # LV environment settings
   LvEnv:
-    carrying_capacity: 3906 # 6500
-    competition_wt: 1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
-    competition_mut: 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
-    growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
+    carrying_capacity: 211591 #463 #244000 # 6500
+    competition_wt: 1.433 #2.297 # 1.323 #2400.0
+    competition_mut: 1.119 #4.967 # 0.0 #0.336
+    growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
   SLvEnv:
-    carrying_capacity: 3906
-    competition_wt: 1.772 #1.772 #2400.0
-    competition_mut: 3.408 #0.336
-    growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
+    carrying_capacity: 211591 #463 #244000
+    competition_wt: 1.433 #2.297 # 1.323 #2400.0
+    competition_mut: 1.119 #4.967 # 0.0 #0.336
+    growth_function_flag: 'instant' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 70.5 # 92
-    cell_volume: 2144
-    growth_layer: 150 # 110
-    dimension: 2
+    mutant_distance_to_front: 55.7 #150
+    cell_volume: 2144 # - 4.674 is normalized to 45871 cells in 3D
+    growth_layer: 150
+    dimension: 3
   # note this is not yet functional
   PcEnv:
     domain_size: 2050 #1250
@@ -118,13 +118,13 @@ env:
           value: 'true'
       filename_chkpt:
           parent_nodes: ['user_parameters']
-          value:  './../paper_presims/patient_285/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
+          value:  './../paper_presims/patient_80/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
       treatment_time_step:
           parent_nodes: ['user_parameters']
           value: 720
       treatment_strength:
           parent_nodes: ['user_parameters']
-          value: 6.0e2 # 3.0e2 or 6.0e2
+          value: 30.0e2 # 3.0e2 or 6.0e2
 
   # LatticeBased environment settings
   GridEnv:
@@ -133,15 +133,15 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file:
   path: './'
-  model_prefix: '2204_n3_t3_l2'
+  model_prefix: '1405_check_3d_lv_agent_p_62_t_1'
   step_to_load: '_best_reward'
-  save_name: '_20240425_agents_comparison_noise_LV_'
+  save_name: '3d_slvp62_no_treatment'
   # evaluation settings
-  fixed_AT_protocol: 0
-  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.25
+  fixed_AT_protocol: 1
+  at_type: 'no_treatment' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.0
   num_episodes: 100
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False

@@ -77,6 +77,8 @@ class SLvEnv(BaseEnv):
         if self.normalize:
             self.capacity = env_specific_params.get('carrying_capacity', 6500) \
                             * self.normalization_factor
+            self.death_rate_treat[0] *= self.normalization_factor
+            self.death_rate_treat[1] *= self.normalization_factor
         else:
             self.capacity = env_specific_params.get('carrying_capacity', 6500)
 
@@ -230,8 +232,16 @@ class SLvEnv(BaseEnv):
         else:
             #mv = L / (1 + np.exp(k*(dist-x0)))
             #mv = (-0.0565 * dist + 4.76)*np.heaviside(-0.0565 * dist + 4.76, 1)
-            mv = (-0.065 * dist + 5.007) * np.heaviside(-0.065 * dist + 5.007, 1)
+            # 2D move
+            # mv = (-0.065 * dist + 5.007) * np.heaviside(-0.065 * dist + 5.007, 1)
 
+            # 3D move
+            # 5 point linear push
+            # mv = (-0.0423 * dist + 3.5) * np.heaviside(-0.0423 * dist + 3.5, 1)
+            # 5 point quad
+            a = 108.5
+            b = 3.3e-04
+            mv = (b*(a-dist)**2) * np.heaviside(a-dist, 1)
             if np.random.rand() < self.mutant_normalized_position:
                 self.mutant_radial_position += np.random.normal(mv, 2*mv+1) # *(3*self.cell_volume/(4*np.pi))**(1/3)
             if (self.mutant_radial_position > self.radius):
@@ -259,15 +269,25 @@ class SLvEnv(BaseEnv):
         self._move_mutant(dist, growth_layer)
 
         if i == 0:
+            # new_pop_size = self.state[i] * \
+            #                (1 + self.growth_rate[i] *
+            #                 (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
+            #                 (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
-                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity)
+                            - self.growth_rate[i] * self.death_rate[i]) - self.death_rate_treat[i] * self.state[2]
         else:
             #
-            if self.state[0] > self.state[1]:
+            if self.state[0] > self.state[1] and dist > 0:
                 # fitted growth rate minus base death rate
-                growth_rate = 0.139*np.exp(-0.0173*dist) - 0.033
+                # 2D
+                # growth_rate = 0.139*np.exp(-0.0173*dist) - 0.033
+                # 3D
+                if self.dimension ==3:
+                    a = 159.5
+                    b = 4.8275e-06
+                    growth_rate = (b * (a - dist) ** 2) * np.heaviside(a - dist, 1) - 0.033
                 #growth_rate = (-0.000998 * dist + 0.1227) * np.heaviside(-0.000998 * dist + 0.1227, 1) - 0.033
             else:
                 growth_rate = self.growth_rate[i]
@@ -308,7 +328,7 @@ if __name__ == "__main__": # pragma: no cover
     ini_size = env.state[0]+env.state[1]
 
     for i in range(250):
-        if obs[0] > 1.20*ini_size:
+        if obs[0] > 1.4*ini_size:
             act = 1
         else:
             act = 0

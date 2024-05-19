@@ -77,6 +77,9 @@ class LvEnv(BaseEnv):
         if self.normalize:
             self.capacity = env_specific_params.get('carrying_capacity', 6500) \
                             * self.normalization_factor
+            self.death_rate_treat[0] *= self.normalization_factor
+            self.death_rate_treat[1] *= self.normalization_factor
+
         else:
             self.capacity = env_specific_params.get('carrying_capacity', 6500)
 
@@ -264,8 +267,8 @@ class LvEnv(BaseEnv):
         if flag == 'instant':
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
-                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity)
+                            - self.growth_rate[i] * self.death_rate[i]) - self.death_rate_treat[i] * self.state[2]
         elif flag == 'instant_with_noise':
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
@@ -321,6 +324,8 @@ class LvEnv(BaseEnv):
                 new_pop_size = 0
         else:
             raise NotImplementedError
+        if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+            new_pop_size = 0
         return new_pop_size
 
 
