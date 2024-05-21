@@ -300,9 +300,9 @@ class SLvEnv(BaseEnv):
             pass
         elif flag == 'instant_with_noise':
             # rand = truncnorm(loc=0, scale=0.00528*new_pop_size, a=-0.02/0.00528, b=0.02/0.00528).rvs()
-            rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
-            if np.abs(rand) > 0.05 * new_pop_size:
-                rand = 0.05 * new_pop_size * np.sign(rand)
+            rand = np.random.normal(0, 0.0025 * new_pop_size, 1)[0]
+            if np.abs(rand) > 0.01 * new_pop_size:
+                rand = 0.01 * new_pop_size * np.sign(rand)
             new_pop_size += rand
             if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
                 new_pop_size = 0
