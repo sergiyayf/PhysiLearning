@@ -47,9 +47,9 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'MeltdEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: True
+  wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 8
@@ -59,17 +59,17 @@ env:
   observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
-  max_tumor_size: 1.50 #61828 #100000 # 110000 # 4000
-  max_time: 170 # 120
-  initial_wt: 45870 #99.99782 #41219 #2761 # 74291 # 2761
-  initial_mut: 1 #0.00218 #8
-  growth_rate_wt: 0.078 #0.074 # 0.29 # 0.0175
-  growth_rate_mut: 0.213 #0.205 # 0.438 # 0.0175
+  max_tumor_size: 3.0 #61828 #100000 # 110000 # 4000
+  max_time: 150 # 120
+  initial_wt: 6000 #99.99782 #41219 #2761 # 74291 # 2761
+  initial_mut: 20 #0.00218 #8
+  growth_rate_wt: 0.079 #0.074 # 0.29 # 0.0175
+  growth_rate_mut: 0.076 #0.205 # 0.438 # 0.0175
   death_rate_wt: 0.01 #0.0029
   death_rate_mut: 0.01 #0.00438
-  treat_death_rate_wt: 8255 #17.998 #3.156 # 0.36 # 0.397 # 0.015
+  treat_death_rate_wt: 2.388 #17.998 #3.156 # 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
-  treatment_time_step: 1
+  treatment_time_step: 2
   reward_shaping: 0 # reward shaping flag for some predefined rewards
   normalize: True
   normalize_to: 1000.0
@@ -129,6 +129,14 @@ env:
   # LatticeBased environment settings
   GridEnv:
     cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random' # 'load'
+
+  MeltdEnv:
+    growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
+    image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
+    mutant_distance_to_front: 505.7 #150
+    cell_volume: 15000 # - 4.674 is normalized to 45871 cells in 3D
+    growth_layer: 150
+    dimension: 2
 
 # evaluation configuration
 eval:

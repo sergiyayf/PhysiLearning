@@ -133,7 +133,7 @@ if __name__ == '__main__':
     iteration = 1
     accuracy = 0.0
     tune_draws = 500
-    final_draws = 1000
+    final_draws = 100
     while accuracy < 0.95:
         theta_fit = list(params_fit.values())
 
