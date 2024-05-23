@@ -79,6 +79,7 @@ class MeltdEnv(BaseEnv):
 
 
         # 1 - wt, 2 - resistant
+        self.treat = 0
         if self.config['env']['patient_sampling']['enable']:
             self._set_patient_specific_position(self.patient_id)
         else:
@@ -137,6 +138,7 @@ class MeltdEnv(BaseEnv):
 
             if self.observation_type == 'number':
                 self.trajectory[:, self.time] = self.state
+
                 if self.see_resistance:
                     obs = self.state[0:2]
                 else:
@@ -146,6 +148,7 @@ class MeltdEnv(BaseEnv):
                 self.trajectory[0:3, self.time] = self.state
                 self.trajectory[3, self.time] = self.mutant_normalized_position
                 self.trajectory[4, self.time] = self.radius
+
                 if self.see_resistance:
                     obs = [self.state, self.mutant_normalized_position*self.normalization_factor]
                 else:
@@ -162,6 +165,8 @@ class MeltdEnv(BaseEnv):
             if len(self.patient_id_list) > 1:
                 self._choose_new_patient()
                 self._set_patient_specific_position(self.patient_id)
+        else:
+            self.mutant_distance_to_front = np.random.uniform(0, 1000)
         self.time = 0
         if self.wt_random:
             self.initial_wt = \
@@ -170,7 +175,7 @@ class MeltdEnv(BaseEnv):
                 self.initial_wt = self.initial_wt*self.normalization_factor
         if self.mut_random:
             self.initial_mut = \
-                np.random.random_integers(low=0, high=int(0.01*self.max_tumor_size), size=1)[0]
+                np.random.random_integers(low=1, high=50, size=1)[0]
             if self.normalize:
                 self.initial_mut = self.initial_mut*self.normalization_factor
 
@@ -248,12 +253,38 @@ class MeltdEnv(BaseEnv):
         growth_layer = self.growth_layer
         self._move_mutant(dist, growth_layer)
 
+        if flag == 'instant' or flag == 'instant_with_noise':
+            self.treat = self.state[2]
+        elif flag == 'delayed' or flag == 'delayed_with_noise':
+
+            if self.state[2] == 0:
+                if self.time > 1 and (self.trajectory[2, self.time - 1] == 1):
+                    self.treat = 1
+                elif self.time > 2 and (self.trajectory[2, self.time - 2] == 1):
+                    self.treat = 1
+                elif self.time > 3 and (self.trajectory[2, self.time - 3] == 1):
+                    self.treat = 1
+                elif self.time > 4 and (self.trajectory[2, self.time - 4] == 1):
+                    self.treat = 1
+                elif self.time > 5 and (self.trajectory[2, self.time - 5] == 1):
+                    self.treat = 1
+                else:
+                    self.treat = 0
+            elif self.state[2] == 1:
+                if self.time in [0, 1, 2, 3]:
+                    self.treat = 0
+
+                elif (self.trajectory[2, self.time - 1] == 0):
+                    self.treat = 0
+                elif (self.trajectory[2, self.time - 2] == 0):
+                    self.treat = 0
+                elif (self.trajectory[2, self.time - 3] == 0):
+                    self.treat = 0
+                else:
+                    self.treat = 1
+
         if i == 0:
-            # new_pop_size = self.state[i] * \
-            #                (1 + self.growth_rate[i] *
-            #                 (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
-            #                 (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
-            new_pop_size = self.state[i] * (1 + self.growth_rate[i]*(1 - self.death_rate_treat[i] * self.state[2]))
+            new_pop_size = self.state[i] * (1 + self.growth_rate[i]*(1 - self.death_rate_treat[i] * self.treat))
         else:
             #
             if self.state[1] < 0.5*self.initial_wt:
@@ -261,25 +292,20 @@ class MeltdEnv(BaseEnv):
                 # 2D
                 a = -3.93102488e-04
                 b = 6.28714489e-01
-                growth_rate = (a*dist+b)*np.heaviside(a*dist+b, 1)
+                growth_rate = (a*dist+b)*np.heaviside(a*dist+b, 1)/2
             else:
                 growth_rate = self.growth_rate[i]
-            # a = -3.93102488e-04
-            # b = 6.28714489e-01
-            # growth_rate = (a * dist + b) * np.heaviside(a * dist + b, 1)
             new_pop_size = self.state[i] * (1+growth_rate)
-        if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+        if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.treat > 0:
             new_pop_size = 0
 
-        if flag == 'instant':
-            pass
-        elif flag == 'instant_with_noise':
+        elif flag == 'instant_with_noise' or flag == 'delayed_with_noise':
             # rand = truncnorm(loc=0, scale=0.00528*new_pop_size, a=-0.02/0.00528, b=0.02/0.00528).rvs()
-            rand = np.random.normal(0, 0.0025 * new_pop_size, 1)[0]
-            if np.abs(rand) > 0.01 * new_pop_size:
-                rand = 0.01 * new_pop_size * np.sign(rand)
+            rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
+            if np.abs(rand) > 0.1 * new_pop_size:
+                rand = 0.1 * new_pop_size * np.sign(rand)
             new_pop_size += rand
-            if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+            if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.treat > 0:
                 new_pop_size = 0
 
         if new_pop_size < 0:
@@ -294,7 +320,7 @@ if __name__ == "__main__": # pragma: no cover
     np.random.seed(int(time.time()))
     env = MeltdEnv.from_yaml("../../../config.yaml")
     env.reset()
-    obs = [0]
+    obs = [env.state[0]+env.state[1]]
     rad = []
     mut_rad_pos = []
     treat = []
@@ -303,11 +329,15 @@ if __name__ == "__main__": # pragma: no cover
     ini_size = env.state[0]+env.state[1]
     maxtime = 150
     for i in range(maxtime):
-        if obs[0] > 2.0*ini_size:
+        print(obs[0])
+        print(ini_size)
+        # on 2x off treatment
+
+        if i % 4 == 0:
             act = 1
         else:
             act = 0
-        #act=1
+        act = 1
         obs, rew, term, trunc, _ = env.step(act)
         rad.append(env.radius)
         mut_rad_pos.append(env.mutant_radial_position)
@@ -334,17 +364,43 @@ if __name__ == "__main__": # pragma: no cover
     ax.set_ylabel('radius')
     ax.legend()
     ax.set_xlim(0, maxtime)
-    plt.show()
+    ax.set_title('Radius and mutant radial position')
 
     fig, ax = plt.subplots()
-    ax.plot(np.array(wt)+np.array(mut), label='tot')
-    ax.plot(mut, label='mut')
-    ax.fill_between(range(len(treat)), max(rad), max(rad) * 1.1, where=treat, color='orange', alpha=0.3, label='treatment')
-    ax.set_xlabel('time')
-    ax.set_ylabel('number')
-    #ax.set_yscale('log')
-    ax.legend()
-    ax.set_xlim(0, maxtime)
-    plt.show()
+    time = [i for i in range(len(env.trajectory[0, :]))]
+    # rollback treatment
+    treat = env.trajectory[2, :]
+    treat = np.where(treat == 0, np.roll(treat, -1), treat)
+    ax.plot(time, env.trajectory[0, :]/(ini_size), label='wt', color='green')
+    ax.plot(time, env.trajectory[1, :]/(ini_size), label='mut', color='red')
+    ax.plot(time, env.trajectory[0, :]/(ini_size)+env.trajectory[1, :]/(ini_size), label='tot', color='k')
+    ax.fill_between(range(len(treat)), 3, 4, where=treat, color='orange', alpha=0.3, label='treatment')
+    ax.set_title('All resolution simulation data')
 
+    # plot only dayly data
+    fig, ax = plt.subplots()
+    sens = env.trajectory[0, ::2]/(ini_size)
+    res = env.trajectory[1, ::2]/(ini_size)
+    tot = sens + res
+    time = [i for i in range(len(sens))]
+    ax.plot(time, sens, label='wt', color='green')
+    ax.plot(time, res, label='mut', color='red')
+    ax.plot(time, tot, label='tot', color='k')
+    ax.fill_between(range(len(treat[::2])), 3, 4, where=treat[::2], color='orange', alpha=0.3, label='treatment')
+    ax.legend()
+    ax.set_title('Daily data')
+
+    # plot every second day
+    fig, ax = plt.subplots()
+    sens = env.trajectory[0, ::4]/(ini_size)
+    res = env.trajectory[1, ::4]/(ini_size)
+    tot = sens + res
+    time = [i for i in range(len(sens))]
+    ax.plot(time, sens, label='wt', color='green')
+    ax.plot(time, res, label='mut', color='red')
+    ax.plot(time, tot, label='tot', color='k')
+    ax.fill_between(range(len(treat[::4])), 3, 4, where=treat[::4], color='orange', alpha=0.3, label='treatment')
+    ax.legend()
+    ax.set_title('Every second day data')
+    plt.show()
     #anim.save('test.mp4', fps)

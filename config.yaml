@@ -38,7 +38,7 @@ learning:
           vf: [ 64, 64 ]
     total_timesteps: 3.e+7
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '1905_3d_slv_noise_agent_p_62_t_1'
+    model_save_prefix: '2305_2d_meltd_noise_agent_t3'
     load:
       enable_loading: 0
       last_model: 0
@@ -49,7 +49,7 @@ env:
   # general env settings
   type: 'MeltdEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: False
+  wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 8
@@ -60,23 +60,23 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   max_tumor_size: 3.0 #61828 #100000 # 110000 # 4000
-  max_time: 150 # 120
-  initial_wt: 6000 #99.99782 #41219 #2761 # 74291 # 2761
-  initial_mut: 20 #0.00218 #8
-  growth_rate_wt: 0.079 #0.074 # 0.29 # 0.0175
-  growth_rate_mut: 0.076 #0.205 # 0.438 # 0.0175
+  max_time: 200 # 120
+  initial_wt: 6500 #99.99782 #41219 #2761 # 74291 # 2761
+  initial_mut: 'random' #0.00218 #8
+  growth_rate_wt: 0.079 #0.158 #0.079 #0.074 # 0.29 # 0.0175
+  growth_rate_mut: 0.076 #0.152 #0.076 #0.205 # 0.438 # 0.0175
   death_rate_wt: 0.01 #0.0029
   death_rate_mut: 0.01 #0.00438
-  treat_death_rate_wt: 2.388 #17.998 #3.156 # 0.36 # 0.397 # 0.015
+  treat_death_rate_wt: 2.388 # 2.388 #17.998 #3.156 # 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
-  treatment_time_step: 2
+  treatment_time_step: 4
   reward_shaping: 0 # reward shaping flag for some predefined rewards
   normalize: True
   normalize_to: 1000.0
   image_size: 124 #84 #124
   patient_sampling:
     enable: 0
-    type: 'sequential' # 'random' # 'sequential'
+    type: 'position' # 'random' # 'sequential' #position
     patient_id: 80 # [1, 4, 55, 80, 93]
 
   # LV environment settings
@@ -131,9 +131,9 @@ env:
     cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random' # 'load'
 
   MeltdEnv:
-    growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
+    growth_function_flag: 'delayed_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 505.7 #150
+    mutant_distance_to_front: 705.7 #150
     cell_volume: 15000 # - 4.674 is normalized to 45871 cells in 3D
     growth_layer: 150
     dimension: 2
@@ -143,13 +143,13 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: '1905_3d_slv_noise_agent_p_62_t_1'
+  model_prefix: '2305_2d_meltd_noise_agent_t3'
   step_to_load: '_best_reward'
-  save_name: '3d_slvp62_agent'
+  save_name: 'stupid_agent'
   # evaluation settings
   fixed_AT_protocol: 0
-  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.4
+  at_type: 'random' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.5
   num_episodes: 100
-  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'MeltdEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False
