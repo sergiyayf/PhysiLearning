@@ -91,12 +91,12 @@ class MeltdEnv(BaseEnv):
         # mutant position related parameters
         self.dimension = env_specific_params.get('dimension', 2)
         self.growth_layer = env_specific_params.get('growth_layer', 150)
-        self.cell_volume = env_specific_params.get('cell_volume', 2144)
+        self.cell_area = env_specific_params.get('cell_area', 2144)
 
         if self.dimension == 2:
             # calculate the cell area from volume
-            self.cell_radius = (self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
-            self.cell_area = np.pi * self.cell_radius ** 2
+            self.cell_radius = (self.cell_area/np.pi) ** (1 / 2)
+            self.cell_volume = (self.cell_radius ** 3) * np.pi * 4 / 3
             self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_area / np.pi) ** (1 / 2)
         elif self.dimension == 3:
             self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
@@ -166,7 +166,7 @@ class MeltdEnv(BaseEnv):
                 self._choose_new_patient()
                 self._set_patient_specific_position(self.patient_id)
         else:
-            self.mutant_distance_to_front = np.random.uniform(0, 1000)
+            self.mutant_distance_to_front = np.random.uniform(0, 1300)
         self.time = 0
         if self.wt_random:
             self.initial_wt = \
@@ -175,7 +175,7 @@ class MeltdEnv(BaseEnv):
                 self.initial_wt = self.initial_wt*self.normalization_factor
         if self.mut_random:
             self.initial_mut = \
-                np.random.random_integers(low=1, high=50, size=1)[0]
+                np.random.random_integers(low=1, high=15, size=1)[0]
             if self.normalize:
                 self.initial_mut = self.initial_mut*self.normalization_factor
 
@@ -287,14 +287,21 @@ class MeltdEnv(BaseEnv):
             new_pop_size = self.state[i] * (1 + self.growth_rate[i]*(1 - self.death_rate_treat[i] * self.treat))
         else:
             #
-            if self.state[1] < 0.5*self.initial_wt:
-                # fitted growth rate minus base death rate
-                # 2D
-                a = -3.93102488e-04
-                b = 6.28714489e-01
-                growth_rate = (a*dist+b)*np.heaviside(a*dist+b, 1)/2
+            if self.state[1] > 0.1*(self.initial_wt+self.initial_mut):
+                # calculate radius estimate of purely state 1 colony
+                red_colony_rad = (self.state[1]/self.normalization_factor * self.cell_area / np.pi) ** (1 / 2)
+                dist += red_colony_rad
+                a = -3.47226633e-04
+                b = 5.11816467e-01
+                growth_rate = (a * dist + b) * np.heaviside(a * dist + b, 1) / 2
+                if growth_rate < self.growth_rate[i]:
+                    growth_rate = self.growth_rate[i]
             else:
-                growth_rate = self.growth_rate[i]
+
+                a = -3.47226633e-04
+                b = 5.11816467e-01
+                growth_rate = (a * dist + b) * np.heaviside(a * dist + b, 1) / 2
+
             new_pop_size = self.state[i] * (1+growth_rate)
         if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.treat > 0:
             new_pop_size = 0
@@ -329,11 +336,10 @@ if __name__ == "__main__": # pragma: no cover
     ini_size = env.state[0]+env.state[1]
     maxtime = 150
     for i in range(maxtime):
-        print(obs[0])
-        print(ini_size)
+        print(env.radius)
         # on 2x off treatment
 
-        if i % 4 == 0:
+        if obs[0] > 1.85*ini_size and env.state[2] == 0:
             act = 1
         else:
             act = 0

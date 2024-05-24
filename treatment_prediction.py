@@ -7,10 +7,15 @@ if __name__ == '__main__':
     trainer = Trainer(config_file)
     trainer.env_type = 'MeltdEnv'
     trainer.setup_env()
-    model = PPO.load('./Training/SavedModels/2305_2d_meltd_noise_agent_t3_best_reward.zip')
+    model = PPO.load('./Training/SavedModels/2305_2d_meltd_cobra_r0_t17_best_reward.zip')
 
-    obs = np.array([[0., 0., 0., 0., 0., 0., 0., 1000.]])
+    obs = trainer.env.reset()
+    obs = np.array([[0., 0., 0., 1000.]])
 
-    action = model.predict(obs)
+    action, _ = model.predict(obs)
 
-
+    if action:
+        print('Treat')
+    else:
+        print('Dont treat')
+    obs, reward, done, info = trainer.env.step(action)

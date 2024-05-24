@@ -20,6 +20,9 @@ def plot(df, title, scale='linear', truncate=False):
     ax.plot(time, df['Type 0'].values[::2]/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
     ax.plot(time, df['Type 1'].values[::2]/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
     ax.plot(time, (df['Type 0'][::2] + df['Type 1'][::2])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
+    # plot radius and mutant position as well
+    # ax.plot(time, df['Radius'].values[::2]/df['Radius'].values[0], label='Radius', color='black')
+    # ax.plot(time, df['Mutant Position'].values[::2], label='Mutant', color='red')
     ax.legend()
     ax.set_title(title)
     ax.set_yscale(scale)
@@ -46,15 +49,13 @@ def get_ttps(filename, timesteps=100):
 
 def main():
 
-    LV_files_list = ['./Evaluations/MeltdEnvEval__test_meltd_env_no_treatment.h5',
-                        './Evaluations/MeltdEnvEval__test_meltd_env_mtd.h5',
-                        './Evaluations/MeltdEnvEval__test_meltd_env_fixed_1_5.h5',
-                        './Evaluations/MeltdEnvEval_stupid_agent2305_2d_meltd_noise_agent_t3.h5',
-                        './Evaluations/MeltdEnvEval__cobra_rew_4_t14.h5',
-                        './Evaluations/MeltdEnvEval__cobra_rew_0_t17.h5',
-                        './Evaluations/MeltdEnvEval__rand.h5'
+    LV_files_list = ['./Evaluations/MeltdEnvEval__new_model_no_treatment.h5',
+                        './Evaluations/MeltdEnvEval__new_model_mtd.h5',
+                      './Evaluations/MeltdEnvEval__new_model_at100.h5',
+                        './Evaluations/MeltdEnvEval__new_model_fixed_1_5.h5',
+
                      ]
-    LV_name_list = ['No treatment', 'MTD', 'Fixed 1_5', 'Stupid agent', 'Cobra r4 agent 14', 'C 17', 'Random']
+    LV_name_list = ['No treatment', 'MTD', 'at100', 'Fixed 1_5']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -68,25 +69,19 @@ def main():
     sns.stripplot(data=LV_df, ax=ax, color='black', jitter=0.2, size=2.5)
     # show mean as well
     ax.scatter(LV_df.mean().index, LV_df.mean(), marker='x', color='red', s=50, label='mean')
+    # horizontal line at MTD median
+    ax.axhline(y=LV_df['MTD'].median(), color='blue', linestyle='--', label='MTD median')
 
 
+for i in range(3):
 
-df = pd.read_hdf('./Evaluations/MeltdEnvEval__test_meltd_env_no_treatment.h5', key=f'run_0')
-plot(df, 'No treatment', scale='linear', truncate=False)
+    df = pd.read_hdf('./Evaluations/MeltdEnvEval__new_model_mtd.h5', key=f'run_{i}')
+    plot(df, 'MTD', scale='linear', truncate=False)
+    df = pd.read_hdf('./Evaluations/MeltdEnvEval__new_model_at100.h5', key=f'run_{i}')
+    plot(df, 'at100', scale='linear', truncate=False)
+    df = pd.read_hdf('./Evaluations/MeltdEnvEval__new_model_fixed_1_5.h5', key=f'run_{i}')
+    plot(df, 'Fixed 1_5', scale='linear', truncate=False)
 
-df = pd.read_hdf('./Evaluations/MeltdEnvEval__test_meltd_env_mtd.h5', key=f'run_0')
-plot(df, 'Meltd MTD', scale='linear', truncate=False)
-
-for k in range(2):
-
-    df = pd.read_hdf('./Evaluations/MeltdEnvEval_stupid_agent2305_2d_meltd_noise_agent_t3.h5', key=f'run_{k}')
-    plot(df, f'Meltd mela Agent run_{k}', scale='linear', truncate=False)
-
-    df = pd.read_hdf('./Evaluations/MeltdEnvEval__cobra_rew_4_t14.h5', key=f'run_{k}')
-    plot(df, f'Meltd Cobra 14 run_{k}', scale='linear', truncate=False)
-
-    df = pd.read_hdf('./Evaluations/MeltdEnvEval__cobra_rew_0_t17.h5', key=f'run_{k}')
-    plot(df, f'Meltd Cobra 17 run_{k}', scale='linear', truncate=False)
 
 main()
 plt.show()

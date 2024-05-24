@@ -49,10 +49,10 @@ env:
   # general env settings
   type: 'MeltdEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: True
+  wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
-    n_stack: 8
+    n_stack: 4
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
@@ -61,7 +61,7 @@ env:
   see_resistance: False
   max_tumor_size: 3.0 #61828 #100000 # 110000 # 4000
   max_time: 200 # 120
-  initial_wt: 6500 #99.99782 #41219 #2761 # 74291 # 2761
+  initial_wt: 8000 #99.99782 #41219 #2761 # 74291 # 2761
   initial_mut: 'random' #0.00218 #8
   growth_rate_wt: 0.079 #0.158 #0.079 #0.074 # 0.29 # 0.0175
   growth_rate_mut: 0.076 #0.152 #0.076 #0.205 # 0.438 # 0.0175
@@ -134,22 +134,22 @@ env:
     growth_function_flag: 'delayed_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
     mutant_distance_to_front: 705.7 #150
-    cell_volume: 15000 # - 4.674 is normalized to 45871 cells in 3D
+    cell_area: 976
     growth_layer: 150
     dimension: 2
 
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
-  model_prefix: '2305_2d_meltd_noise_agent_t3'
+  model_prefix: '2305_2d_meltd_cobra_r0_t17'
   step_to_load: '_best_reward'
-  save_name: 'stupid_agent'
+  save_name: 'new_model_no_treatment'
   # evaluation settings
-  fixed_AT_protocol: 0
-  at_type: 'random' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.5
+  fixed_AT_protocol: 1
+  at_type: 'mtds' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.0
   num_episodes: 100
   evaluate_on: 'MeltdEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False
