@@ -50,9 +50,11 @@ def main():
                         './Evaluations/MeltdEnvEval__test_meltd_env_mtd.h5',
                         './Evaluations/MeltdEnvEval__test_meltd_env_fixed_1_5.h5',
                         './Evaluations/MeltdEnvEval_stupid_agent2305_2d_meltd_noise_agent_t3.h5',
+                        './Evaluations/MeltdEnvEval__cobra_rew_4_t14.h5',
+                        './Evaluations/MeltdEnvEval__cobra_rew_0_t17.h5',
                         './Evaluations/MeltdEnvEval__rand.h5'
                      ]
-    LV_name_list = ['No treatment', 'MTD', 'Fixed 1_5', 'Stupid agent', 'Random']
+    LV_name_list = ['No treatment', 'MTD', 'Fixed 1_5', 'Stupid agent', 'Cobra r4 agent 14', 'C 17', 'Random']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -76,11 +78,15 @@ df = pd.read_hdf('./Evaluations/MeltdEnvEval__test_meltd_env_mtd.h5', key=f'run_
 plot(df, 'Meltd MTD', scale='linear', truncate=False)
 
 for k in range(2):
-    df = pd.read_hdf('./Evaluations/MeltdEnvEval__test_meltd_env_fixed_1_5.h5', key=f'run_{k}')
-    plot(df, f'Meltd Fixed 1_5 run_{k}', scale='linear', truncate=False)
 
     df = pd.read_hdf('./Evaluations/MeltdEnvEval_stupid_agent2305_2d_meltd_noise_agent_t3.h5', key=f'run_{k}')
-    plot(df, f'Meltd Stupid Agent run_{k}', scale='linear', truncate=False)
+    plot(df, f'Meltd mela Agent run_{k}', scale='linear', truncate=False)
+
+    df = pd.read_hdf('./Evaluations/MeltdEnvEval__cobra_rew_4_t14.h5', key=f'run_{k}')
+    plot(df, f'Meltd Cobra 14 run_{k}', scale='linear', truncate=False)
+
+    df = pd.read_hdf('./Evaluations/MeltdEnvEval__cobra_rew_0_t17.h5', key=f'run_{k}')
+    plot(df, f'Meltd Cobra 17 run_{k}', scale='linear', truncate=False)
 
 main()
 plt.show()
