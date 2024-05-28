@@ -36,9 +36,9 @@ learning:
         net_arch:
           pi: [ 64, 64 ]
           vf: [ 64, 64 ]
-    total_timesteps: 3.e+7
+    total_timesteps: 2.e+7
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '2305_2d_meltd_noise_agent_t3'
+    model_save_prefix: '2405_2d_meltd_remake_mela'
     load:
       enable_loading: 0
       last_model: 0
@@ -49,10 +49,10 @@ env:
   # general env settings
   type: 'MeltdEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: False
+  wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
-    n_stack: 4
+    n_stack: 8
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
@@ -141,14 +141,14 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: '2305_2d_meltd_cobra_r0_t17'
-  step_to_load: '_best_reward'
-  save_name: 'new_model_no_treatment'
+  model_prefix: '2405_2d_meltd_remake_mela'
+  step_to_load: '_final'
+  save_name: 'new_model_mela_agent'
   # evaluation settings
-  fixed_AT_protocol: 1
-  at_type: 'mtds' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  fixed_AT_protocol: 0
+  at_type: 'mtd' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.0
   num_episodes: 100
   evaluate_on: 'MeltdEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'

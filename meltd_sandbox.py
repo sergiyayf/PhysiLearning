@@ -37,6 +37,7 @@ def get_ttps(filename, timesteps=100):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
+        df = df[::4]
         # find the largest index with non-zero Type 0 and Type 1
         initial_size = df['Type 0'][0] + df['Type 1'][0]
         nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 3.0)]
@@ -44,7 +45,7 @@ def get_ttps(filename, timesteps=100):
             # append index when type 0 + type 1 is larger than 1.5
             ttps.append(nz.index[0]/2)
         else:
-            ttps.append(len(df)/2)
+            ttps.append(len(df)*2)
     return ttps
 
 def main():
@@ -53,9 +54,11 @@ def main():
                         './Evaluations/MeltdEnvEval__new_model_mtd.h5',
                       './Evaluations/MeltdEnvEval__new_model_at100.h5',
                         './Evaluations/MeltdEnvEval__new_model_fixed_1_5.h5',
+                        './Evaluations/MeltdEnvEval_24ct1_final2.h5',
+                        './Evaluations/MeltdEnvEval_24ct11.h5'
 
                      ]
-    LV_name_list = ['No treatment', 'MTD', 'at100', 'Fixed 1_5']
+    LV_name_list = ['No treatment', 'MTD', 'at100', 'Fixed 1_5', 'agent ct1 final2', 'agent ct11']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -73,15 +76,18 @@ def main():
     ax.axhline(y=LV_df['MTD'].median(), color='blue', linestyle='--', label='MTD median')
 
 
-for i in range(3):
+for i in range(6):
 
-    df = pd.read_hdf('./Evaluations/MeltdEnvEval__new_model_mtd.h5', key=f'run_{i}')
-    plot(df, 'MTD', scale='linear', truncate=False)
-    df = pd.read_hdf('./Evaluations/MeltdEnvEval__new_model_at100.h5', key=f'run_{i}')
-    plot(df, 'at100', scale='linear', truncate=False)
-    df = pd.read_hdf('./Evaluations/MeltdEnvEval__new_model_fixed_1_5.h5', key=f'run_{i}')
-    plot(df, 'Fixed 1_5', scale='linear', truncate=False)
-
+    # df = pd.read_hdf('./Evaluations/MeltdEnvEval__new_model_mtd.h5', key=f'run_{i}')
+    # plot(df, 'MTD', scale='linear', truncate=False)
+    # df = pd.read_hdf('./Evaluations/MeltdEnvEval__new_model_at100.h5', key=f'run_{i}')
+    # plot(df, 'at100', scale='linear', truncate=False)
+    # df = pd.read_hdf('./Evaluations/MeltdEnvEval__new_model_fixed_1_5.h5', key=f'run_{i}')
+    # plot(df, 'Fixed 1_5', scale='linear', truncate=False)
+    df = pd.read_hdf('./Evaluations/MeltdEnvEval_24ct1_final2.h5', key=f'run_{i}')
+    plot(df, 'Agent', scale='linear', truncate=False)
+    df = pd.read_hdf('./Evaluations/MeltdEnvEval_24ct11.h5', key=f'run_{i}')
+    plot(df, 'Agent 11', scale='linear', truncate=False)
 
 main()
 plt.show()
