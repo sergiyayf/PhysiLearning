@@ -63,10 +63,20 @@ if __name__ == '__main__':
     popt_exp, pcov_exp = curve_fit(exp, dists, mean)
     print(popt_exp)
 
+    def quadratic(x, a, b):
+        return b*(a-x)**2
+
+    def trunc_quadratic(x, a, b):
+        return (b*(a-x)**2) * np.heaviside((a-x), 1)
+
+    popt_quad, pcov_quad = curve_fit(quadratic, dists[0:17], mean[0:17])
+    print(popt_quad)
+
     fig, ax = plt.subplots()
     ax.errorbar(dists, mean, yerr=std, fmt='o', label='Mean and std')
     ax.plot(dists, trunc_linear(dists, *popt), label='Fit')
     ax.plot(dists, exp(dists, *popt_exp), label='Exp fit')
+    ax.plot(dists, trunc_quadratic(dists, *popt_quad), label='Quadratic fit')
     ax.legend()
     ax.set_xlabel('Distance to front cell')
     ax.set_ylabel('Transition rate')

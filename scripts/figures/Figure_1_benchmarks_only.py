@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import seaborn as sns
+import numpy as np
+from scipy.stats import gaussian_kde
 ex = {'font.size': 6,
           'font.weight': 'normal',
           'font.family': 'sans-serif'}
@@ -48,6 +50,13 @@ def figure_setup(fig, ax, save_figure = False):
 
     plt.show()
 
+def jitter(x0, y, ax=None, s=0.1, c='b', alpha=0.5):
+    kde = gaussian_kde(y)
+    density = kde(y)
+
+    jitter = np.random.normal(0, s, len(y))
+    x_vals = x0 + (density * jitter * 1)
+    ax.scatter(x_vals, y, color=c, alpha=alpha, s=10)
 
 def plot(fig, ax):
     PC_files_list = ['data/2D_benchmarks/no_treatment/2d_no_treatment_all.h5',
@@ -85,10 +94,30 @@ def plot(fig, ax):
 
     # box plot the distribution with scatter using seaborn
 
-    b = sns.boxplot(data=combined_df, ax=ax, width=0.3, fliersize=1.5, linewidth=1)
-    sns.stripplot(data=combined_df, ax=ax, color='black', jitter=0.2, size=1.5, alpha=0.5)
-    # show mean as well
-    ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=20, label='mean')
+    x_0 = LV_df['LV No therapy'].values[0]
+    y = PC_df['PC No therapy'].values
+    jitter(x_0, y, ax=ax, c='b', s=0.5)
+    x_1 = LV_df['LV MTD'].values[0]
+    y = PC_df['PC MTD'].values
+    jitter(x_1, y, ax=ax, c='r', s=10)
+    x_2 = LV_df['LV AT100'].values[0]
+    y = PC_df['PC AT100'].values
+    jitter(x_2, y, ax=ax, c='g', s=30)
+    ax.boxplot([PC_df['PC No therapy'].values, PC_df['PC MTD'].values, PC_df['PC AT100'].values],
+               positions=[x_0, x_1, x_2], widths=10)
+    # plot diagonal
+    ax.plot([0, 250], [0, 250], 'k--')
+    ax.set_xlim(0, 80)
+    ax.set_ylim(0, 170)
+    ax.set_xlabel('Time to progression LV')
+    ax.set_ylabel('Time to progression PC')
+    ax.set_xticks([0, 20, 40, 60, 80])
+    ax.set_xticklabels([0, 20, 40, 60, 80])
+
+    # b = sns.boxplot(data=combined_df, ax=ax, width=0.3, fliersize=1.5, linewidth=1)
+    # sns.stripplot(data=combined_df, ax=ax, color='black', jitter=0.2, size=1.5, alpha=0.5)
+    # # show mean as well
+    # ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=20, label='mean')
 
     return
 

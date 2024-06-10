@@ -48,6 +48,18 @@ def figure_setup(fig, ax, save_figure = False):
 
     plt.show()
 
+def get_mutant_proportions(filename, timesteps=100):
+    mutant_proportions = []
+    for i in range(timesteps):
+        df = pd.read_hdf(filename, key=f'run_{i}')
+        initial_size = df['Type 0'][0] + df['Type 1'][0]
+        # mutant_proportions.append(df['Type 1'].values[-1]/(df['Type 0'].values[-1] + df['Type 1'].values[-1]))
+        nz = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.33)]
+        if len(nz) > 0:
+            mutant_proportions.append(nz['Type 1'].values[0] / (nz['Type 0'].values[0] + nz['Type 1'].values[0]))
+        else:
+            mutant_proportions.append(df['Type 1'].values[-1] / (df['Type 0'].values[-1] + df['Type 1'].values[-1]))
+    return mutant_proportions
 
 def plot(fig, ax):
     PC_files_list = ['data/2D_benchmarks/no_treatment/2d_no_treatment_all.h5',
@@ -78,17 +90,24 @@ def plot(fig, ax):
 
     # combine the two dataframes
     combined = {}
+    mut_prop_dict = {}
     for i in range(len(PC_name_list)):
         combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
         combined[PC_name_list[i]] = PC_df[PC_name_list[i]]
+        mut_prop_dict[PC_name_list[i]] = get_mutant_proportions(PC_files_list[i])
     combined_df = pd.DataFrame(combined)
 
     # box plot the distribution with scatter using seaborn
 
-    b = sns.boxplot(data=combined_df, ax=ax, width=0.3, fliersize=1.5, linewidth=1)
-    sns.stripplot(data=combined_df, ax=ax, color='black', jitter=0.2, size=1.5, alpha=0.5)
-    # show mean as well
-    ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=20, label='mean')
+    sns.histplot(PC_df['PC Agent'], ax=ax, color='red', kde=True, label='PC Agent')
+    # horizontal lines at No treat, MTD and at100
+    ax.axvline(x=PC_df['PC No therapy'].mean(), color='blue', linestyle='--', label='No therapy')
+    ax.axvline(x=PC_df['PC MTD'].mean(), color='green', linestyle='--', label='MTD')
+    ax.axvline(x=PC_df['PC AT100'].mean(), color='purple', linestyle='--', label='AT100')
+    xa = ax.twinx()
+    xa.scatter(PC_df['PC Agent'], mut_prop_dict['PC Agent'], color='red', label='PC Agent')
+    xa.set_ylim(0, 0.2)
+    xa.set_ylabel('Mutant proportion')
 
     return
 

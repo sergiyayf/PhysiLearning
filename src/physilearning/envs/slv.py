@@ -267,8 +267,12 @@ class SLvEnv(BaseEnv):
             #
             if self.state[0] > self.state[1]:
                 # fitted growth rate minus base death rate
-                growth_rate = 0.139*np.exp(-0.0173*dist) - 0.033
+                #growth_rate = 0.139*np.exp(-0.0173*dist) - 0.033
                 #growth_rate = (-0.000998 * dist + 0.1227) * np.heaviside(-0.000998 * dist + 0.1227, 1) - 0.033
+                a = 176.39
+                b = 4.13e-6
+                growth_rate = (b*(a-dist)**2) * np.heaviside((a-dist), 1) - 0.033
+
             else:
                 growth_rate = self.growth_rate[i]
 

@@ -35,7 +35,7 @@ def figure_setup(fig, ax, save_figure = False):
 
 def plot(fig, ax):
     #df = pd.read_hdf('data/2D_benchmarks/x6/2d_x6_all.h5', key='run_0')
-    df = pd.read_hdf('./Evaluations/LvEnvEval_greatest_agent_run2703_test_x6.h5', key='run_10')
+    df = pd.read_hdf('./Evaluations/saved_paper_2d_evals/LvEnvEval_greatest_agent_run2703_test_x6.h5', key='run_10')
     #ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0', color='b')
     #ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1', color='r')
     total = df['Type 0'].values + df['Type 1'].values
@@ -46,6 +46,10 @@ def plot(fig, ax):
     ax[1].plot(df.index, type0/total[0], label='Type 0', color='b')
     ax[1].plot(df.index, type1/total[0], label='Type 1', color='r')
     ax[1].plot(df.index, total/total[0], label='total', color='k')
+    ax[1].axvline(x=7, color='k', linestyle='--',label='No treatment')
+    ax[1].axvline(x=37, color='orange', linestyle='--',label='MTD')
+    ax[1].axvline(x=73, color='green', linestyle='--',label='AT100')
+
     treat = df['Treatment'].values
     # replace 0s that are directly after 1 with 1s
     treat = np.where(treat == 0, np.roll(treat, -1), treat)
@@ -53,7 +57,8 @@ def plot(fig, ax):
     lw=0)
 if __name__ == '__main__':
     # setup pwd
-    os.chdir('/Users/saif/Desktop/Serhii/Projects/PhysiLearning')
+    # os.chdir('/Users/saif/Desktop/Serhii/Projects/PhysiLearning')
+    os.chdir('/home/saif/Projects/PhysiLearning')
     fig, ax = plt.subplots(2,1, figsize=(200 / 72, 80 / 72), constrained_layout=False,
                            sharex=True, gridspec_kw={'height_ratios': [1, 10]})
     figure_setup(fig, ax, save_figure = False)
