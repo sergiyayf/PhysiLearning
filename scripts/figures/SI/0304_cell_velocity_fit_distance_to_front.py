@@ -126,6 +126,7 @@ if __name__ == '__main__':
     median_projections = []
     mode_projections = []
     std_projs = []
+    all_cells_df = pd.DataFrame()
     for fname in fnames:
         for j in range(2, 12):
 
@@ -143,6 +144,8 @@ if __name__ == '__main__':
             median_projections.append(med_projections)
             mode_projections.append(mode_projection)
             std_projs.append(std_proj)
+            all_cells_df = pd.concat([all_cells_df, df_velocity])
+
         # plot_velocity_map(df_velocity)
         # plot_radial_velocity(average_projections, std_proj, bin_size=20)
     # average the projections by same bin
@@ -194,5 +197,35 @@ if __name__ == '__main__':
     ax.plot(rads, trunc_linear(rads, *popt), 'g-', label='fit 4 points')
     ax.plot(rads, trunc_linear(rads, *popt5), 'b-', label='fit 5 points')
     ax.legend()
+
+    # Assuming df is your dataframe and it has columns 'position_x', 'position_y', 'velocity_x', 'velocity_y'
+
+    # Define grid size
+    grid_size = 10
+    df = all_cells_df
+    # Create grid
+    x = np.arange(df['position_x'].min(), df['position_x'].max(), grid_size)
+    y = np.arange(df['position_y'].min(), df['position_y'].max(), grid_size)
+    grid_x, grid_y = np.meshgrid(x, y)
+
+    # Map cell positions to grid
+    df['grid_x'] = pd.cut(df['position_x'], bins=x, labels=False, include_lowest=True)
+    df['grid_y'] = pd.cut(df['position_y'], bins=y, labels=False, include_lowest=True)
+
+    # Group by grid cell and calculate average velocity
+    grouped = df.groupby(['grid_x', 'grid_y']).agg({'velocity_x': 'mean', 'velocity_y': 'mean'}).reset_index()
+    # Plot average velocity map
+    plt.figure(figsize=(10, 10))
+    # quiver plot of the average velocity, coloring the arrows with viridis, handling outliers
+    plt.quiver(grouped['grid_x'], grouped['grid_y'], grouped['velocity_x'], grouped['velocity_y'], color='black')
+
+    # figure with colors and handled outliers
+    fig, ax = plt.subplots()
+    magnitude = np.sqrt(grouped['velocity_x']**2 + grouped['velocity_y']**2)
+    sc = ax.scatter(grouped['grid_x'], grouped['grid_y'], c=magnitude, cmap='viridis', vmin=0, vmax=1)
+    fig.colorbar(sc)
+
+    # save all_cells_df to pickle for efficient loading
+    all_cells_df.to_pickle('all_cells_df.pkl')
     plt.show()
 
