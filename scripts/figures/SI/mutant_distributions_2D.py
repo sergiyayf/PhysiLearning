@@ -8,7 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-dir = '/data'
+dir = '/home/saif/Projects/PhysiLearning/data/'
 hdf5_file = path.join(dir, 'presims_2d.h5')
 
 

@@ -8,7 +8,7 @@ import os
 if __name__ == '__main__':
     # Load data
     os.chdir('/home/saif/Projects/PhysiLearning')
-    df = pd.read_pickle('data/velocity.pkl')
+    df = pd.read_pickle('data/pickles/velocity.pkl')
     # Define grid size
     grid_size = 10
 

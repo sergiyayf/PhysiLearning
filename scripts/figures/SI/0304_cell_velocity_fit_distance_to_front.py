@@ -157,6 +157,9 @@ if __name__ == '__main__':
     std_projs = np.sqrt((std_projs ** 2).sum(axis=1))
     rads = [x * 20 for x in range(0, len(mean_projections))]
     rads = np.array(rads)
+    # pickle mean projections and std_projs
+    # mean_projections.to_pickle('mean_velocity_projections.pkl')
+    # std_projs.to_pickle('std_velocity_projections.pkl')
     fig, ax = plt.subplots()
     plot_radial_velocity(ax, mean_projections, std_projs, bin_size=20)
     #ax.errorbar(rads, median_projections, yerr=std_proj, fmt='d', color='black', ecolor='lightgray', elinewidth=3,
@@ -226,6 +229,6 @@ if __name__ == '__main__':
     fig.colorbar(sc)
 
     # save all_cells_df to pickle for efficient loading
-    all_cells_df.to_pickle('all_cells_df.pkl')
+    #all_cells_df.to_pickle('all_cells_df.pkl')
     plt.show()
 
