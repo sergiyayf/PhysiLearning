@@ -61,9 +61,9 @@ class SLvEnv(BaseEnv):
         self.wt_random = isinstance(initial_wt, str)
         self.mut_random = isinstance(initial_mut, str)
         if self.wt_random:
-            initial_wt = np.random.random_integers(low=0, high=int(0.99*max_tumor_size), size=1)[0]
+            initial_wt = np.random.randint(low=1000, high=3000, size=1)[0]
         if self.mut_random:
-            initial_mut = np.random.random_integers(low=0, high=int(0.99*max_tumor_size), size=1)[0]
+            initial_mut = np.random.randint(low=0, high=20, size=1)[0]
         super().__init__(config=config, name=name, observation_type=observation_type, action_type=action_type,
                          max_tumor_size=max_tumor_size, max_time=max_time, initial_wt=initial_wt,
                          initial_mut=initial_mut, growth_rate_wt=growth_rate_wt, growth_rate_mut=growth_rate_mut,
@@ -96,6 +96,7 @@ class SLvEnv(BaseEnv):
         self.dimension = env_specific_params.get('dimension', 2)
         self.growth_layer = env_specific_params.get('growth_layer', 150)
         self.cell_volume = env_specific_params.get('cell_volume', 2144)
+        self.growth_fit = env_specific_params.get('growth_fit', 'exp')
         if self.dimension == 2:
             # calculate the cell area from volume
             self.cell_radius = (self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
@@ -105,6 +106,10 @@ class SLvEnv(BaseEnv):
             self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
         else:
             raise ValueError('Dimension should be 2 or 3')
+
+        if isinstance(self.mutant_distance_to_front, str):
+            self.random_distance = True
+            self.mutant_distance_to_front = np.random.randint(low=0, high=self.radius*0.5, size=1)[0]
 
         self.mutant_radial_position = self.radius - self.mutant_distance_to_front
         self.mutant_normalized_position = self.mutant_radial_position/self.radius
@@ -179,20 +184,22 @@ class SLvEnv(BaseEnv):
         self.time = 0
         if self.wt_random:
             self.initial_wt = \
-                np.random.random_integers(low=0, high=int(self.max_tumor_size), size=1)[0]
-            if self.normalize:
-                self.initial_wt = self.initial_wt*self.normalization_factor
+                np.random.randint(low=1000, high=3000, size=1)[0]
         if self.mut_random:
             self.initial_mut = \
-                np.random.random_integers(low=0, high=int(0.01*self.max_tumor_size), size=1)[0]
-            if self.normalize:
-                self.initial_mut = self.initial_mut*self.normalization_factor
+                np.random.randint(low=0, high=20, size=1)[0]
+        if self.normalize:
+            self.normalization_factor = self.normalize_to / (self.initial_wt + self.initial_mut)
+            self.initial_wt = self.initial_wt * self.normalization_factor
+            self.initial_mut = self.initial_mut * self.normalization_factor
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         if self.dimension == 2:
             self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_area / np.pi) ** (1 / 2)
         elif self.dimension == 3:
             self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
+        if self.random_distance:
+            self.mutant_distance_to_front = np.random.randint(low=0, high=self.radius*0.5, size=1)[0]
         self.mutant_radial_position = self.radius - self.mutant_distance_to_front
         self.mutant_normalized_position = self.mutant_radial_position / self.radius
 
@@ -267,12 +274,17 @@ class SLvEnv(BaseEnv):
             #
             if self.state[0] > self.state[1]:
                 # fitted growth rate minus base death rate
-                #growth_rate = 0.139*np.exp(-0.0173*dist) - 0.033
-                #growth_rate = (-0.000998 * dist + 0.1227) * np.heaviside(-0.000998 * dist + 0.1227, 1) - 0.033
-                a = 176.39
-                b = 4.13e-6
-                growth_rate = (b*(a-dist)**2) * np.heaviside((a-dist), 1) - 0.033
-
+                if self.growth_fit == 'exp':
+                    growth_rate = 0.139*np.exp(-0.0173*dist) - 0.033
+                elif self.growth_fit == 'linear':
+                    growth_rate = (-0.000998 * dist + 0.1227) * np.heaviside(-0.000998 * dist + 0.1227, 1) - 0.033
+                elif self.growth_fit == 'quadratic':
+                    a = 176.39
+                    b = 4.13e-6
+                    growth_rate = (b*(a-dist)**2) * np.heaviside((a-dist), 1) - 0.033
+                else:
+                    print('Specified growth fit is not found, using position independent growth rate')
+                    growth_rate = self.growth_rate[i]
             else:
                 growth_rate = self.growth_rate[i]
 

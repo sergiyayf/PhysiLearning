@@ -119,9 +119,9 @@ if __name__ == '__main__':
     figure_setup(fig, ax, save_figure = False)
 
     # plot trajectories of multiple runs
-    for i in range(1):
-        df = pd.read_hdf('data/2D_benchmarks/parabolic_t1/2d_parabolic_run_all.h5', key=f'run_{i}')
-        fig, ax = plt.subplots(2,1, constrained_layout=False, figsize=(200 / 72, 80 / 72),sharex=True, gridspec_kw={'height_ratios': [1, 10]})
+    for i in range(10,30):
+        df = pd.read_hdf('data/2D_benchmarks/multipatient/agent_s2t5/2d_mult_s2t5_run_all.h5', key=f'run_{i}')
+        fig, ax = plt.subplots(2,1, constrained_layout=False, figsize=(200 / 72, 80 / 72), sharex=True, gridspec_kw={'height_ratios': [1, 10]})
         plot_trajectory(fig, ax, df)
 
     plt.show()

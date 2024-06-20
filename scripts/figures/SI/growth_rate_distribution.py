@@ -61,7 +61,7 @@ if __name__ == '__main__':
         return a*np.exp(-b*x)
 
     popt_exp, pcov_exp = curve_fit(exp, dists, mean)
-    print(popt_exp)
+    print('Exp: ', popt_exp)
 
     def quadratic(x, a, b):
         return b*(a-x)**2

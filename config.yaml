@@ -38,16 +38,16 @@ learning:
           vf: [64, 64]
     total_timesteps: 3.e+7
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '0904_slv_num1_load_1'
+    model_save_prefix: 'test_cohort'
     load:
-      enable_loading: 1
+      enable_loading: 0
       last_model: 0
       saved_model_name: './Training/SavedModels/0904_slv_num1_best_reward'
 
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -61,8 +61,8 @@ env:
   see_resistance: False
   max_tumor_size: 1.33 # 2006 #3086 #100000 # 110000 # 4000
   max_time: 250 # 120
-  initial_wt: 1539 #2761 # 74291 # 2761
-  initial_mut: 4
+  initial_wt: 'random' #1539 #2761 # 74291 # 2761
+  initial_mut: 'random' #4
   growth_rate_wt: 0.087 #0.085 - 1.3# 0.083 # 0.29 # 0.0175
   growth_rate_mut: 0.216 #0.219 - 1.3# 0.223 # 0.438 # 0.0175
   death_rate_wt: 0.01 #0.0029
@@ -93,10 +93,11 @@ env:
     competition_mut: 3.408 #0.336
     growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 70.5 # 92
+    mutant_distance_to_front: 'random' #70.5 # 92
     cell_volume: 2144
     growth_layer: 150 # 110
     dimension: 2
+    growth_fit: 'exp'
   # note this is not yet functional
   PcEnv:
     domain_size: 2050 #1250
