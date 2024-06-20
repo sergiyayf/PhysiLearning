@@ -52,14 +52,15 @@ def figure_setup(fig, ax, save_figure = False):
 
 
 def plot(fig, ax):
-    PC_files_list = ['./Evaluations/LvEnvEval_greatest_agent_run2703_test_x6.h5',
+    PC_files_list = ['./Evaluations/saved_paper_2d_evals/LvEnvEval_greatest_agent_run2703_test_x6.h5',
                      'data/2D_benchmarks/x6/2d_x6_all.h5',
                      'data/2D_benchmarks/n2_t4_l3/2d_n2_t4_l3_all.h5',
-                     './Evaluations/LvEnvEval__s2t5_on_lv_no_noise1504_s2_t5_l3.h5',
-                     './Evaluations/SLvEnvEval__s2t5_on_itself1504_s2_t5_l3.h5',
+                     './Evaluations/saved_paper_2d_evals/LvEnvEval__s2t5_on_lv_no_noise1504_s2_t5_l3.h5',
+                     './Evaluations/saved_paper_2d_evals/SLvEnvEval__s2t5_on_itself1504_s2_t5_l3.h5',
                      'data/2D_benchmarks/s2_t5_l3/2d_s2_t5_l3_all.h5',
+                     'data/2D_benchmarks/parabolic_t1/2d_parabolic_run_all.h5',
                      ]
-    PC_name_list = ['LV x6', 'PC x6', 'PC n2t4', 'LV s2t5', 'nnLV s2t5', 'PC s2t5']
+    PC_name_list = ['LV x6', 'PC x6', 'PC n2t4', 'LV s2t5', 'nnLV s2t5', 'PC s2t5', 'PC parabolic']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -78,6 +79,7 @@ def plot(fig, ax):
 
 if __name__ == '__main__':
     # setup pwd
-    os.chdir('/Users/saif/Desktop/Serhii/Projects/PhysiLearning')
+    # os.chdir('/Users/saif/Desktop/Serhii/Projects/PhysiLearning')
+    os.chdir('/home/saif/Projects/PhysiLearning')
     fig, ax = plt.subplots(figsize=(220 / 72, 200 / 72), constrained_layout=True)
-    figure_setup(fig, ax, save_figure = True)
+    figure_setup(fig, ax, save_figure = False)

@@ -66,8 +66,12 @@ def plot(fig, ax):
                      'data/2D_benchmarks/mtd/2d_mtd_all.h5',
                      'data/2D_benchmarks/at100/2d_at100_all.h5',
                      'data/2D_benchmarks/x6/2d_x6_all.h5',
+                     'data/2D_benchmarks/parabolic_t1/2d_parabolic_run_all.h5',
+                     # 'data/2D_benchmarks/s2_t5_l3/2d_s2_t5_l3_all.h5',
+                     # './data/2D_benchmarks/agent_n3/t3/2d_n3_t3_run_all.h5'
+                     # './data/2D_benchmarks/agent_l3/t3/2d_l3_t3_run_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC Agent']
+    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC Agent', 'PC l3t3']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -79,8 +83,9 @@ def plot(fig, ax):
                      './Evaluations/saved_paper_2d_evals/LvEnvEval_2d_mtd.h5',
                      './Evaluations/saved_paper_2d_evals/LvEnvEval_2d_at100.h5',
                      './Evaluations/saved_paper_2d_evals/LvEnvEval_greatest_agent_run2703_test_x6.h5',
+                     './Evaluations/saved_paper_2d_evals/LvEnvEval_greatest_agent_run2703_test_x6.h5',
                      ]
-    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV Agent']
+    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV Agent', 'LV Parabolic']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -99,14 +104,16 @@ def plot(fig, ax):
 
     # box plot the distribution with scatter using seaborn
 
-    sns.histplot(PC_df['PC Agent'], ax=ax, color='red', kde=True, label='PC Agent')
+    sns.histplot(PC_df['PC l3t3'], ax=ax, color='red', kde=True, label='PC Agent')
     # horizontal lines at No treat, MTD and at100
     ax.axvline(x=PC_df['PC No therapy'].mean(), color='blue', linestyle='--', label='No therapy')
     ax.axvline(x=PC_df['PC MTD'].mean(), color='green', linestyle='--', label='MTD')
     ax.axvline(x=PC_df['PC AT100'].mean(), color='purple', linestyle='--', label='AT100')
     xa = ax.twinx()
-    xa.scatter(PC_df['PC Agent'], mut_prop_dict['PC Agent'], color='red', label='PC Agent')
-    xa.set_ylim(0, 0.2)
+    xa.scatter(PC_df['PC l3t3'], mut_prop_dict['PC l3t3'], color='red', label='PC Agent')
+    # discontinuous y-axis , because there is one outlier
+
+    # xa.set_ylim(0, 0.2)
     xa.set_ylabel('Mutant proportion')
 
     return

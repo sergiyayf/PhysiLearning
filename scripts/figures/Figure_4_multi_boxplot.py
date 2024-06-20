@@ -55,8 +55,9 @@ def plot(fig, ax):
     PC_files_list = ['data/2D_benchmarks/multipatient/agent_x6/2d_mult_x6_run_all.h5',
                      'data/2D_benchmarks/multipatient/agent_n2t4/2d_mult_n2t4_run_all.h5',
                      'data/2D_benchmarks/multipatient/agent_s2t5/2d_mult_s2t5_run_all.h5',
+                     'data/2D_benchmarks/multipatient/parabolic_agent_100_pats/2d_parabolic_run_all.h5',
                      ]
-    PC_name_list = ['PC x6', 'PC n2t4', 'PC s2t5']
+    PC_name_list = ['PC x6', 'PC n2t4', 'PC s2t5', 'prbl']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -75,6 +76,6 @@ def plot(fig, ax):
 
 if __name__ == '__main__':
     # setup pwd
-    os.chdir('/Users/saif/Desktop/Serhii/Projects/PhysiLearning')
+    os.chdir('/home/saif/Projects/PhysiLearning')
     fig, ax = plt.subplots(figsize=(175 / 72, 135 / 72), constrained_layout=True)
-    figure_setup(fig, ax, save_figure = True)
+    figure_setup(fig, ax, save_figure = False)
