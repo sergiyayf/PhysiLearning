@@ -53,14 +53,16 @@ def figure_setup(fig, ax, save_figure = False):
 
 
 def plot(fig, ax):
-    PC_files_list = ['data/2D_benchmarks/multipatient/parabolic_agent_different_positions/p1/2d_run_all.h5',
-                     'data/2D_benchmarks/multipatient/parabolic_agent_different_positions/p26/2d_run_all.h5',
-                     'data/2D_benchmarks/multipatient/parabolic_agent_different_positions/p15/2d_run_all.h5',
-                     'data/2D_benchmarks/parabolic_t1/2d_parabolic_run_all.h5',
-                     'data/2D_benchmarks/multipatient/parabolic_agent_different_positions/p78/2d_run_all.h5',
-                     'data/2D_benchmarks/multipatient/parabolic_agent_different_positions/p71/2d_run_all.h5',
-                     'data/2D_benchmarks/multipatient/parabolic_agent_different_positions/p57/2d_run_all.h5',
-                     'data/2D_benchmarks/multipatient/parabolic_agent_different_positions/p65/2d_run_all.h5',
+    agnt = 's2t5'
+    PC_files_list = [f'data/2D_benchmarks/multipatient/{agnt}_different_positions/p1/2d_run_all.h5',
+                     f'data/2D_benchmarks/multipatient/{agnt}_different_positions/p26/2d_run_all.h5',
+                     f'data/2D_benchmarks/multipatient/{agnt}_different_positions/p15/2d_run_all.h5',
+                     # f'data/2D_benchmarks/parabolic_t1/2d_parabolic_run_all.h5',
+                     f'data/2D_benchmarks/s2_t5_l3/2d_s2_t5_l3_all.h5',
+                     f'data/2D_benchmarks/multipatient/{agnt}_different_positions/p78/2d_run_all.h5',
+                     f'data/2D_benchmarks/multipatient/{agnt}_different_positions/p71/2d_run_all.h5',
+                     f'data/2D_benchmarks/multipatient/{agnt}_different_positions/p57/2d_run_all.h5',
+                     f'data/2D_benchmarks/multipatient/{agnt}_different_positions/p65/2d_run_all.h5',
                      ]
     PC_name_list = ['0', '27', '52', '71', '98', '136', '198', 'none']
 
@@ -119,8 +121,10 @@ if __name__ == '__main__':
     figure_setup(fig, ax, save_figure = False)
 
     # plot trajectories of multiple runs
-    for i in range(10,30):
-        df = pd.read_hdf('data/2D_benchmarks/multipatient/agent_s2t5/2d_mult_s2t5_run_all.h5', key=f'run_{i}')
+    for i in range(0,20):
+        # df = pd.read_hdf('data/2D_benchmarks/multipatient/agent_s2t5/2d_mult_s2t5_run_all.h5', key=f'run_{i}')
+        #df = pd.read_hdf('./Evaluations/SLvEnvEval_cohort_t3_l220240620_slvenv_cohort_l2.h5', key=f'run_{i}')
+        df = pd.read_hdf('/home/saif/Projects/PhysiLearning/data/2D_benchmarks/multipatient/s2t5_different_positions/p78/2d_run_all.h5', key=f'run_{i}')
         fig, ax = plt.subplots(2,1, constrained_layout=False, figsize=(200 / 72, 80 / 72), sharex=True, gridspec_kw={'height_ratios': [1, 10]})
         plot_trajectory(fig, ax, df)
 
