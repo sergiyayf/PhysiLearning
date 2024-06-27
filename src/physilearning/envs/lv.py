@@ -93,6 +93,9 @@ class LvEnv(BaseEnv):
 
         self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
 
+        if self.growth_function_flag == 'instant_fixed_treat' or self.growth_function_flag == 'instant_fixed_treat_with_noise':
+            self.death_rate_treat[0] *= self.normalization_factor
+
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
                             self.config['patients'][patient_id]['LvEnv']['competition_mut']]
@@ -261,26 +264,20 @@ class LvEnv(BaseEnv):
     def grow(self, i: int, j: int, flag: str) -> float:
 
         # instantaneous death rate increase by drug application
-        if flag == 'instant':
+        if flag == 'instant' or flag == 'instant_with_noise':
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
                             (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
                             (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
-        elif flag == 'instant_with_noise':
+        elif flag == 'instant_fixed_treat' or flag == 'instant_fixed_treat_with_noise':
+
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
-                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
-            # add noise
-            # rand = truncnorm(loc=0, scale=0.00528*new_pop_size, a=-0.02/0.00528, b=0.02/0.00528).rvs()
-            rand = np.random.normal(0, 0.01*new_pop_size, 1)[0]
-            if np.abs(rand) > 0.05*new_pop_size:
-                rand = 0.05*new_pop_size*np.sign(rand)
-            new_pop_size += rand
-            if new_pop_size < 10*self.normalization_factor and self.death_rate_treat[i]*self.state[2] > 0:
-                new_pop_size = 0
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
+                            self.growth_rate[i] * self.death_rate[i]) - self.death_rate_treat[i] * self.state[2]
+
         # one time step delay in treatment effect
-        elif flag == 'delayed':
+        elif flag == 'delayed' or flag == 'delayed_with_noise':
             treat = self.state[2]
             if self.state[2] == 0:
                 if self.time > 1 and (self.trajectory[2, self.time-1] == 1):
@@ -298,29 +295,20 @@ class LvEnv(BaseEnv):
 
             if new_pop_size < 10*self.normalization_factor and self.death_rate_treat[i]*treat > 0:
                 new_pop_size = 0
-        elif flag == 'delayed_with_noise':
-            treat = self.state[2]
-            if self.state[2] == 0:
-                if self.time > 1 and (self.trajectory[2, self.time - 1] == 1):
-                    treat = 1
-                else:
-                    treat = 0
-            elif self.state[2] == 1:
-                if self.time > 1 and (self.trajectory[2, self.time - 1] == 0):
-                    treat = 0
-                else:
-                    treat = 1
-            new_pop_size = self.state[i] * (1 + self.growth_rate[i] *
-                                            (1 - (self.state[i] + self.state[j] * self.competition[
-                                                j]) / self.capacity) -
-                                            self.death_rate[i] - self.death_rate_treat[i] * treat)
-            # add noise
-            new_pop_size += np.random.normal(0, 0.01*new_pop_size, 1)[0]
-
-            if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * treat > 0:
-                new_pop_size = 0
         else:
             raise NotImplementedError
+
+        if flag == 'instant_with_noise' or flag == 'instant_fixed_treat_with_noise' or flag == 'delayed_with_noise':
+            # add noise
+            # rand = truncnorm(loc=0, scale=0.00528*new_pop_size, a=-0.02/0.00528, b=0.02/0.00528).rvs()
+            if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+                new_pop_size = 0
+            rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
+            if np.abs(rand) > 0.05 * new_pop_size:
+                rand = 0.05 * new_pop_size * np.sign(rand)
+            new_pop_size += rand
+        if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+            new_pop_size = 0
         return new_pop_size
 
 

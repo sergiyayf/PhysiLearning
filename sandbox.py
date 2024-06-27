@@ -106,8 +106,8 @@ def main():
 # plot(df, 'PC n2t4', scale='linear', truncate=False)
 
 
-df = pd.read_hdf(f'data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_34')
-plot(df, 'PC at100', scale='linear', truncate=False)
+df = pd.read_hdf(f'./Evaluations/LvEnvEval__test_fixed_treat_with_noise_mtd.h5', key=f'run_34')
+plot(df, 'new lv at100 with noise', scale='linear', truncate=False)
 # df = pd.read_hdf('data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_0')
 # plot(df, 'RL model on PC', scale='linear', truncate=False)
 

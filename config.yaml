@@ -47,7 +47,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -61,13 +61,13 @@ env:
   see_resistance: False
   max_tumor_size: 1.33 # 2006 #3086 #100000 # 110000 # 4000
   max_time: 250 # 120
-  initial_wt: 'random' #1539 #2761 # 74291 # 2761
-  initial_mut: 'random' #4
-  growth_rate_wt: 0.087 #0.085 - 1.3# 0.083 # 0.29 # 0.0175
-  growth_rate_mut: 0.216 #0.219 - 1.3# 0.223 # 0.438 # 0.0175
+  initial_wt: 1539 #1539 #2761 # 74291 # 2761
+  initial_mut: 4 #4
+  growth_rate_wt: 0.087 #0.087 - 1.3# 0.083 # 0.29 # 0.0175
+  growth_rate_mut: 0.211 #0.216 - 1.3# 0.223 # 0.438 # 0.0175
   death_rate_wt: 0.01 #0.0029
   death_rate_mut: 0.01 #0.00438
-  treat_death_rate_wt: 5.837 #5.986 - 1.3 # 6.07 # 0.36 # 0.397 # 0.015
+  treat_death_rate_wt: 437 #5.837 #5.986 - 1.3 # 6.07 # 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
@@ -82,9 +82,9 @@ env:
   # LV environment settings
   LvEnv:
     carrying_capacity: 3906 # 6500
-    competition_wt: 1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
-    competition_mut: 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
-    growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
+    competition_wt: 1.732 #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
+    competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
+    growth_function_flag: 'instant_fixed_treat' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
   SLvEnv:
@@ -134,15 +134,15 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
   model_prefix: '2204_n3_t3_l2'
   step_to_load: '_best_reward'
-  save_name: '_20240425_agents_comparison_noise_LV_'
+  save_name: 'at100'
   # evaluation settings
-  fixed_AT_protocol: 0
-  at_type: 'fixed' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.25
+  fixed_AT_protocol: 1
+  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.0
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False

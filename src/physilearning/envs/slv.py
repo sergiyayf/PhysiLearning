@@ -116,6 +116,7 @@ class SLvEnv(BaseEnv):
 
         # fitting competition implementation
         self.competition_exponent = 0.2 # 1/35
+        self.death_rate_treat[0] *= self.normalization_factor
 
         # self.drug_color = 0
 
@@ -266,10 +267,14 @@ class SLvEnv(BaseEnv):
         self._move_mutant(dist, growth_layer)
 
         if i == 0:
+            # new_pop_size = self.state[i] * \
+            #                (1 + self.growth_rate[i] *
+            #                 (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
+            #                 (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
-                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
+                            self.growth_rate[i] * self.death_rate[i]) - self.death_rate_treat[i] * self.state[2]
         else:
             #
             if self.state[0] > self.state[1]:

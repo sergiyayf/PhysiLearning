@@ -40,7 +40,7 @@ fig, ax = plt.subplots()
 # plot normal distribution
 x = np.linspace(-0.05, 0.05, 100)
 mean = 0
-std = 0.01
+#std = 0.01
 y = 1/(std * np.sqrt(2 * np.pi)) * np.exp( - (x - mean)**2 / (2 * std**2))
 
 ax.plot(x, y, label='Normal distribution', color = 'red')
