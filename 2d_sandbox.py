@@ -60,9 +60,12 @@ def get_mutant_proportions(filename, timesteps=100):
 
 
 PC_files_list = [
-                 'data/2D_benchmarks/x6/2d_x6_all.h5',
-                 'data/2D_benchmarks/n2_t4_l3/2d_n2_t4_l3_all.h5',
-                 'data/2D_benchmarks/s2_t5_l3/2d_s2_t5_l3_all.h5',
+                 # 'data/2D_benchmarks/x6/2d_x6_all.h5',
+                 # 'data/2D_benchmarks/n2_t4_l3/2d_n2_t4_l3_all.h5',
+                 # 'data/2D_benchmarks/s2_t5_l3/2d_s2_t5_l3_all.h5',
+                    'data/2D_benchmarks/fixed_therapy_lv/no_noise/2d_run_all.h5',
+                    'data/2D_benchmarks/fixed_therapy_lv/with_noise/2d_run_all.h5',
+                    'data/2D_benchmarks/fixed_therapy_lv/slvenv/2d_t3_run_all.h5',
                  ]
 PC_name_list = [
                 'PC x6', 'PC n2', 'PC s2',

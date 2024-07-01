@@ -110,7 +110,8 @@ class SLvEnv(BaseEnv):
         if isinstance(self.mutant_distance_to_front, str):
             self.random_distance = True
             self.mutant_distance_to_front = np.random.randint(low=0, high=self.radius*0.5, size=1)[0]
-
+        else:
+            self.random_distance = False
         self.mutant_radial_position = self.radius - self.mutant_distance_to_front
         self.mutant_normalized_position = self.mutant_radial_position/self.radius
 

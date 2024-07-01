@@ -72,9 +72,9 @@ def plot(fig, ax):
 
     PC_df = pd.DataFrame(PC_dict)
 
-    LV_files_list = ['./Evaluations/LvEnvEval__nt.h5',
-                     './Evaluations/LvEnvEval__mtd.h5',
-                     './Evaluations/LvEnvEval__at100.h5',
+    LV_files_list = ['./Evaluations/SLvEnvEval__nt_e.h5',
+                     './Evaluations/SLvEnvEval__mtd_e.h5',
+                     './Evaluations/SLvEnvEval__at100_e.h5',
                      # './Evaluations/saved_paper_2d_evals/LvEnvEval_2d_no_treatment.h5',
                      # './Evaluations/saved_paper_2d_evals/LvEnvEval_2d_mtd.h5',
                      # './Evaluations/saved_paper_2d_evals/LvEnvEval_2d_at100.h5',

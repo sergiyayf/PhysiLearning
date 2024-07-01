@@ -47,9 +47,9 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: True
+  wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 8
@@ -89,15 +89,15 @@ env:
 
   SLvEnv:
     carrying_capacity: 3906
-    competition_wt: 1.772 #1.772 #2400.0
-    competition_mut: 3.408 #0.336
+    competition_wt: 1.732 #1.772 #2400.0
+    competition_mut: 1.0 #0.336
     growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
     mutant_distance_to_front: 'random' #70.5 # 92
     cell_volume: 2144
     growth_layer: 150 # 110
     dimension: 2
-    growth_fit: 'exp'
+    growth_fit: 'quadratic'
   # note this is not yet functional
   PcEnv:
     domain_size: 2050 #1250
@@ -136,13 +136,13 @@ eval:
   most_recent: 0
   from_file: 0
   path: './'
-  model_prefix: '2204_n3_t3_l2'
+  model_prefix: '20240627_fixed_treatment_lv_no_noise_t1_l2'
   step_to_load: '_best_reward'
-  save_name: 'at100'
+  save_name: 'nt_p'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  at_type: 'nt' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.0
   num_episodes: 100
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False
