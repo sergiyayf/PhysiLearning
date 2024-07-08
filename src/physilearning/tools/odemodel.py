@@ -102,16 +102,16 @@ class ODEModel:
 
         # equations
         # normal capacity coupled death
-        # dx_dt = s*(prm['r_s']*(1-(s+r*prm['c_r'])/prm['K'])*(1-self.treatment*prm['Delta_s'])-prm['delta_s']*prm['r_s'])
+        dx_dt = s*(prm['r_s']*(1-(s+r*prm['c_r'])/prm['K'])*(1-self.treatment*prm['Delta_s'])-prm['delta_s']*prm['r_s'])
         #capacity decoupled cell number coupled death
         # dx_dt = s * (prm['r_s'] * (1 - (s + r * prm['c_r']) / prm['K']) - self.treatment * prm['Delta_s'] - prm[
         #     'delta_s'] * prm['r_s'])
         # cell number decoupled death
-        if s > 0:
-            dx_dt = s * (prm['r_s'] * (1 - (s + r * prm['c_r']) / prm['K']) - prm[
-                'delta_s'] * prm['r_s']) - self.treatment * prm['Delta_s']
-        else:
-            dx_dt = 0
+        # if s > 0:
+        #     dx_dt = s * (prm['r_s'] * (1 - (s + r * prm['c_r']) / prm['K']) - prm[
+        #         'delta_s'] * prm['r_s']) - self.treatment * prm['Delta_s']
+        # else:
+        #     dx_dt = 0
         dy_dt = r*(prm['r_r']*(1-(r+s*prm['c_s'])/prm['K'])-prm['Delta_r']*self.treatment-prm['delta_r']*prm['r_r'])
 
         return [dx_dt, dy_dt]

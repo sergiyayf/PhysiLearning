@@ -24,32 +24,32 @@ learning:
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     model_kwargs:
       n_steps: 4096
-      batch_size: 128
+      batch_size: 64
       n_epochs: 15
       verbose: 1
-      ent_coef: 0.0001
-      clip_range: 0.001
-      learning_rate: 1.e-5
+      ent_coef: 1.0e-7
+      clip_range: 0.01
+      learning_rate: 1.e-4
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
-          pi: [64, 64]
-          vf: [64, 64]
-    total_timesteps: 3.e+7
+          pi: [128, 128]
+          vf: [32, 32]
+    total_timesteps: 5.e+6
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'test_cohort'
+    model_save_prefix: 'slvenv_20240708_mela_1'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/0904_slv_num1_best_reward'
+      saved_model_name: './Training/SavedModels/test_fixed_treatment_with_noise_l3_best_reward'
 
 # Environment configuration
 env:
   # general env settings
   type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
-  wrap: False
+  wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 8
@@ -84,7 +84,7 @@ env:
     carrying_capacity: 3906 # 6500
     competition_wt: 1.732 #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
     competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
-    growth_function_flag: 'instant_fixed_treat' # 'instant', 'delayed', 'delayed_with_noise'
+    growth_function_flag: 'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
   SLvEnv:
@@ -134,15 +134,15 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: '20240627_fixed_treatment_lv_no_noise_t1_l2'
+  model_prefix: '20240703_fixed_treatment_lv_with_noise_t6_load'
   step_to_load: '_best_reward'
-  save_name: 'nt_p'
+  save_name: ''
   # evaluation settings
-  fixed_AT_protocol: 1
+  fixed_AT_protocol: 0
   at_type: 'nt' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.0
   num_episodes: 100
-  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False
