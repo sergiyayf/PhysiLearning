@@ -99,3 +99,7 @@ ax = plot(df, 'det l3 t5 l2')
 
 df = pd.read_hdf('./data/2D_benchmarks/agent_l3/t2/2d_l3_t2_run_all.h5', key='run_10')
 ax = plot(df, 'det l3 t2 l2')
+
+for i in range(1,6):
+    df = pd.read_hdf(f'./Evaluations/saved_paper_2d_evals/LvEnvEval__20240425_agents_comparison_det_LV_2204_l3_t{i}_l2.h5', key='run_10')
+    ax = plot(df, f'det l3 t{i} l2')

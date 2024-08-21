@@ -76,6 +76,10 @@ class Trainer:
         self.enable_model_loading = self.config['learning']['model']['load']['enable_loading']
         self.model_load_last = self.config['learning']['model']['load']['last_model']
         self.model_kwargs = self.config['learning']['model']['model_kwargs']
+        try:
+            self.best_reward_average = self.config['learning']['model']['average_steps']
+        except KeyError:
+            self.best_reward_average = 10
         self.saved_model_name = self.config['learning']['model']['load']['saved_model_name']
         self.save_freq = self.config['learning']['model']['save_freq']
         self.model_save_prefix = self.config['learning']['model']['model_save_prefix']
@@ -195,7 +199,8 @@ class Trainer:
                 SaveOnBestTrainingRewardCallback(check_freq=self.model_kwargs['n_steps'],
                                                  log_dir=os.path.join('Training', 'Logs'),
                                                  save_dir=os.path.join('Training', 'SavedModels'),
-                                                 save_name=self.model_save_prefix)
+                                                 save_name=self.model_save_prefix,
+                                                 average_steps=self.best_reward_average)
         else:
             checkpoint_callback = CheckpointCallback(save_freq=self.save_freq,
                                                      save_path=os.path.join('Training', 'SavedModels'),

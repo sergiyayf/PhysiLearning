@@ -44,7 +44,7 @@ def figure_setup(fig, ax, save_figure = False):
     ax.set_ylabel('Time to progression', fontsize=6)
     fig.set_constrained_layout_pads(w_pad=10 / 72, h_pad=10 / 72, hspace=2 / 72, wspace=2 / 72)
     if save_figure:
-        fig.savefig(r'fig1_benchmark.pdf', transparent = True)
+        fig.savefig(r'one_comp_fig1_benchmark.svg', transparent = True)
 
     plt.show()
 
@@ -53,9 +53,12 @@ def plot(fig, ax):
     PC_files_list = ['data/2D_benchmarks/no_treatment/2d_no_treatment_all.h5',
                      'data/2D_benchmarks/mtd/2d_mtd_all.h5',
                      'data/2D_benchmarks/at100/2d_at100_all.h5',
-                     'data/2D_benchmarks/x6/2d_x6_all.h5',
+                     # 'data/2D_benchmarks/x6/2d_x6_all.h5',
+                     'data/2D_benchmarks/one_comp/t12_one_comp/2d_no_noise_run_all.h5',
+                     'data/2D_benchmarks/one_comp/with_noise_t12/2d_with_noise_run_all.h5',
+                     'data/2D_benchmarks/one_comp/qslv_t12/2d_qslv_run_all.h5',
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC Agent']
+    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100', 'PC No noise', 'PC With noise', 'PC Abstracted']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -66,9 +69,12 @@ def plot(fig, ax):
     LV_files_list = ['./Evaluations/saved_paper_2d_evals/LvEnvEval_2d_no_treatment.h5',
                      './Evaluations/saved_paper_2d_evals/LvEnvEval_2d_mtd.h5',
                      './Evaluations/saved_paper_2d_evals/LvEnvEval_2d_at100.h5',
-                     './Evaluations/saved_paper_2d_evals/LvEnvEval_greatest_agent_run2703_test_x6.h5',
+                     # './Evaluations/saved_paper_2d_evals/LvEnvEval_greatest_agent_run2703_test_x6.h5',
+                     './Evaluations/LvEnvEval_train_envs_no_noise.h5',
+                     './Evaluations/LvEnvEval_train_envs_with_noise.h5',
+                     './Evaluations/SLvEnvEval_train_envs_qslv.h5',
                      ]
-    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV Agent']
+    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV No noise', 'LV With noise', 'LV Abstracted']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -97,4 +103,4 @@ if __name__ == '__main__':
     # os.chdir('/Users/saif/Desktop/Serhii/Projects/PhysiLearning')
     os.chdir('/home/saif/Projects/PhysiLearning')
     fig, ax = plt.subplots(figsize=(290 / 72, 160 / 72), constrained_layout=True)
-    figure_setup(fig, ax, save_figure = False)
+    figure_setup(fig, ax, save_figure = True)

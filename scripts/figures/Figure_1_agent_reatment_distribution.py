@@ -66,7 +66,8 @@ def plot(fig, ax):
                      'data/2D_benchmarks/mtd/2d_mtd_all.h5',
                      'data/2D_benchmarks/at100/2d_at100_all.h5',
                      'data/2D_benchmarks/x6/2d_x6_all.h5',
-                     'data/2D_benchmarks/parabolic_t1/2d_parabolic_run_all.h5',
+                     # 'data/2D_benchmarks/parabolic_t1/2d_parabolic_run_all.h5',
+                     'data/2D_benchmarks/one_comp_new_t9/2d_t9_run_all.h5',
                      # 'data/2D_benchmarks/s2_t5_l3/2d_s2_t5_l3_all.h5',
                      # './data/2D_benchmarks/agent_n3/t3/2d_n3_t3_run_all.h5'
                      # './data/2D_benchmarks/agent_l3/t3/2d_l3_t3_run_all.h5'

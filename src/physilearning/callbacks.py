@@ -71,19 +71,20 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
     :param verbose: Verbosity level: 0 for no output, 1 for info messages, 2 for debug messages
     """
     def __init__(self, check_freq: int, log_dir: str,
-                 save_dir: str, save_name: str, verbose: int = 1):
+                 save_dir: str, save_name: str, verbose: int = 1, average_steps: int = 10):
         super(SaveOnBestTrainingRewardCallback, self).__init__(verbose)
         self.check_freq = check_freq
         self.log_dir = log_dir
         self.save_path = os.path.join(save_dir)
         self.save_name = save_name
+        self.average_steps = average_steps
         try:
             x, y = ts2xy(load_results(self.log_dir), "timesteps")
             if len(x) > 0:
                 if len(y) < 5:
-                    self.best_mean_reward = np.mean(y[-10:]) / 2
+                    self.best_mean_reward = np.mean(y[-self.average_steps:]) / 2
                 else:
-                    self.best_mean_reward = np.mean(y[-10:])
+                    self.best_mean_reward = np.mean(y[-self.average_steps:])
             else:
                 self.best_mean_reward = -np.inf
 
@@ -103,9 +104,9 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
             if len(x) > 0:
                 # Mean training reward over the last 20 episodes
                 if len(y) < 5:
-                    mean_reward = np.mean(y[-10:]) / 2
+                    mean_reward = np.mean(y[-self.average_steps:]) / 2
                 else:
-                    mean_reward = np.mean(y[-10:])
+                    mean_reward = np.mean(y[-self.average_steps:])
                 if self.verbose >= 1:
                     print(f"Num timesteps: {self.num_timesteps}")
                     print(f"Best mean reward: {self.best_mean_reward:.2f} "

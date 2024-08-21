@@ -35,7 +35,7 @@ def get_ttps(filename, timesteps=100):
         df = pd.read_hdf(filename, key=f'run_{i}')
         # find the largest index with non-zero Type 0 and Type 1
         initial_size = df['Type 0'][0] + df['Type 1'][0]
-        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 1.5)]
+        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 1.4)]
         if len(nz) > 0:
             # append index when type 0 + type 1 is larger than 1.5
             ttps.append(nz.index[0])
@@ -58,13 +58,13 @@ def main():
     PC_df = pd.DataFrame(PC_dict)
 
     LV_files_list = ['./Evaluations/temp/LvEnvEvalno_treatment_1_5.h5',
-                        './Evaluations/temp/LvEnvEvalmtd_1_5.h5',
-                        './Evaluations/temp/LvEnvEvalat100_1_5.h5',
-                        './Evaluations/temp/LvEnvEvalfixed_1_4_1_5.h5',
-                        './Evaluations/LvEnvEval_3d_cont_4_rav19022024_run_22_load_4.h5',
+                        './Evaluations/LvEnvEval__high_low_1_10_0_90.h5',
+                        './Evaluations/LvEnvEval__high_low_1_20_0_80.h5',
+                        './Evaluations/SLvEnvEval__high_low_1_10_0_90.h5',
+                        './Evaluations/SLvEnvEval__high_low_1_20_0_80.h5',
                         #'./Evaluations/LvEnvEvalrandom_1_5.h5'
                         ]
-    LV_name_list = ['LV No therapy', 'LV MTD', 'LV AT100', 'LV Fixed 1.4', 'RL']
+    LV_name_list = ['LV No therapy', 'LV s', 'LV w', 'Slv shall', 'Slv wide']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -77,8 +77,8 @@ def main():
     for i in range(len(PC_name_list)):
         combined[PC_name_list[i]] = PC_df[PC_name_list[i]]
         # combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
-    combined_df = pd.DataFrame(combined)
-
+    # combined_df = pd.DataFrame(combined)
+    combined_df = LV_df
     # box plot the distribution with scatter using seaborn
     fig, ax = plt.subplots()
     sns.boxplot(data=combined_df, ax=ax, width = 0.3)
@@ -106,11 +106,21 @@ def main():
 # plot(df, 'PC n2t4', scale='linear', truncate=False)
 
 
-df = pd.read_hdf(f'./Evaluations/LvEnvEval_at10020240627_fixed_treatment_lv_no_noise_t1_l2.h5', key=f'run_0')
-plot(df, 'new lv at100 no noise', scale='linear', truncate=False)
+# for i in range(1,10):
+#     df = pd.read_hdf(f'./data/temp/agents_updated_progression_def/2_test_{i}.h5', key=f'run_0')
+#     plot(df, f'LV no treatment 1.{i}', scale='linear', truncate=False)
+#     average = df['Type 0'].values[:100]
+#     print(f'1.{i} average: {average.mean()}')
+#     ttp = get_ttps(f'./data/temp/agents_updated_progression_def/test_{i}.h5')
+#     print(f'1.{i} ttp: {np.mean(ttp)}')
 
-# df = pd.read_hdf('data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key=f'run_0')
-# plot(df, 'RL model on PC', scale='linear', truncate=False)
+# for i in range(1,10):
+#     df = pd.read_hdf(f'./data/temp/deep.h5', key=f'run_{i}')
+#     plot(df, f'deep {i}', scale='linear', truncate=False)
+#     df = pd.read_hdf(f'./data/temp/shallow.h5', key=f'run_{i}')
+#     plot(df, f'shallow {i}', scale='linear', truncate=False)
 
-main()
+meltd_df = pd.read_hdf('./Evaluations/meltd/MeltdEnvEval_1006_2d_meltd_l2.h5', key=f'run_0')
+plot(meltd_df, 'Meltd stupid agent', scale='linear', truncate=False)
+# main()
 plt.show()

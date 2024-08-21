@@ -78,6 +78,33 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
             action = 1
         else:
             action = 0
+    elif at_type == 'manual':
+        schedule = []
+        for i in range(200):
+            if i%11 == 0:
+            # if i % 6 == 0:
+                schedule.append(1)
+                schedule.append(1)
+            else:
+                schedule.append(0)
+        # prepend 0s to the schedule
+        schedule = [0, 0, 0, 0] + schedule
+        action = schedule[int(environment.time)]
+
+    elif 'effective' in at_type:
+        # find "low" and number after it
+        low = float(at_type[at_type.find('low')+4:at_type.find('low')+8])
+        high = float(at_type[at_type.find('high')+5:at_type.find('high')+9])
+        ini_tumor_size = environment.initial_wt + environment.initial_mut
+        if tumor_size >= high*ini_tumor_size:
+            action = 1
+        else:
+            warnings.warn('This implementation is sensitive to the type of observation space, be careful')
+
+            if environment.trajectory[2, int(environment.time)] == 1 and tumor_size > low * ini_tumor_size:
+                action = 1
+            else:
+                action = 0
     else:
         action = 0
 

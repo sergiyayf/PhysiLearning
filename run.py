@@ -151,7 +151,7 @@ def evaluate():
     # prepare PhysiCell simulations for job submission
     if config['eval']['evaluate_on'] == 'PcEnv':
         pc_conf = config['env']['PcEnv']['xml']
-        change_pc_config(pc_conf, n_envs)
+        #change_pc_config(pc_conf, n_envs)
     click.echo('Evaluating')
     if config['eval']['evaluate_on'] == 'PcEnv' and config['eval']['pcdl']:
         eval_command = 'cd ./scripts && sbatch evaluation_pcdl_job.sh'

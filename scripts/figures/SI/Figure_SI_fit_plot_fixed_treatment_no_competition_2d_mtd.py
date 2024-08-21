@@ -64,12 +64,12 @@ def plot_finals():
     ax.legend(loc='lower left')
     eq = (r"$\frac{dS}{dt} = S \cdot (r_S \cdot (1 - \frac{S + R}{K} ) - \delta_S) - D_S $")
     eq2 = (r"$\frac{dR}{dt} = R \cdot (r_R \cdot (1 - \frac{S c_S + R}{K} ) - \delta_R) $")
-    title = eq + "\n" + eq2
+    title = eq + "\n" + eq2 + "\n" + r"$r_S = 0.087, r_R = 0.211, K = 2.53, c_S = 1.732, D_S = 0.142$" + r" fit $r_R$"
     # put the equation on the top as title
     ax.set_title(title, fontsize=8)
     ax.set_xlabel('Time to progression')
     ax.set_ylabel('Normalized cell number')
-    fig.savefig(r'/home/saif/Projects/PhysiLearning/data/si_figure_panels/fixed_treatment_mtd_fit.pdf', transparent = True)
+    fig.savefig(r'/home/saif/Projects/PhysiLearning/data/si_figure_panels/fixed_treatment_mtd_fit.svg', transparent = True)
     # plot median parameters
     #
     # median_params = {}

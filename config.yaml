@@ -22,32 +22,33 @@ learning:
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
+    average_steps: 10
     model_kwargs:
-      n_steps: 4096
+      n_steps: 512
       batch_size: 64
       n_epochs: 15
       verbose: 1
-      ent_coef: 1.0e-7
-      clip_range: 0.01
-      learning_rate: 1.e-4
+      ent_coef: 1.e-6
+      clip_range: 0.005
+      learning_rate: 5.e-5
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
-          pi: [128, 128]
-          vf: [32, 32]
-    total_timesteps: 5.e+6
+          pi: [64, 64]
+          vf: [64, 64]
+    total_timesteps: 2.e+7
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'slvenv_20240708_mela_1'
+    model_save_prefix: '20240819_test_3'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/test_fixed_treatment_with_noise_l3_best_reward'
+      saved_model_name: './Training/SavedModels/20240710_q_slv_one_comp_t12_best_reward'
 
 # Environment configuration
 env:
   # general env settings
-  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv'
   n_envs: 1
   wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -64,10 +65,10 @@ env:
   initial_wt: 1539 #1539 #2761 # 74291 # 2761
   initial_mut: 4 #4
   growth_rate_wt: 0.087 #0.087 - 1.3# 0.083 # 0.29 # 0.0175
-  growth_rate_mut: 0.211 #0.216 - 1.3# 0.223 # 0.438 # 0.0175
+  growth_rate_mut: 0.215 #0.211 - fixed treat #0.216 - 1.3# 0.223 # 0.438 # 0.0175
   death_rate_wt: 0.01 #0.0029
   death_rate_mut: 0.01 #0.00438
-  treat_death_rate_wt: 437 #5.837 #5.986 - 1.3 # 6.07 # 0.36 # 0.397 # 0.015
+  treat_death_rate_wt: 5.707 # 437 - fixed treat #5.837 #5.986 - 1.3 # 6.07 # 0.36 # 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 0 # reward shaping flag for some predefined rewards
@@ -82,18 +83,18 @@ env:
   # LV environment settings
   LvEnv:
     carrying_capacity: 3906 # 6500
-    competition_wt: 1.732 #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
+    competition_wt: 1.733 # 1.732 - fixed treat #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
     competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
-    growth_function_flag: 'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
+    growth_function_flag: 'instant' #'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
 
   SLvEnv:
     carrying_capacity: 3906
-    competition_wt: 1.732 #1.772 #2400.0
+    competition_wt: 1.733 #1.772 #2400.0
     competition_mut: 1.0 #0.336
     growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 'random' #70.5 # 92
+    mutant_distance_to_front: 73.5 #70.5 # 92
     cell_volume: 2144
     growth_layer: 150 # 110
     dimension: 2
@@ -136,13 +137,13 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: '20240703_fixed_treatment_lv_with_noise_t6_load'
+  model_prefix: '20240819_test_2'
   step_to_load: '_best_reward'
   save_name: ''
   # evaluation settings
   fixed_AT_protocol: 0
-  at_type: 'nt' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.0
+  at_type: 'fixed' #'effective_high_1.20_low_0.80' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.3
   num_episodes: 100
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False
