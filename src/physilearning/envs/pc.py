@@ -90,7 +90,7 @@ class PcEnv(BaseEnv):
         # reward shaping flag
         self.cpu_per_task = env_specific_params.get('cpus_per_sim', 10)
         self.running = False
-        self._start_slurm_physicell_job_step()
+        #self._start_slurm_physicell_job_step()
 
         self.cell_df = pd.DataFrame()
         self.dimension = 2
@@ -193,71 +193,77 @@ class PcEnv(BaseEnv):
 
         # check if the simulation is running or not, if not start physicell for testing
         if not self.running:
-            self._start_slurm_physicell_job_step()
-
-        if action == 0:
-            self.socket.send(b"Stop treatment")
-        elif action == 1:
-            self.socket.send(b"Treat")
-
-        self.time += self.treatment_time_step
-        # get tumor updated state
-        message = self._receive_message()
-        num_wt_cells, num_mut_cells = self._get_cell_number(message)
-
-        if self.normalize:
-            self.state[0] = num_wt_cells * self.normalization_factor
-            self.state[1] = num_mut_cells * self.normalization_factor
-        else:
-            self.state[0] = num_wt_cells
-            self.state[1] = num_mut_cells
-
+            self.reset()
+        reward = 0
         self.state[2] = action
-        # get from the string comma separated values from t0_x to t0_y
-        if self.observation_type == 'image' or self.observation_type == 'multiobs':
-            self.image = self._get_image_obs(message, action)
-            self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
-            self.trajectory[:, int(self.time/self.treatment_time_step)] = self.state
+        for t in range(0, self.treatment_time_step):
 
-            if self.observation_type == 'image':
-                obs = self.image
-            elif self.observation_type == 'multiobs':
-                obs = {'vec': self.state, 'img': self.image}
+            if action == 0:
+                self.socket.send(b"Stop treatment")
+            elif action == 1:
+                self.socket.send(b"Treat")
+
+            self.time += 1
+            # get tumor updated state
+            message = self._receive_message()
+            num_wt_cells, num_mut_cells = self._get_cell_number(message)
+
+            if self.normalize:
+                self.state[0] = num_wt_cells * self.normalization_factor
+                self.state[1] = num_mut_cells * self.normalization_factor
+            else:
+                self.state[0] = num_wt_cells
+                self.state[1] = num_mut_cells
+
+
+            # get from the string comma separated values from t0_x to t0_y
+            if self.observation_type == 'image' or self.observation_type == 'multiobs':
+                self.image = self._get_image_obs(message, action)
+                self.image_trajectory[:, :, int(self.time)] = self.image[0, :, :]
+                self.trajectory[:, int(self.time)] = self.state
+
+                if self.observation_type == 'image':
+                    obs = self.image
+                elif self.observation_type == 'multiobs':
+                    obs = {'vec': self.state, 'img': self.image}
+                else:
+                    raise ValueError('Observation type not supported')
+
+            elif self.observation_type == 'number':
+                # record trajectory
+                self.trajectory[:, int(self.time)] = self.state
+
+                if self.see_resistance:
+                    obs = self.state[0:2]
+                else:
+                    obs = [np.sum(self.state[0:2])]
+
+            elif self.observation_type == 'mutant_position':
+                # measure tumor radius
+                cell_df = self._get_df_from_message(message)
+                self.radius = self._measure_radius()
+                mutants_df = cell_df[cell_df['cell_type'] == 1]
+                mut_dist_dict= self._calculate_distances_to_front(mutants_df)
+                min_mut_dist = mut_dist_dict['min_front_distance']
+                self.mutant_normalized_position = 1 - min_mut_dist / self.radius
+                self.trajectory[0:3, int(self.time)] = self.state
+                self.trajectory[3, int(self.time)] = self.mutant_normalized_position
+                self.trajectory[4, int(self.time)] = self.radius
+                if self.see_resistance:
+                    obs = self.state
+                    obs.append(self.mutant_normalized_position)
+                else:
+                    obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
+
             else:
                 raise ValueError('Observation type not supported')
 
-        elif self.observation_type == 'number':
-            # record trajectory
-            self.trajectory[:, int(self.time/self.treatment_time_step)] = self.state
-
-            if self.see_resistance:
-                obs = self.state[0:2]
+            info = {}
+            rewards = Reward(self.reward_shaping_flag)
+            if self.reward_shaping_flag == 'tendayaverage':
+                reward += rewards.tendayaverage(self.trajectory, self.time)
             else:
-                obs = [np.sum(self.state[0:2])]
-
-        elif self.observation_type == 'mutant_position':
-            # measure tumor radius
-            cell_df = self._get_df_from_message(message)
-            self.radius = self._measure_radius()
-            mutants_df = cell_df[cell_df['cell_type'] == 1]
-            mut_dist_dict= self._calculate_distances_to_front(mutants_df)
-            min_mut_dist = mut_dist_dict['min_front_distance']
-            self.mutant_normalized_position = 1 - min_mut_dist / self.radius
-            self.trajectory[0:3, int(self.time/self.treatment_time_step)] = self.state
-            self.trajectory[3, int(self.time/self.treatment_time_step)] = self.mutant_normalized_position
-            self.trajectory[4, int(self.time/self.treatment_time_step)] = self.radius
-            if self.see_resistance:
-                obs = self.state
-                obs.append(self.mutant_normalized_position)
-            else:
-                obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position]
-
-        else:
-            raise ValueError('Observation type not supported')
-
-        info = {}
-        rewards = Reward(self.reward_shaping_flag)
-        reward = rewards.get_reward(self.state, self.time / self.max_time, self.threshold_burden)
+                reward += rewards.get_reward(self.state, self.time / self.max_time, self.threshold_burden)
         terminate = self.terminate()
         truncate = self.truncate()
         if terminate or truncate:
@@ -304,15 +310,15 @@ class PcEnv(BaseEnv):
                 obs = self.state[0:2]
             else:
                 obs = [np.sum(self.state[0:2])]
-            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
+            self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)+1))
             self.trajectory[:, 0] = self.state
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image_obs(message, action=0)
             self.image_trajectory = np.zeros(
-                (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step)+1))
+                (self.image_size, self.image_size, int(self.max_time)+1))
             self.image_trajectory[:, :, 0] = self.image[0, :, :]
             self.trajectory = np.zeros(
-                (np.shape(self.state)[0], int(self.max_time / self.treatment_time_step)+1))
+                (np.shape(self.state)[0], int(self.max_time)+1))
             self.trajectory[:, 0] = self.state
             if self.observation_type == 'image':
                 obs = self.image
@@ -329,7 +335,7 @@ class PcEnv(BaseEnv):
             min_mut_dist = mut_dist_dict['min_front_distance']
             self.mutant_normalized_position = 1 - min_mut_dist / self.radius
             self.trajectory = np.zeros(
-                (np.shape(self.state)[0]+2, int(self.max_time / self.treatment_time_step)+1))
+                (np.shape(self.state)[0]+2, int(self.max_time)+1))
             self.trajectory[0:3, 0] = self.state
             self.trajectory[3, 0] = self.mutant_normalized_position
             self.trajectory[4, 0] = self.radius
@@ -341,6 +347,23 @@ class PcEnv(BaseEnv):
         else:
             raise ValueError('Observation type not supported')
 
+        # not clean pulse hack
+        for tt in [0,1]:
+            self.socket.send(b"Stop treatment")
+            message = self._receive_message()
+            wt, mut = self._get_cell_number(message)
+            wt = wt * self.normalization_factor
+            mut = mut * self.normalization_factor
+            self.state = [wt, mut, 0]
+            self.time += 1
+            self.trajectory[0:3, self.time] = self.state
+        self.threshold_burden = self.max_tumor_size * (self.state[0] + self.state[1])
+
+
+        if self.see_resistance:
+            obs = self.state[0:2]
+        else:
+            obs = [np.sum(self.state[0:2])]
         return obs, {}
 
     def _measure_radius(self):

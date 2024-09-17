@@ -16,17 +16,39 @@ def plot(df, title, scale='linear', truncate=False):
         df.loc[index:, 'Type 0'] = 0
         df.loc[index:, 'Type 1'] = 0
         df.loc[index:, 'Treatment'] = 0
-    ax.plot(df.index, df['Type 0'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 0')
-    ax.plot(df.index, df['Type 1'].values/(df['Type 0'][0]+df['Type 1'][0]), label='Type 1')
-    ax.plot(df.index, (df['Type 0'] + df['Type 1'])/(df['Type 0'][0]+df['Type 1'][0]), label='total')
+
+    skip = 2
+    normalize = 2
+    sus = np.array(df['Type 0'].values )#/ (df['Type 0'][normalize] + df['Type 1'][normalize]))
+    res = np.array(df['Type 1'].values )#/ (df['Type 0'][normalize] + df['Type 1'][normalize]))
+    # sus = np.array(df['Type 0'].values)*70
+    # res = np.array(df['Type 1'].values)*70
+    tot = sus + res
+    time = df.index / 2
+
+    ax.plot(time[::skip], sus[::skip], color='g')
+    ax.plot(time[::skip], res[::skip], color='r')
+    ax.plot(time[::skip], tot[::skip], color='black', label='LV')
+
     ax.legend()
     ax.set_title(title)
     ax.set_yscale(scale)
+    ax.hlines(1.0, 0, time[-1], color='k', linestyle='--')
     treat = df['Treatment'].values
     # replace 0s that are directly after 1 with 1s
-    treat = np.where(treat == 0, np.roll(treat, 1), treat)
-    ax.fill_between(df.index, 1, 1.250, where=treat==1, color='orange', label='drug',
+    treat = np.where(treat == 0, np.roll(treat, -1), treat)
+    ax.fill_between(time, 1, 1.250, where=treat==1, color='orange', label='drug',
     lw=2)
+
+    b = np.array([6322, 7215, 8159, 8246, 6563, 5068, 5393, 6203, 6695, 8155, 10244, 12520, 13013])
+    d = np.array([6589, 7531, 8595, 8662, 7559, 6745, 6539, 7280, 7845, 8666, 9837, 11615, 11724])
+    c = np.array([5845, 6865, 7957, 8014, 6781, 5245, 5274, 6242, 6550, 7790, 9647, 11916, 12452])
+    #ax.scatter(range(len(b)), np.array(b), color='green', label='B7')
+    #ax.scatter(range(len(c)), np.array(c), color='blue', label='C7')
+    #ax.scatter(range(len(d)), np.array(d), color='red', label='D7')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Normalized cell count')
+    ax.legend()
     return ax
 
 def get_ttps(filename, timesteps=100):
@@ -87,40 +109,84 @@ def main():
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
 
-# df = pd.read_hdf('data/3D_benchmarks/at100/at100_all.h5', key=f'run_3')
-# plot(df, 'at100 PC', scale='linear')
-#
-# df = pd.read_hdf('Evaluations/LvEnvEval_3d_fixed_1_9.h5', key=f'run_0')
-# plot(df, 'LV fixed 1.9', scale='linear')
-#
-# df = pd.read_hdf('data/3D_benchmarks/rl_model_on_PC/rl_model_on_PC_all.h5', key=f'run_0')
-# plot(df, 'RL model on PC', scale='linear', truncate=False)
-#
-# df = pd.read_hdf('data/temp/multp_x6/run_1.h5', key=f'run_0')
-# plot(df, 'x6 model on PC x6 ', scale='linear', truncate=False)
-#
-# df = pd.read_hdf('data/temp/PcEnvEval__s2t5_pc_pat_1_test1504_s2_t5_l3.h5', key=f'run_0')
-# plot(df, 's2 agent on 3D p3', scale='linear', truncate=False)
-#
-# df = pd.read_hdf('data/2D_benchmarks/n2_t4_l3/2d_n2_t4_l3_all.h5', key=f'run_7')
-# plot(df, 'PC n2t4', scale='linear', truncate=False)
 
-
+#
 # for i in range(1,10):
-#     df = pd.read_hdf(f'./data/temp/agents_updated_progression_def/2_test_{i}.h5', key=f'run_0')
-#     plot(df, f'LV no treatment 1.{i}', scale='linear', truncate=False)
+#     df = pd.read_hdf(f'./data/temp/agents_updated_progression_def/fixed_rew_{i}.h5', key=f'run_0')
+#     plot(df, f'LV Agent {i}', scale='linear', truncate=False)
 #     average = df['Type 0'].values[:100]
 #     print(f'1.{i} average: {average.mean()}')
 #     ttp = get_ttps(f'./data/temp/agents_updated_progression_def/test_{i}.h5')
 #     print(f'1.{i} ttp: {np.mean(ttp)}')
-
+#
 # for i in range(1,10):
 #     df = pd.read_hdf(f'./data/temp/deep.h5', key=f'run_{i}')
-#     plot(df, f'deep {i}', scale='linear', truncate=False)
+#     plot(df, f'PC manual deeper treatment {i}', scale='linear', truncate=False)
 #     df = pd.read_hdf(f'./data/temp/shallow.h5', key=f'run_{i}')
-#     plot(df, f'shallow {i}', scale='linear', truncate=False)
+#     plot(df, f'PC manual shallow treatment {i}', scale='linear', truncate=False)
 
-meltd_df = pd.read_hdf('./Evaluations/meltd/MeltdEnvEval_1006_2d_meltd_l2.h5', key=f'run_0')
-plot(meltd_df, 'Meltd stupid agent', scale='linear', truncate=False)
+# df = pd.read_hdf('./Evaluations/PcEnvEval_A820240826_elv_tendayaverage_test8.h5', key='run_0')
+# plot(df, 'PC A8', scale='linear', truncate=False)
+
+# for i in range(4,5):
+#
+#     df = pd.read_hdf(f'./Evaluations/tots/run_{i}.h5', key=f'run_0')
+#     plot(df, f'Pc pulse {i}', scale='linear', truncate=False)
+
+# df = pd.read_hdf('./Evaluations/pulse_demo/Evaluations/PcEnvEval_job_1271510920240909_pulse_test.h5', key='run_0')
+# plot(df, 'Pc pulse', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('./Evaluations/at50/Evaluations/PcEnvEval_job_1271516520240910_at50.h5', key='run_0')
+# plot(df, 'Pc at50', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('./Evaluations/at100/Evaluations/PcEnvEval_job_1271516620240910_at50.h5', key='run_0')
+# plot(df, 'Pc at100', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('./Evaluations/mtd/Evaluations/PcEnvEval_job_1271511320240910_mtd.h5', key='run_0')
+# plot(df, 'Pc mtd', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('./Evaluations/eat100/Evaluations/PcEnvEval_job_1271620020240910_eat100.h5', key='run_0')
+# plot(df, 'Pc eat100', scale='linear', truncate=False)
+
+#df = pd.read_hdf('Evaluations/temp/LvEnvEval_pulse_check20240910_try_to_converge_7.h5', key='run_0')
+#plot(df, 'Lv agnt', scale='linear', truncate=False)
+
+# df = pd.read_hdf('Evaluations/temp/LvEnvEval_20240826_elv_tendayaverage_test7.h5', key='run_0')
+# plot(df, 'Lv A7', scale='linear', truncate=False)
+# df = pd.read_hdf('Evaluations/temp/LvEnvEval_20240826_elv_tendayaverage_test8.h5', key='run_0')
+# plot(df, 'Lv A8', scale='linear', truncate=False)
+#
+
+# df = pd.read_hdf('Evaluations/LvEnvEval__mtd_lv.h5', key='run_0')
+# plot(df, 'Lv mtd', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('Evaluations/LvEnvEval__at100_lv.h5', key='run_0')
+# plot(df, 'Lv at100', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('Evaluations/LvEnvEval__at50_lv.h5', key='run_0')
+# plot(df, 'Lv at50', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('Evaluations/LvEnvEval__eat120_lv.h5', key='run_0')
+# plot(df, 'Lv eat120', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('Evaluations/LvEnvEval__eat80_lv.h5', key='run_0')
+# plot(df, 'Lv eat80', scale='linear', truncate=False)
+# df = pd.read_hdf('data/demos_elias_pc/agnt_7/Evaluations/PcEnvEval_a720240826_elv_tendayaverage_test7.h5', key='run_0')
+# plot(df, 'PC A7', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('data/demos_elias_pc/agnt_8/Evaluations/PcEnvEval_a820240826_elv_tendayaverage_test8.h5', key='run_0')
+# plot(df, 'PC A8', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('Evaluations/pc_manuals/PcEnvEval_at50_demo.h5', key='run_0')
+# plot(df, 'PC at50', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('Evaluations/pc_manuals/PcEnvEval_at100_demo.h5', key='run_0')
+# plot(df, 'PC at100', scale='linear', truncate=False)
+
+df = pd.read_hdf('Evaluations/LvEnvEval_transfer_720240912_transfer_7.h5', key='run_0')
+plot(df, 'Lv transfer 7', scale='linear', truncate=False)
+
+df = pd.read_hdf('Evaluations/LvEnvEval_transfer_820240912_transfer_8.h5', key='run_0')
+plot(df, 'Lv transfer 8', scale='linear', truncate=False)
 # main()
 plt.show()

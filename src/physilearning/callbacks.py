@@ -23,8 +23,8 @@ class CopyConfigCallback(BaseCallback):
         os.system(r'echo "copying config.yaml to Training/Configs/"')
         command = f'cp {self.config_file} ./Training/Configs/{self.logname}.yaml'
         os.system(command)
-        command = f'rm {self.config_file}'
-        os.system(command)
+        #command = f'rm {self.config_file}'
+        #os.system(command)
 
         return True
 

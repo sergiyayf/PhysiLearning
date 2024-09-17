@@ -51,5 +51,10 @@ class Reward:
                 reward = 1 - 0.5 * obs[0]
             else:
                 raise ValueError("reward_shaping_flag not recognized")
-
+        return reward
+    def tendayaverage(self, trajectory, time):
+        if np.sum(trajectory[0:2, time-19:])/np.sum(trajectory[0:2,2]) < 20:
+            reward = 1
+        else:
+            reward = 0
         return reward

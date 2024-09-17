@@ -34,7 +34,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
     tumor_size = environment.state[0]+environment.state[1]
 
     if at_type == 'zhang_et_al':
-        ini_tumor_size = environment.initial_wt + environment.initial_mut
+        ini_tumor_size = environment.trajectory[0, 2] + environment.trajectory[1, 2]
         if tumor_size >= ini_tumor_size:
             action = 1
         else:
@@ -95,8 +95,8 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
         # find "low" and number after it
         low = float(at_type[at_type.find('low')+4:at_type.find('low')+8])
         high = float(at_type[at_type.find('high')+5:at_type.find('high')+9])
-        ini_tumor_size = environment.initial_wt + environment.initial_mut
-        if tumor_size >= high*ini_tumor_size:
+        ini_tumor_size = environment.trajectory[0,2] + environment.trajectory[1,2]
+        if tumor_size >= high*ini_tumor_size and environment.trajectory[2, int(environment.time)] == 0:
             action = 1
         else:
             warnings.warn('This implementation is sensitive to the type of observation space, be careful')
@@ -105,6 +105,11 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
                 action = 1
             else:
                 action = 0
+    elif at_type == 'pulse':
+        if environment.time == 2:
+            action = 1
+        else:
+            action = 0
     else:
         action = 0
 
@@ -189,17 +194,6 @@ class Evaluation:
         else:
             obs, _ = self.env.reset()
         for episode in range(num_episodes):
-            if self._is_venv():
-                if self.env.get_attr('time')[0] > 0:
-                    obs = self.env.reset()
-                else:
-                    print('Episode 0, already reset')
-
-            else:
-                if self.env.unwrapped.time > 0:
-                    obs, _ = self.env.reset()
-                else:
-                    print('Episode 0, already reset')
 
             done = False
             score = 0
@@ -227,6 +221,17 @@ class Evaluation:
             print(f'Episode {episode} - Score: {score}')
             filename = os.path.join(save_path, save_name)
             self.save_trajectory(filename, episode)
+            if self._is_venv():
+                if self.env.get_attr('time')[0] > 0:
+                    obs = self.env.reset()
+                else:
+                    print('Episode 0, already reset')
+
+            else:
+                if self.env.unwrapped.time > 0:
+                    obs, _ = self.env.reset()
+                else:
+                    print('Episode 0, already reset')
 
         return
 

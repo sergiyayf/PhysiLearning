@@ -264,6 +264,8 @@ class BaseEnv(Env):
         """
         if self.time >= self.max_time:
             truncate = True
+        elif np.sum(self.state[0:2]) >= self.threshold_burden:
+            truncate = True
         else:
             truncate = False
         return truncate
@@ -275,10 +277,12 @@ class BaseEnv(Env):
         # response = self.measure_response()
         # if response < 0 and np.sum(self.state[0:2]) >= np.sum(self.trajectory[0:2, 0]):
         #     terminate = False
-        # if np.sum(self.state[0:2]) >= self.threshold_burden:
-        #     terminate = True
-        if np.sum(self.trajectory[0:2, self.time-13:]) > 14*self.threshold_burden:
+        #if np.sum(self.state[0:2]) >= self.threshold_burden:
+        #    terminate = True
+        if self.state[1] > np.sum(self.trajectory[0:2,2])*1.0:
             terminate = True
+        # if np.sum(self.trajectory[0:2, self.time-13:]) > 14*self.threshold_burden:
+        #     terminate = True
         else:
             terminate = False
         return terminate
