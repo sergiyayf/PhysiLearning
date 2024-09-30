@@ -131,14 +131,14 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(12, 4))
     plot_data(ax, title="PC raw data")
 
-    consts_fit = {'Delta_s': 2.58, 'r_r': 0.22, 'r_s': 0.114}
-    params_fit = {'K': 42100}
+    consts_fit = {'Delta_s': 2.57, 'r_r': 0.22, 'r_s': 0.116}
+    params_fit = {'K': 40000}
     sigmas = [1000]
     iteration = 1
     accuracy = 0.0
     tune_draws = 1000
     final_draws = 10000
-    while accuracy < 0.95:
+    while accuracy < 0.99:
         theta_fit = list(params_fit.values())
 
         sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],

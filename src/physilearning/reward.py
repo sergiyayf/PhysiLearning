@@ -53,7 +53,12 @@ class Reward:
                 raise ValueError("reward_shaping_flag not recognized")
         return reward
     def tendayaverage(self, trajectory, time):
-        if np.sum(trajectory[0:2, time-19:])/np.sum(trajectory[0:2,2]) < 20:
+        r = trajectory[1,:]
+        s = trajectory[0,:]
+        tot = (r + s)/np.sum(trajectory[0:2,2])
+        last_seven_days = tot[time-13:time+1]
+        if np.any(last_seven_days < 1):
+        #if np.sum(trajectory[0:2, time-19:time+1])/np.sum(trajectory[0:2,2]) < 20:
             reward = 1
         else:
             reward = 0
