@@ -4,7 +4,7 @@ import yaml
 from physilearning.train import Trainer
 from physilearning.evaluate import Evaluation
 
-config_file = 'config.yaml'
+config_file = '../config.yaml'
 
 for i in range(1, 21):
 
@@ -58,6 +58,6 @@ for i in range(1, 21):
         else:
             job_name = '_'
         evaluation.run_environment(model_name='None', num_episodes=general_config['eval']['num_episodes'],
-                                   save_path=os.path.join('.', 'Evaluations'),
+                                   save_path=os.path.join('..', 'Evaluations'),
                                    save_name=env_type +'Eval_ ' +job_name +save_name, fixed_therapy=fixed,
                                    fixed_therapy_kwargs={'at_type': at_type, 'threshold': threshold})
