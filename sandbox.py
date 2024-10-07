@@ -51,27 +51,35 @@ def plot(df, title, scale='linear', truncate=False):
     ax.legend()
     return ax
 
-def get_ttps(filename, timesteps=100):
+def get_ttps(filename, timesteps=10):
     ttps = []
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
         # find the largest index with non-zero Type 0 and Type 1
-        initial_size = df['Type 0'][0] + df['Type 1'][0]
-        nz = df[((df['Type 0'] + df['Type 1'])/initial_size > 1.4)]
-        if len(nz) > 0:
-            # append index when type 0 + type 1 is larger than 1.5
-            ttps.append(nz.index[0])
-        else:
-            ttps.append(len(df))
+        initial_size = df['Type 0'][2] + df['Type 1'][2]
+        nz = df[((df['Type 1'])/initial_size > 1.0)]
+        # if len(nz) > 0:
+        #     # append index when type 0 + type 1 is larger than 1.5
+        #     ttps.append(nz.index[0]/2)
+        #
+        # else:
+        #     ttps.append(len(df)/2)
+        ttps.append(df['Type 1'][52]/initial_size)
     return ttps
 
 def main():
-    PC_files_list = ['data/3D_benchmarks/p62/p62_no_treat/p62_no_treat_all.h5',
-                     'data/3D_benchmarks/p62/p62_mtd/p62_mtd_all.h5',
-                     'data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5',
+    PC_files_list = ['./data/agnt_1_3/Evaluations/PcEnvEval_a1_320240927_1_3.h5',
+                    './data/agnt_1_6/Evaluations/PcEnvEval_a1_620240927_1_6.h5',
+                    './data/agnt_1_10/Evaluations/PcEnvEval_a1_1020240927_1_10.h5',
+                    './data/agnt_1_11/Evaluations/PcEnvEval_a1_1120240927_1_11.h5',
+                    './data/agnt_1_14/Evaluations/PcEnvEval_a1_1420240927_1_14.h5',
+                    # './Evaluations/run_evals/mtd.h5',
+                    #  './Evaluations/run_evals/at50.h5',
+                    #  './Evaluations/run_evals/at100.h5',
+                    #  './Evaluations/run_evals/eat100.h5',
                      #'data/3D_benchmarks/random/random_all.h5'
                      ]
-    PC_name_list = ['PC No therapy', 'PC MTD', 'PC AT100']
+    PC_name_list = ['PC agnt 1_3', 'PC agnt 1_6', 'PC agnt 1_10', 'PC agnt 1_11', 'PC agnt 1_14']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -79,14 +87,18 @@ def main():
 
     PC_df = pd.DataFrame(PC_dict)
 
-    LV_files_list = ['./Evaluations/temp/LvEnvEvalno_treatment_1_5.h5',
-                        './Evaluations/LvEnvEval__high_low_1_10_0_90.h5',
-                        './Evaluations/LvEnvEval__high_low_1_20_0_80.h5',
-                        './Evaluations/SLvEnvEval__high_low_1_10_0_90.h5',
-                        './Evaluations/SLvEnvEval__high_low_1_20_0_80.h5',
+    LV_files_list = ['Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_3.h5',
+        'Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_6.h5',
+        'Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_10.h5',
+        'Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_11.h5',
+        'Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_14.h5',
+        # './Evaluations/LvEnvEval__mtd.h5',
+        #                 './Evaluations/LvEnvEval__at50.h5',
+        #                 './Evaluations/LvEnvEval__at100.h5',
+        #                 './Evaluations/LvEnvEval__eat100.h5',
                         #'./Evaluations/LvEnvEvalrandom_1_5.h5'
                         ]
-    LV_name_list = ['LV No therapy', 'LV s', 'LV w', 'Slv shall', 'Slv wide']
+    LV_name_list = ['LV agnt 1_3', 'LV agnt 1_6', 'LV agnt 1_10', 'LV agnt 1_11', 'LV agnt 1_14']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -98,9 +110,9 @@ def main():
     combined = {}
     for i in range(len(PC_name_list)):
         combined[PC_name_list[i]] = PC_df[PC_name_list[i]]
-        # combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
-    # combined_df = pd.DataFrame(combined)
-    combined_df = LV_df
+        combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
+    combined_df = pd.DataFrame(combined)
+
     # box plot the distribution with scatter using seaborn
     fig, ax = plt.subplots()
     sns.boxplot(data=combined_df, ax=ax, width = 0.3)
@@ -108,21 +120,28 @@ def main():
     # show mean as well
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
-df_mtd = pd.read_hdf('./Evaluations/LvEnvEval__5000_2_mtd.h5', key='run_0')
-plot(df_mtd, 'Lv 5000 2 mtd ', scale='linear', truncate=False)
 
-df_mtd = pd.read_hdf('./Evaluations/LvEnvEval__8000_1_mtd.h5', key='run_0')
-plot(df_mtd, 'Lv 8000 1 mtd ', scale='linear', truncate=False)
+# df_metld = pd.read_hdf('./Evaluations/MeltdEnvEval__test_meltd_at100.h5', key='run_0')
+# plot(df_metld, 'Meltd at100', scale='linear', truncate=False)
+#
+# df_m = pd.read_hdf('./Evaluations/meltd/MeltdEnvEval_1006_2d_meltd_l2.h5', key='run_0')
+# plot(df_m, 'Meltd 1006 2d l2', scale='linear', truncate=False)
+#
+# df_metld = pd.read_hdf('./Evaluations/MeltdEnvEval__test_meltd_eat100.h5', key='run_0')
+# plot(df_metld, 'Meltd eat100', scale='linear', truncate=False)
+#
+# df_pc_mtd = pd.read_hdf('./Evaluations/run_evals/mtd.h5', key='run_0')
+# plot(df_pc_mtd, 'PC MTD', scale='linear', truncate=False)
 
-df_mtd = pd.read_hdf('./Evaluations/LvEnvEval__5000_2_eat.h5', key='run_0')
-plot(df_mtd, 'Lv 5000 2 eat ', scale='linear', truncate=False)
+# df = pd.read_hdf('./Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_10.h5', key='run_0')
+# plot(df, 'LV agnt 1_10', scale='linear', truncate=False)
+#
+# df = pd.read_hdf('./Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_6.h5', key='run_0')
+# plot(df, 'LV agnt 1_6', scale='linear', truncate=False)
 
-df_mtd = pd.read_hdf('./Evaluations/LvEnvEval__8000_1_eat.h5', key='run_0')
-plot(df_mtd, 'Lv 8000 1 eat ', scale='linear', truncate=False)
+df = pd.read_hdf('./Evaluations/LvEnvEval__mtd.h5', key='run_0')
+plot(df, 'LV MTD', scale='linear', truncate=False)
 
-df_metld = pd.read_hdf('./Evaluations/MeltdEnvEval__test_meltd_at100.h5', key='run_0')
-plot(df_metld, 'Meltd at100', scale='linear', truncate=False)
+main()
 
-df_m = pd.read_hdf('./Evaluations/meltd/MeltdEnvEval_1006_2d_meltd_l2.h5', key='run_0')
-plot(df_m, 'Meltd 1006 2d l2', scale='linear', truncate=False)
 plt.show()

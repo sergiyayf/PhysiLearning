@@ -130,13 +130,6 @@ class MeltdEnv(BaseEnv):
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
 
-            # get the reward
-            rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
-            if self.reward_shaping_flag == 'tendayaverage':
-                reward += rewards.tendayaverage(self.trajectory, self.time)
-            else:
-                reward += rewards.get_reward(self.state, self.time/self.max_time, self.threshold_burden)
-
             info = {}
 
             if self.observation_type == 'number':
@@ -158,6 +151,13 @@ class MeltdEnv(BaseEnv):
                     obs = [np.sum(self.state[0:2]), self.state[2], self.mutant_normalized_position*self.normalization_factor]
             else:
                 raise NotImplementedError
+
+            # get the reward
+            rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
+            if self.reward_shaping_flag == 'tendayaverage':
+                reward += rewards.tendayaverage(self.trajectory, self.time)
+            else:
+                reward += rewards.get_reward(self.state, self.time / self.max_time, self.threshold_burden)
         terminate = self.terminate()
         truncate = self.truncate()
         # self.done = terminate or truncate
@@ -210,7 +210,15 @@ class MeltdEnv(BaseEnv):
 
         else:
             raise NotImplementedError
-
+        for tt in [0, 1]:
+            self.time += 1
+            self.state[0] = self.grow(0, 1, self.growth_function_flag)
+            self.state[1] = self.grow(1, 0, self.growth_function_flag)
+            self.burden = np.sum(self.state[0:2])
+            # record trajectory
+            # self.state[2] = action
+            self.trajectory[:, self.time] = self.state
+        self.threshold_burden = self.max_tumor_size * (self.state[0]+self.state[1])
         return obs, {}
 
     def _move_mutant(self, dist, growth_layer) -> float:
@@ -288,6 +296,7 @@ class MeltdEnv(BaseEnv):
 
         if i == 0:
             new_pop_size = self.state[i] * (1 + self.growth_rate[i]*(1 - self.death_rate_treat[i] * self.treat))
+
         else:
             #
             if self.state[1] > 0.1*(self.initial_wt+self.initial_mut):
