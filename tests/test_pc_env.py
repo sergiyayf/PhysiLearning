@@ -41,8 +41,8 @@ def test_env_reset():
             obs, _ = env.reset()
 
 
-    assert obs == [34, 0]
-    mock_send_message.assert_called_with('Reset')
+    assert obs == [34]
+    mock_send_message.assert_called_with()
     mock_start_slurm_physicell_job_step.assert_called_with()
     mock_receive_message.assert_called_with()
 

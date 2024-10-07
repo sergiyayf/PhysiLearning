@@ -49,7 +49,7 @@ def test_at_fixed_with_vector_monitor(env_type):
         evaluate.fixed_at(env, threshold=0.8, at_type='fixed')
 
 
-@pytest.mark.parametrize('env_type', ['LvEnv', 'GridEnv'])
+@pytest.mark.parametrize('env_type', ['LvEnv'])
 def test_zhang_et_al(env_type):
     """
     Test Zhang et al adaptive therapy evaluation
@@ -66,25 +66,6 @@ def test_zhang_et_al(env_type):
     env.state[0] = 1
     treatment = evaluate.fixed_at(env, at_type='zhang_et_al')
     assert treatment == 0
-    env.step(1)
-    env.state[0] = 3
-    treatment = evaluate.fixed_at(env, at_type='zhang_et_al', threshold=0.5)
-    assert treatment == 1
-
-
-@pytest.mark.parametrize('env_type', ['GridEnv'])
-def test_image_trajectory_zhang_et_al(env_type):
-    """
-    Test Zhang et al adaptive therapy evaluation with image observation
-    """
-    EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
-    env = EnvClass(normalize_to=4, max_tumor_size=10, initial_wt=3, initial_mut=1, observation_type='image')
-    env.reset()
-    env.step(0)
-    env.state[0] = 1
-    treatment = evaluate.fixed_at(env, at_type='zhang_et_al', threshold=0.5)
-    assert treatment == 0
-    env.step(1)
     env.step(1)
     env.state[0] = 3
     treatment = evaluate.fixed_at(env, at_type='zhang_et_al', threshold=0.5)

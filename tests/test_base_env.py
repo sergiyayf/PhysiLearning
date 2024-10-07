@@ -111,14 +111,12 @@ def test_measure_response():
     assert resp != 0
 
 def test_terminate():
-    env = BaseEnv(initial_wt=8, initial_mut=2, normalize=False, max_tumor_size=1.1)
+    env = BaseEnv(initial_wt=18, initial_mut=2, normalize=False, max_tumor_size=1.1)
+    env.trajectory[0,2] = 20
+    env.trajectory[1,2] = 3
     term = env.terminate()
     assert term == False
-    env.time = 1
-    env.trajectory[0,env.time] = 10
-    env.trajectory[1,env.time] = 3
-    env.trajectory[2,env.time] = 1
-    env.state = [10, 2, 1]
+    env.state = [1, 24, 1]
     term = env.terminate()
     assert term
 

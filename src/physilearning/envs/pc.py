@@ -46,6 +46,7 @@ class PcEnv(BaseEnv):
         name='PcEnv',
         observation_type: str = 'image',
         action_type: str = 'discrete',
+        see_resistance: bool = False,
         max_tumor_size: int = 600,
         max_time: int = 1000,
         initial_wt: int = 2,
@@ -74,6 +75,7 @@ class PcEnv(BaseEnv):
                          treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
                          treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
+                         see_resistance=see_resistance,
                          )
         # check supported observation spaces
         if self.observation_type not in ['number', 'image', 'multiobs', 'mutant_position']:
@@ -349,7 +351,7 @@ class PcEnv(BaseEnv):
 
         # not clean pulse hack
         for tt in [0,1]:
-            self.socket.send(b"Stop treatment")
+            self._send_message('Stop treatment')
             message = self._receive_message()
             wt, mut = self._get_cell_number(message)
             wt = wt * self.normalization_factor
