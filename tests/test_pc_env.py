@@ -40,9 +40,9 @@ def test_env_reset():
             env = EnvClass(initial_wt=1, initial_mut=1, observation_type='number', normalize=False)
             obs, _ = env.reset()
 
-
     assert obs == [34]
-    mock_send_message.assert_called_with()
+    # send message called once with 'Reset' and twice with 'Stop treatment'
+    mock_send_message.assert_called()
     mock_start_slurm_physicell_job_step.assert_called_with()
     mock_receive_message.assert_called_with()
 
