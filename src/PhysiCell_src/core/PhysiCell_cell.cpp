@@ -87,6 +87,25 @@
 
 #include <algorithm>
 #include <iterator> 
+#include <random>
+#include <cmath>
+#include <numeric>
+
+std::vector<double> readCSV(const std::string& filename) {
+    std::vector<double> data;
+    std::ifstream file(filename);
+    std::string line;
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string value;
+        while (std::getline(ss, value, ',')) {
+            data.push_back(std::stod(value));
+        }
+    }
+
+    return data;
+}
 
 namespace PhysiCell{
 
@@ -135,7 +154,7 @@ Cell_Definition::Cell_Definition()
 //	int number_of_cell_defs = cell_definition_indices_by_name.size(); 
 
 	// set up the default parameters 
-		// the default Cell_Parameters constructor should take care of this
+		// the default Cell_Parameters constructor should take care of thisG
 		
 	type = 0;
 	name = "unnamed";
@@ -568,6 +587,7 @@ Cell* Cell::divide( )
 	child->copy_data( this );
 	child->copy_function_pointers(this);
 	child->parameters = parameters;
+	std::vector<double> data = readCSV("volumes.csv");
 
 	// evenly divide internalized substrates
 	// if these are not actively tracked, they are zero anyway
@@ -648,6 +668,10 @@ Cell* Cell::divide( )
     child->barcode = temp_bitset_child_2;
 	this->number_of_divisions++;
 	child->number_of_divisions = this->number_of_divisions;
+
+    int randomIndex = std::rand() % data.size();
+    double volume = data[randomIndex];
+    child->set_total_volume(volume);
 
     if (child->phenotype.intracellular){
         child->phenotype.intracellular->start();

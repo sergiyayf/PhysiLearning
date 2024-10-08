@@ -1,20 +1,20 @@
 <PhysiCell_settings version="devel-version">
 
     <domain>
-        <x_min>-600</x_min>
-        <x_max>600</x_max>
-        <y_min>-600</y_min>
-        <y_max>600</y_max>
-        <z_min>-10</z_min>
-        <z_max>10</z_max>
-        <dx>20</dx>
-        <dy>20</dy>
-        <dz>20</dz>
+        <x_min>-2500</x_min>
+        <x_max>2500</x_max>
+        <y_min>-2500</y_min>
+        <y_max>2500</y_max>
+        <z_min>-25</z_min>
+        <z_max>25</z_max>
+        <dx>50</dx>
+        <dy>50</dy>
+        <dz>50</dz>
         <use_2D>true</use_2D>
     </domain>
 
     <overall>
-        <max_time units="min">108000</max_time>
+        <max_time units="min">100800</max_time>
         <time_units>min</time_units>
         <space_units>micron</space_units>
         <dt_diffusion units="min">0.01</dt_diffusion>
@@ -29,12 +29,12 @@
     <save>
         <folder>output</folder>
         <full_data>
-            <interval units="min">720</interval>
+            <interval units="min">360</interval>
             <enable>true</enable>
         </full_data>
         <SVG>
-            <interval units="min">720</interval>
-            <enable>false</enable>
+            <interval units="min">1440</interval>
+            <enable>true</enable>
         </SVG>
         <legacy_data>
             <enable>false</enable>
@@ -97,14 +97,14 @@
             <phenotype>
                 <cycle code="5" name="live">
                     <phase_durations units="min">
-                        <duration index="0" fixed_duration="false">2160</duration> 
+                        <duration index="0" fixed_duration="false">2880</duration>
                     </phase_durations>
                 </cycle>
                 <death>
                     <model code="100" name="apoptosis">
-                        <death_rate units="1/min">4.63e-06</death_rate>
+                        <death_rate units="1/min">2.4e-06</death_rate>
                         <phase_durations units="min">
-                            <duration index="0" fixed_duration="true">61</duration>
+				            <duration index="0" fixed_duration="false">3600</duration>
                         </phase_durations>
                         <parameters>
                             <unlysed_fluid_change_rate units="1/min">0.05</unlysed_fluid_change_rate>
@@ -148,7 +148,7 @@
                     <relative_maximum_adhesion_distance units="dimensionless">1.25</relative_maximum_adhesion_distance>
                     <cell_adhesion_affinities>
                         <cell_adhesion_affinity name="sensitive">1</cell_adhesion_affinity>
-                        <cell_adhesion_affinity name="resistant ">1.0</cell_adhesion_affinity>
+                        <cell_adhesion_affinity name="resistant">1.0</cell_adhesion_affinity>
                     </cell_adhesion_affinities>
                     <options>
                         <set_relative_equilibrium_distance enabled="false" units="dimensionless">1.8</set_relative_equilibrium_distance>
@@ -200,41 +200,44 @@
                     <dead_phagocytosis_rate units="1/min">0</dead_phagocytosis_rate>
                     <live_phagocytosis_rates>
                         <phagocytosis_rate name="sensitive" units="1/min">0</phagocytosis_rate>
-                        <phagocytosis_rate name="resistant " units="1/min">0.0</phagocytosis_rate>
+                        <phagocytosis_rate name="resistant" units="1/min">0.0</phagocytosis_rate>
                     </live_phagocytosis_rates>
                     <attack_rates>
                         <attack_rate name="sensitive" units="1/min">0</attack_rate>
-                        <attack_rate name="resistant " units="1/min">0.0</attack_rate>
+                        <attack_rate name="resistant" units="1/min">0.0</attack_rate>
                     </attack_rates>
                     <damage_rate units="1/min">1</damage_rate>
                     <fusion_rates>
                         <fusion_rate name="sensitive" units="1/min">0</fusion_rate>
-                        <fusion_rate name="resistant " units="1/min">0.0</fusion_rate>
+                        <fusion_rate name="resistant" units="1/min">0.0</fusion_rate>
                     </fusion_rates>
                 </cell_interactions>
                 <cell_transformations>
                     <transformation_rates>
                         <transformation_rate name="sensitive" units="1/min">0</transformation_rate>
-                        <transformation_rate name="resistant " units="1/min">0.0</transformation_rate>
+                        <transformation_rate name="resistant" units="1/min">0.0</transformation_rate>
                     </transformation_rates>
                 </cell_transformations>
             </phenotype>
             <custom_data>
                 <sample conserved="false" units="dimensionless" description="">1.0</sample>
+                <flagged_for_delayed_death conserved="false" units="dimensionless" description="">0</flagged_for_delayed_death>
+                <delayed_death_time conserved="false" units="min" description="">0</delayed_death_time>
+                <delayed_regrowth_time conserved="false" units="min" description="">0</delayed_regrowth_time>
             </custom_data>
         </cell_definition>
-        <cell_definition name="resistant " ID="1">
+        <cell_definition name="resistant" ID="1">
             <phenotype>
                 <cycle code="5" name="live">
                     <phase_durations units="min">
-                        <duration index="0" fixed_duration="false">2160</duration>
+                        <duration index="0" fixed_duration="false">2880</duration>
                     </phase_durations>
                 </cycle>
                 <death>
                     <model code="100" name="apoptosis">
                         <death_rate units="1/min">4.63e-6</death_rate>
                         <phase_durations units="min">
-                            <duration index="0" fixed_duration="true">61</duration>
+                            <duration index="0" fixed_duration="false">3600</duration>
                         </phase_durations>
                         <parameters>
                             <unlysed_fluid_change_rate units="1/min">0.05</unlysed_fluid_change_rate>
@@ -278,7 +281,7 @@
                     <relative_maximum_adhesion_distance units="dimensionless">1.25</relative_maximum_adhesion_distance>
                     <cell_adhesion_affinities>
                         <cell_adhesion_affinity name="sensitive">1.0</cell_adhesion_affinity>
-                        <cell_adhesion_affinity name="resistant ">1.0</cell_adhesion_affinity>
+                        <cell_adhesion_affinity name="resistant">1.0</cell_adhesion_affinity>
                     </cell_adhesion_affinities>
                     <options>
                         <set_relative_equilibrium_distance enabled="false" units="dimensionless">1.8</set_relative_equilibrium_distance>
@@ -330,27 +333,30 @@
                     <dead_phagocytosis_rate units="1/min">0.0</dead_phagocytosis_rate>
                     <live_phagocytosis_rates>
                         <phagocytosis_rate name="sensitive" units="1/min">0.0</phagocytosis_rate>
-                        <phagocytosis_rate name="resistant " units="1/min">0.0</phagocytosis_rate>
+                        <phagocytosis_rate name="resistant" units="1/min">0.0</phagocytosis_rate>
                     </live_phagocytosis_rates>
                     <attack_rates>
                         <attack_rate name="sensitive" units="1/min">0.0</attack_rate>
-                        <attack_rate name="resistant " units="1/min">0.0</attack_rate>
+                        <attack_rate name="resistant" units="1/min">0.0</attack_rate>
                     </attack_rates>
                     <damage_rate units="1/min">1</damage_rate>
                     <fusion_rates>
                         <fusion_rate name="sensitive" units="1/min">0.0</fusion_rate>
-                        <fusion_rate name="resistant " units="1/min">0.0</fusion_rate>
+                        <fusion_rate name="resistant" units="1/min">0.0</fusion_rate>
                     </fusion_rates>
                 </cell_interactions>
                 <cell_transformations>
                     <transformation_rates>
                         <transformation_rate name="sensitive" units="1/min">0.0</transformation_rate>
-                        <transformation_rate name="resistant " units="1/min">0.0</transformation_rate>
+                        <transformation_rate name="resistant" units="1/min">0.0</transformation_rate>
                     </transformation_rates>
                 </cell_transformations>
             </phenotype>
             <custom_data>
                 <sample conserved="false" units="dimensionless" description="">1.0</sample>
+                <flagged_for_delayed_death conserved="false" units="dimensionless" description="">0</flagged_for_delayed_death>
+                <delayed_death_time conserved="false" units="min" description="">0</delayed_death_time>
+                <delayed_regrowth_time conserved="false" units="min" description="">0</delayed_regrowth_time>
             </custom_data>
         </cell_definition>
     </cell_definitions>
@@ -377,22 +383,28 @@
         <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">0</number_of_cells>
         <drug_death_saturation type="double" units="mmHg" description="drug concentration value at which death is at maximum">26</drug_death_saturation>
         <drug_death_threshold type="double" units="mmHg" description="drug concentration at which death starts">18</drug_death_threshold>
-        <treatment_start type="int" units="min" description="">200160</treatment_start>
-        <treatment_end type="int" units="min" description="">230040</treatment_end>
-	<mutation_rate type="double" units="none" description="">0.0</mutation_rate>  
+	    <mutation_rate type="double" units="none" description="">0.0</mutation_rate>
         <number_of_resistant_cells type="int" units="none" description="">5</number_of_resistant_cells>
-        <number_of_susceptible_cells type="int" units="none" description="">45</number_of_susceptible_cells>
-        <treatment type="bool" units="none" description="">false</treatment>
+        <number_of_susceptible_cells type="int" units="none" description="">2500</number_of_susceptible_cells>
         <enable_chkpt description="" type="bool" units="none">false</enable_chkpt>
-	<filename_chkpt description="" type="string" units="none">./../paper_presims/patient_33/final</filename_chkpt>
+	    <filename_chkpt description="" type="string" units="none">./output00000004</filename_chkpt>
         <treatment_death_rate type="double" units="1/min" description="">0.000115</treatment_death_rate> 
+        <ini_treatment_time_step type="int" units="min" description="">720</ini_treatment_time_step>
         <treatment_time_step type="int" units="min" description="">720</treatment_time_step>
         <number_of_denovo_mutations type="int" units="none" description="">1</number_of_denovo_mutations>
-        <treatment_strength type="double" units="none" description="">6.0e2</treatment_strength>
-	<enable_barcode_communication type="bool" units="none">true</enable_barcode_communication>
-	<o2_proliferation_saturation type="double">30.</o2_proliferation_saturation>
-	<o2_proliferation_threshold type="double">8.</o2_proliferation_threshold>
-	<o2_necrosis_threshold type="double">2.0</o2_necrosis_threshold>
-	<o2_necrosis_max typy="double">1.0</o2_necrosis_max>
+	    <enable_barcode_communication type="bool" units="none">false</enable_barcode_communication>
+	    <o2_proliferation_saturation type="double">30.</o2_proliferation_saturation>
+	    <o2_proliferation_threshold type="double">8.</o2_proliferation_threshold>
+	    <o2_necrosis_threshold type="double">2.0</o2_necrosis_threshold>
+	    <o2_necrosis_max typy="double">1.0</o2_necrosis_max>
+	    <treatment type="bool" units="" description="">false</treatment>
+        <treatment_strength type="double" units="" description="">0.012</treatment_strength>
+        <growth_multiplier type="double" units="" description="">1.0</growth_multiplier>
+        <lower_pressure_threshold type="double" units="" description="">0.0</lower_pressure_threshold>
+	    <higher_pressure_threshold type="double" units="" description="">7.0</higher_pressure_threshold>
+        <death_delay type="int" units="" description="">2160</death_delay>
+        <treatment_growth_reduction type="double" units="" description="">0.6</treatment_growth_reduction>
+        <regrowth_delay type="int" units="" description="">4320</regrowth_delay>
+        <apoptosis_duration type="int" units="" description="">2880</apoptosis_duration>
     </user_parameters>
 </PhysiCell_settings>

@@ -67,6 +67,25 @@
 
 #include "./custom.h"
 #include <time.h>
+#include <random>
+#include <cmath>
+#include <numeric>
+
+std::vector<double> readCSV2(const std::string& filename) {
+    std::vector<double> data;
+    std::ifstream file(filename);
+    std::string line;
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string value;
+        while (std::getline(ss, value, ',')) {
+            data.push_back(std::stod(value));
+        }
+    }
+
+    return data;
+}
 
 void create_cell_types( void )
 {
@@ -94,7 +113,7 @@ void create_cell_types( void )
 	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
 
 	cell_defaults.functions.update_migration_bias = NULL; 
-	cell_defaults.functions.update_phenotype = update_cell_and_death_parameters_O2_based; 
+	cell_defaults.functions.update_phenotype = phenotype_function; // update_cell_and_death_parameters_O2_based; 
 	cell_defaults.functions.custom_cell_rule = NULL; 
 	cell_defaults.functions.contact_function = NULL; 
 	
@@ -142,10 +161,8 @@ void create_cell_types( void )
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
 	*/
-	
-	Cell_Definition* pSensitive = find_cell_definition("sensitive");
 
-	pSensitive->functions.update_phenotype = susceptible_cell_phenotype_update_rule;
+	//pSensitive->functions.update_phenotype = phenotype_function; //susceptible_cell_phenotype_update_rule;
 	display_cell_definitions( std::cout ); 
 	
 	return; 
@@ -303,6 +320,18 @@ void setup_tissue( void )
     if (parameters.bools("enable_chkpt")){
         std::cout<<"Loading cell positions from"<<parameters.strings("filename_chkpt")+"_cells.mat"<<std::endl;
         load_minimal_cells_physicell(parameters.strings("filename_chkpt"));
+	std::vector<double> data = readCSV2("volumes.csv");
+
+	for (int i=0; i<(*all_cells).size(); i++){
+        	Cell* pCell = (*all_cells)[i];
+		int randomIndex = std::rand() % data.size();
+        double volume = data[randomIndex];
+
+		//std::cout<<"Set repulsion strength = "<<pCell->phenotype.mechanics.cell_cell_repulsion_strength<<std::endl;
+		//double volume = pCell->phenotype.volume.total;
+        pCell->set_total_volume(volume);
+	}	
+
     } else {
 
 	double Xmin = microenvironment.mesh.bounding_box[0]; 
@@ -327,7 +356,7 @@ void setup_tissue( void )
 	
 	Cell* pC;
 	
-	for( int k=0; k < cell_definitions_by_index.size() ; k++ )
+	for( int k=0; k < 1 ; k++ )
 	{
 		Cell_Definition* pCD = cell_definitions_by_index[k]; 
 		std::cout << "Placing cells of type " << pCD->name << " ... " << std::endl; 
@@ -345,8 +374,19 @@ void setup_tissue( void )
 	std::cout << std::endl; 
 	
 	// load cells from your CSV file (if enabled)
-	load_cells_from_pugixml();
 
+	load_cells_from_pugixml();
+    std::vector<double> data = readCSV2("sizes_E7.csv");
+
+	for (int i=0; i<(*all_cells).size(); i++){
+        	Cell* pCell = (*all_cells)[i];
+		//int randomIndex = std::rand() % data.size();
+        double volume = data[i];
+
+		//std::cout<<"Set repulsion strength = "<<pCell->phenotype.mechanics.cell_cell_repulsion_strength<<std::endl;
+		//double volume = pCell->phenotype.volume.total;
+        pCell->set_total_volume(volume);
+	}
 	// set the correct barcode for all of the initially created cells
 
 	for (int i=0; i<(*all_cells).size(); i++){
@@ -425,7 +465,69 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 return output;} // paint_by_number_cell_coloring(pCell); }
 
 void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
-{ return; }
+{
+    // if cell is dead, don't bother with future phenotype changes.
+        if( phenotype.death.dead == true )
+        {
+                pCell->functions.update_phenotype = NULL;
+                return;
+        }
+    static int cycle_start_index = live.find_phase_index( PhysiCell_constants::live );
+    static int cycle_end_index = live.find_phase_index( PhysiCell_constants::live );
+    double pressure = pCell->state.simple_pressure;
+    int delay = parameters.ints("death_delay");
+    double multiplier;
+    double pressure_threshold = parameters.doubles("higher_pressure_threshold");
+    double lower_pressure_threshold = parameters.doubles("lower_pressure_threshold");
+    static int apoptosis_model_index = phenotype.death.find_death_model_index(PhysiCell_constants::apoptosis_death_model);
+
+    if (pressure < lower_pressure_threshold) {
+        multiplier = 1;
+    } else if (pressure > pressure_threshold) {
+        multiplier = 0.0;
+    } else {
+        multiplier = 1 - pressure/pressure_threshold;
+    }
+    if (pCell->type == 0) {
+
+    if (parameters.bools("treatment")==true) {
+        multiplier *= parameters.doubles("treatment_growth_reduction");
+    } else {
+        pCell->custom_data["delayed_regrowth_time"] +=dt;
+        if (pCell->custom_data["delayed_regrowth_time"] < parameters.ints("regrowth_delay")) {
+            //multiplier *= parameters.doubles("treatment_growth_reduction");
+            if (UniformRandom() < multiplier*parameters.doubles("treatment_strength")) {
+                  pCell->custom_data["flagged_for_delayed_death"] = 1;
+                  pCell->custom_data["delayed_death_time"] = 0.0;
+                  }
+        }
+    }
+    pCell->phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index) = multiplier *
+                pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(cycle_start_index,cycle_end_index);
+
+    if (pCell->custom_data["flagged_for_delayed_death"] == 1) {
+        pCell->custom_data["delayed_death_time"] += dt;
+        if (pCell->custom_data["delayed_death_time"] > delay) {
+            pCell->phenotype.death.rates[apoptosis_model_index] = 0.01;
+            pCell->phenotype.death.models[apoptosis_model_index]->data.exit_rate(0)
+						= 1.0 / (parameters.ints("apoptosis_duration")+1e-16);
+			// set longer time in the apoptotic phase
+			// pCell->phenotype.death.models[apoptosis_model_index]->transition_rate(0,1) = 1/1440;
+
+        }
+    }else if (pCell->type == 0 && parameters.bools("treatment")==true) {
+                  pCell->custom_data["delayed_regrowth_time"] = 0.0;
+                  if (UniformRandom() < multiplier*parameters.doubles("treatment_strength")) {
+                  pCell->custom_data["flagged_for_delayed_death"] = 1;
+                  pCell->custom_data["delayed_death_time"] = 0.0;
+                  }
+
+		     //pCell->phenotype.death.rates[apoptosis_model_index] = parameters.doubles("treatment_strength") * pCell->parameters.pReference_live_phenotype->death.rates[apoptosis_model_index]*multiplier;
+    }
+    } else {pCell->phenotype.cycle.data.transition_rate(cycle_start_index,cycle_end_index) = multiplier *
+                pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(cycle_start_index,cycle_end_index);}
+
+    return; }
 
 /* Scuceptible cell rule */
 void susceptible_cell_phenotype_update_rule( Cell* pCell, Phenotype& phenotype, double dt)
@@ -511,7 +613,7 @@ int talk_to_pcenv(zmq::socket_t& socket) {
                 t0_pos_y.append(",");
                 t0_pos_z.append(std::to_string((*all_cells)[cells_it]->position[2]));
                 t0_pos_z.append(",");
-            }else if ((*all_cells)[cells_it]->type == 1 ) {
+            }else if ((*all_cells)[cells_it]->type == 1) {
                 type_1_counter++;
                 t1_pos_x.append(std::to_string((*all_cells)[cells_it]->position[0]));
                 t1_pos_x.append(",");
@@ -552,10 +654,12 @@ int talk_to_pcenv(zmq::socket_t& socket) {
     // do treatment or not
     if (reply.to_string() == "Treat") {
         activate_drug_dc();
+	parameters.bools("treatment") = true;
      //treatment_on();
     } else if (reply.to_string() == "Stop treatment") {
         //std::cout<<"Deactivating treatment"<<std::endl;
         deactivate_drug_dc();
+	parameters.bools("treatment") = false;
 
     } else if (reply.to_string() == "Start simulation") {
 

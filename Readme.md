@@ -1,7 +1,7 @@
 # PhysiLearning
 [![CI](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml/badge.svg)](https://github.com/sergiyayf/PhysiLearning/actions/workflows/ci.yaml)
 [![coverage](https://codecov.io/github/sergiyayf/PhysiLearning/branch/master/graph/badge.svg?token=EsiaxXIL7Z)](https://codecov.io/github/sergiyayf/PhysiLearning)
-![version](https://img.shields.io/badge/version-0.3.5-blue)
+![version](https://img.shields.io/badge/version-0.5.0-blue)
 
 <img src="data/images/RL_treatment.gif" width="250" height="250" />
 
@@ -98,6 +98,16 @@ pytest tests/test_evaluate.py
 
 
 ## Changelog
+
+#### 0.5.0 Major Changes
+- Added meltd environment which is fitted to the experimental data of Elias 
+- Image obsrvations and gridEnv are now deprecated and my not work properly
+- Added averaging for best reward callback in training 
+- Modify progression (termination/truncation) conditions 
+- Modify LV and PC envs normalization to the (day 1 in experiments)
+- Implement 1 day no treatment decision steps inside of resets of environments to mimic experiments
+- Update PC simulation with pressure based growth, parameters and initial conditions are fitted to the experimental data
+
 #### 0.3.5 Major Changes
 - Implement corrected abstracted model with position dependent mutant growth rate and motion 
 - Remove treatment application from agent's observation 
