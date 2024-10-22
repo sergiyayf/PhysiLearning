@@ -48,7 +48,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
+  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
   n_envs: 1
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -61,16 +61,16 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   max_tumor_size: 3.0 # 2006 #3086 #100000 # 110000 # 4000
-  max_time: 802 #122 # 120
-  initial_wt: 6000 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
+  max_time: 22 #122 # 120
+  initial_wt: 7000 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
   initial_mut: 1 # 4 # 'random' - used for meltd atserhii train
-  growth_rate_wt: 0.06 #0.087 - 1.3# 0.079 - meltd. 0.116 - current
-  growth_rate_mut: 0.03 #0.211 - fixed treat #0.216 - 1.3# 0.076 - meltd. 0.23 - current
-  death_rate_wt: 0.0 #0.0029
-  death_rate_mut: 0.0 #0.00438
-  treat_death_rate_wt: 2.2 #5.707 # 437 - fixed treat #5.837 #5.986 - 1.3 # 2.388 - meltd. 2.57 - current
+  growth_rate_wt: 0.096 #'0.096pm0.001' # 0.079 - meltd. 0.116 - current
+  growth_rate_mut: 0.12 # 0.076 - meltd. 0.23 - current
+  death_rate_wt: 0.1
+  death_rate_mut: 0.1
+  treat_death_rate_wt: 2.076 # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
-  treatment_time_step: 1
+  treatment_time_step: 4
   reward_shaping: 'tendayaverage' # reward shaping flag for some predefined rewards
   normalize: False
   normalize_to: 1000.0
@@ -82,7 +82,7 @@ env:
 
   # LV environment settings
   LvEnv:
-    carrying_capacity: 25000 # 3906 # 6500
+    carrying_capacity: 48300 # 3906 # 6500
     competition_wt: 1.0 # 1.732 - fixed treat #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
     competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
     growth_function_flag: 'instant' #'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
@@ -147,11 +147,11 @@ eval:
   path: './'
   model_prefix: '20240927_3'
   step_to_load: '_best_reward'
-  save_name: 'weak'
+  save_name: '2210_turnover_redo_pls'
   # evaluation settings
   fixed_AT_protocol: 1
-  at_type: 'effective_high_1.40_low_0.60' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  at_type: 'pulse' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.00
-  num_episodes: 100
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  num_episodes: 1
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False

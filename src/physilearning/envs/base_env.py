@@ -77,18 +77,24 @@ class BaseEnv(Env):
         self.normalize = normalize
         self.normalize_to = normalize_to
         self.max_tumor_size = max_tumor_size
+        self.initial_wt = initial_wt
+        self.initial_mut = initial_mut
+        self.growth_rate = [growth_rate_wt, growth_rate_mut]
+        self.death_rate = [death_rate_wt, death_rate_mut]
+        self.death_rate_treat = [treat_death_rate_wt, treat_death_rate_mut]
 
+        self.random_params = self.set_random_params()
+        self.randomize_params()
         if self.normalize:
-            self.normalization_factor = normalize_to / (initial_mut + initial_wt)
+            self.normalization_factor = normalize_to / (self.initial_mut + self.initial_wt)
             self.threshold_burden = normalize_to*max_tumor_size
-            self.initial_wt = initial_wt * self.normalization_factor
-            self.initial_mut = initial_mut * self.normalization_factor
+            self.initial_wt *= self.normalization_factor
+            self.initial_mut *= self.normalization_factor
 
         else:
-            self.threshold_burden = max_tumor_size*(initial_mut + initial_wt)
-            self.initial_wt = initial_wt
-            self.initial_mut = initial_mut
+            self.threshold_burden = max_tumor_size*(self.initial_mut + self.initial_wt)
             self.normalization_factor = 1
+
         # Spaces
         self.name = name
         self.action_type = action_type
@@ -110,15 +116,12 @@ class BaseEnv(Env):
         self.max_time = max_time
 
         self.initial_drug = 0
-        self.burden = self.initial_mut + self.initial_wt
+
         self.state = [self.initial_wt,
                       self.initial_mut,
                       self.initial_drug]
 
         # 1 - wt, 2 - resistant
-        self.growth_rate = [growth_rate_wt, growth_rate_mut]
-        self.death_rate = [death_rate_wt, death_rate_mut]
-        self.death_rate_treat = [treat_death_rate_wt, treat_death_rate_mut]
 
         # If patient sampling enabled set patient specific parameters
         if self.config is not None:
@@ -220,6 +223,45 @@ class BaseEnv(Env):
                                  self.config['patients'][self.patient_id]['treat_death_rate_mut']]
 
         return
+
+    def set_random_params(self):
+        random_params = {}
+        if isinstance(self.initial_wt, str):
+            random_params['initial_wt'] = self.initial_wt
+        if isinstance(self.initial_mut, str):
+            random_params['initial_mut'] = self.initial_mut
+        if isinstance(self.growth_rate[0], str):
+            random_params['growth_rate_wt'] = self.growth_rate[0]
+        if isinstance(self.growth_rate[1], str):
+            random_params['growth_rate_mut'] = self.growth_rate[1]
+        if isinstance(self.death_rate_treat[0], str):
+            random_params['death_rate_treat_wt'] = self.death_rate_treat[0]
+        if isinstance(self.death_rate_treat[1], str):
+            random_params['death_rate_treat_mut'] = self.death_rate_treat[1]
+        return random_params
+
+    def randomize_params(self):
+        for key, value in self.random_params.items():
+            if key == 'initial_wt':
+                low, high = (int(val) for val in value.split('-'))
+                self.initial_wt = np.random.randint(low, high)
+            if key == 'initial_mut':
+                low, high = (int(val) for val in value.split('-'))
+                self.initial_mut = np.random.randint(low, high)
+
+            if key == 'growth_rate_wt':
+                low, high = (float(val) for val in value.split('-'))
+                self.growth_rate[0] = np.random.uniform(low, high)
+            if key == 'growth_rate_mut':
+                if '-' in value:
+                    low, high = (float(val) for val in value.split('-'))
+                    self.growth_rate[1] = np.random.uniform(low, high)
+                elif value == 'same':
+                    self.growth_rate[1] = self.growth_rate[0]
+
+            if key == 'death_rate_treat_wt':
+                low, high = (float(val) for val in value.split('-'))
+                self.death_rate_treat[0] = np.random.uniform(low, high)
 
     def _choose_new_patient(self):
         """

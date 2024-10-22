@@ -58,12 +58,6 @@ class LvEnv(BaseEnv):
         **kwargs,
     ) -> None:
 
-        self.wt_random = isinstance(initial_wt, str)
-        self.mut_random = isinstance(initial_mut, str)
-        if self.wt_random:
-            initial_wt = np.random.random_integers(low=0, high=int(0.99*max_tumor_size), size=1)[0]
-        if self.mut_random:
-            initial_mut = np.random.random_integers(low=0, high=int(0.99*max_tumor_size), size=1)[0]
         super().__init__(config=config, name=name, observation_type=observation_type, action_type=action_type,
                          max_tumor_size=max_tumor_size, max_time=max_time, initial_wt=initial_wt,
                          initial_mut=initial_mut, growth_rate_wt=growth_rate_wt, growth_rate_mut=growth_rate_mut,
@@ -73,6 +67,7 @@ class LvEnv(BaseEnv):
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
                          )
 
+        self.capacity_non_normalized = env_specific_params.get('carrying_capacity', 6500)
         # Normalizazion
         if self.normalize:
             self.capacity = env_specific_params.get('carrying_capacity', 6500) \
@@ -95,6 +90,9 @@ class LvEnv(BaseEnv):
 
         if self.growth_function_flag == 'instant_fixed_treat' or self.growth_function_flag == 'instant_fixed_treat_with_noise':
             self.death_rate_treat[0] *= self.normalization_factor
+
+        self.mtd_rew = 0
+        self.current_rew = 0
 
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
@@ -193,8 +191,12 @@ class LvEnv(BaseEnv):
             rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
             if self.reward_shaping_flag == 'tendayaverage':
                 reward += rewards.tendayaverage(self.trajectory, self.time)
+            elif self.reward_shaping_flag == 'mtd_compare':
+                reward += rewards.tendayaverage(self.trajectory, self.time)
             else:
                 reward += rewards.get_reward(self.state, self.time/self.max_time, self.threshold_burden)
+
+        self.current_rew += reward
 
         info = {}
 
@@ -218,6 +220,14 @@ class LvEnv(BaseEnv):
         truncate = self.truncate()
         self.done = terminate or truncate
 
+        if self.reward_shaping_flag == 'mtd_compare':
+            if self.done:
+                print('MTD rew: ', self.mtd_rew)
+                print('Current rew: ', self.current_rew)
+                reward = (self.current_rew/self.mtd_rew-1)*100
+            else:
+                reward = 0
+
         return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):
@@ -227,19 +237,19 @@ class LvEnv(BaseEnv):
                 self._choose_new_patient()
                 self._set_patient_specific_competition(self.patient_id)
 
-        if self.wt_random:
-            self.initial_wt = \
-                np.random.random_integers(low=0, high=int(self.max_tumor_size), size=1)[0]
-            if self.normalize:
-                self.initial_wt = self.initial_wt*self.normalization_factor
-        if self.mut_random:
-            self.initial_mut = \
-                np.random.random_integers(low=0, high=int(0.01*self.max_tumor_size), size=1)[0]
-            if self.normalize:
-                self.initial_mut = self.initial_mut*self.normalization_factor
+        self.randomize_params()
+        if self.normalize:
+            keys = self.random_params.keys()
+            if 'initial_wt' in keys or 'initial_mut' in keys:
+                self.normalization_factor = self.normalize_to / (self.initial_wt + self.initial_mut)
+                self.initial_wt *= self.normalization_factor
+                self.initial_mut *= self.normalization_factor
+                self.capacity = self.capacity_non_normalized * self.normalization_factor
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
+        self.current_rew = 0
+        self.done = False
 
         self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)+1))
         self.trajectory[:, 0] = self.state
@@ -273,7 +283,37 @@ class LvEnv(BaseEnv):
             # self.state[2] = action
             self.trajectory[:, self.time] = self.state
         self.threshold_burden = self.max_tumor_size * (self.state[0]+self.state[1])
+
+        if self.reward_shaping_flag == 'mtd_compare':
+            # backup parameters
+            backup_state = self.state.copy()
+            backup_time = self.time
+            backup_trajectory = self.trajectory.copy()
+            self.mtd_rew = self.run_mtd()
+            # reset params back to original
+            self.state = backup_state
+            self.time = backup_time
+            self.trajectory = backup_trajectory
+
         return obs, {}
+
+    def run_mtd(self):
+        rew = 0
+        while not self.done:
+            for tt in range(0, self.treatment_time_step):
+                self.time += 1
+                self.state[2] = 1
+                self.state[0] = self.grow(0, 1, self.growth_function_flag)
+                self.state[1] = self.grow(1, 0, self.growth_function_flag)
+                self.trajectory[:, self.time] = self.state
+                rew += Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0])).tendayaverage(self.trajectory, self.time)
+            terminate = self.terminate()
+            truncate = self.truncate()
+            self.done = terminate or truncate
+        self.done = False
+        if rew == 0:
+            rew = 100
+        return rew
 
     def grow(self, i: int, j: int, flag: str) -> float:
 
@@ -345,10 +385,10 @@ if __name__ == "__main__": # pragma: no cover
     np.random.seed(int(time.time()))
     env = LvEnv.from_yaml("../../../config.yaml")
     env.reset()
-    grid = env.image
 
     while not env.done:
         act = env.action_space.sample()
-        env.step(act)
+        o, r, t, tr, i = env.step(act)
+        print(r)
+        print(env.state)
 
-    anim = env.render()

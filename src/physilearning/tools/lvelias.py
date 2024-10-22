@@ -101,8 +101,10 @@ class ODEModel:
                 raise ValueError('Parameter {} not found in parameters dictionary'.format(parameter))
 
         # equations
-        dx_dt = s*(prm['r_s']*(1-(s+r)/prm['K'])*(1-self.treatment*prm['Delta_s']))
-        dy_dt = r*(prm['r_r']*(1-(r+s)/prm['K']))
+        if prm['r_r'] == 1.25:
+            prm['r_r'] = 1.25*prm['r_s']
+        dx_dt = s*(prm['r_s']*(1-(s+r)/prm['K'])*(1-self.treatment*prm['Delta_s']) - 0.1*prm['r_s'])
+        dy_dt = r*(prm['r_r']*(1-(r+s)/prm['K'])-0.1*prm['r_r'])
 
         return [dx_dt, dy_dt]
 
