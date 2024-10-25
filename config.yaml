@@ -48,7 +48,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
+  type: 'ArrEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
   n_envs: 1
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -61,14 +61,14 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   max_tumor_size: 3.0 # 2006 #3086 #100000 # 110000 # 4000
-  max_time: 22 #122 # 120
+  max_time: 82 #122 # 120
   initial_wt: 7000 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
-  initial_mut: 1 # 4 # 'random' - used for meltd atserhii train
-  growth_rate_wt: 0.096 #'0.096pm0.001' # 0.079 - meltd. 0.116 - current
-  growth_rate_mut: 0.12 # 0.076 - meltd. 0.23 - current
+  initial_mut: 8 # 4 # 'random' - used for meltd atserhii train
+  growth_rate_wt: 0.12 #0.096 #'0.096pm0.001 ' # 0.079 - meltd. 0.116 - current
+  growth_rate_mut: 0.15 #0.12 # 0.076 - meltd. 0.23 - current
   death_rate_wt: 0.1
   death_rate_mut: 0.1
-  treat_death_rate_wt: 2.076 # 2.388 - meltd. 2.57 - current
+  treat_death_rate_wt: 0.1 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 4
   reward_shaping: 'tendayaverage' # reward shaping flag for some predefined rewards
@@ -82,7 +82,7 @@ env:
 
   # LV environment settings
   LvEnv:
-    carrying_capacity: 48300 # 3906 # 6500
+    carrying_capacity: 48300 # '48300pm1210'
     competition_wt: 1.0 # 1.732 - fixed treat #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
     competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
     growth_function_flag: 'instant' #'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
@@ -140,6 +140,14 @@ env:
     growth_layer: 150
     dimension: 2
 
+  ArrEnv:
+    carrying_capacity: 48000
+    arrest_rate: 0.7
+    recover_rate: 0.1
+    arresting_time_threshold: 2
+    recovering_time_threshold: 4
+    dying_time_threshold: 2
+    initial_growth_reduction: 0.5
 # evaluation configuration
 eval:
   most_recent: 0
@@ -147,11 +155,11 @@ eval:
   path: './'
   model_prefix: '20240927_3'
   step_to_load: '_best_reward'
-  save_name: '2210_turnover_redo_pls'
+  save_name: '25_pulse_arrest'
   # evaluation settings
   fixed_AT_protocol: 1
   at_type: 'pulse' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.00
   num_episodes: 1
-  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'ArrEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False

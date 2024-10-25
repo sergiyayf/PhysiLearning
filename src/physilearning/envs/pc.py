@@ -100,6 +100,7 @@ class PcEnv(BaseEnv):
         self.mutant_radial_position = 0
         self.mutant_normalized_position = 0
 
+
     def _bind_socket(self) -> None:
         """
         Bind the socket for communication between PhysiCell and the python environment

@@ -139,8 +139,17 @@ def main():
 # df = pd.read_hdf('./Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_6.h5', key='run_0')
 # plot(df, 'LV agnt 1_6', scale='linear', truncate=False)
 
-df = pd.read_hdf('./Evaluations/LvEnvEval__mtd.h5', key='run_0')
-plot(df, 'LV MTD', scale='linear', truncate=False)
+df = pd.read_hdf('./Evaluations/ArrEnvEval__25_pulse_arrest.h5', key='run_0')
+plot(df, 'arrest pulse', scale='linear', truncate=False)
+
+df = pd.read_hdf('./Evaluations/ArrEnvEval__25_on_off_arrest.h5', key='run_0')
+plot(df, 'arrest on off', scale='linear', truncate=False)
+
+df = pd.read_hdf('./Evaluations/ArrEnvEval__25_mtd_arrest.h5', key='run_0')
+plot(df, 'arrest mtd', scale='linear', truncate=False)
+
+df = pd.read_hdf('./Evaluations/ArrEnvEval__25_mtd_8_arrest.h5', key='run_0')
+plot(df, 'arrest mtd 8', scale='linear', truncate=False)
 
 main()
 

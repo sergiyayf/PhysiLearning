@@ -10,6 +10,12 @@ import yaml
 from gymnasium.spaces import Discrete, Box
 import numpy as np
 
+def trunc_norm(mean, std, n_std=3):
+    var = np.random.normal(mean, std)
+    # truncate at n_std
+    while var < mean - n_std*std or var > mean + n_std*std:
+        var = np.random.normal(mean, std)
+    return var
 
 class BaseEnv(Env):
     """
@@ -82,7 +88,7 @@ class BaseEnv(Env):
         self.growth_rate = [growth_rate_wt, growth_rate_mut]
         self.death_rate = [death_rate_wt, death_rate_mut]
         self.death_rate_treat = [treat_death_rate_wt, treat_death_rate_mut]
-
+        self.capacity = self.config['env']['LvEnv']['carrying_capacity']
         self.random_params = self.set_random_params()
         self.randomize_params()
         if self.normalize:
@@ -238,30 +244,36 @@ class BaseEnv(Env):
             random_params['death_rate_treat_wt'] = self.death_rate_treat[0]
         if isinstance(self.death_rate_treat[1], str):
             random_params['death_rate_treat_mut'] = self.death_rate_treat[1]
+        if isinstance(self.capacity, str):
+            random_params['capacity'] = self.capacity
         return random_params
 
     def randomize_params(self):
         for key, value in self.random_params.items():
+            if '-' in value:
+                low, high = (int(val) for val in value.split('-'))
+                val = np.random.randint(low, high)
+            elif 'pm' in value:
+                mean = int(value.split('pm')[0])
+                std = int(value.split('pm')[1])
+                val = trunc_norm(mean, std, 3)
+            else:
+                val = value
             if key == 'initial_wt':
-                low, high = (int(val) for val in value.split('-'))
-                self.initial_wt = np.random.randint(low, high)
+                self.initial_wt = val
             if key == 'initial_mut':
-                low, high = (int(val) for val in value.split('-'))
-                self.initial_mut = np.random.randint(low, high)
-
+                self.initial_mut = val
             if key == 'growth_rate_wt':
-                low, high = (float(val) for val in value.split('-'))
-                self.growth_rate[0] = np.random.uniform(low, high)
+                self.growth_rate[0] = val
             if key == 'growth_rate_mut':
-                if '-' in value:
-                    low, high = (float(val) for val in value.split('-'))
-                    self.growth_rate[1] = np.random.uniform(low, high)
-                elif value == 'same':
+                if value == 'same':
                     self.growth_rate[1] = self.growth_rate[0]
-
+                else:
+                    self.growth_rate[1] = val
             if key == 'death_rate_treat_wt':
-                low, high = (float(val) for val in value.split('-'))
-                self.death_rate_treat[0] = np.random.uniform(low, high)
+                self.death_rate_treat[0] = val
+            if key == 'capacity':
+                self.capacity = val
 
     def _choose_new_patient(self):
         """
