@@ -106,9 +106,7 @@ def plot_finals():
 def run_model(theta, y0, treatment):
     # parameters distinction
 
-    delta_s = theta[0]
-    arr_rate = theta[1]
-    rec_rate = theta[2]
+    rec_rate = theta[0]
 
     # env setup
 
@@ -118,8 +116,6 @@ def run_model(theta, y0, treatment):
     env.initial_mut = y0[1]
     env.treatment_time_step = 2
 
-    env.death_rate_treat[0] = delta_s
-    env.arrest_rate = arr_rate
     env.recover_rate = rec_rate
 
     env.normalize = False
@@ -214,28 +210,22 @@ if __name__ == '__main__':
             'Treatment': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
 
     #data_list = [mtd1, mtd2, mtd3, treat1_1, treat1_2, treat1_3, treat2_1, treat2_2, treat2_3, treat3_1, treat3_2, treat3_3, nc_1, nc_2, nc_3]
-    data_list = [treat1_1, treat1_2, treat1_3]
+    data_list = [treat1_1]
 
     iteration = 1
     accuracy = 0.0
-    tune_draws = 1000
-    final_draws = 1000
+    tune_draws = 100
+    final_draws = 100
     consts_fit = {'r_r': 1.25}
-    #params_fit = {'Delta_s': 0.108, 'ar_r': 0.55, 'rec_r': 0.126}
-    params_fit = {'Delta_s': 0.085, 'ar_r': 0.82, 'rec_r': 0.14}
-    sigmas = [0.01, 0.01, 0.01]
+    params_fit = {'rec_r': 0.25}
+    sigmas = [0.1]
 
-    while accuracy < 0.99:
+    while accuracy < 0.9:
         theta_fit = list(params_fit.values())
         with pm.Model() as model:
             # Shared priors
 
-            Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-3,
-                                         upper=10)
-
-            ar_r = pm.TruncatedNormal("ar_r", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-3,
-                                        upper=1)
-            rec_r = pm.TruncatedNormal("rec_r", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-3,
+            rec_r = pm.TruncatedNormal("rec_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-3,
                                         upper=1)
 
 
@@ -250,10 +240,10 @@ if __name__ == '__main__':
 
                 treatment_schedule = np.array(df['Treatment'].values[1:10])
 
-                sol = run_model(theta=[Delta_s, ar_r, rec_r], y0=[data.x[0], data.y[0]], treatment=treatment_schedule)
+                sol = run_model(theta=[rec_r], y0=[data.x[0], data.y[0]], treatment=treatment_schedule)
                 # Ode solution function
                 ode_solution = pytensor_forward_model_matrix(
-                    pm.math.stack([Delta_s, ar_r, rec_r])
+                    pm.math.stack([rec_r])
                 )
 
                 # Likelihood
@@ -291,12 +281,7 @@ if __name__ == '__main__':
     with pm.Model() as model:
         # Shared priors
 
-        Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-3,
-                                     upper=10)
-
-        ar_r = pm.TruncatedNormal("ar_r", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-3,
-                                  upper=1)
-        rec_r = pm.TruncatedNormal("rec_r", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-3,
+        rec_r = pm.TruncatedNormal("rec_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-3,
                                    upper=1)
 
         for i, data_dict in enumerate(data_list):
@@ -310,10 +295,10 @@ if __name__ == '__main__':
 
             treatment_schedule = np.array(df['Treatment'].values[1:10])
 
-            sol = run_model(theta=[Delta_s, ar_r, rec_r], y0=[data.x[0], data.y[0]], treatment=treatment_schedule)
+            sol = run_model(theta=[rec_r], y0=[data.x[0], data.y[0]], treatment=treatment_schedule)
             # Ode solution function
             ode_solution = pytensor_forward_model_matrix(
-                pm.math.stack([Delta_s, ar_r, rec_r])
+                pm.math.stack([rec_r])
             )
 
             # Likelihood
@@ -329,7 +314,7 @@ if __name__ == '__main__':
         trace_DEM = pm.sample(tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
 
-    trace.to_json('./data/SI_data/trace_arr_env_pulse.json')
+    #trace.to_json('./data/SI_data/trace_arr_env_pulse_rec.json')
     plot_finals()
     plt.show()
 

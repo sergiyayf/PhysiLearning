@@ -93,6 +93,7 @@ class ArrEnv(BaseEnv):
         self.arresting_time_threshold = env_specific_params.get('arresting_time_threshold', 2)
         self.recovering_time_threshold = env_specific_params.get('recovering_time_threshold', 4)
         self.dying_time_threshold = env_specific_params.get('dying_time_threshold', 2)
+        self.dying_time_threshold += self.arresting_time_threshold
         self.cycle_number = 0
         self.initial_growth_reduction = env_specific_params.get('initial_growth_reduction', 0.5)
 
@@ -108,6 +109,7 @@ class ArrEnv(BaseEnv):
         for t in range(0, self.treatment_time_step):
             # step time
             self.time += 1
+            self.state[2] = action
             sus, arr, res = self.grow()
             self.sensitive = sus
             self.arrested = arr
@@ -115,7 +117,7 @@ class ArrEnv(BaseEnv):
             self.state[0] = sus+arr
             self.state[1] = res
             self.burden = np.sum(self.state[0:2])
-            self.state[2] = action
+
             if action == 1:
                 self.time_on_treatment += 1
                 self.time_off_treatment = 0
@@ -133,13 +135,7 @@ class ArrEnv(BaseEnv):
                 self.state = [0, 0, 0]
 
             # get the reward
-            rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
-            if self.reward_shaping_flag == 'tendayaverage':
-                reward += rewards.tendayaverage(self.trajectory, self.time)
-            elif self.reward_shaping_flag == 'mtd_compare':
-                reward += rewards.tendayaverage(self.trajectory, self.time)
-            else:
-                reward += rewards.get_reward(self.state, self.time/self.max_time, self.threshold_burden)
+            reward += self.get_reward()
 
         self.current_rew += reward
 
@@ -196,19 +192,19 @@ class ArrEnv(BaseEnv):
                 obs = [np.sum(self.state[0:2])]
 
         # do day zero without treatment
-        for tt in [0, 1]:
-            self.time += 1
-            sus, arr, res = self.grow()
-            self.sensitive = sus
-            self.arrested = arr
-            self.resistant = res
-            self.state[0] = sus + arr
-            self.state[1] = res
-            self.time_off_treatment += 1
-            self.burden = np.sum(self.state[0:2])
-            # record trajectory
-            # self.state[2] = action
-            self.trajectory[:, self.time] = self.state
+        # for tt in [0, 1]:
+        #     self.time += 1
+        #     sus, arr, res = self.grow()
+        #     self.sensitive = sus
+        #     self.arrested = arr
+        #     self.resistant = res
+        #     self.state[0] = sus + arr
+        #     self.state[1] = res
+        #     self.time_off_treatment += 1
+        #     self.burden = np.sum(self.state[0:2])
+        #     # record trajectory
+        #     # self.state[2] = action
+        #     self.trajectory[:, self.time] = self.state
         self.threshold_burden = self.max_tumor_size * (self.state[0]+self.state[1])
 
         if self.reward_shaping_flag == 'mtd_compare':
@@ -254,48 +250,45 @@ class ArrEnv(BaseEnv):
             drug_seen_factor = 2
         if self.cycle_number > 1:
             recovery_factor = 2
-        if self.time_on_treatment > drug_seen_factor*self.arresting_time_threshold:
+        if self.time_on_treatment >= drug_seen_factor*self.arresting_time_threshold:
             arresting = 1
         else:
             arresting = 0
 
-        if self.time_off_treatment > self.recovering_time_threshold/recovery_factor:
+        if self.time_off_treatment >= self.recovering_time_threshold/recovery_factor:
             recovering = 1
         else:
             recovering = 0
 
-        if self.time_on_treatment > self.dying_time_threshold or self.time_off_treatment < self.recovering_time_threshold:
+        if (self.time_on_treatment >= self.dying_time_threshold and self.state[2] == 1) or (self.time_off_treatment < (self.recovering_time_threshold+2)/recovery_factor and self.state[2] == 0):
             dying = 1
         else:
             dying = 0
 
         # Initial phase growth reduction ?? might be essential to be able to fit the data
-        if self.time < 4:
-            sus_gr_rate  = self.growth_rate[0] * self.initial_growth_reduction
-            res_gr_rate = self.growth_rate[1] * self.initial_growth_reduction
-        else:
-            sus_gr_rate = self.growth_rate[0]
-            res_gr_rate = self.growth_rate[1]
+
+        sus_gr_rate = self.growth_rate[0]
+        res_gr_rate = self.growth_rate[1]
         competition = (1 - (self.sensitive + self.arrested + self.resistant) / self.capacity)
         new_sensitive = self.sensitive*(1+sus_gr_rate*competition - self.arrest_rate*arresting - self.death_rate[0]*sus_gr_rate ) + \
                                         self.recover_rate*self.arrested*recovering
         new_arrested = self.arrested*(1 - self.recover_rate*recovering - self.death_rate[0]*sus_gr_rate -
-                                      self.death_rate_treat[0]*dying) + self.sensitive*self.arrest_rate*arresting*competition
+                                      self.death_rate_treat[0]*dying) + self.sensitive*self.arrest_rate*arresting
         new_resistant = self.resistant*(1 + res_gr_rate*competition-self.death_rate[1]*res_gr_rate)
 
         # add noise comment for fitting
-        # if new_sensitive <= 0:
-        #     new_sensitive = 0
-        # else:
-        #     new_sensitive = np.max([0, new_sensitive + np.random.normal(0, 0.01*new_sensitive)])
-        # if new_arrested <= 0:
-        #     new_arrested = 0
-        # else:
-        #     new_arrested = np.max([0, new_arrested + np.random.normal(0, 0.01*new_arrested)])
-        # if new_resistant <= 0:
-        #     new_resistant = 0
-        # else:
-        #     new_resistant = np.max([0, new_resistant + np.random.normal(0, 0.01*new_resistant)])
+        if new_sensitive <= 0:
+            new_sensitive = 0
+        else:
+            new_sensitive = np.max([0, new_sensitive + np.random.normal(0, 0.01*new_sensitive)])
+        if new_arrested <= 0:
+            new_arrested = 0
+        else:
+            new_arrested = np.max([0, new_arrested + np.random.normal(0, 0.01*new_arrested)])
+        if new_resistant <= 0:
+            new_resistant = 0
+        else:
+            new_resistant = np.max([0, new_resistant + np.random.normal(0, 0.01*new_resistant)])
 
 
         return new_sensitive, new_arrested, new_resistant

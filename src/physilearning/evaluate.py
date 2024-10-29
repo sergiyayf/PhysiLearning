@@ -34,7 +34,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
     tumor_size = environment.state[0]+environment.state[1]
 
     if at_type == 'zhang_et_al':
-        ini_tumor_size = environment.trajectory[0, 2] + environment.trajectory[1, 2]
+        ini_tumor_size = environment.trajectory[0, 0] + environment.trajectory[1, 0]
         if tumor_size >= ini_tumor_size:
             action = 1
         else:
@@ -95,7 +95,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
         # find "low" and number after it
         low = float(at_type[at_type.find('low')+4:at_type.find('low')+8])
         high = float(at_type[at_type.find('high')+5:at_type.find('high')+9])
-        ini_tumor_size = environment.trajectory[0,2] + environment.trajectory[1,2]
+        ini_tumor_size = environment.trajectory[0,0] + environment.trajectory[1,0]
         if tumor_size >= high*ini_tumor_size and environment.trajectory[2, int(environment.time)] == 0:
             action = 1
         else:
@@ -106,7 +106,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
             else:
                 action = 0
     elif at_type == 'pulse':
-        if environment.time == 2:
+        if environment.time == 0:
             action = 1
         else:
             action = 0

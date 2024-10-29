@@ -188,13 +188,7 @@ class LvEnv(BaseEnv):
                 self.state = [0, 0, 0]
 
             # get the reward
-            rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
-            if self.reward_shaping_flag == 'tendayaverage':
-                reward += rewards.tendayaverage(self.trajectory, self.time)
-            elif self.reward_shaping_flag == 'mtd_compare':
-                reward += rewards.tendayaverage(self.trajectory, self.time)
-            else:
-                reward += rewards.get_reward(self.state, self.time/self.max_time, self.threshold_burden)
+            reward += self.get_reward()
 
         self.current_rew += reward
 
@@ -274,14 +268,14 @@ class LvEnv(BaseEnv):
             raise NotImplementedError
 
         # do day zero without treatment
-        for tt in [0, 1]:
-            self.time += 1
-            self.state[0] = self.grow(0, 1, self.growth_function_flag)
-            self.state[1] = self.grow(1, 0, self.growth_function_flag)
-            self.burden = np.sum(self.state[0:2])
-            # record trajectory
-            # self.state[2] = action
-            self.trajectory[:, self.time] = self.state
+        # for tt in [0, 1]:
+        #     self.time += 1
+        #     self.state[0] = self.grow(0, 1, self.growth_function_flag)
+        #     self.state[1] = self.grow(1, 0, self.growth_function_flag)
+        #     self.burden = np.sum(self.state[0:2])
+        #     # record trajectory
+        #     # self.state[2] = action
+        #     self.trajectory[:, self.time] = self.state
         self.threshold_burden = self.max_tumor_size * (self.state[0]+self.state[1])
 
         if self.reward_shaping_flag == 'mtd_compare':

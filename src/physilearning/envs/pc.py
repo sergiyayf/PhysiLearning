@@ -262,11 +262,8 @@ class PcEnv(BaseEnv):
                 raise ValueError('Observation type not supported')
 
             info = {}
-            rewards = Reward(self.reward_shaping_flag)
-            if self.reward_shaping_flag == 'tendayaverage':
-                reward += rewards.tendayaverage(self.trajectory, self.time)
-            else:
-                reward += rewards.get_reward(self.state, self.time / self.max_time, self.threshold_burden)
+            reward += self.get_reward()
+
         terminate = self.terminate()
         truncate = self.truncate()
         if terminate or truncate:

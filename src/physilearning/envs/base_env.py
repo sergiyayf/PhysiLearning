@@ -9,6 +9,7 @@ from gymnasium import spaces
 import yaml
 from gymnasium.spaces import Discrete, Box
 import numpy as np
+from physilearning.reward import Reward
 
 def trunc_norm(mean, std, n_std=3):
     var = np.random.normal(mean, std)
@@ -328,17 +329,13 @@ class BaseEnv(Env):
         """
         Termination condition
         """
-        # response = self.measure_response()
-        # if response < 0 and np.sum(self.state[0:2]) >= np.sum(self.trajectory[0:2, 0]):
-        #     terminate = False
-        #if np.sum(self.state[0:2]) >= self.threshold_burden:
-        #    terminate = True
-        if self.state[1] > np.sum(self.trajectory[0:2,2])*1.0:
+
+        if self.state[1] > np.sum(self.trajectory[0:2,0])*1.0:
             terminate = True
-        # if np.sum(self.trajectory[0:2, self.time-13:]) > 14*self.threshold_burden:
-        #     terminate = True
+
         else:
             terminate = False
+
         return terminate
 
     @classmethod
@@ -370,6 +367,16 @@ class BaseEnv(Env):
     def reset(self, *, seed=None, options=None): # pragma: no cover
         raise NotImplementedError
 
+    def get_reward(self):
+        rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
+
+        if self.reward_shaping_flag == 'tendayaverage':
+            reward = rewards.tendayaverage(self.trajectory, self.time)
+        elif self.reward_shaping_flag == 'mtd_compare':
+            reward = rewards.tendayaverage(self.trajectory, self.time)
+        else:
+            reward = rewards.get_reward(self.state, self.time, self.trajectory)
+        return reward
     def render(self, mode='human') -> mpl.animation.ArtistAnimation:
         """
         Render environment
