@@ -24,7 +24,7 @@ class Reward:
                 reward = 0
         elif 'less_than' in self.reward_shaping_flag:
             cap = float(self.reward_shaping_flag[-3:])
-            if np.sum(obs[0:2]) < cap:
+            if np.sum(obs[0:2])/np.sum(trajectory[0:2, 0]) < cap:
                 reward = 1
             else:
                 reward = 0

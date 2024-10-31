@@ -22,24 +22,24 @@ learning:
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
-    average_steps: 8
+    average_steps: 4
     model_kwargs:
       n_steps: 64
-      batch_size: 64
+      batch_size: 32
       n_epochs: 5
       verbose: 0
-      ent_coef: 1.e-5
-      clip_range: 0.05
-      learning_rate: 1.e-4
+      ent_coef: 1.e-7
+      clip_range: 0.001
+      learning_rate: 5.e-6
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
           pi: [ 64, 64 ]
           vf: [ 64, 64 ]
-    total_timesteps: 5.e+5
+    total_timesteps: 1.e+6
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '20240927_3'
+    model_save_prefix: '20241029_tune_hypers_for_arr_3'
     load:
       enable_loading: 0
       last_model: 0
@@ -50,7 +50,7 @@ env:
   # general env settings
   type: 'ArrEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
   n_envs: 1
-  wrap: False
+  wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -60,7 +60,7 @@ env:
   observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
-  max_tumor_size: 3.0 # 2006 #3086 #100000 # 110000 # 4000
+  max_tumor_size: 2.0 # 2006 #3086 #100000 # 110000 # 4000
   max_time: 160 #122 # 120
   initial_wt: 7000 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
   initial_mut: 2 # 4 # 'random' - used for meltd atserhii train
@@ -71,7 +71,7 @@ env:
   treat_death_rate_wt: 0.085 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 4
-  reward_shaping: 0 #'tendayaverage' # reward shaping flag for some predefined rewards
+  reward_shaping: 'ttp' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
   normalize: False
   normalize_to: 1000.0
   image_size: 124 #84 #124
@@ -153,13 +153,13 @@ eval:
   most_recent: 0
   from_file: 0
   path: './'
-  model_prefix: '20240927_3'
-  step_to_load: '_best_reward'
-  save_name: 'at100'
+  model_prefix: '20241029_tune_hypers_for_arr_1'
+  step_to_load: '_final'
+  save_name: 'positions'
   # evaluation settings
-  fixed_AT_protocol: 1
-  at_type: 'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  fixed_AT_protocol: 0
+  at_type: 'nc' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.0
-  num_episodes: 100
-  evaluate_on: 'ArrEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  num_episodes: 1
+  evaluate_on: 'PcEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False
