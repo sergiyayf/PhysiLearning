@@ -317,12 +317,13 @@ class BaseEnv(Env):
         """
         Truncation condition
         """
-        if self.time >= self.max_time:
-            truncate = True
-        elif np.sum(self.state[0:2]) >= self.threshold_burden:
-            truncate = True
-        else:
-            truncate = False
+        # if self.time >= self.max_time:
+        #     truncate = True
+        # elif np.sum(self.state[0:2]) >= self.threshold_burden:
+        #     truncate = True
+        # else:
+        #     truncate = False
+        truncate = False
         return truncate
 
     def terminate(self):
@@ -330,12 +331,12 @@ class BaseEnv(Env):
         Termination condition
         """
 
-        if self.state[1] > np.sum(self.trajectory[0:2,0])*1.0:
-            terminate = True
-
-        else:
-            terminate = False
-
+        # if self.state[1] > np.sum(self.trajectory[0:2,0])*1.0:
+        #     terminate = True
+        #
+        # else:
+        #     terminate = False
+        terminate = False
         return terminate
 
     @classmethod

@@ -57,9 +57,12 @@ def plot( df, title, scale='linear', truncate=False, ax=None, c='black'):
     treat = np.array(df['Treatment'].values)
     treat = treat[:len(time)]
     # replace 0s that are directly after 1 with 1s
-    treat = np.where(treat == 0, np.roll(treat, -1), treat)
-    ax.fill_between(time, 0, np.max(tot), where=treat==1, color=treatment_color, label='drug',
-    lw=2)
+    #treat = np.where(treat == 0, np.roll(treat, -1), treat)
+    for t in range(len(time)-1):
+        if treat[t] == 1:
+            ax.axvspan((t-1)/2, t/2, color=treatment_color)
+    #ax.fill_between(time, 0, np.max(tot), where=treat==1, color=treatment_color, label='drug',
+    #lw=2)
 
     nc = [7022, 7368, 8799, 10946, 12655, 15305, 16515, 19284, 20086, 24395, 27738]
     pulse = [7245, 7074, 8394, 9172, 8018, 6935, 6292, 6961, 7593, 8577]
@@ -84,30 +87,31 @@ def get_ttps(filename, timesteps=10):
     for i in range(timesteps):
         df = pd.read_hdf(filename, key=f'run_{i}')
         # find the largest index with non-zero Type 0 and Type 1
-        initial_size = df['Type 0'][2] + df['Type 1'][2]
-        nz = df[((df['Type 1'])/initial_size > 1.0)]
-        # if len(nz) > 0:
-        #     # append index when type 0 + type 1 is larger than 1.5
-        #     ttps.append(nz.index[0]/2)
-        #
-        # else:
-        #     ttps.append(len(df)/2)
-        ttps.append(df['Type 1'][52]/initial_size)
+        initial_size = df['Type 0'][0] + df['Type 1'][0]
+        nz = df[((df['Type 1'])/initial_size >= 1.0)]
+        tot_idx = df[((df['Type 0'] + df['Type 1'])/initial_size >= 1.5)].index
+        if len(nz) > 0:
+            # append index when type 0 + type 1 is larger than 1.5
+            ttps.append(nz.index[0]/2)
+        elif len(tot_idx) > 0:
+            ttps.append(tot_idx[0]/2)
+        else:
+            ttps.append(len(df)/2)
+        #ttps.append(df['Type 1'][52]/initial_size)
     return ttps
 
 def main():
-    PC_files_list = ['./data/agnt_1_3/Evaluations/PcEnvEval_a1_320240927_1_3.h5',
-                    './data/agnt_1_6/Evaluations/PcEnvEval_a1_620240927_1_6.h5',
-                    './data/agnt_1_10/Evaluations/PcEnvEval_a1_1020240927_1_10.h5',
-                    './data/agnt_1_11/Evaluations/PcEnvEval_a1_1120240927_1_11.h5',
-                    './data/agnt_1_14/Evaluations/PcEnvEval_a1_1420240927_1_14.h5',
+    PC_files_list = ['./data/3D_manuals/nc/nc_all.h5',
+                    './data/3D_manuals/mtd/mtd_all.h5',
+                     './data/3D_manuals/at50/at50_all.h5',
+                     './data/3D_manuals/at100/at100_all.h5',
                     # './Evaluations/run_evals/mtd.h5',
                     #  './Evaluations/run_evals/at50.h5',
                     #  './Evaluations/run_evals/at100.h5',
                     #  './Evaluations/run_evals/eat100.h5',
                      #'data/3D_benchmarks/random/random_all.h5'
                      ]
-    PC_name_list = ['PC agnt 1_3', 'PC agnt 1_6', 'PC agnt 1_10', 'PC agnt 1_11', 'PC agnt 1_14']
+    PC_name_list = ['nc', 'mtd', 'at50', 'at100']
 
     PC_dict = {}
     for i in range(len(PC_files_list)):
@@ -115,18 +119,17 @@ def main():
 
     PC_df = pd.DataFrame(PC_dict)
 
-    LV_files_list = ['Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_3.h5',
-        'Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_6.h5',
-        'Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_10.h5',
-        'Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_11.h5',
-        'Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_14.h5',
+    LV_files_list = ['Evaluations/LvEnvEval__nc.h5',
+        'Evaluations/LvEnvEval__mtd.h5',
+        'Evaluations/LvEnvEval__at50.h5',
+        'Evaluations/LvEnvEval__at100.h5',
         # './Evaluations/LvEnvEval__mtd.h5',
         #                 './Evaluations/LvEnvEval__at50.h5',
         #                 './Evaluations/LvEnvEval__at100.h5',
         #                 './Evaluations/LvEnvEval__eat100.h5',
                         #'./Evaluations/LvEnvEvalrandom_1_5.h5'
                         ]
-    LV_name_list = ['LV agnt 1_3', 'LV agnt 1_6', 'LV agnt 1_10', 'LV agnt 1_11', 'LV agnt 1_14']
+    LV_name_list = ['Lv nc', 'Lv mtd', 'Lv at50', 'Lv at100']
 
     LV_dict = {}
     for i in range(len(LV_files_list)):
@@ -149,63 +152,51 @@ def main():
     ax.scatter(combined_df.mean().index, combined_df.mean(), marker='x', color='red', s=50, label='mean')
 
 
-# df_metld = pd.read_hdf('./Evaluations/MeltdEnvEval__test_meltd_at100.h5', key='run_0')
-# plot(df_metld, 'Meltd at100', scale='linear', truncate=False)
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./Evaluations/3d_at50.h5', key='run_0')
+# plot(df, '3d at50', scale='linear', truncate=False, ax = ax, c='red')
+# df = pd.read_hdf('./Evaluations/LvEnvEval__3D_at50.h5', key='run_0')
+# plot(df, 'Lv 3D at50', scale='linear', truncate=False, ax = ax, c='red')
 #
-# df_m = pd.read_hdf('./Evaluations/meltd/MeltdEnvEval_1006_2d_meltd_l2.h5', key='run_0')
-# plot(df_m, 'Meltd 1006 2d l2', scale='linear', truncate=False)
-#
-# df_metld = pd.read_hdf('./Evaluations/MeltdEnvEval__test_meltd_eat100.h5', key='run_0')
-# plot(df_metld, 'Meltd eat100', scale='linear', truncate=False)
-#
-# df_pc_mtd = pd.read_hdf('./Evaluations/run_evals/mtd.h5', key='run_0')
-# plot(df_pc_mtd, 'PC MTD', scale='linear', truncate=False)
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./Evaluations/LvEnvEval__3D_deep.h5', key='run_0')
+# plot(df, 'Lv 3D deep', scale='linear', truncate=False, ax = ax, c='red')
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./Evaluations/LvEnvEval_3D_deep20241031_3D_hypers_3.h5', key='run_0')
+# plot(df, 'Lv 3D agnt', scale='linear', truncate=False, ax = ax, c='red')
 
-# df = pd.read_hdf('./Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_10.h5', key='run_0')
-# plot(df, 'LV agnt 1_10', scale='linear', truncate=False)
+# for i in range(10):
+#     fig, ax = plt.subplots()
+#     df = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key=f'run_{i}')
+#     plot(df, f'3D at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
+
+i=0
+fig, ax = plt.subplots()
+df = pd.read_hdf('./Evaluations/LvEnvEval__3D_at50.h5', key=f'run_{i}')
+plot(df, f'Lv at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
+fig, ax = plt.subplots()
+df = pd.read_hdf('./data/3D_manuals/at50/at50_all.h5', key=f'run_{i}')
+plot(df, f'3D at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
 #
-# df = pd.read_hdf('./Evaluations/scale_t_1_lv_agents/LvEnvEval__agnt_20240927_1_6.h5', key='run_0')
-# plot(df, 'LV agnt 1_6', scale='linear', truncate=False)
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/ArrEnvEval__nc.h5', key='run_0')
-plot(df, 'arrest nc', scale='linear', truncate=False, ax = ax, c='black')
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/ArrEnvEval__eat100.h5', key='run_0')
-plot(df, 'arrest pulse', scale='linear', truncate=False, ax = ax, c='blue')
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/ArrEnvEval__mtd.h5', key='run_0')
-plot(df, 'arrest mtd 8', scale='linear', truncate=False, ax = ax, c='orange')
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/ArrEnvEval__at50.h5', key='run_0')
-plot(df, 'arrest at50', scale='linear', truncate=False, ax = ax, c='red')
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/ArrEnvEval__at100.h5', key='run_0')
-plot(df, 'arrest at100', scale='linear', truncate=False, ax = ax, c='green')
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./Evaluations/LvEnvEval__3D_mtd.h5', key=f'run_{i}')
+# plot(df, f'Lv mtd {i}', scale='linear', truncate=False, ax = ax, c='red')
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key=f'run_{i}')
+# plot(df, f'3D mtd {i}', scale='linear', truncate=False, ax = ax, c='red')
 
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/ArrEnvEval_fin20241029_tune_hypers_for_arr_1.h5', key='run_0')
-plot(df, 'arrest at100', scale='linear', truncate=False, ax = ax, c='green')
-# df = pd.read_hdf('./Evaluations/LvEnvEval__eat100.h5', key='run_0')
-# plot(df, 'LV pulse', scale='linear', truncate=False, ax = ax, c='blue')
-
-# df = pd.read_hdf('./Evaluations/LvEnvEval__on_off.h5', key='run_0')
-# plot(df, 'LV pulse', scale='linear', truncate=False, ax = ax, c='c')
 #
-# df = pd.read_hdf('./Evaluations/ArrEnvEval__on_off.h5', key='run_0')
-# plot(df, 'arrest at100', scale='linear', truncate=False, ax = ax, c='cyan')
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key=f'run_{i}')
+# plot(df, f'3D mtd {i}', scale='linear', truncate=False, ax = ax, c='red')
+#
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./Evaluations/Pc_at100_550.h5', key=f'run_{i}')
+# plot(df, f'3D at100 550 {i}', scale='linear', truncate=False, ax = ax, c='red')
+# #
+# for i in range(1,8):
+#     fig, ax = plt.subplots()
+#     df = pd.read_hdf(f'./Evaluations/new_96_at100s/run_{i}.h5', key=f'run_0')
 
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/3d_at50.h5', key='run_0')
-plot(df, '3d at50', scale='linear', truncate=False, ax = ax, c='red')
-#ax.set_yscale('log')
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/3d_mtd.h5', key='run_0')
-plot(df, '3d mtd', scale='linear', truncate=False, ax = ax, c='red')
-#ax.set_yscale('log')
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/3d_mtd_2.h5', key='run_0')
-plot(df, '3d mtd 2', scale='linear', truncate=False, ax = ax, c='red')
-#ax.set_yscale('log')
 main()
-
 plt.show()

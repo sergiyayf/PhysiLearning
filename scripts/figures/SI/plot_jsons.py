@@ -27,7 +27,7 @@ def plot_data(ax, lw=2, title="Initial data"):
     return ax
 
 def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
-    cols = ['r_r']
+    cols = ['c_s', 'c_r', 'Delta_s']
     row = trace_df.iloc[row_idx, :][cols].values
 
     theta = row
@@ -104,15 +104,15 @@ if __name__ == '__main__':
 
     # Get data
     df = pd.read_hdf(
-        '../../../data/2D_benchmarks/at100/2d_at100_all.h5', key='run_29')
+        '/media/saif/1A6A95E932FFC943/Projects_20240927_backup/PhysiLearning/data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key='run_32')
     # find the index when all of the data is 0
     initial_size = df['Type 0'][0] + df['Type 1'][0]
-    truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.33)]
-    index = truncated.index[1]
-    # replace df with zeros after index
-    df.loc[index:, 'Type 0'] = 0
-    df.loc[index:, 'Type 1'] = 0
-    df.loc[index:, 'Treatment'] = 0
+    # truncated = df[((df['Type 0'] + df['Type 1']) / initial_size > 1.5)]
+    # index = truncated.index[1]
+    # # replace df with zeros after index
+    # df.loc[index:, 'Type 0'] = 0
+    # df.loc[index:, 'Type 1'] = 0
+    # df.loc[index:, 'Treatment'] = 0
     sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
 
     data = pd.DataFrame(dict(
@@ -121,9 +121,23 @@ if __name__ == '__main__':
         y=df['Type 1'].values[0:sim_end:1], ))
 
     treatment_schedule = np.array(df['Treatment'].values[0:sim_end:1])
+    fig, ax = plt.subplots(figsize=(12, 4))
+    plot_data(ax, title="Original treatment")
+    # append treatmentd schedule with two zeros from the beginning, delete last 2
+    treatment_schedule = np.array([np.int32(i) for i in np.array(df['Treatment'].values[0:sim_end:1])])
+    # shfit by 1 to the right
+    treatment_schedule = np.roll(treatment_schedule, -1)
+    # find ends of treatment
+    treatment_ends = np.where(np.diff(treatment_schedule) == -1)[0]
+
+    # Plot data
+    fig, ax = plt.subplots(figsize=(12, 4))
+    plot_data(ax, title="PC raw data")
+
     consts_fit = {'Delta_r': 0.0, 'delta_r': 0.01, 'delta_s': 0.01,
-                  'r_s': 0.087, 'c_s': 1.70, 'c_r': 3.4, 'Delta_s': 5.868, 'K': 1.27}
-    params_fit = {'r_r': 0.211}
+                  'r_r': 0.214, 'K': 463, 'r_s': 0.078}
+    params_fit = {'c_s': 1.0, 'c_r': 1.0, 'Delta_s': 3.156}
+    sigmas = [0.5, 0.5, 0.1]
 
     # append treatmentd schedule with two zeros from the beginning, delete last 2
     treatment_schedule = np.array([np.int32(i) for i in np.array(df['Treatment'].values[0:sim_end:1])])
@@ -133,7 +147,8 @@ if __name__ == '__main__':
     treatment_ends = np.where(np.diff(treatment_schedule) == -1)[0]
     sampler = "DEMetropolis"
 
-    trace = az.from_json('./../../../data/SI_data/2D_patient_x_mtd_LV_inference_Data_1_33_threshold.json')
+    #trace = az.from_json('./../../../data/SI_data/2D_patient_x_mtd_LV_inference_Data_1_33_threshold.json')
+    trace = az.from_json('/media/saif/1A6A95E932FFC943/Projects_20240927_backup/PhysiLearning/data/SI_data/3D_patient_62_at100_LV_inference_Data_1_5_threshold.json')
     plot_finals()
     plt.show()
 
