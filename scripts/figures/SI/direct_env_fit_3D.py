@@ -110,7 +110,7 @@ def run_model(theta, y0, treatment, sim_end):
     r_r = theta[1]
     delta_s = theta[2]
     #t0 = theta[3]
-    #k = theta[4]
+    k = theta[4]
     c_r = theta[3]
 
     # env setup
@@ -126,7 +126,7 @@ def run_model(theta, y0, treatment, sim_end):
     env.growth_rate[1] = r_r
     #env.capacity = K
     #env.t0 = t0
-    #env.k = k
+    env.k = k
     env.competition[0] = c_r
     env.end_time = sim_end
 
@@ -152,14 +152,14 @@ if __name__ == '__main__':
     df_at50 = pd.read_hdf('./data/3D_manuals/at50/at50_all.h5', key='run_1')
     df_nc = pd.read_hdf('./data/3D_manuals/nc/nc_all.h5', key='run_1')
 
-    data_list = [df_at50, df_mtd, df_nc]
+    data_list = [df_at50, df_mtd]
 
     iteration = 1
     accuracy = 0.0
     tune_draws = 100
     final_draws = 500
-    params_fit = {'r_s': 0.32, 'r_r': 0.58, 'Delta_s': 1.61, 'c_r': 2.83}
-    sigmas = [0.1, 0.1, 0.1, 0.1]
+    params_fit = {'r_s': 0.323, 'r_r': 0.556, 'Delta_s': 3.0, 'c_r': 3.0, 'k': 0.35}
+    sigmas = [0.1, 0.1, 0.1, 0.1, 0.1]
     while accuracy < 0.9:
         theta_fit = list(params_fit.values())
         with pm.Model() as model:
@@ -174,10 +174,11 @@ if __name__ == '__main__':
                                          upper=10)
             # t0 = pm.TruncatedNormal("t0", mu=theta_fit[3], sigma=sigmas[3], initval=theta_fit[3], lower=1e-2,
             #                         upper=10)
-            # k = pm.TruncatedNormal("k", mu=theta_fit[4], sigma=sigmas[4], initval=theta_fit[4], lower=1.e-2,
-            #                           upper=1)
+
             c_r = pm.TruncatedNormal("c_r", mu=theta_fit[3], sigma=sigmas[3], initval=theta_fit[3], lower=1.e-2,
                                     upper=4)
+            k = pm.TruncatedNormal("k", mu=theta_fit[4], sigma=sigmas[4], initval=theta_fit[4], lower=1.e-2,
+                                      upper=1)
 
             for i, df in enumerate(data_list):
 
@@ -190,10 +191,10 @@ if __name__ == '__main__':
 
                 treatment_schedule = np.array(df['Treatment'].values)
 
-                sol = run_model(theta=[r_s, r_r, Delta_s, c_r], y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
+                sol = run_model(theta=[r_s, r_r, Delta_s, c_r, k], y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
                 # Ode solution function
                 ode_solution = pytensor_forward_model_matrix(
-                    pm.math.stack([r_s, r_r,Delta_s, c_r])
+                    pm.math.stack([r_s, r_r,Delta_s, c_r, k])
                 )
 
                 # Likelihood
@@ -241,10 +242,11 @@ if __name__ == '__main__':
                                      upper=10)
         # t0 = pm.TruncatedNormal("t0", mu=theta_fit[3], sigma=sigmas[3], initval=theta_fit[3], lower=1e-2,
         #                         upper=10)
-        # k = pm.TruncatedNormal("k", mu=theta_fit[4], sigma=sigmas[4], initval=theta_fit[4], lower=1.e-2,
-        #                           upper=1)
+
         c_r = pm.TruncatedNormal("c_r", mu=theta_fit[3], sigma=sigmas[3], initval=theta_fit[3], lower=1.e-2,
                                  upper=4)
+        k = pm.TruncatedNormal("k", mu=theta_fit[4], sigma=sigmas[4], initval=theta_fit[4], lower=1.e-2,
+                               upper=1)
 
         for i, df in enumerate(data_list):
             sigma = pm.HalfNormal(f"sigma_{i}", 10)
@@ -256,11 +258,11 @@ if __name__ == '__main__':
 
             treatment_schedule = np.array(df['Treatment'].values)
 
-            sol = run_model(theta=[r_s, r_r, Delta_s, c_r], y0=[data.x[0], data.y[0]], treatment=treatment_schedule,
+            sol = run_model(theta=[r_s, r_r, Delta_s, c_r, k], y0=[data.x[0], data.y[0]], treatment=treatment_schedule,
                             sim_end=sim_end)
             # Ode solution function
             ode_solution = pytensor_forward_model_matrix(
-                pm.math.stack([r_s, r_r, Delta_s, c_r])
+                pm.math.stack([r_s, r_r, Delta_s, c_r, k])
             )
 
             # Likelihood

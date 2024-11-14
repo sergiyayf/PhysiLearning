@@ -7,7 +7,7 @@ import h5py
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
-os.chdir('/home/saif/Projects/PhysiLearning')
+os.chdir('/media/saif/1A6A95E932FFC943/Projects_20240927_backup/PhysiLearning')
 
 dir = './data'
 hdf5_file = path.join(dir, '3d_full_presims_30_days.h5')

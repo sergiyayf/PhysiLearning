@@ -170,13 +170,19 @@ def main():
 #     df = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key=f'run_{i}')
 #     plot(df, f'3D at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
 
-i=0
-fig, ax = plt.subplots()
-df = pd.read_hdf('./Evaluations/LvEnvEval__3D_at50.h5', key=f'run_{i}')
-plot(df, f'Lv at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
-fig, ax = plt.subplots()
-df = pd.read_hdf('./data/3D_manuals/at50/at50_all.h5', key=f'run_{i}')
-plot(df, f'3D at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
+fig, axs = plt.subplots(2, 5)
+for i in range(1):
+    fig, ax = plt.subplots()
+    #ax = axs[0, i]
+    df = pd.read_hdf('./Evaluations/LvEnvEval__3D_at50.h5', key=f'run_{i}')
+    plot(df, f'Lv at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
+    ax.set_xlim(0, 30)
+    #fig, ax = plt.subplots()
+    ax = axs[1, i]
+    df = pd.read_hdf('./data/3D_manuals/at50/at50_all.h5', key=f'run_{i}')
+    plot(df, f'3D at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
+    ax.set_xlim(0, 30)
+# #
 #
 # fig, ax = plt.subplots()
 # df = pd.read_hdf('./Evaluations/LvEnvEval__3D_mtd.h5', key=f'run_{i}')
@@ -184,19 +190,21 @@ plot(df, f'3D at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
 # fig, ax = plt.subplots()
 # df = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key=f'run_{i}')
 # plot(df, f'3D mtd {i}', scale='linear', truncate=False, ax = ax, c='red')
-
 #
 # fig, ax = plt.subplots()
-# df = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key=f'run_{i}')
-# plot(df, f'3D mtd {i}', scale='linear', truncate=False, ax = ax, c='red')
+# df = pd.read_hdf('/media/saif/1A6A95E932FFC943/Projects_20240927_backup/PhysiLearning/data/3D_benchmarks/p62/p62_at100/p62_at100_all.h5', key='run_0')
+# plot(df, '3D at100', scale='linear', truncate=False, ax = ax, c='red')
 #
 # fig, ax = plt.subplots()
-# df = pd.read_hdf('./Evaluations/Pc_at100_550.h5', key=f'run_{i}')
-# plot(df, f'3D at100 550 {i}', scale='linear', truncate=False, ax = ax, c='red')
-# #
-# for i in range(1,8):
-#     fig, ax = plt.subplots()
-#     df = pd.read_hdf(f'./Evaluations/new_96_at100s/run_{i}.h5', key=f'run_0')
-
+# df = pd.read_hdf('/media/saif/1A6A95E932FFC943/Projects_20240927_backup/PhysiLearning/data/3D_benchmarks/p62/p62_det_agent/p62_det_agent_all.h5', key='run_0')
+# plot(df, '3D det agent', scale='linear', truncate=False, ax = ax, c='red')
+#
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('/media/saif/1A6A95E932FFC943/Projects_20240927_backup/PhysiLearning/data/3D_benchmarks/p62/p62_slv_agent/p62_slv_agent_all.h5', key='run_0')
+# plot(df, '3D slv_agent', scale='linear', truncate=False, ax = ax, c='red')
+#
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('/media/saif/1A6A95E932FFC943/Projects_20240927_backup/PhysiLearning/data/3D_benchmarks/p62/p62_mtd/p62_mtd_all.h5', key='run_0')
+# plot(df, '3D mtd', scale='linear', truncate=False, ax = ax, c='red')
 main()
 plt.show()

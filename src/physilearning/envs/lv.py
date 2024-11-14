@@ -96,7 +96,6 @@ class LvEnv(BaseEnv):
         self.k = env_specific_params.get('k', 0.1)
         self.t0 = env_specific_params.get('t0', 100)
         self.time_on_treatment = 0
-        self.end_time = 120
 
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
@@ -190,11 +189,11 @@ class LvEnv(BaseEnv):
 
             # record trajectory
             #self.state[2] = action
-            #self.trajectory[:, self.time] = self.state
+            self.trajectory[:, self.time] = self.state
 
             # check if done
-            # if self.state[0] <= 0 and self.state[1] <= 0:
-            #     self.state = [0, 0, 0]
+            if self.state[0] <= 0 and self.state[1] <= 0:
+                self.state = [0, 0, 0]
 
             # get the reward
             reward += self.get_reward()
@@ -208,7 +207,17 @@ class LvEnv(BaseEnv):
                 obs = self.state[0:2]
             else:
                 obs = [np.sum(self.state[0:2])]
-
+        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
+            self.image = self._get_image(action)
+            self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
+            if self.observation_type == 'image':
+                obs = self.image
+            elif self.observation_type == 'multiobs':
+                obs = {'vec': self.state, 'img': self.image}
+            else:
+                raise NotImplementedError
+        else:
+            raise NotImplementedError
         terminate = self.terminate()
         truncate = self.truncate()
         self.done = terminate or truncate
@@ -321,14 +330,16 @@ class LvEnv(BaseEnv):
 
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-                            self.growth_rate[i] * self.death_rate[i]) - self.death_rate_treat[i] * self.state[2]
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) * (
+                                        1 - self.state[2] * self.death_rate_treat[i] / (
+                                            1 + np.exp(-self.k * (self.time_on_treatment - self.t0)))) -
+                            self.growth_rate[i] * self.death_rate[i])
         elif flag == '3D':
-
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity)*(1-self.state[2]*self.death_rate_treat[i]) -
-                            self.growth_rate[i] * self.death_rate[i])
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
+                            self.growth_rate[i] * self.death_rate[i]) - self.state[2] * self.death_rate_treat[i] * \
+                           self.state[i] / (1 + np.exp(-self.k * (self.time_on_treatment - self.t0)))
         # one time step delay in treatment effect
         elif flag == 'delayed' or flag == 'delayed_with_noise':
             treat = self.state[2]
@@ -365,18 +376,16 @@ class LvEnv(BaseEnv):
         else:
             raise NotImplementedError
 
-        if flag == 'instant_with_noise' or flag == 'instant_fixed_treat_with_noise' or flag == 'delayed_with_noise':
+        # if flag == 'instant_with_noise' or flag == 'instant_fixed_treat_with_noise' or flag == 'delayed_with_noise':
             # add noise
             # rand = truncnorm(loc=0, scale=0.00528*new_pop_size, a=-0.02/0.00528, b=0.02/0.00528).rvs()
-            if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
-                new_pop_size = 0
-            rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
-            if np.abs(rand) > 0.05 * new_pop_size:
-                rand = 0.05 * new_pop_size * np.sign(rand)
-            new_pop_size += rand
         # if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
         #     new_pop_size = 0
-        if self.time >= self.end_time:
+        rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
+        if np.abs(rand) > 0.05 * new_pop_size:
+            rand = 0.05 * new_pop_size * np.sign(rand)
+        new_pop_size += rand
+        if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
             new_pop_size = 0
         return new_pop_size
 

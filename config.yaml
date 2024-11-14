@@ -64,15 +64,15 @@ env:
   max_time: 200 #122 # 120
   initial_wt: 39771 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
   initial_mut: 5 # 4 # 'random' - used for meltd atserhii train
-  growth_rate_wt: 0.32 #0.096 #'0.096pm0.001 ' # 0.079 - meltd. 0.116 - current
+  growth_rate_wt: 0.54 #0.096 #'0.096pm0.001 ' # 0.079 - meltd. 0.116 - current
   growth_rate_mut: 0.58 #0.12 # 0.076 - meltd. 0.23 - current
   death_rate_wt: 0.1
   death_rate_mut: 0.1
-  treat_death_rate_wt: 1.61 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
+  treat_death_rate_wt: 1.11 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
   reward_shaping: 'ttp' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
-  normalize: False
+  normalize: True
   normalize_to: 1.0
   image_size: 124 #84 #124
   patient_sampling:
@@ -82,13 +82,13 @@ env:
 
   # LV environment settings
   LvEnv:
-    carrying_capacity: 160000 # '48300pm1210'
-    competition_wt: 2.83 # 1.732 - fixed treat #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
+    carrying_capacity: 120000 # '48300pm1210'
+    competition_wt: 2.66 # 1.732 - fixed treat #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
     competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
     growth_function_flag: '3D' #'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
-    k: .750
-    t0: 0.5
+    k: 0.57
+    t0: 1.12
 
   SLvEnv:
     carrying_capacity: 3906
