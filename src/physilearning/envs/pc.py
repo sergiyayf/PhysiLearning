@@ -348,16 +348,16 @@ class PcEnv(BaseEnv):
             raise ValueError('Observation type not supported')
 
         # not clean pulse hack
-        for tt in [0,1]:
-            self._send_message('Stop treatment')
-            message = self._receive_message()
-            wt, mut = self._get_cell_number(message)
-            wt = wt * self.normalization_factor
-            mut = mut * self.normalization_factor
-            self.state = [wt, mut, 0]
-            self.time += 1
-            self.trajectory[0:3, self.time] = self.state
-        self.threshold_burden = self.max_tumor_size * (self.state[0] + self.state[1])
+        # for tt in [0,1]:
+        #    self._send_message('Stop treatment')
+        #    message = self._receive_message()
+        #    wt, mut = self._get_cell_number(message)
+        #    wt = wt * self.normalization_factor
+        #    mut = mut * self.normalization_factor
+        #    self.state = [wt, mut, 0]
+        #    self.time += 1
+        #    self.trajectory[0:3, self.time] = self.state
+        #self.threshold_burden = self.max_tumor_size * (self.state[0] + self.state[1])
 
 
         if self.see_resistance:

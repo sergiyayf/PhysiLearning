@@ -33,8 +33,8 @@ class Reward:
             s = trajectory[0, :]
             tot = (r + s) / np.sum(trajectory[0:2, 0])
             # average over last 10 days
-            average = np.mean(tot[time - 20:time + 1])
-            if average < 1.2:
+            average = np.mean(tot[time - 10:time + 1])
+            if average < 1.0:
                 reward = 1
             else:
                 reward = 0

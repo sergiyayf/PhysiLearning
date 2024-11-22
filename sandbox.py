@@ -141,7 +141,7 @@ def main():
     combined = {}
     for i in range(len(PC_name_list)):
         combined[PC_name_list[i]] = PC_df[PC_name_list[i]]
-        combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
+        #combined[LV_name_list[i]] = LV_df[LV_name_list[i]]
     combined_df = pd.DataFrame(combined)
 
     # box plot the distribution with scatter using seaborn
@@ -164,24 +164,25 @@ def main():
 # fig, ax = plt.subplots()
 # df = pd.read_hdf('./Evaluations/LvEnvEval_3D_deep20241031_3D_hypers_3.h5', key='run_0')
 # plot(df, 'Lv 3D agnt', scale='linear', truncate=False, ax = ax, c='red')
-
+#
 # for i in range(10):
 #     fig, ax = plt.subplots()
-#     df = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key=f'run_{i}')
+#     df = pd.read_hdf('./data/3D_manuals/at100/at100_all.h5', key=f'run_{i}')
 #     plot(df, f'3D at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
 
 fig, axs = plt.subplots(2, 5)
-for i in range(1):
-    fig, ax = plt.subplots()
-    #ax = axs[0, i]
+for i in range(5):
+    #fig, ax = plt.subplots()
+    ax = axs[0, i]
     df = pd.read_hdf('./Evaluations/LvEnvEval__3D_at50.h5', key=f'run_{i}')
+    #df = pd.read_hdf('./data/3D_manuals/at100/at100_all.h5', key=f'run_{i}')
     plot(df, f'Lv at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
-    ax.set_xlim(0, 30)
+    ax.set_xlim(0, 50)
     #fig, ax = plt.subplots()
     ax = axs[1, i]
     df = pd.read_hdf('./data/3D_manuals/at50/at50_all.h5', key=f'run_{i}')
     plot(df, f'3D at50 {i}', scale='linear', truncate=False, ax = ax, c='red')
-    ax.set_xlim(0, 30)
+    ax.set_xlim(0, 50)
 # #
 #
 # fig, ax = plt.subplots()
