@@ -33,8 +33,9 @@ if __name__ == '__main__':
     # set pwd
     import os
     os.chdir('/home/saif/Projects/PhysiLearning')
-    df = read_data('./data/position_physilearning/transition_rate_save_run_1/Evaluations/sim_full_data/pcdl_data_job_7839832_port_0.h5', 2, 1*720)
-    df['transition_rate'] = df['transition_rate']*720
+    # df = read_data('./data/position_physilearning/transition_rate_save_run_1/Evaluations/sim_full_data/pcdl_data_job_7839832_port_0.h5', 2, 1*720)
+    df = read_data('./data/29112024_2d_manuals/nc/sim_full_data/pcdl_data_job_13887080_port_0.h5', 2, 2*720)
+    df['transition_rate'] = df['transition_rate']*360
     # plot cell positions, color map by growth rate
     fig, ax = plt.subplots()
     sns.scatterplot(x='x', y='y', data=df, hue='transition_rate', ax=ax)
@@ -51,7 +52,7 @@ if __name__ == '__main__':
     to_fit_dists = dists[mean-std > 0]
     to_fit_mean = mean[mean-std > 0]
     popt, pcov = curve_fit(linear, to_fit_dists, to_fit_mean)
-    print(popt)
+    # print(popt)
 
     def trunc_linear(x, a, b):
         return (a * x + b) * np.heaviside(a * x + b, 1)
@@ -61,7 +62,7 @@ if __name__ == '__main__':
         return a*np.exp(-b*x)
 
     popt_exp, pcov_exp = curve_fit(exp, dists, mean)
-    print('Exp: ', popt_exp)
+    # print('Exp: ', popt_exp)
 
     def quadratic(x, a, b):
         return b*(a-x)**2
@@ -69,13 +70,13 @@ if __name__ == '__main__':
     def trunc_quadratic(x, a, b):
         return (b*(a-x)**2) * np.heaviside((a-x), 1)
 
-    popt_quad, pcov_quad = curve_fit(quadratic, dists[0:17], mean[0:17])
-    print(popt_quad)
+    popt_quad, pcov_quad = curve_fit(quadratic, dists[0:21], mean[0:21])
+    print('Quad fit: ', popt_quad)
 
     fig, ax = plt.subplots()
     ax.errorbar(dists, mean, yerr=std, fmt='o', label='Mean and std')
-    ax.plot(dists, trunc_linear(dists, *popt), label='Fit')
-    ax.plot(dists, exp(dists, *popt_exp), label='Exp fit')
+    # ax.plot(dists, trunc_linear(dists, *popt), label='Fit')
+    # ax.plot(dists, exp(dists, *popt_exp), label='Exp fit')
     ax.plot(dists, trunc_quadratic(dists, *popt_quad), label='Quadratic fit')
     ax.legend()
     ax.set_xlabel('Distance to front cell')

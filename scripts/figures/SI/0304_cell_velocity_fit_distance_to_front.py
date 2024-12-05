@@ -114,9 +114,11 @@ def plot_radial_velocity(ax, average_projections, std_proj, bin_size, **kwargs):
 if __name__ == '__main__':
     import os
     os.chdir('/home/saif/Projects/PhysiLearning')
-    fname = f'./data/position_physilearning/run_1/Evaluations/sim_full_data/pcdl_data_job_7676594_port_0.h5'
-    fnames = [f'./data/position_physilearning/transition_rate_save_run_{i}/Evaluations/sim_full_data/pcdl_data_job_78398{i+31}_port_0.h5' for i in range(1, 11)
-              ]
+    # fname = f'./data/position_physilearning/run_1/Evaluations/sim_full_data/pcdl_data_job_7676594_port_0.h5'
+    # fnames = [f'./data/position_physilearning/transition_rate_save_run_{i}/Evaluations/sim_full_data/pcdl_data_job_78398{i+31}_port_0.h5' for i in range(1, 11)
+    #           ]
+    fname = f'./data/29112024_2d_manuals/nc/sim_full_data/pcdl_data_job_13887080_port_0.h5'
+    fnames = [fname]
     df = pd.read_hdf(fname, key=f'run_4/time_720')
     cdf = run_is_at_front(df)
 
@@ -127,11 +129,12 @@ if __name__ == '__main__':
     mode_projections = []
     std_projs = []
     all_cells_df = pd.DataFrame()
-    for fname in fnames:
+    # for fname in fnames:
+    for i in range(0, 10):
         for j in range(2, 12):
 
-            df_t_1 = read_data(fname, run=j, time=i * 720)
-            df_t_2 = read_data(fname, run=j, time=(i + 1) * 720)
+            df_t_1 = read_data(fname, run=j, time=i * 360)
+            df_t_2 = read_data(fname, run=j, time=(i + 1) * 360)
             df_t_1 = run_is_at_front(df_t_1)
             df_t_2 = run_is_at_front(df_t_2)
 
@@ -197,8 +200,17 @@ if __name__ == '__main__':
     def trunc_linear(x, a, b):
         return (a * x + b)*np.heaviside(a*x+b, 1)
 
-    ax.plot(rads, trunc_linear(rads, *popt), 'g-', label='fit 4 points')
-    ax.plot(rads, trunc_linear(rads, *popt5), 'b-', label='fit 5 points')
+    def quadratic(x, a, b):
+        return b*(a-x)**2
+    def trunc_quadratic(x, a, b):
+        return (b*(a-x)**2) * np.heaviside((a-x), 1)
+
+    qpopt, qpcov = curve_fit(quadratic, rads[0:8], mean_projections.values[0:8], sigma=std_projs[0:8])
+    print('quadratic: ', qpopt)
+    ax.plot(rads, trunc_quadratic(rads, *qpopt), 'g-', label='fit quadratic')
+    #
+    # ax.plot(rads, trunc_linear(rads, *popt), 'g-', label='fit 4 points')
+    # ax.plot(rads, trunc_linear(rads, *popt5), 'b-', label='fit 5 points')
     ax.legend()
 
     # Assuming df is your dataframe and it has columns 'position_x', 'position_y', 'velocity_x', 'velocity_y'

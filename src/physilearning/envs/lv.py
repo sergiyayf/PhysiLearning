@@ -330,10 +330,9 @@ class LvEnv(BaseEnv):
 
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) * (
-                                        1 - self.state[2] * self.death_rate_treat[i] / (
-                                            1 + np.exp(-self.k * (self.time_on_treatment - self.t0)))) -
-                            self.growth_rate[i] * self.death_rate[i])
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
+                            self.growth_rate[i]*self.death_rate[i]) - self.death_rate_treat[i]*self.state[2]
+
         elif flag == '3D':
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
@@ -376,15 +375,14 @@ class LvEnv(BaseEnv):
         else:
             raise NotImplementedError
 
-        # if flag == 'instant_with_noise' or flag == 'instant_fixed_treat_with_noise' or flag == 'delayed_with_noise':
-            # add noise
-            # rand = truncnorm(loc=0, scale=0.00528*new_pop_size, a=-0.02/0.00528, b=0.02/0.00528).rvs()
-        # if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
-        #     new_pop_size = 0
-        rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
-        if np.abs(rand) > 0.05 * new_pop_size:
-            rand = 0.05 * new_pop_size * np.sign(rand)
-        new_pop_size += rand
+        if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+            new_pop_size = 0
+        if flag == 'instant_with_noise' or flag == 'instant_fixed_treat_with_noise' or flag == 'delayed_with_noise':
+
+            rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
+            if np.abs(rand) > 0.05 * new_pop_size:
+                rand = 0.05 * new_pop_size * np.sign(rand)
+            new_pop_size += rand
         if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
             new_pop_size = 0
         return new_pop_size

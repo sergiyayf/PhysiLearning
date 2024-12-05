@@ -315,8 +315,8 @@ class LvEnv(BaseEnv):
         if flag == 'instant' or flag == 'instant_with_noise':
             new_pop_size = self.state[i] * \
                            (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
-                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity)
+                            - self.growth_rate[i] * self.death_rate[i]) - self.death_rate_treat[i] * self.state[2]
         elif flag == 'instant_fixed_treat' or flag == 'instant_fixed_treat_with_noise':
 
             new_pop_size = self.state[i] * \
