@@ -34,7 +34,7 @@ if __name__ == '__main__':
     import os
     os.chdir('/home/saif/Projects/PhysiLearning')
     # df = read_data('./data/position_physilearning/transition_rate_save_run_1/Evaluations/sim_full_data/pcdl_data_job_7839832_port_0.h5', 2, 1*720)
-    df = read_data('./data/29112024_2d_manuals/nc/sim_full_data/pcdl_data_job_13887080_port_0.h5', 2, 2*720)
+    df = read_data('./data/29112024_2d_manuals/nc/sim_full_data/pcdl_data_job_13887080_port_0.h5', 2, 1440)
     df['transition_rate'] = df['transition_rate']*360
     # plot cell positions, color map by growth rate
     fig, ax = plt.subplots()
@@ -68,7 +68,7 @@ if __name__ == '__main__':
         return b*(a-x)**2
 
     def trunc_quadratic(x, a, b):
-        return (b*(a-x)**2) * np.heaviside((a-x), 1)
+        return (b*(a-x)**2) * np.heaviside((a-x), 1)-0.001
 
     popt_quad, pcov_quad = curve_fit(quadratic, dists[0:21], mean[0:21])
     print('Quad fit: ', popt_quad)

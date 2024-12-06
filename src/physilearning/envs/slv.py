@@ -73,6 +73,7 @@ class SLvEnv(BaseEnv):
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
                          )
 
+        self.capacity_non_normalized = env_specific_params.get('carrying_capacity', 6500)
         # Normalizazion
         if self.normalize:
             self.capacity = env_specific_params.get('carrying_capacity', 6500) \
@@ -80,6 +81,11 @@ class SLvEnv(BaseEnv):
         else:
             self.capacity = env_specific_params.get('carrying_capacity', 6500)
 
+        self.growth_function_flag = env_specific_params.get('growth_function_flag', 'delayed')
+        self.trajectory[:, 0] = self.state
+
+        if self.growth_function_flag == 'instant_fixed_treat' or self.growth_function_flag == 'instant_fixed_treat_with_noise':
+            self.death_rate_treat[0] *= self.normalization_factor
         # 1 - wt, 2 - resistant
         if self.config['env']['patient_sampling']['enable']:
             self._set_patient_specific_competition(self.patient_id)
@@ -115,12 +121,6 @@ class SLvEnv(BaseEnv):
         self.mutant_radial_position = self.radius - self.mutant_distance_to_front
         self.mutant_normalized_position = self.mutant_radial_position/self.radius
 
-        # fitting competition implementation
-        self.competition_exponent = 0.2 # 1/35
-        # self.death_rate_treat[0] *= self.normalization_factor
-
-        # self.drug_color = 0
-
 
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['SLvEnv']['competition_wt'],
@@ -129,7 +129,7 @@ class SLvEnv(BaseEnv):
     def _set_patient_specific_position(self, patient_id):
         self.mutant_distance_to_front = self.config['patients'][patient_id]['SLvEnv']['mutant_distance_to_front']
 
-    def step(self, action: int) -> Tuple[list, float, bool, bool, dict]:
+    def step(self, action: int) -> Tuple[np.ndarray, float, bool, bool, dict]:
         """
         Step in the environment that simulates tumor growth and treatment
         :param action: 0 - no treatment, 1 - treatment
@@ -137,31 +137,37 @@ class SLvEnv(BaseEnv):
 
         # grow_tumor
         reward = 0
-        self.state[2] = action
-        # for t in range(0, self.treatment_time_step):
-        # step time
-        self.time += 1
-        self.state[0] = self.grow(0, 1, self.growth_function_flag)
-        self.state[1] = self.grow(1, 0, self.growth_function_flag)
-        self.burden = np.sum(self.state[0:2])
+        for t in range(0, self.treatment_time_step):
+            # step time
+            self.time += 1
+            self.state[2] = action
+            self.state[0] = self.grow(0, 1, self.growth_function_flag)
+            self.state[1] = self.grow(1, 0, self.growth_function_flag)
+            self.burden = np.sum(self.state[0:2])
 
-        # check for tumor death
-        if self.state[0] <= 0 and self.state[1] <= 0:
-            self.state = [0, 0, 0]
+            self.trajectory[:, self.time] = self.state
+            # check if done
+            if self.state[0] <= 0 and self.state[1] <= 0:
+                self.state = [0, 0, 0]
 
-        # get the reward
-        rewards = Reward(self.reward_shaping_flag, normalization=np.sum(self.trajectory[0:2, 0]))
-        reward += rewards.get_reward(self.state, self.time/self.max_time, self.threshold_burden)
+            # get the reward
+            reward += self.get_reward()
 
         info = {}
-
         if self.observation_type == 'number':
-            self.trajectory[:, self.time] = self.state
             if self.see_resistance:
                 obs = self.state[0:2]
             else:
                 obs = [np.sum(self.state[0:2])]
-
+        elif self.observation_type == 'image' or self.observation_type == 'multiobs':
+            self.image = self._get_image(action)
+            self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
+            if self.observation_type == 'image':
+                obs = self.image
+            elif self.observation_type == 'multiobs':
+                obs = {'vec': self.state, 'img': self.image}
+            else:
+                raise NotImplementedError
         elif self.observation_type == 'mutant_position':
             self.trajectory[0:3, self.time] = self.state
             self.trajectory[3, self.time] = self.mutant_normalized_position
@@ -174,36 +180,31 @@ class SLvEnv(BaseEnv):
             raise NotImplementedError
         terminate = self.terminate()
         truncate = self.truncate()
-        # self.done = terminate or truncate
+        self.done = terminate or truncate
+
         return obs, reward, terminate, truncate, info
+
 
     def reset(self, *, seed=None, options=None):
         if self.config['env']['patient_sampling']['enable']:
             if len(self.patient_id_list) > 1:
                 self._choose_new_patient()
                 self._set_patient_specific_competition(self.patient_id)
-                self._set_patient_specific_position(self.patient_id)
-        self.time = 0
-        if self.wt_random:
-            self.initial_wt = \
-                np.random.randint(low=1000, high=3000, size=1)[0]
-        if self.mut_random:
-            self.initial_mut = \
-                np.random.randint(low=0, high=20, size=1)[0]
+
+        self.randomize_params()
         if self.normalize:
-            self.normalization_factor = self.normalize_to / (self.initial_wt + self.initial_mut)
-            self.initial_wt = self.initial_wt * self.normalization_factor
-            self.initial_mut = self.initial_mut * self.normalization_factor
+            keys = self.random_params.keys()
+            if 'initial_wt' in keys or 'initial_mut' in keys:
+                self.normalization_factor = self.normalize_to / (self.initial_wt + self.initial_mut)
+                self.initial_wt *= self.normalization_factor
+                self.initial_mut *= self.normalization_factor
+                self.capacity = self.capacity_non_normalized * self.normalization_factor
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
-        if self.dimension == 2:
-            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_area / np.pi) ** (1 / 2)
-        elif self.dimension == 3:
-            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
-        if self.random_distance:
-            self.mutant_distance_to_front = np.random.randint(low=0, high=self.radius*0.5, size=1)[0]
-        self.mutant_radial_position = self.radius - self.mutant_distance_to_front
-        self.mutant_normalized_position = self.mutant_radial_position / self.radius
+        self.time = 0
+        self.time_on_treatment = 0
+        self.current_rew = 0
+        self.done = False
 
         if self.observation_type == 'number':
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
@@ -239,7 +240,10 @@ class SLvEnv(BaseEnv):
         else:
             #mv = L / (1 + np.exp(k*(dist-x0)))
             #mv = (-0.0565 * dist + 4.76)*np.heaviside(-0.0565 * dist + 4.76, 1)
-            mv = (-0.065 * dist + 5.007) * np.heaviside(-0.065 * dist + 5.007, 1)
+            #mv = (-0.065 * dist + 5.007) * np.heaviside(-0.065 * dist + 5.007, 1)
+            a = 152
+            b = 2.24e-4
+            mv = (b*(a-dist)**2) * np.heaviside((a-dist), 1)
 
             if np.random.rand() < self.mutant_normalized_position:
                 self.mutant_radial_position += np.random.normal(mv, 2*mv+1) # *(3*self.cell_volume/(4*np.pi))**(1/3)
@@ -268,14 +272,14 @@ class SLvEnv(BaseEnv):
         self._move_mutant(dist, growth_layer)
 
         if i == 0:
-            new_pop_size = self.state[i] * \
-                           (1 + self.growth_rate[i] *
-                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
-                            (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
             # new_pop_size = self.state[i] * \
             #                (1 + self.growth_rate[i] *
-            #                 (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
-            #                 self.growth_rate[i] * self.death_rate[i]) - self.death_rate_treat[i] * self.state[2]
+            #                 (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) *
+            #                 (1 - self.death_rate_treat[i] * self.state[2]) - self.growth_rate[i] * self.death_rate[i])
+            new_pop_size = self.state[i] * \
+                           (1 + self.growth_rate[i] *
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
+                            self.growth_rate[i] * self.death_rate[i]) - self.death_rate_treat[i] * self.state[2]
         else:
             #
             if self.state[0] > self.state[1]:
@@ -285,9 +289,9 @@ class SLvEnv(BaseEnv):
                 elif self.growth_fit == 'linear':
                     growth_rate = (-0.000998 * dist + 0.1227) * np.heaviside(-0.000998 * dist + 0.1227, 1) - 0.033
                 elif self.growth_fit == 'quadratic':
-                    a = 176.39
-                    b = 4.13e-6
-                    growth_rate = (b*(a-dist)**2) * np.heaviside((a-dist), 1) - 0.033
+                    a = 213
+                    b = 2.17e-6
+                    growth_rate = (b*(a-dist)**2) * np.heaviside((a-dist), 1) - 0.001
                 else:
                     print('Specified growth fit is not found, using position independent growth rate')
                     growth_rate = self.growth_rate[i]
@@ -300,8 +304,10 @@ class SLvEnv(BaseEnv):
 
         if flag == 'instant':
             pass
-        elif flag == 'instant_with_noise':
+        elif 'with_noise' in flag:
             # rand = truncnorm(loc=0, scale=0.00528*new_pop_size, a=-0.02/0.00528, b=0.02/0.00528).rvs()
+            if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+                new_pop_size = 0
             rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
             if np.abs(rand) > 0.05 * new_pop_size:
                 rand = 0.05 * new_pop_size * np.sign(rand)
@@ -329,12 +335,12 @@ if __name__ == "__main__": # pragma: no cover
     mut = []
     ini_size = env.state[0]+env.state[1]
 
-    for i in range(250):
-        if obs[0] > 1.20*ini_size:
+    for i in range(500):
+        if obs[0] > 0.805*ini_size:
             act = 1
         else:
             act = 0
-        #act=1
+        # act=1
         obs, rew, term, trunc, _ = env.step(act)
         rad.append(env.radius)
         mut_rad_pos.append(env.mutant_radial_position)
@@ -360,18 +366,18 @@ if __name__ == "__main__": # pragma: no cover
     ax.set_xlabel('time')
     ax.set_ylabel('radius')
     ax.legend()
-    ax.set_xlim(0, 250)
+    ax.set_xlim(0, 500)
     plt.show()
 
     fig, ax = plt.subplots()
-    ax.plot(np.array(wt)+np.array(mut), label='tot')
+    ax.plot(wt, label='wt')
     ax.plot(mut, label='mut')
     ax.fill_between(range(len(treat)), max(rad), max(rad) * 1.1, where=treat, color='orange', alpha=0.3, label='treatment')
     ax.set_xlabel('time')
     ax.set_ylabel('number')
-    ax.set_yscale('log')
+    ax.set_yscale('linear')
     ax.legend()
-    ax.set_xlim(0, 250)
+    ax.set_xlim(0, 500)
     plt.show()
 
     #anim.save('test.mp4', fps)

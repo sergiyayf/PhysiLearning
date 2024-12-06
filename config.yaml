@@ -48,7 +48,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
+  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
   n_envs: 1
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -70,7 +70,7 @@ env:
   death_rate_mut: 0.01
   treat_death_rate_wt: 330 #3.59 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
-  treatment_time_step: 4
+  treatment_time_step: 1
   reward_shaping: 'average' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
   normalize: True
   normalize_to: 1.0
@@ -91,13 +91,13 @@ env:
     t0: 1.12
 
   SLvEnv:
-    carrying_capacity: 3906
-    competition_wt: 1.733 #1.772 #2400.0
-    competition_mut: 1.0 #0.336
-    growth_function_flag: 'instant_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
+    carrying_capacity: 18000 #120000 # '48300pm1210'
+    competition_wt: 4.78 # 1.732 - fixed treat #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
+    competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
+    growth_function_flag: 'instant_fixed_treat_with_noise' #'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 73.5 #70.5 # 92
-    cell_volume: 2144
+    mutant_distance_to_front: 200 #70.5 # 92
+    cell_volume: 2494 #2144
     growth_layer: 150 # 110
     dimension: 2
     growth_fit: 'quadratic'
@@ -163,5 +163,5 @@ eval:
   at_type: 'effective_high_1.40_low_0.60' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.50
   num_episodes: 100
-  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False

@@ -179,8 +179,8 @@ if __name__ == '__main__':
 
 
     popt, pcov = curve_fit(exponential, rads, mean_projections.values, sigma=std_projs)
-    print(popt)
-    print(pcov)
+    # print(popt)
+    # print(pcov)
 
     #ax.plot(rads, exponential(rads, *popt), 'r-')
     plt.show()
@@ -190,12 +190,12 @@ if __name__ == '__main__':
         return a * x + b
 
     popt, pcov = curve_fit(linear, rads[:4], mean_projections.values[:4], sigma=std_projs[:4])
-    print(popt)
-    print(pcov)
+    # print(popt)
+    # print(pcov)
 
     popt5, pcov5 = curve_fit(linear, rads[:5], mean_projections.values[:5], sigma=std_projs[:5])
-    print(popt5)
-    print(pcov5)
+    # print(popt5)
+    # print(pcov5)
 
     def trunc_linear(x, a, b):
         return (a * x + b)*np.heaviside(a*x+b, 1)
