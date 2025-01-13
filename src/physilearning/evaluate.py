@@ -221,6 +221,10 @@ class Evaluation:
             print(f'Episode {episode} - Score: {score}')
             filename = os.path.join(save_path, save_name)
             self.save_trajectory(filename, episode)
+            # if PhysiCell environment create a directory with the episode number and copy all svg files there
+            #os.mkdir(f'simulations/PhysiCell_0/eval_{episode}')
+            #os.system(f'mv ./simulations/PhysiCell_0/output/*.svg ./simulations/PhysiCell_0/eval_{episode}')
+
             if self._is_venv():
                 if self.env.get_attr('time')[0] > 0:
                     obs = self.env.reset()

@@ -54,7 +54,7 @@ class GridEnv(BaseEnv):
         treat_death_rate_wt: float = 0.02,
         treat_death_rate_mut: float = 0.0,
         treatment_time_step: int = 1,
-        reward_shaping_flag: int = 0,
+        reward_shaping_flag: str = 'ttp',
         normalize: bool = True,
         normalize_to: float = 1,
         image_size: int = 36,

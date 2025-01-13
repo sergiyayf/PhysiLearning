@@ -62,7 +62,7 @@ class BaseEnv(Env):
         treat_death_rate_wt: float = 0.15,
         treat_death_rate_mut: float = 0.0,
         treatment_time_step: int = 60,
-        reward_shaping_flag: int = 0,
+        reward_shaping_flag: str = 'ttp',
         normalize: bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,
@@ -90,7 +90,10 @@ class BaseEnv(Env):
         self.growth_rate = [growth_rate_wt, growth_rate_mut]
         self.death_rate = [death_rate_wt, death_rate_mut]
         self.death_rate_treat = [treat_death_rate_wt, treat_death_rate_mut]
-        self.capacity = self.config['env']['LvEnv']['carrying_capacity']
+        if self.config is not None:
+            self.capacity = self.config['env']['LvEnv']['carrying_capacity']
+        else:
+            self.capacity = 1
         self.random_params = self.set_random_params()
         self.randomize_params()
         if self.normalize:

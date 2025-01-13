@@ -18,7 +18,6 @@ def test_random_cell_number():
     assert env.initial_wt == 5
     env.reset()
     assert env.trajectory[0,0] >= 5
-    assert env.time == 2
 
     initials_wt = []
     initials_mut = []

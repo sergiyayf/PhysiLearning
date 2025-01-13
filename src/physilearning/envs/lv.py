@@ -49,7 +49,7 @@ class LvEnv(BaseEnv):
         treat_death_rate_wt: float = 0.15,
         treat_death_rate_mut: float = 0.0,
         treatment_time_step: int = 60,
-        reward_shaping_flag: int = 0,
+        reward_shaping_flag: str = 'ttp',
         normalize:  bool = 1,
         normalize_to: float = 1000,
         image_size: int = 84,

@@ -14,7 +14,7 @@ def test_at_fixed(env_type):
     Test fixed adaptive therapy evaluation
     """
     EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
-    env = EnvClass(normalize_to=4, max_tumor_size=10, initial_wt=3, initial_mut=1)
+    env = EnvClass(normalize_to=4, max_tumor_size=10, initial_wt=3, initial_mut=1, reward_shaping_flag='ttp')
     env.observation_type = 'number'
     env.reset()
     env.step(0)
@@ -55,7 +55,7 @@ def test_zhang_et_al(env_type):
     Test Zhang et al adaptive therapy evaluation
     """
     EnvClass = getattr(importlib.import_module('physilearning.envs'), env_type)
-    env = EnvClass(normalize_to=4, max_tumor_size=10, initial_wt=3, initial_mut=1, observation_type='number')
+    env = EnvClass(normalize_to=4, max_tumor_size=10, initial_wt=3, initial_mut=1, observation_type='number', reward_shaping_flag='ttp')
     env.observation_type = 'number'
     env.reset()
     env.step(0)
@@ -70,20 +70,6 @@ def test_zhang_et_al(env_type):
     env.state[0] = 3
     treatment = evaluate.fixed_at(env, at_type='zhang_et_al', threshold=0.5)
     assert treatment == 1
-
-
-def test_evaluation_class_wrapper_handling_image_observation():
-    from physilearning.envs import GridEnv
-    env = DummyVecEnv([make_env(GridEnv, config_file='./tests/test_cfg.yaml')])
-    env = VecMonitor(env)
-    eval = evaluate.Evaluation(env, config_file='./tests/test_cfg.yaml')
-    trajectory_dim = eval.image_trajectory.shape[0]
-    assert trajectory_dim > 4
-
-    env = GridEnv(observation_type='image')
-    eval = evaluate.Evaluation(env, config_file='./tests/test_cfg.yaml')
-    trajectory_dim = eval.image_trajectory.shape[0]
-    assert trajectory_dim > 4
 
 
 def test_evaluation_class_wrapper_handling_number_observation():

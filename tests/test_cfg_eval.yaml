@@ -52,6 +52,7 @@ env:
   observation_type: 'number' # 'image' # 'number'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
+  see_prev_action: False
   max_tumor_size: 4000
   max_time: 120
   initial_wt: 27
@@ -63,7 +64,7 @@ env:
   treat_death_rate_wt: 0.397 # 0.015
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1
-  reward_shaping: 0  # reward shaping flag for some predefined rewards
+  reward_shaping: 'ttp'  # reward shaping flag for some predefined rewards
   normalize: 0
   normalize_to: 1000
   image_size: 84
