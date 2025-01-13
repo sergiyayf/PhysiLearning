@@ -54,6 +54,8 @@ class LvEnv(BaseEnv):
         normalize_to: float = 1000,
         image_size: int = 84,
         patient_id: int | list = 0,
+        see_prev_action: bool = False,
+        see_resistance: bool = False,
         env_specific_params: dict = {},
         **kwargs,
     ) -> None:
@@ -65,6 +67,7 @@ class LvEnv(BaseEnv):
                          treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
                          treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
+                         see_prev_action=see_prev_action, see_resistance=see_resistance
                          )
 
         self.capacity_non_normalized = env_specific_params.get('carrying_capacity', 6500)
@@ -207,6 +210,8 @@ class LvEnv(BaseEnv):
                 obs = self.state[0:2]
             else:
                 obs = [np.sum(self.state[0:2])]
+            if self.see_prev_action:
+                obs = np.append(obs, action)
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(action)
             self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
@@ -262,6 +267,8 @@ class LvEnv(BaseEnv):
                 obs = self.state[0:2]
             else:
                 obs = [np.sum(self.state[0:2])]
+            if self.see_prev_action:
+                obs = np.append(obs, 0)
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(self.initial_drug)
             self.image_trajectory = np.zeros(

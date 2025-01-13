@@ -18,14 +18,14 @@ def plot( df, title, scale='linear', truncate=False, ax=None, c='black'):
         df.loc[index:, 'Type 1'] = 0
         df.loc[index:, 'Treatment'] = 0
 
-    skip = 1
+    skip = 6
     normalize = 2
-    sus = np.array(df['Type 0'].values )#/ (df['Type 0'][normalize] + df['Type 1'][normalize]))
-    res = np.array(df['Type 1'].values )#/ (df['Type 0'][normalize] + df['Type 1'][normalize]))
+    sus = np.array(df['Type 0'].values[::skip] )#/ (df['Type 0'][normalize] + df['Type 1'][normalize]))
+    res = np.array(df['Type 1'].values[::skip] )#/ (df['Type 0'][normalize] + df['Type 1'][normalize]))
     # sus = np.array(df['Type 0'].values)*70
     # res = np.array(df['Type 1'].values)*70
     tot = sus + res
-    time = df.index / 2
+    time = df.index[::skip] / skip
     # only do for nonzero tot
     time = time[tot > 0]
     sus = sus[tot > 0]
@@ -50,17 +50,17 @@ def plot( df, title, scale='linear', truncate=False, ax=None, c='black'):
     # ax.plot(time[::skip], res[::skip], color='r')
     # ax.plot(time[::skip], tot[::skip], color=c)
 
-    ax.legend()
+    # ax.legend()
     ax.set_title(title)
     ax.set_yscale(scale)
     ax.hlines(1.0, 0, time[-1], color='k', linestyle='--')
-    treat = np.array(df['Treatment'].values)
+    treat = np.array(df['Treatment'].values[::skip])
     treat = treat[:len(time)]
     # replace 0s that are directly after 1 with 1s
     #treat = np.where(treat == 0, np.roll(treat, -1), treat)
     for t in range(len(time)-1):
         if treat[t] == 1:
-            ax.axvspan((t-1)/2, t/2, color=treatment_color)
+            ax.axvspan((t-1), t, color=treatment_color)
     #ax.fill_between(time, 0, np.max(tot), where=treat==1, color=treatment_color, label='drug',
     #lw=2)
 
@@ -79,7 +79,7 @@ def plot( df, title, scale='linear', truncate=False, ax=None, c='black'):
     #ax.scatter(range(len(d)), np.array(d), color='red', label='D7')
     ax.set_xlabel('Time')
     ax.set_ylabel('Cell count')
-    ax.legend()
+    # ax.legend()
     return ax
 
 def get_ttps(filename, timesteps=10):
@@ -165,18 +165,62 @@ def main():
 # df = pd.read_hdf('./Evaluations/LvEnvEval_3D_deep20241031_3D_hypers_3.h5', key='run_0')
 # plot(df, 'Lv 3D agnt', scale='linear', truncate=False, ax = ax, c='red')
 #
-for i in range(10):
-    fig, ax = plt.subplots()
-    agnt = './data/20241202_day_run_9_t8_and_t10_agents/agent_r9t10/Evaluations/PcEnvEval_agnt_r9t1020241202_2DLV_10.h5'
-    #agnt = './data/20241202_day_run_9_t8_and_t10_agents/agent_r9t8/Evaluations/PcEnvEval_agnt_r9t820241202_2DLV_8.h5'
-    df = pd.read_hdf(agnt, key=f'run_{i}')
-    plot(df, f'agnt10 {i}', scale='linear', truncate=False, ax = ax, c='red')
+# for i in range(1):
+#     fig, ax = plt.subplots()
+#     agnt = './data/20241202_day_run_9_t8_and_t10_agents/agent_r9t10/Evaluations/PcEnvEval_agnt_r9t1020241202_2DLV_10.h5'
+#     #agnt = './data/20241202_day_run_9_t8_and_t10_agents/agent_r9t8/Evaluations/PcEnvEval_agnt_r9t820241202_2DLV_8.h5'
+#     df = pd.read_hdf(agnt, key=f'run_{i}')
+#     plot(df, f'agnt10 {i}', scale='linear', truncate=False, ax = ax, c='red')
 
-
+#
 # fig, ax = plt.subplots()
 # df = pd.read_hdf('./Evaluations/LvEnvEval__e_140-060.h5', key=f'run_1')
-# plot(df, f'2D at50', scale='linear', truncate=False, ax = ax, c='red')
+# plot(df, f'LV', scale='linear', truncate=False, ax = ax, c='red')
+#
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./Evaluations/SLvEnvEval__e_140-060.h5', key=f'run_1')
+# plot(df, f'SLV', scale='linear', truncate=False, ax = ax, c='red')
+#
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./Evaluations/LvEnvEval__e_110-090.h5', key=f'run_1')
+# plot(df, f'LV', scale='linear', truncate=False, ax = ax, c='red')
+#
+fig, axs = plt.subplots(10,6)
+for i in range(1,11):
+    for j in range(6):
+        # fig, ax = plt.subplots()
 
-
+        #df = pd.read_hdf(f'./Evaluations/physicell_0901_tain_6_data/run_{i}/PcEnvEval_run20250109_2DLV_average_less_1_onehalf_day_{i}.h5', key=f'run_{j}')
+        #df = pd.read_hdf(f'./Evaluations/lv_weekend_1001_trains/train_5/LvEnvEval__agnt_20250110_2DLV_improve_try_{i}.h5', key=f'run_{j}')
+        df = pd.read_hdf(f'./Evaluations/0901_onehalf_day_6/LvEnvEval__agnt_20250109_2DLV_average_less_1_onehalf_day_{i}.h5', key=f'run_{j}')
+        ax = axs[i-1, j]
+        plot(df, f'PC Daily', scale='linear', truncate=False, ax = ax, c='red')
+        # calculate average totatl cell count
+        tot = df['Type 0'] + df['Type 1']
+        tot = tot[tot > 0]
+        print(np.mean(tot))
+        max_sens = np.max(df['Type 0'])
+        min_sens = np.min(df['Type 0'])
+        min_tot = np.min(tot)
+        ax.set_title(f'C: {np.mean(tot):.2f}, A: {min_tot:.2f}')
+        ax.set_xlim(0, 100)
+        #fig.savefig(f'./plots/lucky_4_pc_{i}.pdf')
+        #ax.set_yscale('log')
+#
+# for i in range(6):
+#     fig, ax = plt.subplots()
+#     df = pd.read_hdf('./Evaluations/pcs_09_6/PcEnvEval_run20250109_2DLV_average_less_1_onehalf_day_4.h5', key=f'run_{i}')
+#     plot(df, f'PC', scale='linear', truncate=False, ax = ax, c='red')
+#     ax.set_xlim(0, 100)
+#ax.set_yscale('log')
+# ax[0].set_xlim(0, 300)
+# for i in range(1,6):
+#     df = pd.read_hdf(f'./Evaluations/ptb{i}.h5', key=f'run_0')
+#     plot(df, f'perturbed {i}', scale='linear', truncate=False, ax = ax[i], c='red')
+#     ax[i].set_xlim(0, 300)
+# fig, ax = plt.subplots()
+# df = pd.read_hdf('./Evaluations/SLvEnvEval_r9t820241202_2DLV_8.h5', key=f'run_1')
+# plot(df, f'original', scale='linear', truncate=False, ax = ax, c='red')
+# ax.set_xlim(0, 300)
 #main()
 plt.show()

@@ -47,6 +47,7 @@ class PcEnv(BaseEnv):
         observation_type: str = 'image',
         action_type: str = 'discrete',
         see_resistance: bool = False,
+        see_prev_action: bool = False,
         max_tumor_size: int = 600,
         max_time: int = 1000,
         initial_wt: int = 2,
@@ -75,7 +76,7 @@ class PcEnv(BaseEnv):
                          treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
                          treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
-                         see_resistance=see_resistance,
+                         see_resistance=see_resistance, see_prev_action=see_prev_action
                          )
         # check supported observation spaces
         if self.observation_type not in ['number', 'image', 'multiobs', 'mutant_position']:
@@ -240,6 +241,8 @@ class PcEnv(BaseEnv):
                     obs = self.state[0:2]
                 else:
                     obs = [np.sum(self.state[0:2])]
+                if self.see_prev_action:
+                    obs = np.append(obs, action)
 
             elif self.observation_type == 'mutant_position':
                 # measure tumor radius
@@ -359,11 +362,12 @@ class PcEnv(BaseEnv):
         #    self.trajectory[0:3, self.time] = self.state
         #self.threshold_burden = self.max_tumor_size * (self.state[0] + self.state[1])
 
-
         if self.see_resistance:
             obs = self.state[0:2]
         else:
             obs = [np.sum(self.state[0:2])]
+        if self.see_prev_action:
+            obs = np.append(obs, 0)
         return obs, {}
 
     def _measure_radius(self):

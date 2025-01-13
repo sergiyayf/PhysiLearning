@@ -50,6 +50,7 @@ class BaseEnv(Env):
         observation_type: str = 'number',
         action_type: str = 'discrete',
         see_resistance: bool = False,
+        see_prev_action: bool = False,
         max_tumor_size: float = 1000,
         max_time: int = 3000,
         initial_wt: float = 45,
@@ -106,6 +107,7 @@ class BaseEnv(Env):
         self.name = name
         self.action_type = action_type
         self.see_resistance = see_resistance
+        self.see_prev_action = see_prev_action
         if self.action_type == 'discrete':
             self.action_space = Discrete(2)
         elif self.action_type == 'continuous':
@@ -138,10 +140,13 @@ class BaseEnv(Env):
             self.config = {'env': {'patient_sampling': {'enable': False}}}
 
         if self.observation_type == 'number':
+            num_obs = 1
+            if self.see_prev_action:
+                num_obs+=1
             if see_resistance:
-                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(2,))
-            else:
-                self.observation_space = Box(low=0, high=self.threshold_burden, shape=(1,))
+                num_obs+=1
+            self.observation_space = Box(low=0, high=self.threshold_burden, shape=(num_obs,))
+
         else:
             self.image_trajectory = np.zeros(
                 (self.image_size, self.image_size, int(self.max_time / self.treatment_time_step) + 1))
@@ -191,6 +196,7 @@ class BaseEnv(Env):
                    observation_type=config['env']['observation_type'],
                    action_type=config['env']['action_type'],
                    see_resistance=config['env']['see_resistance'],
+                   see_prev_action=config['env']['see_prev_action'],
                    max_tumor_size=config['env']['max_tumor_size'],
                    max_time=config['env']['max_time'],
                    initial_wt=config['env']['initial_wt'],

@@ -40,6 +40,8 @@ class SLvEnv(BaseEnv):
         action_type: str = 'discrete',
         max_tumor_size: float = 1000,
         max_time: int = 3000,
+        see_resistance: bool = False,
+        see_prev_action: bool = False,
         initial_wt: float = 45,
         initial_mut: float = 5,
         growth_rate_wt: float = 0.0175,
@@ -71,6 +73,7 @@ class SLvEnv(BaseEnv):
                          treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
                          treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
+                         see_resistance=see_resistance, see_prev_action=see_prev_action, env_specific_params=env_specific_params,
                          )
 
         self.capacity_non_normalized = env_specific_params.get('carrying_capacity', 6500)
@@ -159,6 +162,8 @@ class SLvEnv(BaseEnv):
                 obs = self.state[0:2]
             else:
                 obs = [np.sum(self.state[0:2])]
+            if self.see_prev_action:
+                obs = np.append(obs, action)
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(action)
             self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
@@ -200,11 +205,22 @@ class SLvEnv(BaseEnv):
                 self.initial_mut *= self.normalization_factor
                 self.capacity = self.capacity_non_normalized * self.normalization_factor
 
+
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
         self.time_on_treatment = 0
         self.current_rew = 0
         self.done = False
+        self.mutant_distance_to_front = self.config['env']['SLvEnv']['mutant_distance_to_front']
+        if self.dimension == 2:
+            # calculate the cell area from volume
+            self.cell_radius = (self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
+            self.cell_area = np.pi * self.cell_radius ** 2
+            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_area / np.pi) ** (1 / 2)
+        elif self.dimension == 3:
+            self.radius = (np.sum(self.state[0:2])/self.normalization_factor * self.cell_volume * 3 / (4 * np.pi)) ** (1 / 3)
+        self.mutant_radial_position = self.radius - self.mutant_distance_to_front
+        self.mutant_normalized_position = self.mutant_radial_position / self.radius
 
         if self.observation_type == 'number':
             self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
@@ -213,7 +229,8 @@ class SLvEnv(BaseEnv):
                 obs = self.state[0:2]
             else:
                 obs = [np.sum(self.state[0:2])]
-
+            if self.see_prev_action:
+                obs = np.append(obs, 0)
         elif self.observation_type == 'mutant_position':
             self.trajectory = np.zeros((np.shape(self.state)[0]+2, int(self.max_time) + 1))
             self.trajectory[0:3, 0] = self.state
@@ -334,9 +351,12 @@ if __name__ == "__main__": # pragma: no cover
     wt = []
     mut = []
     ini_size = env.state[0]+env.state[1]
+    wt.append(env.state[0])
+    mut.append(env.state[1])
+    treat.append(0)
 
     for i in range(500):
-        if obs[0] > 0.805*ini_size:
+        if obs[0] > 1.2*ini_size:
             act = 1
         else:
             act = 0

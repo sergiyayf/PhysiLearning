@@ -22,44 +22,45 @@ learning:
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
-    average_steps: 4
+    average_steps: 8
     model_kwargs:
-      n_steps: 256
+      n_steps: 512
       batch_size: 64
-      n_epochs: 5
+      n_epochs: 10
       verbose: 0
-      ent_coef: 1.e-2
+      ent_coef: 0.01
       clip_range: 0.01
-      learning_rate: 1.e-3
+      learning_rate: 2.e-4
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
-          pi: [ 64, 64 ]
-          vf: [ 64, 64 ]
+          pi: [ 128, 128 ]
+          vf: [ 128, 128 ]
     total_timesteps: 1.0e+6
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '20241202_2D_hypers_and_rewards_ttp_1_5_max'
+    model_save_prefix: '20241213_try_to_generate_divergence_6'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/20240826_elv_tendayaverage_test8_best_reward'
+      saved_model_name: './Training/SavedModels/20241211_pretrain_vfs_with_action_observe_treat_best_reward'
 
 # Environment configuration
 env:
   # general env settings
-  type: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
   n_envs: 1
-  wrap: False
+  wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
-    n_stack: 8
+    n_stack: 32
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
   observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
+  see_prev_action: True
   max_tumor_size: 2.0 # 2006 #3086 #100000 # 110000 # 4000
   max_time: 600 #122 # 120
   initial_wt: 3584 #39771 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
@@ -70,7 +71,7 @@ env:
   death_rate_mut: 0.01
   treat_death_rate_wt: 330 #3.59 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
-  treatment_time_step: 1
+  treatment_time_step: 4
   reward_shaping: 'average' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
   normalize: True
   normalize_to: 1.0
@@ -153,15 +154,15 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: '20241202_2D_hypers_and_rewards_avg_vfs'
+  model_prefix: '20241213_try_to_generate_divergence_1'
   step_to_load: '_best_reward'
-  save_name: 'e_140-060'
+  save_name: ''
   # evaluation settings
-  fixed_AT_protocol: 1
-  at_type: 'effective_high_1.40_low_0.60' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 0.50
+  fixed_AT_protocol: 0
+  at_type: 'zhang_et_al' #'effective_high_1.10_low_0.90' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.00
   num_episodes: 100
-  evaluate_on: 'SLvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False

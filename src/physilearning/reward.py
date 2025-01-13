@@ -33,11 +33,13 @@ class Reward:
             s = trajectory[0, :]
             tot = (r + s) / np.sum(trajectory[0:2, 0])
             # average over last 10 days
-            average = np.mean(tot[time - 39:time + 1])
-            if average < 1.0:
+            average = np.mean(tot[0:time + 1])
+            if average < 1.2:
                 reward = 1
             else:
                 reward = 0
+        elif self.reward_shaping_flag == 'treat':
+            reward = obs[2]
         else:
             raise ValueError("reward_shaping_flag not recognized")
         return reward
