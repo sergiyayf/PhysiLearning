@@ -7,9 +7,9 @@
         <y_max>2500</y_max>
         <z_min>-25</z_min>
         <z_max>25</z_max>
-        <dx>50</dx>
-        <dy>50</dy>
-        <dz>50</dz>
+        <dx>20</dx>
+        <dy>20</dy>
+        <dz>20</dz>
         <use_2D>true</use_2D>
     </domain>
 

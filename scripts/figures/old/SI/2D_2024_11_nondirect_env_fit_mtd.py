@@ -77,35 +77,32 @@ def plot_finals():
 
 if __name__ == '__main__':
 
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    os.chdir('/')
 
     ############################# MTD data #############################
-    # Plate3 D2 MTd
-    df_mtd = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key='run_1')
-    df_at50 = pd.read_hdf('./data/3D_manuals/at50/at50_all.h5', key='run_1')
-    df_nc = pd.read_hdf('./data/29112024_2d_manuals/nc_demo/Evaluations/PcEnvEval_job_1388398420241129_2D_manuals_nc_demo.h5', key='run_0')
+    df_mtd = pd.read_hdf(
+        './data/29112024_2d_manuals/mtd_demo/Evaluations/PcEnvEval_job_1388539920241129_2D_manuals_mtd_demo.h5',
+        key='run_0')    #df_mtd2 = pd.read_hdf('./Evaluations/3d_mtd.h5')
 
-    data_list = [df_nc]
+    data_list = [df_mtd]
 
     iteration = 1
     accuracy = 0.0
-    tune_draws = 100
-    final_draws = 100
-    consts_fit = {'r_r': 0.14, 'delta_s': 0.01, 'delta_r': 0.01, 'c_s': 5.0, 'c_r': 1.0, 'K': 18000, 'Delta_s': 400.0,
-                  'Delta_r': 0.0}
-    params_fit = {'r_s': 0.043}
-    sigmas = [0.001]
-
+    tune_draws = 1000
+    final_draws = 1000
+    consts_fit = {'r_s': 0.045,  'delta_s': 0.01, 'delta_r': 0.01, 'c_s': 4.82, 'c_r': 1.0, 'K': 18000, 'Delta_r': 0.0, 'Delta_s': 367.0}
+    params_fit = {'r_r': 0.134}
+    sigmas = [0.005]
     while accuracy < 0.99:
         theta_fit = list(params_fit.values())
         with pm.Model() as model:
             # Shared priors
-            r_s = pm.TruncatedNormal("r_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-2,
-                                     upper=1)
-            # K = pm.TruncatedNormal("K", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=80000,
-            #                           upper=500000)
-            # c_r = pm.TruncatedNormal("c_r", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-2,
-            #                         upper=3)
+
+            r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-2,
+                                        upper=1)
+
+            # Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-2,
+            #                              upper=1000)
 
             for i, df in enumerate(data_list):
 
@@ -120,11 +117,11 @@ if __name__ == '__main__':
                     [np.int32(i) for i in
                      df['Treatment'].values[1:sim_end + 1]])
 
-                sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0=[data.x[0], data.y[0]],
-                               params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
+                sol = ODEModel(theta=theta_fit, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
+                        params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
                 # Ode solution function
                 ode_solution = pytensor_forward_model_matrix(
-                    pm.math.stack([r_s])
+                    pm.math.stack([r_r])
                 )
 
                 # Likelihood
@@ -161,12 +158,11 @@ if __name__ == '__main__':
     theta_fit = list(params_fit.values())
     with pm.Model() as model:
         # Shared priors
-        r_s = pm.TruncatedNormal("r_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-2,
+        r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-2,
                                  upper=1)
-        # K = pm.TruncatedNormal("K", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=80000,
-        #                           upper=500000)
-        # c_r = pm.TruncatedNormal("c_r", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-2,
-        #                         upper=3)
+
+        # Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-2,
+        #                              upper=1000)
 
         for i, df in enumerate(data_list):
             sigma = pm.HalfNormal(f"sigma_{i}", 10)
@@ -184,7 +180,7 @@ if __name__ == '__main__':
                            params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
             # Ode solution function
             ode_solution = pytensor_forward_model_matrix(
-                pm.math.stack([r_s])
+                pm.math.stack([r_r])
             )
 
             # Likelihood
@@ -200,7 +196,7 @@ if __name__ == '__main__':
         trace_DEM = pm.sample(tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
 
-    #trace.to_json('./data/SI_data/2D_22112024_nc_LV.json')
+    trace.to_json('./data/SI_data/2D_29112024_mtd_LV.json')
     plot_finals()
     plt.show()
 

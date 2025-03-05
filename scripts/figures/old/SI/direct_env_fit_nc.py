@@ -9,12 +9,12 @@ from pytensor.compile.ops import as_op
 import pytensor.tensor as pt
 import pymc as pm
 from scipy.optimize import least_squares
-from physilearning.envs import LvEnv
+from physilearning.envs import ArrEnv
 import os
 
 @as_op(itypes=[pt.dvector], otypes=[pt.dmatrix])
 def pytensor_forward_model_matrix(theta):
-    return run_model(theta=theta, y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
+    return run_model(theta=theta, y0=[data.x[0], data.y[0]], treatment=treatment_schedule)
 
 def plot_data(ax, dat, lw=2, title="Initial data"):
     ax.plot(dat.time, dat.x, color="b", lw=lw, marker="o", markersize=12, label="X (Data)")
@@ -68,15 +68,14 @@ def plot_finals():
     trace_df = az.summary(trace)
 
     # plot mean parameters
-    for i, df in enumerate(data_list):
+    for i, data_dict in enumerate(data_list):
+        df = pd.DataFrame(data_dict)
 
-        sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
         data = pd.DataFrame(dict(
-            time=df.index.values,
-            x=df['Type 0'].values,
-            y=df['Type 1'].values, ))
-
-        treatment_schedule = np.array(df['Treatment'].values)
+            time=df.index.values[1:],
+            x=df['Type 0'].values[1:],
+            y=df['Type 1'].values[1:], ))
+        treatment_schedule = np.array(df['Treatment'].values[1:])
 
         fig, ax = plt.subplots(figsize=(12, 4))
         plot_data(ax, data)
@@ -84,7 +83,7 @@ def plot_finals():
         for key in params_fit.keys():
             mean_params[key] = trace_df.loc[key, 'mean']
         theta = [mean_params[key] for key in params_fit.keys()]
-        sol = run_model(theta=theta, y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
+        sol = run_model(theta=theta, y0=[data.x[0], data.y[0]], treatment=treatment_schedule)
         ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="--", markersize=12, label="X (Mean)")
         ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="--", markersize=14, label="Y (Mean)")
         ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="--", markersize=14, label="Total (Mean)")
@@ -96,40 +95,28 @@ def plot_finals():
             print(key, median_params[key])
 
         theta = [median_params[key] for key in params_fit.keys()]
-        sol = run_model(theta=theta, y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
+        sol = run_model(theta=theta, y0=[data.x[0], data.y[0]], treatment=treatment_schedule)
         ax.plot(data.time, sol[:, 0], color="r", lw=2, ls="-.", markersize=12, label="X (Median)")
         ax.plot(data.time, sol[:, 1], color="g", lw=2, ls="-.", markersize=14, label="Y (Median)")
         ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Median)")
         ax.legend()
         ax.set_title('Median parameters')
 
-def run_model(theta, y0, treatment, sim_end):
+def run_model(theta, y0, treatment):
     # parameters distinction
 
-    #r_s = theta[0]
-    r_r = theta[0]
-    #K = theta[2]
-    delta_s = theta[1]
-    t0 = theta[3]
-    k = theta[2]
-    #c_r = theta[6]
+    capacity = theta[0]
+    sus_gr_rate = theta[1]
 
     # env setup
 
     config_file = 'config.yaml'
-    env = LvEnv.from_yaml(config_file)
+    env = ArrEnv.from_yaml(config_file)
     env.initial_wt = y0[0]
     env.initial_mut = y0[1]
-    env.treatment_time_step = 1
-
-    env.death_rate_treat[0] = delta_s
-    #env.growth_rate[0] = r_s
-    env.growth_rate[1] = r_r
-    #env.capacity = K
-    env.t0 = t0
-    env.k = k
-    #env.competition[0] = c_r
-    env.end_time = sim_end
+    env.treatment_time_step = 2
+    env.growth_rate[0] = sus_gr_rate
+    env.capacity = capacity
 
     env.normalize = False
     env.reset()
@@ -145,51 +132,120 @@ def run_model(theta, y0, treatment, sim_end):
 
 if __name__ == '__main__':
 
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    os.chdir('/')
 
     ############################# MTD data #############################
-    df_mtd = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key='run_1')
-    #df_mtd2 = pd.read_hdf('./Evaluations/3d_mtd.h5')
-    df_at50 = pd.read_hdf('./data/3D_manuals/at50/at50_all.h5', key='run_1')
+    # Plate3 D2 MTd
+    mtd1 = {'Type 0': [6980, 6883, 7888, 8986, 7665, 6079, 4157, 3103, 1823, 1426, 911, 803, 493, 426],
+          'Type 1': [0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0],
+          'Treatment': [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+    # Plate3 D4 mtd
+    mtd2 = {'Type 0': [7071, 7308, 8537, 9314, 8011, 6246, 4279, 3008, 1932, 1534, 1127, 954, 642, 534],
+            'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'Treatment': [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+    # Plate3 D7 mtd
+    mtd3 = {'Type 0': [7648, 7833, 9194, 9766, 8690, 7038, 4444, 3178, 1895, 1430,  950,  766,  566,  491],
+            'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'Treatment': [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
 
-    data_list = [df_mtd]
+    ############################# eAT100 data #############################
+
+    # Plate1 D2
+    treat1_1 = {'Type 0': [7245, 7074, 8394, 9172, 8018, 6935, 6292, 6961, 7593, 8577],
+            'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'Treatment': [0, 0, 1, 1, 0, 0, 0, 0, 0, 0]}
+    # Plate1 D5
+    treat1_2 = {'Type 0': [7714, 7624, 8820, 9681, 8354, 7423, 6401, 7223, 7965, 9694],
+            'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'Treatment': [0, 0, 1, 1, 0, 0, 0, 0, 0, 0]}
+    # Plate1 D7
+    treat1_3 = {'Type 0': [7764, 7750, 8552, 9566, 8483, 7539, 6788, 7637, 8533, 9700],
+                'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                'Treatment': [0, 0, 1, 1, 0, 0, 0, 0, 0, 0]}
+
+    ############################# AT100 data #############################
+    # Plate1 E4
+    treat2_1 = {'Type 0': [7831, 7793, 9121, 9667, 8485, 6922, 4689, 3607, 2694, 3117, 3797, 5218, 6657, 8613],
+                'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                'Treatment': [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]}
+    # Plate1 E5
+    treat2_2 = {'Type 0': [7908, 7771, 9121, 9786, 8530, 7032, 4905, 3701, 2767, 2984, 3602, 4751, 6232, 7766],
+                'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                'Treatment': [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]}
+    # Plate1 E6
+    treat2_3 = {'Type 0': [8223, 8030, 9134, 9993, 8781, 7203, 4885, 3795, 2856, 3254, 3644, 5147, 6572, 7567],
+                'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                'Treatment': [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]}
+
+    ############################# AT50 data #############################
+    # C2, C3, C5
+    # Plate1 C2
+    treat3_1 = {'Type 0': [7071, 7267, 7954, 8794, 7637, 6239, 4710, 3614, 2413, 2024, 1910, 2417, 3493, 4924, 6307, 7867],
+                'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                'Treatment': [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]}
+    # Plate1 C3
+    treat3_2 = {
+        'Type 0': [7361, 7425, 8520, 9250, 8107, 6612, 4695, 3501, 2256, 1980, 1674, 2253, 3005, 4444, 5731, 7227],
+        'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'Treatment': [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]}
+    # Plate1 C5
+    treat3_3 = {
+        'Type 0': [7453, 7434, 8628, 9328, 7942, 6460, 4543, 3359, 2185, 1693, 1496, 1910, 2556, 4162, 5486, 6752],
+        'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'Treatment': [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]}
+
+    ############################# nc data #############################
+    #E3, E6, E7
+    # Plate3 E3
+    nc_1 = {'Type 0': [7022, 7368, 8799, 10946, 12655, 15305, 16515, 19284, 20086, 24395, 27738],
+            'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'Treatment': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+    # Plate3 E6
+    nc_2 = {'Type 0': [7687, 7859, 9194, 11732, 13399, 16037, 17012, 20622, 19677, 23456, 26791],
+            'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'Treatment': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+    # Plate3 E7
+    nc_3 = {'Type 0': [7620, 7865, 9520, 11775, 13537, 16468, 17914, 20766, 22366, 24169, 27038],
+            'Type 1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'Treatment': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+
+    #data_list = [mtd1, mtd2, mtd3, treat1_1, treat1_2, treat1_3, treat2_1, treat2_2, treat2_3, treat3_1, treat3_2, treat3_3, nc_1, nc_2, nc_3]
+    data_list = [nc_1, nc_2, nc_3]
 
     iteration = 1
     accuracy = 0.0
     tune_draws = 1000
     final_draws = 1000
-    params_fit = {'r_r': 0.58, 'Delta_s': 1.11, 'k': 0.58, 't0': 1.12}
-    sigmas = [0.01, 0.01, 0.01, 0.01]
+    consts_fit = {'r_r': 1.25}
+    params_fit = {'K': 43600, 'r_s': 0.133}
+    sigmas = [300, 0.001]
+
     while accuracy < 0.99:
         theta_fit = list(params_fit.values())
         with pm.Model() as model:
             # Shared priors
 
-            r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-2,
-                                        upper=1)
+            K = pm.TruncatedNormal("K", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=10000,
+                                   upper=120000)
+            r_s = pm.TruncatedNormal("r_s", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-3,
+                                     upper=1)
 
-            t0 = pm.TruncatedNormal("t0", mu=theta_fit[3], sigma=sigmas[3], initval=theta_fit[3], lower=1.e-2,
-                                    upper=10)
-            k = pm.TruncatedNormal("k", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-2,
-                                      upper=4)
-            Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-2,
-                                         upper=5)
 
-            for i, df in enumerate(data_list):
-
+            for i, data_dict in enumerate(data_list):
+                df = pd.DataFrame(data_dict)
                 sigma = pm.HalfNormal(f"sigma_{i}", 10)
-                sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
+
                 data = pd.DataFrame(dict(
-                    time=df.index.values,
-                    x=df['Type 0'].values,
-                    y=df['Type 1'].values, ))
+                    time=df.index.values[1:],
+                    x=df['Type 0'].values[1:],
+                    y=df['Type 1'].values[1:], ))
 
-                treatment_schedule = np.array(df['Treatment'].values)
+                treatment_schedule = np.array(df['Treatment'].values[1:])
 
-                sol = run_model(theta=[r_r, Delta_s, k, t0], y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
+                sol = run_model(theta=[K, r_s], y0=[data.x[0], data.y[0]], treatment=treatment_schedule)
                 # Ode solution function
                 ode_solution = pytensor_forward_model_matrix(
-                    pm.math.stack([r_r, Delta_s, k, t0])
+                    pm.math.stack([K, r_s])
                 )
 
                 # Likelihood
@@ -226,31 +282,28 @@ if __name__ == '__main__':
     theta_fit = list(params_fit.values())
     with pm.Model() as model:
         # Shared priors
-        r_r = pm.TruncatedNormal("r_r", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-2,
+
+        K = pm.TruncatedNormal("K", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=10000,
+                               upper=120000)
+        r_s = pm.TruncatedNormal("r_s", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-3,
                                  upper=1)
 
-        t0 = pm.TruncatedNormal("t0", mu=theta_fit[3], sigma=sigmas[3], initval=theta_fit[3], lower=1.e-2,
-                                upper=10)
-        k = pm.TruncatedNormal("k", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-2,
-                               upper=4)
-        Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-2,
-                                     upper=5)
 
-        for i, df in enumerate(data_list):
+        for i, data_dict in enumerate(data_list):
+            df = pd.DataFrame(data_dict)
             sigma = pm.HalfNormal(f"sigma_{i}", 10)
-            sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
+
             data = pd.DataFrame(dict(
-                time=df.index.values,
-                x=df['Type 0'].values,
-                y=df['Type 1'].values, ))
+                time=df.index.values[1:],
+                x=df['Type 0'].values[1:],
+                y=df['Type 1'].values[1:], ))
 
-            treatment_schedule = np.array(df['Treatment'].values)
+            treatment_schedule = np.array(df['Treatment'].values[1:])
 
-            sol = run_model(theta=[r_r, Delta_s, k, t0], y0=[data.x[0], data.y[0]], treatment=treatment_schedule,
-                            sim_end=sim_end)
+            sol = run_model(theta=[K, r_s], y0=[data.x[0], data.y[0]], treatment=treatment_schedule)
             # Ode solution function
             ode_solution = pytensor_forward_model_matrix(
-                pm.math.stack([r_r, Delta_s, k, t0])
+                pm.math.stack([K, r_s])
             )
 
             # Likelihood
@@ -266,7 +319,7 @@ if __name__ == '__main__':
         trace_DEM = pm.sample(tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
 
-    trace.to_json('./data/SI_data/3D_13112024_mtd_LV.json')
+    trace.to_json('./data/SI_data/trace_arr_env_nc.json')
     plot_finals()
     plt.show()
 

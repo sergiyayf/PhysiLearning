@@ -141,7 +141,7 @@ def run_model(theta, y0, treatment, sim_end):
 
 if __name__ == '__main__':
 
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    os.chdir('/')
 
     ############################# MTD data #############################
     df_mtd = pd.read_hdf(

@@ -32,7 +32,7 @@ def plot_growth_rate_distribution(df):
 if __name__ == '__main__':
     # set pwd
     import os
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    os.chdir('/')
     # df = read_data('./data/position_physilearning/transition_rate_save_run_1/Evaluations/sim_full_data/pcdl_data_job_7839832_port_0.h5', 2, 1*720)
     df = read_data('./data/29112024_2d_manuals/nc/sim_full_data/pcdl_data_job_13887080_port_0.h5', 2, 1440)
     df['transition_rate'] = df['transition_rate']*360

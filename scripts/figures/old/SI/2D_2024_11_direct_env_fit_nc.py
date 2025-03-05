@@ -145,24 +145,24 @@ def run_model(theta, y0, treatment, sim_end):
 
 if __name__ == '__main__':
 
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    os.chdir('/')
 
     ############################# MTD data #############################
     # Plate3 D2 MTd
     df_mtd = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key='run_1')
     df_at50 = pd.read_hdf('./data/3D_manuals/at50/at50_all.h5', key='run_1')
-    df_nc = pd.read_hdf('./data/3D_manuals/nc/nc_all.h5', key='run_1')
+    df_nc = pd.read_hdf('./data/29112024_2d_manuals/nc_demo/Evaluations/PcEnvEval_job_1388398420241129_2D_manuals_nc_demo.h5', key='run_0')
 
     data_list = [df_nc]
 
     iteration = 1
     accuracy = 0.0
-    tune_draws = 500
-    final_draws = 1000
-    params_fit = {'r_s': 0.323}
-    sigmas = [0.005]
+    tune_draws = 100
+    final_draws = 100
+    params_fit = {'r_s': 0.040}
+    sigmas = [0.01]
 
-    while accuracy < 0.99:
+    while accuracy < 0.5:
         theta_fit = list(params_fit.values())
         with pm.Model() as model:
             # Shared priors
@@ -260,7 +260,7 @@ if __name__ == '__main__':
         trace_DEM = pm.sample(tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
 
-    trace.to_json('./data/SI_data/3D_12112024_nc_LV.json')
+    #trace.to_json('./data/SI_data/2D_22112024_nc_LV.json')
     plot_finals()
     plt.show()
 

@@ -113,7 +113,7 @@ def plot_radial_velocity(ax, average_projections, std_proj, bin_size, **kwargs):
 
 if __name__ == '__main__':
     import os
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    os.chdir('/')
     # fname = f'./data/position_physilearning/run_1/Evaluations/sim_full_data/pcdl_data_job_7676594_port_0.h5'
     # fnames = [f'./data/position_physilearning/transition_rate_save_run_{i}/Evaluations/sim_full_data/pcdl_data_job_78398{i+31}_port_0.h5' for i in range(1, 11)
     #           ]
@@ -208,6 +208,7 @@ if __name__ == '__main__':
     qpopt, qpcov = curve_fit(quadratic, rads[0:8], mean_projections.values[0:8], sigma=std_projs[0:8])
     print('quadratic: ', qpopt)
     ax.plot(rads, trunc_quadratic(rads, *qpopt), 'g-', label='fit quadratic')
+    ax.errorbar(rads, trunc_quadratic(rads,*qpopt), yerr=3*trunc_quadratic(rads,*qpopt)+3, fmt='o', color='green', ecolor='green', elinewidth=3, capsize=0)
     #
     # ax.plot(rads, trunc_linear(rads, *popt), 'g-', label='fit 4 points')
     # ax.plot(rads, trunc_linear(rads, *popt5), 'b-', label='fit 5 points')
@@ -241,6 +242,6 @@ if __name__ == '__main__':
     fig.colorbar(sc)
 
     # save all_cells_df to pickle for efficient loading
-    #all_cells_df.to_pickle('all_cells_df.pkl')
+    # all_cells_df.to_pickle('for_velocity_plotting_10_nc_runs_df.pkl')
     plt.show()
 

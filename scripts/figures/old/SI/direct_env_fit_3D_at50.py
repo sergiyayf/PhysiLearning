@@ -28,7 +28,7 @@ def plot_data(ax, dat, lw=2, title="Initial data"):
     return ax
 
 def plot_model_trace(ax, trace_df, row_idx, lw=1, alpha=0.2):
-    cols = ['K', 'r_s']
+    cols = ['K', 'Delta_s', 'r_s']
     row = trace_df.iloc[row_idx, :][cols].values
 
     theta = row
@@ -72,11 +72,11 @@ def plot_finals():
 
         sim_end = df.index[np.where(~df.any(axis=1))[0][0]]
         data = pd.DataFrame(dict(
-            time=df.index.values,
-            x=df['Type 0'].values,
-            y=df['Type 1'].values, ))
+            time=df.index.values[:sim_end],
+            x=df['Type 0'].values[:sim_end],
+            y=df['Type 1'].values[:sim_end], ))
 
-        treatment_schedule = np.array(df['Treatment'].values)
+        treatment_schedule = np.array(df['Treatment'].values)[:sim_end]
 
         fig, ax = plt.subplots(figsize=(12, 4))
         plot_data(ax, data)
@@ -108,11 +108,11 @@ def run_model(theta, y0, treatment, sim_end):
 
     r_s = theta[0]
     #r_r = theta[1]
-    #K = theta[1]
-    #delta_s = theta[3]
-    #t0 = theta[4]
-    #k = theta[5]
-    #c_r = theta[2]
+    # K = theta[2]
+    # delta_s = theta[0]
+    # t0 = theta[3]
+    # k = theta[3]
+    c_r = theta[1]
 
     # env setup
 
@@ -122,13 +122,13 @@ def run_model(theta, y0, treatment, sim_end):
     env.initial_mut = y0[1]
     env.treatment_time_step = 1
 
-    #env.death_rate_treat[0] = delta_s
+    # env.death_rate_treat[0] = delta_s
     env.growth_rate[0] = r_s
-    #env.growth_rate[1] = r_r
-    #env.capacity = K
-    #env.t0 = t0
-    #env.k = k
-    #env.competition[0] = c_r
+    # env.growth_rate[1] = r_s
+    # env.capacity = K
+    # env.t0 = t0
+    # env.k = k
+    env.competition[0] = c_r
     env.end_time = sim_end
 
     env.normalize = False
@@ -141,37 +141,44 @@ def run_model(theta, y0, treatment, sim_end):
         env.step(t)
         result = np.append(result, [[env.state[0], env.state[1]]], axis=0)
 
+
     return result
 
 if __name__ == '__main__':
 
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    os.chdir('/')
 
     ############################# MTD data #############################
     # Plate3 D2 MTd
     df_mtd = pd.read_hdf('./data/3D_manuals/mtd/mtd_all.h5', key='run_1')
     df_at50 = pd.read_hdf('./data/3D_manuals/at50/at50_all.h5', key='run_1')
-    df_nc = pd.read_hdf('./data/29112024_2d_manuals/nc_demo/Evaluations/PcEnvEval_job_1388398420241129_2D_manuals_nc_demo.h5', key='run_0')
 
-    data_list = [df_nc]
+    data_list = [df_at50]
 
     iteration = 1
     accuracy = 0.0
-    tune_draws = 100
-    final_draws = 100
-    params_fit = {'r_s': 0.040}
-    sigmas = [0.01]
+    tune_draws = 1000
+    final_draws = 1000
+    params_fit = {'r_s': 0.54, 'c_r': 2.66} # for classic c_r,=2.5, Delta_s = 1.57
+    sigmas = [0.01, 0.01]
 
-    while accuracy < 0.5:
+    while accuracy < 0.99:
         theta_fit = list(params_fit.values())
         with pm.Model() as model:
             # Shared priors
             r_s = pm.TruncatedNormal("r_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-2,
                                      upper=1)
-            # K = pm.TruncatedNormal("K", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=80000,
-            #                           upper=500000)
-            # c_r = pm.TruncatedNormal("c_r", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-2,
-            #                         upper=3)
+            # K = pm.TruncatedNormal("K", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=80000,
+            #                           upper=200000)
+            c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-2,
+                                    upper=5)
+            # Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-2,
+            #                             upper=5)
+            # k = pm.TruncatedNormal("k", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-2,
+            #                         upper=2)
+            # t0 = pm.TruncatedNormal("t0", mu=theta_fit[3], sigma=sigmas[3], initval=theta_fit[3], lower=-2,
+            #                         upper=5)
+
 
             for i, df in enumerate(data_list):
 
@@ -182,12 +189,12 @@ if __name__ == '__main__':
                     x=df['Type 0'].values[:sim_end],
                     y=df['Type 1'].values[:sim_end], ))
 
-                treatment_schedule = np.array(df['Treatment'].values[:sim_end])
+                treatment_schedule = np.array(df['Treatment'].values)[:sim_end]
 
-                sol = run_model(theta=[r_s], y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
+                sol = run_model(theta=[r_s, c_r], y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
                 # Ode solution function
                 ode_solution = pytensor_forward_model_matrix(
-                    pm.math.stack([r_s])
+                    pm.math.stack([r_s, c_r])
                 )
 
                 # Likelihood
@@ -199,6 +206,8 @@ if __name__ == '__main__':
         sampler = "DEMetropolis"
         chains = 8
         draws = tune_draws
+
+
         with model:
             trace_DEM = pm.sample(tune=2 * draws, draws=draws, chains=chains, cores=16)
         trace = trace_DEM
@@ -226,10 +235,16 @@ if __name__ == '__main__':
         # Shared priors
         r_s = pm.TruncatedNormal("r_s", mu=theta_fit[0], sigma=sigmas[0], initval=theta_fit[0], lower=1.e-2,
                                  upper=1)
-        # K = pm.TruncatedNormal("K", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=80000,
-        #                           upper=500000)
-        # c_r = pm.TruncatedNormal("c_r", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-2,
-        #                         upper=3)
+        # K = pm.TruncatedNormal("K", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=80000,
+        #                           upper=200000)
+        c_r = pm.TruncatedNormal("c_r", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-2,
+                                 upper=5)
+        # Delta_s = pm.TruncatedNormal("Delta_s", mu=theta_fit[1], sigma=sigmas[1], initval=theta_fit[1], lower=1.e-2,
+        #                             upper=5)
+        # k = pm.TruncatedNormal("k", mu=theta_fit[2], sigma=sigmas[2], initval=theta_fit[2], lower=1.e-2,
+        #                         upper=2)
+        # t0 = pm.TruncatedNormal("t0", mu=theta_fit[3], sigma=sigmas[3], initval=theta_fit[3], lower=-2,
+        #                         upper=5)
 
         for i, df in enumerate(data_list):
             sigma = pm.HalfNormal(f"sigma_{i}", 10)
@@ -239,12 +254,12 @@ if __name__ == '__main__':
                 x=df['Type 0'].values[:sim_end],
                 y=df['Type 1'].values[:sim_end], ))
 
-            treatment_schedule = np.array(df['Treatment'].values[:sim_end])
+            treatment_schedule = np.array(df['Treatment'].values)[:sim_end]
 
-            sol = run_model(theta=[r_s], y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
+            sol = run_model(theta=[r_s, c_r], y0=[data.x[0], data.y[0]], treatment=treatment_schedule, sim_end=sim_end)
             # Ode solution function
             ode_solution = pytensor_forward_model_matrix(
-                pm.math.stack([r_s])
+                pm.math.stack([r_s, c_r])
             )
 
             # Likelihood
@@ -260,7 +275,7 @@ if __name__ == '__main__':
         trace_DEM = pm.sample(tune=2 * draws, draws=draws, chains=chains, cores=16)
     trace = trace_DEM
 
-    #trace.to_json('./data/SI_data/2D_22112024_nc_LV.json')
+    trace.to_json('./data/SI_data/3D_13112024_at50_LV.json')
     plot_finals()
     plt.show()
 

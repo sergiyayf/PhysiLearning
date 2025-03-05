@@ -53,7 +53,7 @@ env:
   wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
-    n_stack: 32
+    n_stack: 64
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
@@ -71,7 +71,7 @@ env:
   death_rate_mut: 0.01
   treat_death_rate_wt: 330 #3.59 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
-  treatment_time_step: 4
+  treatment_time_step: 6
   reward_shaping: 'average' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
   normalize: True
   normalize_to: 1.0
@@ -97,7 +97,7 @@ env:
     competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
     growth_function_flag: 'instant_fixed_treat_with_noise' #'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
     image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 200 #70.5 # 92
+    mutant_distance_to_front: 207 #70.5 # 92
     cell_volume: 2494 #2144
     growth_layer: 150 # 110
     dimension: 2
@@ -154,15 +154,15 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './'
   model_prefix: '20241213_try_to_generate_divergence_1'
   step_to_load: '_best_reward'
-  save_name: ''
+  save_name: 'nc'
   # evaluation settings
-  fixed_AT_protocol: 0
-  at_type: 'zhang_et_al' #'effective_high_1.10_low_0.90' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.00
-  num_episodes: 100
+  fixed_AT_protocol: 1
+  at_type: 'nc' #'effective_high_1.10_low_0.90' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 0.50
+  num_episodes: 50
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False

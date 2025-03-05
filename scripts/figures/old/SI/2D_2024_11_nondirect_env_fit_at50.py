@@ -77,7 +77,7 @@ def plot_finals():
 
 if __name__ == '__main__':
 
-    os.chdir('/home/saif/Projects/PhysiLearning')
+    os.chdir('/')
 
     ############################# MTD data #############################
     # Plate3 D2 MTd

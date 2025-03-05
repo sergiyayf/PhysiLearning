@@ -258,12 +258,13 @@ class SLvEnv(BaseEnv):
             #mv = L / (1 + np.exp(k*(dist-x0)))
             #mv = (-0.0565 * dist + 4.76)*np.heaviside(-0.0565 * dist + 4.76, 1)
             #mv = (-0.065 * dist + 5.007) * np.heaviside(-0.065 * dist + 5.007, 1)
-            a = 152
-            b = 2.24e-4
+            a = 148 #139
+            b = 2.57e-4 #6.26e-4
             mv = (b*(a-dist)**2) * np.heaviside((a-dist), 1)
 
-            if np.random.rand() < self.mutant_normalized_position:
-                self.mutant_radial_position += np.random.normal(mv, 2*mv+1) # *(3*self.cell_volume/(4*np.pi))**(1/3)
+            if True: #np.random.rand() < self.mutant_normalized_position:
+                self.mutant_radial_position += mv #np.random.normal(mv,3*mv+3) # *(3*self.cell_volume/(4*np.pi))**(1/3)
+                print(mv)
             if (self.mutant_radial_position > self.radius):
                 self.mutant_radial_position = self.radius
             self.mutant_normalized_position = self.mutant_radial_position / self.radius
@@ -306,8 +307,8 @@ class SLvEnv(BaseEnv):
                 elif self.growth_fit == 'linear':
                     growth_rate = (-0.000998 * dist + 0.1227) * np.heaviside(-0.000998 * dist + 0.1227, 1) - 0.033
                 elif self.growth_fit == 'quadratic':
-                    a = 213
-                    b = 2.17e-6
+                    a = 215 #213 #220
+                    b = 2.29e-6 #2.17e-6 #2.38e-6
                     growth_rate = (b*(a-dist)**2) * np.heaviside((a-dist), 1) - 0.001
                 else:
                     print('Specified growth fit is not found, using position independent growth rate')
@@ -344,7 +345,6 @@ if __name__ == "__main__": # pragma: no cover
     np.random.seed(int(time.time()))
     env = SLvEnv.from_yaml("../../../config.yaml")
     env.reset()
-    obs = [0]
     rad = []
     mut_rad_pos = []
     treat = []
@@ -354,9 +354,12 @@ if __name__ == "__main__": # pragma: no cover
     wt.append(env.state[0])
     mut.append(env.state[1])
     treat.append(0)
+    obs = [env.state[0]+ env.state[1]]
+    rad.append(env.radius)
+    mut_rad_pos.append(env.mutant_radial_position)
 
-    for i in range(500):
-        if obs[0] > 1.2*ini_size:
+    for i in range(600):
+        if obs[0] >= 1.0*ini_size:
             act = 1
         else:
             act = 0
@@ -386,7 +389,7 @@ if __name__ == "__main__": # pragma: no cover
     ax.set_xlabel('time')
     ax.set_ylabel('radius')
     ax.legend()
-    ax.set_xlim(0, 500)
+    ax.set_xlim(0, 100)
     plt.show()
 
     fig, ax = plt.subplots()
@@ -397,7 +400,7 @@ if __name__ == "__main__": # pragma: no cover
     ax.set_ylabel('number')
     ax.set_yscale('linear')
     ax.legend()
-    ax.set_xlim(0, 500)
+    ax.set_xlim(0, 100)
     plt.show()
 
     #anim.save('test.mp4', fps)

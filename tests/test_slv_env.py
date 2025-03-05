@@ -13,12 +13,15 @@ def test_observation_space():
     assert env.observation_type == 'image'
 
 def test_normalization():
-    env = SLvEnv(normalize=True, normalize_to=1, max_tumor_size=10, initial_wt=5, initial_mut=5)
+
+    config = yaml.safe_load(open('./tests/test_cfg_eval.yaml'))
+    env = SLvEnv(normalize=True, normalize_to=1, max_tumor_size=10, initial_wt=5, initial_mut=5, config=config)
     assert np.sum(env.state) == 1
     env.reset()
     assert np.sum(env.state) == 1
 
-    env = SLvEnv(normalize=False, max_tumor_size=10, initial_wt=5, initial_mut=5)
+    config = yaml.safe_load(open('./tests/test_cfg_eval.yaml'))
+    env = SLvEnv(normalize=False, max_tumor_size=10, initial_wt=5, initial_mut=5, config=config)
     assert np.sum(env.state) == 10
     env.reset()
     assert np.sum(env.state) == 10
@@ -26,7 +29,8 @@ def test_normalization():
 
 
 def test_random_cell_number():
-    env = SLvEnv(initial_wt=5, normalize=False)
+    config = yaml.safe_load(open('./tests/test_cfg_eval.yaml'))
+    env = SLvEnv(initial_wt=5, normalize=False, config=config)
     assert env.initial_wt == 5
     env.reset()
     assert env.state[0] == 5
@@ -34,7 +38,7 @@ def test_random_cell_number():
     initials_wt = []
     initials_mut = []
     for i in range(10):
-        env = SLvEnv(initial_wt='random', initial_mut='random')
+        env = SLvEnv(initial_wt='10-20', initial_mut='5pm2')
         initial_wt = env.initial_wt
         initial_mut = env.initial_mut
         initials_wt.append(initial_wt)
@@ -50,7 +54,8 @@ def test_random_cell_number_with_reset():
     initials_wt = []
     initials_mut = []
     for i in range(10):
-        env = SLvEnv(initial_wt='random', initial_mut='random')
+        config = yaml.safe_load(open('./tests/test_cfg_eval.yaml'))
+        env = SLvEnv(initial_wt='10-20', initial_mut='5pm2', config=config)
         env.reset()
         initial_wt = env.initial_wt
         initial_mut = env.initial_mut

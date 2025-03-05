@@ -185,14 +185,19 @@ def main():
 # df = pd.read_hdf('./Evaluations/LvEnvEval__e_110-090.h5', key=f'run_1')
 # plot(df, f'LV', scale='linear', truncate=False, ax = ax, c='red')
 #
-fig, axs = plt.subplots(10,6)
+fig, axs = plt.subplots(10,10)
 for i in range(1,11):
-    for j in range(6):
+    for j in range(0,10):
         # fig, ax = plt.subplots()
 
-        #df = pd.read_hdf(f'./Evaluations/physicell_0901_tain_6_data/run_{i}/PcEnvEval_run20250109_2DLV_average_less_1_onehalf_day_{i}.h5', key=f'run_{j}')
         #df = pd.read_hdf(f'./Evaluations/lv_weekend_1001_trains/train_5/LvEnvEval__agnt_20250110_2DLV_improve_try_{i}.h5', key=f'run_{j}')
-        df = pd.read_hdf(f'./Evaluations/0901_onehalf_day_6/LvEnvEval__agnt_20250109_2DLV_average_less_1_onehalf_day_{i}.h5', key=f'run_{j}')
+        # df = pd.read_hdf(f'./Evaluations/0901_onehalf_day_6/LvEnvEval__agnt_20250109_2DLV_average_less_1_onehalf_day_{i}.h5', key=f'run_{j}')
+        df = pd.read_hdf(f'./Evaluations/train_6_physicell_evals/train_6_run_{i}.h5', key=f'run_{j}')
+        #df = pd.read_hdf(f'./Evaluations/train_6_on_slvenv/SLvEnvEval__slv_20250109_2DLV_average_less_1_onehalf_day_{i}.h5', key=f'run_{j}')
+        # df = pd.read_hdf(f'./Evaluations/1402_lvs_evals/LvEnvEval__20250206_lv_1_{i}.h5',
+        #df=pd.read_hdf(f'./Evaluations/1402_pcs_evals/run_{i}.h5',
+        # df = pd.read_hdf(f'./Evaluations/2002_pc_evals_of_slvs/run_{i}.h5',
+        #                 key=f'run_{j}')
         ax = axs[i-1, j]
         plot(df, f'PC Daily', scale='linear', truncate=False, ax = ax, c='red')
         # calculate average totatl cell count
@@ -203,9 +208,10 @@ for i in range(1,11):
         min_sens = np.min(df['Type 0'])
         min_tot = np.min(tot)
         ax.set_title(f'C: {np.mean(tot):.2f}, A: {min_tot:.2f}')
-        ax.set_xlim(0, 100)
+        ax.set_xlim(0, 120)
         #fig.savefig(f'./plots/lucky_4_pc_{i}.pdf')
         #ax.set_yscale('log')
+        fig.suptitle(f'pc')
 #
 # for i in range(6):
 #     fig, ax = plt.subplots()

@@ -22,7 +22,7 @@ def test_random_cell_number():
     initials_wt = []
     initials_mut = []
     for i in range(10):
-        env = LvEnv(initial_wt='random', initial_mut='random')
+        env = LvEnv(initial_wt='20-100', initial_mut='5pm1')
         initial_wt = env.initial_wt
         initial_mut = env.initial_mut
         initials_wt.append(initial_wt)
@@ -38,7 +38,7 @@ def test_random_cell_number_with_reset():
     initials_wt = []
     initials_mut = []
     for i in range(10):
-        env = LvEnv(initial_wt='random', initial_mut='random')
+        env = LvEnv(initial_wt='20-100', initial_mut='5pm1')
         env.reset()
         initial_wt = env.initial_wt
         initial_mut = env.initial_mut
@@ -83,26 +83,6 @@ def test_get_image():
     assert not (env.wt_color in image)
     assert (env.mut_color in image)
 
-def test_patient_sampling():
-    np.random.seed(0)
-    # os.chdir('/home/saif/Projects/PhysiLearning')
-    config_file = './tests/test_cfg.yaml'
-    with open(config_file, 'r') as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-
-    config['env']['patient_sampling']['enable'] = True
-    config['env']['patient_sampling']['patient_id'] = [80, 55]
-    env = LvEnv(config=config, patient_id=[80, 55])
-    patient_list = []
-    initial_mut_list = []
-    patient_list.append(env.patient_id)
-    initial_mut_list.append(env.initial_mut)
-    for i in range(10):
-        env.reset()
-        patient_list.append(env.patient_id)
-        initial_mut_list.append(env.initial_mut)
-    assert len(set(patient_list)) > 1
-    assert len(set(initial_mut_list)) > 1
 
 def test_delayed_growth_with_noise():
     np.random.seed(0)

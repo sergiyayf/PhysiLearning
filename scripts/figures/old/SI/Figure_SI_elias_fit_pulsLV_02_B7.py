@@ -172,7 +172,7 @@ if __name__ == '__main__':
     params_fit = {'K': 42100}
     sigmas = [1000]
 
-    trace = az.from_json('./../../../data/SI_data/elias_lv_fit_02_K_B7.json')
+    trace = az.from_json('../../../../data/SI_data/elias_lv_fit_02_K_B7.json')
 
     plot_finals()
     plt.show()
