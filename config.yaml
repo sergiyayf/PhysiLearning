@@ -48,7 +48,7 @@ learning:
 # Environment configuration
 env:
   # general env settings
-  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
+  type: 'KppEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
   n_envs: 1
   wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -62,16 +62,16 @@ env:
   see_resistance: False
   see_prev_action: True
   max_tumor_size: 2.0 # 2006 #3086 #100000 # 110000 # 4000
-  max_time: 600 #122 # 120
+  max_time: 4800 #122 # 120
   initial_wt: 3584 #39771 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
   initial_mut: 5 # 4 # 'random' - used for meltd atserhii train
-  growth_rate_wt: 0.040 #0.096 #'0.096pm0.001 ' # 0.079 - meltd. 0.116 - current
-  growth_rate_mut: 0.134 #0.12 # 0.076 - meltd. 0.23 - current
-  death_rate_wt: 0.01
-  death_rate_mut: 0.01
-  treat_death_rate_wt: 330 #3.59 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
+  growth_rate_wt: 0.05 #0.096 #'0.096pm0.001 ' # 0.079 - meltd. 0.116 - current
+  growth_rate_mut: 0.05 #0.12 # 0.076 - meltd. 0.23 - current
+  death_rate_wt: 0.001
+  death_rate_mut: 0.001
+  treat_death_rate_wt: 0.005 #3.59 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
-  treatment_time_step: 6
+  treatment_time_step: 48
   reward_shaping: 'average' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
   normalize: True
   normalize_to: 1.0
@@ -151,6 +151,17 @@ env:
     recovering_time_threshold: 3
     dying_time_threshold: 2
     initial_growth_reduction: 0.25
+
+  KppEnv:
+    r_bins: 200
+    sensitive_colony_radius: 0.35
+    peak_center: 0.3
+    sigma: 0.001
+    ramp_time: 72
+    diffusion_coefficient: 0.00001
+    density_exponent_sensitive: 1.0
+    density_exponent_resistant: 1.0
+
 # evaluation configuration
 eval:
   most_recent: 0
