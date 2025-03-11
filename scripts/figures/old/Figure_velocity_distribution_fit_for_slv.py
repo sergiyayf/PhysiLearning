@@ -242,7 +242,7 @@ if __name__ == '__main__':
     fig.colorbar(sc)
 
     # save all_cells_df to pickle for efficient loading
-    #all_cells_df.to_pickle('for_velocity_plotting_10_nc_runs_df.pkl')
+    all_cells_df.to_pickle('/home/saif/Projects/PhysiLearning/data/for_velocity_plotting_50_nc_runs_df.pkl')
     plt.show()
 
     # R: 1.3945e+02 6.2623e-04

@@ -42,27 +42,28 @@ def figure_setup(fig, ax, save_figure = False):
 
     b = plot(fig, ax)
 
-    ax.set_ylabel('Time to progression')
+    ax.set_ylabel('Time to failure')
     ax.set_xlabel('Environment')
     # Set x ticks 1 - Train, 2 - Target
     ax.set_xticks([1, 2])
-    ax.set_xticklabels(['Train', 'Target'])
+    ax.set_xticklabels(['Augmented Train', 'Target'])
     ax.set_xlim(0.5, 2.5)
+    ax.set_ylim(0, 220)
     # fig.set_constrained_layout_pads(w_pad=10 / 72, h_pad=10 / 72, hspace=2 / 72, wspace=2 / 72)
     if save_figure:
-        fig.savefig(r'scripts/figures/plots/Figure_1_heterogeneity.pdf', transparent = True)
+        fig.savefig(r'scripts/figures/plots/Figure_4_d_slv.pdf', transparent = True)
 
     plt.show()
 
 
 def plot(fig, ax):
     #PC_files_list = [f'./Evaluations/train_6_physicell_evals/train_6_run_{i}.h5' for i in range(1,11)]
-    PC_files_list = [f'./Evaluations/1402_pcs_evals/run_{i}.h5' for i in range(1, 11)]
+    LV_files_list = [f'./Evaluations/1402_slvs_evals/SLvEnvEval__20250206_slv_1_{i}.h5' for i in range(1, 11)]
     sim_type_2 = ['PC' for i in range(500)]
     agent_name_2 = [i for i in range(1,11) for j in range(50) ]
 
     #LV_files_list = [f'Evaluations/train_6_lv_evals/LvEnvEval__agnt_20250109_2DLV_average_less_1_onehalf_day_{i}.h5' for i in range(1,11)]
-    LV_files_list = [f'./Evaluations/2002_pc_evals_of_slvs/run_{i}.h5' for
+    PC_files_list = [f'./Evaluations/2002_pc_evals_of_slvs/run_{i}.h5' for
                      i in range(1, 11)]
     sim_type = ['LV' for i in range(500)]
     agent_name = [i for i in range(1,11) for j in range(50) ]
@@ -106,5 +107,5 @@ if __name__ == '__main__':
     # setup pwd
     #os.chdir('/Users/saif/Desktop/Serhii/Projects/PhysiLearning')
     os.chdir('/home/saif/Projects/PhysiLearning')
-    fig, ax = plt.subplots(figsize=(200 / 72, 150 / 72), constrained_layout=True)
-    figure_setup(fig, ax, save_figure = False)
+    fig, ax = plt.subplots(figsize=(150 / 72, 150 / 72), constrained_layout=True)
+    figure_setup(fig, ax, save_figure = True)
