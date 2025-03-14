@@ -3,6 +3,7 @@ from physilearning.envs.base_env import BaseEnv
 from physilearning.reward import Reward
 from typing import Tuple
 import time
+from physilearning.envs.base_env import trunc_norm
 
 
 class KppEnv(BaseEnv):
@@ -73,25 +74,61 @@ class KppEnv(BaseEnv):
         #self.time_end = self.params['timestep_size'] * (self.params['num_timesteps'] - 1)
         #self.time_array = np.arange(self.params['num_timesteps']) * self.params['timestep_size']
 
-        self.radial_step_size = 1/self.env_specific_params['r_bins']
-        self.radius_array = np.linspace(0, 1, self.env_specific_params['r_bins'])
+        self.radial_step_size = (self.env_specific_params['r_max']-self.env_specific_params['r_min'])/(self.env_specific_params['r_bins']-1)
+        self.radius_array = np.linspace(self.env_specific_params['r_min'], self.env_specific_params['r_max'], self.env_specific_params['r_bins'])
         self.sensitive_population, self.resistant_population = None, None
         self.growth_fraction = 1
         self.death_fraction = 0
         self.current_sensitive_growth_rate = self.growth_rate[0]*self.growth_fraction
         self.current_treat_death_rate = self.death_rate_treat[0]*self.death_fraction
-
+        self.timestep_size = self.env_specific_params['timestep_size']
+        self.sensitive_population, self.resistant_population = None, None
         self.initialize_population()
 
+        # rewrite initial state and normalizations
+        self.initial_wt = self.density_to_number(self.sensitive_population)
+        self.initial_mut = self.density_to_number(self.resistant_population)
+        if self.normalize:
+            self.normalization_factor = self.normalize_to/(self.initial_wt + self.initial_mut)
+            self.initial_wt *= self.normalization_factor
+            self.initial_mut *= self.normalization_factor
+            self.threshold_burden = self.max_tumor_size * self.normalize_to
+            self.state = [self.initial_wt, self.initial_mut, 0]
+            self.trajectory[:,0] = self.state
+
+        self.density_trajectory = np.zeros((self.env_specific_params['r_bins'], self.max_time, 2))
+        self.density_trajectory[:,0,0] = self.sensitive_population
+        self.density_trajectory[:,0,1] = self.resistant_population
+
     def initialize_population(self):
+        prms = {}
+        for key in ['sensitive_colony_radius', 'peak_center', 'sigma']:
+            if isinstance(self.env_specific_params[key], str):
+                value = self.env_specific_params[key]
+                if '-' in value:
+                    low, high = (float(val) for val in value.split('-'))
+                    val = np.random.uniform(low, high)
+                elif 'pm' in value:
+                    mean = float(value.split('pm')[0])
+                    std = float(value.split('pm')[1])
+                    val = trunc_norm(mean, std, 3)
+                else:
+                    raise ValueError(f"Invalid value for {key}")
+            else:
+                val = self.env_specific_params[key]
+            prms[key] = val
+
         sensitive_initialization = self.initialization_sigmoid(self.radius_array,
-                                                               self.env_specific_params['sensitive_colony_radius'])
-        resistant_initialization = 1.0 * self.initialization_gaussian(self.radius_array, self.env_specific_params['peak_center'],
-                                                                      self.env_specific_params['sigma'])
+                                                               prms['sensitive_colony_radius'])
+        resistant_initialization = 1.0 * self.initialization_gaussian(self.radius_array, prms['peak_center'],
+                                                                      prms['sigma'])
         sensitive_initialization -= resistant_initialization
         self.sensitive_population = sensitive_initialization
         self.resistant_population = resistant_initialization
         return
+
+    def density_to_number(self, density):
+        return np.sum(density * 2 * np.pi * self.radius_array)
 
     @staticmethod
     def initialization_sigmoid(x, colony_radius):
@@ -140,10 +177,14 @@ class KppEnv(BaseEnv):
             # step time
             self.time += 1
             self.state[2] = action
-            self.state[0], self.state[1] = self.grow()
+            s,r = self.grow()
+            self.state[0] = s*self.normalization_factor
+            self.state[1] = r*self.normalization_factor
             self.burden = np.sum(self.state[0:2])
 
             self.trajectory[:, self.time] = self.state
+            self.density_trajectory[:, self.time, 0] = self.sensitive_population
+            self.density_trajectory[:, self.time, 1] = self.resistant_population
             # check if done
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
@@ -191,8 +232,21 @@ class KppEnv(BaseEnv):
         self.current_sensitive_growth_rate = self.growth_rate[0] * self.growth_fraction
         self.current_treat_death_rate = self.death_rate_treat[0] * self.death_fraction
         self.initialize_population()
+        self.initial_wt = np.sum(self.sensitive_population * 2 * np.pi * self.radius_array)
+        self.initial_mut = np.sum(self.resistant_population * 2 * np.pi * self.radius_array)
+        if self.normalize:
+            self.normalization_factor = self.normalize_to / (self.initial_wt + self.initial_mut)
+            self.initial_wt *= self.normalization_factor
+            self.initial_mut *= self.normalization_factor
+            self.threshold_burden = self.max_tumor_size * self.normalize_to
+        self.state = [self.initial_wt, self.initial_mut, 0]
+        self.trajectory[:, 0] = self.state
         self.time = 0
-        self.state = [np.sum(self.sensitive_population)*self.radial_step_size, np.sum(self.resistant_population)*self.radial_step_size, 0]
+
+        self.density_trajectory = np.zeros((self.env_specific_params['r_bins'], self.max_time, 2))
+        self.density_trajectory[:, 0, 0] = self.sensitive_population
+        self.density_trajectory[:, 0, 1] = self.resistant_population
+
         self.burden = np.sum(self.state[0:2])
         self.reward = 0
         if self.observation_type == 'number':
@@ -209,7 +263,7 @@ class KppEnv(BaseEnv):
     def grow(self):
 
         # 1. update growth and death rate
-        step = 1 / self.env_specific_params['ramp_time']
+        step = self.timestep_size / self.env_specific_params['ramp_time']
 
         if self.state[2]:
             if self.growth_fraction > 0:
@@ -255,16 +309,16 @@ class KppEnv(BaseEnv):
         random_death_sensitive = self.death_rate[0] * self.sensitive_population
         random_death_resistant = self.death_rate[1] * self.resistant_population
 
-        self.sensitive_population = (self.sensitive_population +
+        self.sensitive_population = (self.sensitive_population + self.timestep_size *
                                      (laplacian_sensitive + growth_sensitive - treat_death_sensitive - random_death_sensitive))
-        self.resistant_population = (self.resistant_population +
+        self.resistant_population = (self.resistant_population + self.timestep_size *
                                      (laplacian_resistant + growth_resistant - random_death_resistant))
 
         self.sensitive_population[self.sensitive_population < 1.e-4] = 0
         self.resistant_population[self.resistant_population < 1.e-4] = 0
 
-        pop_sens = np.sum(self.sensitive_population)*self.radial_step_size
-        pop_res = np.sum(self.resistant_population)*self.radial_step_size
+        pop_sens = self.density_to_number(self.sensitive_population)
+        pop_res = self.density_to_number(self.resistant_population)
 
         return pop_sens, pop_res
 
@@ -279,11 +333,11 @@ if __name__ == "__main__": # pragma: no cover
     treat = []
     wt = []
     mut = []
-    treat.append(env.state[2])
-    wt.append(env.state[0])
-    mut.append(env.state[1])
+    #treat.append(env.state[2])
+    #wt.append(env.state[0])
+    #mut.append(env.state[1])
     while not env.done:
-        act = env.action_space.sample()
+        act = 1 #env.action_space.sample()
         o, r, t, tr, i = env.step(act)
         print(r)
         print(env.state)
@@ -294,8 +348,8 @@ if __name__ == "__main__": # pragma: no cover
     fig, ax = plt.subplots(1, 1)
     tot = np.array(wt) + np.array(mut)
     # normalize to 1
-    wt = np.array(wt)/tot[0]
-    mut = np.array(mut)/tot[0]
+    wt = np.array(wt)#/tot[0]
+    mut = np.array(mut)#/tot[0]
     ax.plot(wt, label='wt')
     ax.plot(mut, label='mut')
     ax.fill_between(range(len(treat)), 1, 1.1, where=treat, color='orange', alpha=0.3,
@@ -305,3 +359,4 @@ if __name__ == "__main__": # pragma: no cover
     ax.set_yscale('linear')
     ax.legend()
     ax.set_xlim(0, 50)
+    ax.set_yscale('log')

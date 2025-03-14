@@ -131,10 +131,14 @@ class Evaluation:
             self.trajectory = self.env.get_attr('trajectory')[0]
             if self.env.get_attr('observation_type')[0] == 'image':
                 self.image_trajectory = self.env.get_attr('image_trajectory')[0]
+            if self.env.name =='KppEnv':
+                self.density_trajectory = self.env.get_attr('density_trajectory')[0]
         else:
             self.trajectory = self.env.unwrapped.trajectory
             if self.env.unwrapped.observation_type == 'image':
                 self.image_trajectory = self.env.unwrapped.image_trajectory
+            if self.env.unwrapped.name == 'KppEnv':
+                self.density_trajectory = self.env.unwrapped.density_trajectory
 
         with open(config_file, 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
@@ -206,12 +210,16 @@ class Evaluation:
                     self.trajectory = self.env.get_attr('trajectory')[0]
                     if self.env.get_attr('observation_type')[0] == 'image':
                         self.image_trajectory = self.env.get_attr('image_trajectory')[0]
+                    if self.env.name == 'KppEnv':
+                        self.density_trajectory = self.env.get_attr('density_trajectory')[0]
                     obs, reward, term, info = self.env.step(action)
                     trunc = info[0]['TimeLimit.truncated']
                 else:
                     self.trajectory = self.env.unwrapped.trajectory
                     if self.env.unwrapped.observation_type == 'image':
                         self.image_trajectory = self.env.unwrapped.image_trajectory
+                    if self.env.unwrapped.name == 'KppEnv':
+                        self.density_trajectory = self.env.unwrapped.density_trajectory
 
                     obs, reward, term, trunc, info = self.env.step(action)
                 done = term or trunc
@@ -262,6 +270,12 @@ class Evaluation:
         else:
             df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
             df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
+            if self.env.name == 'KppEnv':
+                # create a directory with save name if doesnt exist
+                if not os.path.exists(save_name):
+                    os.makedirs(save_name)
+                # save the density trajectory
+                np.save(f'./{save_name}/density_{episode}.npy', self.density_trajectory)
         return None
 
     @staticmethod
