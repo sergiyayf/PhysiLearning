@@ -106,7 +106,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
             else:
                 action = 0
     elif at_type == 'pulse':
-        if environment.time == 0:
+        if environment.time == 2000:
             action = 1
         else:
             action = 0
@@ -131,7 +131,7 @@ class Evaluation:
             self.trajectory = self.env.get_attr('trajectory')[0]
             if self.env.get_attr('observation_type')[0] == 'image':
                 self.image_trajectory = self.env.get_attr('image_trajectory')[0]
-            if self.env.name =='KppEnv':
+            if self.env.get_attr('name')[0] =='KppEnv':
                 self.density_trajectory = self.env.get_attr('density_trajectory')[0]
         else:
             self.trajectory = self.env.unwrapped.trajectory
@@ -210,7 +210,7 @@ class Evaluation:
                     self.trajectory = self.env.get_attr('trajectory')[0]
                     if self.env.get_attr('observation_type')[0] == 'image':
                         self.image_trajectory = self.env.get_attr('image_trajectory')[0]
-                    if self.env.name == 'KppEnv':
+                    if self.env.get_attr('name')[0] == 'KppEnv':
                         self.density_trajectory = self.env.get_attr('density_trajectory')[0]
                     obs, reward, term, info = self.env.step(action)
                     trunc = info[0]['TimeLimit.truncated']
@@ -223,6 +223,8 @@ class Evaluation:
 
                     obs, reward, term, trunc, info = self.env.step(action)
                 done = term or trunc
+                if done:
+                    print('Term, trunc', term, trunc)
                 score += reward
 
             final_score[episode] = score
@@ -270,12 +272,20 @@ class Evaluation:
         else:
             df = pd.DataFrame(np.transpose(self.trajectory), columns=['Type 0', 'Type 1', 'Treatment'])
             df.to_hdf(f'{save_name}.h5', key=f'run_{episode}')
-            if self.env.name == 'KppEnv':
-                # create a directory with save name if doesnt exist
-                if not os.path.exists(save_name):
-                    os.makedirs(save_name)
-                # save the density trajectory
-                np.save(f'./{save_name}/density_{episode}.npy', self.density_trajectory)
+            if self._is_venv():
+                if self.env.get_attr('name')[0] == 'KppEnv':
+                    # create a directory with save name if doesnt exist
+                    if not os.path.exists(save_name):
+                        os.makedirs(save_name)
+                    # save the density trajectory
+                    np.save(f'./{save_name}/density_{episode}.npy', self.density_trajectory)
+            else:
+                if self.env.unwrapped.name == 'KppEnv':
+                    # create a directory with save name if doesnt exist
+                    if not os.path.exists(save_name):
+                        os.makedirs(save_name)
+                    # save the density trajectory
+                    np.save(f'./{save_name}/density_{episode}.npy', self.density_trajectory)
         return None
 
     @staticmethod

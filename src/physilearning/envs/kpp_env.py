@@ -81,6 +81,7 @@ class KppEnv(BaseEnv):
         self.death_fraction = 0
         self.current_sensitive_growth_rate = self.growth_rate[0]*self.growth_fraction
         self.current_treat_death_rate = self.death_rate_treat[0]*self.death_fraction
+        self.min_death_during_treat = self.env_specific_params['min_death_during_treat']
         self.timestep_size = self.env_specific_params['timestep_size']
         self.sensitive_population, self.resistant_population = None, None
         self.initialize_population()
@@ -96,7 +97,7 @@ class KppEnv(BaseEnv):
             self.state = [self.initial_wt, self.initial_mut, 0]
             self.trajectory[:,0] = self.state
 
-        self.density_trajectory = np.zeros((self.env_specific_params['r_bins'], self.max_time, 2))
+        self.density_trajectory = np.zeros((self.env_specific_params['r_bins'], self.max_time+1, 2))
         self.density_trajectory[:,0,0] = self.sensitive_population
         self.density_trajectory[:,0,1] = self.resistant_population
 
@@ -117,26 +118,34 @@ class KppEnv(BaseEnv):
             else:
                 val = self.env_specific_params[key]
             prms[key] = val
+        # account for correct radial distribution of resistant cells
+        prms['peak_center'] = np.sqrt((prms['sensitive_colony_radius']-1)*prms['peak_center'])
 
-        sensitive_initialization = self.initialization_sigmoid(self.radius_array,
-                                                               prms['sensitive_colony_radius'])
-        resistant_initialization = 1.0 * self.initialization_gaussian(self.radius_array, prms['peak_center'],
-                                                                      prms['sigma'])
+        sensitive_initialization = self.initialization_sigmoid(prms['sensitive_colony_radius'])
+        resistant_initialization = 1.0 * self.initialization_gaussian(prms['peak_center'], prms['sigma'])
         sensitive_initialization -= resistant_initialization
         self.sensitive_population = sensitive_initialization
         self.resistant_population = resistant_initialization
         return
 
     def density_to_number(self, density):
-        return np.sum(density * 2 * np.pi * self.radius_array)
+        num = 2*np.pi*np.dot(density,self.radius_array)
+        # add noise
+        num += np.random.normal(0, 0.05*num)
+        if num < 0:
+            num = 0
+        return num
 
     @staticmethod
-    def initialization_sigmoid(x, colony_radius):
-        return 1 / (1 + np.exp(200 * (x - colony_radius)))
+    def initialization_sigmoid(colony_radius):
+        x = np.linspace(0, 699, 700)
+        return 1 / (1 + np.exp(0.05 * (x - colony_radius)))
+        #return 1 / (1 + np.exp(0.06 * (x - colony_radius)))
 
     @staticmethod
-    def initialization_gaussian(x, peak_center, sigma):
-        return 1. * np.exp(-((x - peak_center) ** 2) / (2 * sigma ** 2))
+    def initialization_gaussian(peak_center, sigma):
+        x = np.linspace(0, 699, 700)
+        return .01 * np.exp(-((x - peak_center) ** 2) / (2 * sigma ** 2))
 
     def calculate_no_flux_laplacian(self, radial_population_array, density_dep_diffusion_coefficient):
         """
@@ -190,7 +199,7 @@ class KppEnv(BaseEnv):
                 self.state = [0, 0, 0]
 
             # get the reward
-            reward += self.get_reward()
+        reward += self.get_reward()
 
         info = {}
         if self.observation_type == 'number':
@@ -240,14 +249,33 @@ class KppEnv(BaseEnv):
             self.initial_mut *= self.normalization_factor
             self.threshold_burden = self.max_tumor_size * self.normalize_to
         self.state = [self.initial_wt, self.initial_mut, 0]
+        self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
         self.trajectory[:, 0] = self.state
         self.time = 0
+        self.done = False
 
-        self.density_trajectory = np.zeros((self.env_specific_params['r_bins'], self.max_time, 2))
+        self.density_trajectory = np.zeros((self.env_specific_params['r_bins'], self.max_time+1, 2))
         self.density_trajectory[:, 0, 0] = self.sensitive_population
         self.density_trajectory[:, 0, 1] = self.resistant_population
 
         self.burden = np.sum(self.state[0:2])
+
+        for t in range(0, int(self.treatment_time_step/2)):
+            # step time
+            self.time += 1
+            self.state[2] = 0
+            s,r = self.grow()
+            self.state[0] = s*self.normalization_factor
+            self.state[1] = r*self.normalization_factor
+            self.burden = np.sum(self.state[0:2])
+
+            self.trajectory[:, self.time] = self.state
+            self.density_trajectory[:, self.time, 0] = self.sensitive_population
+            self.density_trajectory[:, self.time, 1] = self.resistant_population
+            # check if done
+            if self.state[0] <= 0 and self.state[1] <= 0:
+                self.state = [0, 0, 0]
+
         self.reward = 0
         if self.observation_type == 'number':
             if self.see_resistance:
@@ -306,6 +334,8 @@ class KppEnv(BaseEnv):
         growth_resistant = self.growth_rate[1] * self.resistant_population * (1 - total_density)
 
         treat_death_sensitive = self.current_treat_death_rate * self.sensitive_population
+        if self.death_fraction > 0:
+            treat_death_sensitive += self.min_death_during_treat
         random_death_sensitive = self.death_rate[0] * self.sensitive_population
         random_death_resistant = self.death_rate[1] * self.resistant_population
 
@@ -333,14 +363,15 @@ if __name__ == "__main__": # pragma: no cover
     treat = []
     wt = []
     mut = []
-    #treat.append(env.state[2])
-    #wt.append(env.state[0])
-    #mut.append(env.state[1])
+    treat.append(env.state[2])
+    wt.append(env.state[0])
+    mut.append(env.state[1])
+
     while not env.done:
         act = 1 #env.action_space.sample()
         o, r, t, tr, i = env.step(act)
-        print(r)
-        print(env.state)
+        #print(r)
+        #print(env.state)
         treat.append(env.state[2])
         wt.append(env.state[0])
         mut.append(env.state[1])
@@ -350,13 +381,26 @@ if __name__ == "__main__": # pragma: no cover
     # normalize to 1
     wt = np.array(wt)#/tot[0]
     mut = np.array(mut)#/tot[0]
-    ax.plot(wt, label='wt')
-    ax.plot(mut, label='mut')
-    ax.fill_between(range(len(treat)), 1, 1.1, where=treat, color='orange', alpha=0.3,
+    time = 2*np.arange(len(treat))
+    ax.plot(time,wt, label='wt')
+    ax.plot(time,mut, label='mut')
+    ax.fill_between(time, 1, 1.1, where=treat, color='orange', alpha=0.3,
                     label='treatment')
     ax.set_xlabel('time')
     ax.set_ylabel('number')
     ax.set_yscale('linear')
     ax.legend()
     ax.set_xlim(0, 50)
-    ax.set_yscale('log')
+    ax.set_yscale('linear')
+
+    # plot initial density profile
+    fig, ax = plt.subplots(1, 1)
+    sens_density = env.density_trajectory[:,0,0]
+    res_density = env.density_trajectory[:,0,1]
+    ax.plot(env.radius_array, sens_density, label='initial')
+    ax.plot(env.radius_array, res_density, label='initial', c='r')
+
+    sens_density = env.density_trajectory[:, 10000, 0]
+    ax.plot(env.radius_array, sens_density, label='final')
+    ax.legend()
+

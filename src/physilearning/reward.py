@@ -8,6 +8,12 @@ class Reward:
 
         if self.reward_shaping_flag == 'ttp':
             reward = 1
+        elif self.reward_shaping_flag == 'ttp_lin':
+            x = np.sum(obs[0:2])/np.sum(trajectory[0:2, 0])
+            if np.sum(obs[0:2]) < 1:
+                reward = 1
+            else:
+                reward = 1 - (x-1)/1.5
         elif self.reward_shaping_flag == 'dont_treat':
             if obs[2] == 0 and np.sum(obs[0:2]) < 1.5*np.sum(trajectory[0:2, 0]):
                 reward = 1

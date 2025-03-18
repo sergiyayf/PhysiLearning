@@ -8,8 +8,8 @@ global:
 job:
   nodes: 1
   ntasks: 1
-  mem-per-task: 2000
-  cpus-per-task: 2
+  mem-per-task: 100
+  cpus-per-task: 12
   time: '24:00:00'
   agent_buffer: 0
   recurrent:
@@ -26,20 +26,20 @@ learning:
     model_kwargs:
       n_steps: 64
       batch_size: 64
-      n_epochs: 10
+      n_epochs: 5
       verbose: 1
       ent_coef: 0.01
-      clip_range: 0.01
+      clip_range: 0.02
       learning_rate: 5.e-4
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
-          pi: [ 64, 64 ]
-          vf: [ 64, 64 ]
-    total_timesteps: 1.0e+6
+          pi: [64, 64]
+          vf: [64, 64]
+    total_timesteps: 1.0e+5
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '2025_kpp_test_training'
+    model_save_prefix: '2025_03_17_kpp_updated_hpr'
     load:
       enable_loading: 0
       last_model: 0
@@ -53,7 +53,7 @@ env:
   wrap: False
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
-    n_stack: 64
+    n_stack: 4
     channels_order: 'last' # use first for image learning and last for number
 
   # general simulation settings
@@ -61,20 +61,20 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   see_prev_action: True
-  max_tumor_size: 3.0 # 2006 #3086 #100000 # 110000 # 4000
-  max_time: 10000 #122 # 120
+  max_tumor_size: 2.5 # 2006 #3086 #100000 # 110000 # 4000
+  max_time: 48400 #122000 #122 # 120
   initial_wt: 3584 #39771 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
   initial_mut: 5 # 4 # 'random' - used for meltd atserhii train
-  growth_rate_wt: 0.2 #0.096 #'0.096pm0.001 ' # 0.079 - meltd. 0.116 - current
-  growth_rate_mut: 0.2 #0.12 # 0.076 - meltd. 0.23 - current
-  death_rate_wt: 0.01
-  death_rate_mut: 0.01
-  treat_death_rate_wt: 0.6 #3.59 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
+  growth_rate_wt: 0.302 #0.096 #'0.096pm0.001 ' # 0.079 - meltd. 0.116 - current
+  growth_rate_mut: 0.302 #0.12 # 0.076 - meltd. 0.23 - current
+  death_rate_wt: 1.43e-6
+  death_rate_mut: 1.43e-6
+  treat_death_rate_wt: 0.21 #3.59 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
-  treatment_time_step: 100
+  treatment_time_step: 800 #4000
   reward_shaping: 'ttp' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
   normalize: True
-  normalize_to: 100
+  normalize_to: 1
   image_size: 124 #84 #124
   patient_sampling:
     enable: 0
@@ -153,30 +153,31 @@ env:
     initial_growth_reduction: 0.25
 
   KppEnv:
-    r_bins: 200
-    sensitive_colony_radius: .250
-    peak_center: '.1-.24'
-    sigma: 0.001
-    ramp_time: 2
-    diffusion_coefficient: 0.001
+    r_bins: 700
+    sensitive_colony_radius: '210-260'
+    peak_center: '10-220' #'0.1-0.6'
+    sigma: '20-40'
+    ramp_time: 4.5
+    diffusion_coefficient: 0.00053
     density_exponent_sensitive: 1.0
     density_exponent_resistant: 1.0
-    timestep_size: 0.01
+    timestep_size: 0.005 #0.001 #0.001
     r_min: 0.0
-    r_max: 1.0
+    r_max: 2.0
+    min_death_during_treat: 0.01
 
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: '2025_kpp_test_training'
+  model_prefix: 'ttp_1'
   step_to_load: '_best_reward'
-  save_name: 'mtd'
+  save_name: ''
   # evaluation settings
-  fixed_AT_protocol: 1
-  at_type: 'mtd' #'effective_high_1.10_low_1.20' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.0
-  num_episodes: 50
+  fixed_AT_protocol: 0
+  at_type: 'fixed' #'effective_high_1.10_low_1.20' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.8
+  num_episodes: 10
   evaluate_on: 'KppEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False
