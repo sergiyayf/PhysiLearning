@@ -106,7 +106,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
             else:
                 action = 0
     elif at_type == 'pulse':
-        if environment.time == 2000:
+        if environment.time == 400:
             action = 1
         else:
             action = 0
@@ -202,6 +202,7 @@ class Evaluation:
             done = False
             score = 0
             while not done:
+                print(obs)
                 if fixed_therapy:
                     action = fixed_at(self.env, **fixed_therapy_kwargs)
                 else:

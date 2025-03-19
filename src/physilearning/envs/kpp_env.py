@@ -243,14 +243,7 @@ class KppEnv(BaseEnv):
         self.initialize_population()
         self.initial_wt = np.sum(self.sensitive_population * 2 * np.pi * self.radius_array)
         self.initial_mut = np.sum(self.resistant_population * 2 * np.pi * self.radius_array)
-        if self.normalize:
-            self.normalization_factor = self.normalize_to / (self.initial_wt + self.initial_mut)
-            self.initial_wt *= self.normalization_factor
-            self.initial_mut *= self.normalization_factor
-            self.threshold_burden = self.max_tumor_size * self.normalize_to
-        self.state = [self.initial_wt, self.initial_mut, 0]
-        self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
-        self.trajectory[:, 0] = self.state
+
         self.time = 0
         self.done = False
 
@@ -259,14 +252,14 @@ class KppEnv(BaseEnv):
         self.density_trajectory[:, 0, 1] = self.resistant_population
 
         self.burden = np.sum(self.state[0:2])
-
+        self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
         for t in range(0, int(self.treatment_time_step/2)):
             # step time
             self.time += 1
             self.state[2] = 0
             s,r = self.grow()
-            self.state[0] = s*self.normalization_factor
-            self.state[1] = r*self.normalization_factor
+            self.state[0] = s#*self.normalization_factor
+            self.state[1] = r#*self.normalization_factor
             self.burden = np.sum(self.state[0:2])
 
             self.trajectory[:, self.time] = self.state
@@ -275,6 +268,17 @@ class KppEnv(BaseEnv):
             # check if done
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
+
+        if self.normalize:
+            self.normalization_factor = self.normalize_to / (self.state[0] + self.state[1])
+            self.initial_wt *= self.normalization_factor
+            self.initial_mut *= self.normalization_factor
+            self.threshold_burden = self.max_tumor_size * self.normalize_to
+
+        self.trajectory *= self.normalization_factor
+        self.state[0] = self.state[0]*self.normalization_factor
+        self.state[1] = self.state[1]*self.normalization_factor
+        self.trajectory[:, 0] = [self.initial_wt, self.initial_mut, 0]
 
         self.reward = 0
         if self.observation_type == 'number':

@@ -9,7 +9,7 @@ job:
   nodes: 1
   ntasks: 1
   mem-per-task: 100
-  cpus-per-task: 12
+  cpus-per-task: 4
   time: '24:00:00'
   agent_buffer: 0
   recurrent:
@@ -22,14 +22,14 @@ learning:
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
-    average_steps: 1
+    average_steps: 8
     model_kwargs:
-      n_steps: 64
+      n_steps: 256
       batch_size: 64
-      n_epochs: 5
+      n_epochs: 4
       verbose: 1
-      ent_coef: 0.01
-      clip_range: 0.02
+      ent_coef: 0.005
+      clip_range: 0.01
       learning_rate: 5.e-4
       policy_kwargs:
 #        features_extractor_kwargs:
@@ -37,20 +37,20 @@ learning:
         net_arch:
           pi: [64, 64]
           vf: [64, 64]
-    total_timesteps: 1.0e+5
+    total_timesteps: 2.0e+5
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '2025_03_17_kpp_updated_hpr'
+    model_save_prefix: 'first'
     load:
-      enable_loading: 0
+      enable_loading: 1
       last_model: 0
-      saved_model_name: './Training/SavedModels/20241211_pretrain_vfs_with_action_observe_treat_best_reward'
+      saved_model_name: './Training/SavedModels/2025_03_18_ttp_2_best_reward'
 
 # Environment configuration
 env:
   # general env settings
   type: 'KppEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
   n_envs: 1
-  wrap: False
+  wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
   wrapper_kwargs: #
     n_stack: 4
@@ -61,8 +61,8 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   see_prev_action: True
-  max_tumor_size: 2.5 # 2006 #3086 #100000 # 110000 # 4000
-  max_time: 48400 #122000 #122 # 120
+  max_tumor_size: 3.0 # 2006 #3086 #100000 # 110000 # 4000
+  max_time: 36400 #122 # 120
   initial_wt: 3584 #39771 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
   initial_mut: 5 # 4 # 'random' - used for meltd atserhii train
   growth_rate_wt: 0.302 #0.096 #'0.096pm0.001 ' # 0.079 - meltd. 0.116 - current
@@ -71,7 +71,7 @@ env:
   death_rate_mut: 1.43e-6
   treat_death_rate_wt: 0.21 #3.59 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
   treat_death_rate_mut: 0.00 # 0.0
-  treatment_time_step: 800 #4000
+  treatment_time_step: 800
   reward_shaping: 'ttp' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
   normalize: True
   normalize_to: 1
@@ -154,14 +154,14 @@ env:
 
   KppEnv:
     r_bins: 700
-    sensitive_colony_radius: '210-260'
-    peak_center: '10-220' #'0.1-0.6'
-    sigma: '20-40'
+    sensitive_colony_radius: 240 #'210-260'
+    peak_center: 170 #'1-209' #'0.1-0.6'
+    sigma: 30 #'20-40'
     ramp_time: 4.5
     diffusion_coefficient: 0.00053
     density_exponent_sensitive: 1.0
     density_exponent_resistant: 1.0
-    timestep_size: 0.005 #0.001 #0.001
+    timestep_size: 0.005
     r_min: 0.0
     r_max: 2.0
     min_death_during_treat: 0.01
@@ -171,13 +171,13 @@ eval:
   most_recent: 0
   from_file: 1
   path: './'
-  model_prefix: 'ttp_1'
+  model_prefix: '2025_03_18_lin_2_2'
   step_to_load: '_best_reward'
   save_name: ''
   # evaluation settings
   fixed_AT_protocol: 0
-  at_type: 'fixed' #'effective_high_1.10_low_1.20' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
-  threshold: 1.8
-  num_episodes: 10
+  at_type: 'zhang_et_al' #'effective_high_1.10_low_1.20' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
+  threshold: 1.0
+  num_episodes: 5
   evaluate_on: 'KppEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False
