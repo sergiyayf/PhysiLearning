@@ -22,28 +22,28 @@ learning:
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
-    average_steps: 8
+    average_steps: 12
     model_kwargs:
-      n_steps: 256
-      batch_size: 64
+      n_steps: 512
+      batch_size: 128
       n_epochs: 4
       verbose: 1
-      ent_coef: 0.005
+      ent_coef: 0.02
       clip_range: 0.01
-      learning_rate: 5.e-4
+      learning_rate: 1.0e-3
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
           pi: [64, 64]
           vf: [64, 64]
-    total_timesteps: 2.0e+5
+    total_timesteps: 3.0e+5
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: 'first'
+    model_save_prefix: '2025_03_19_mela_ttp_hist_load'
     load:
       enable_loading: 1
       last_model: 0
-      saved_model_name: './Training/SavedModels/2025_03_18_ttp_2_best_reward'
+      saved_model_name: './Training/SavedModels/2025_03_19_mela_ttp_hist_best_reward'
 
 # Environment configuration
 env:
@@ -154,9 +154,9 @@ env:
 
   KppEnv:
     r_bins: 700
-    sensitive_colony_radius: 240 #'210-260'
-    peak_center: 170 #'1-209' #'0.1-0.6'
-    sigma: 30 #'20-40'
+    sensitive_colony_radius: '210-260'
+    peak_center: '1-209' #'0.1-0.6'
+    sigma: '20-40'
     ramp_time: 4.5
     diffusion_coefficient: 0.00053
     density_exponent_sensitive: 1.0
@@ -170,8 +170,8 @@ env:
 eval:
   most_recent: 0
   from_file: 1
-  path: './'
-  model_prefix: '2025_03_18_lin_2_2'
+  path: './data/ttp_1903_overnights_6'
+  model_prefix: '2025_03_19_ttp_6'
   step_to_load: '_best_reward'
   save_name: ''
   # evaluation settings
