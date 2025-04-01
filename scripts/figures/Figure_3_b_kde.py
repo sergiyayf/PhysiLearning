@@ -20,7 +20,7 @@ os.chdir('/media/saif/1A6A95E932FFC943/14022025_run_of_0602_lv_evaluations_paper
 run = 1
 with h5py.File(f'./pcdl_2.h5', 'r') as f:
     runs = list(f.keys())
-    times = list(f['run_3'].keys())
+    times = list(f['run_2'].keys())
 
 timer = 0
 times = times[:-55]
@@ -41,6 +41,8 @@ for time in times:
         'radial_position': radial_positions
     })], ignore_index=True)
 
+# save df_radial_positions to hdf5
+df_radial_positions.to_hdf('Figure_3_b_kde.h5', key='df_radial_positions')
 # Plot KDE of radial positions for all times
 fig, ax = plt.subplots(figsize=(500/72,150/72), constrained_layout=True)
 sns.kdeplot(data=df_radial_positions, x='radial_position', hue='time', common_norm=True, ax=ax, palette=color, linewidth=2.0)
@@ -53,6 +55,6 @@ cbar = plt.colorbar(sm, ax=ax)
 ax.legend([])
 # set format for y label to scientific notation
 ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-fig.savefig('/home/saif/Projects/PhysiLearning/scripts/figures/plots/Figure_3_kde_plot.pdf', transparent = True)
+#fig.savefig('/home/saif/Projects/PhysiLearning/scripts/figures/plots/Figure_3_kde_plot.pdf', transparent = True)
 plt.show()
 

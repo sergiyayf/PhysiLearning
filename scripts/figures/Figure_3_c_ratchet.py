@@ -61,6 +61,10 @@ if __name__ == '__main__':
 
 
     # plot position over time
+    # save positions for plotting
+    position = np.array(position)
+    # np.save('../../../figuresrlpaper/data/Figure3_ratchet.npy', position)
+
     fig, ax = plt.subplots(figsize=(150/72, 150/72), constrained_layout=True)
     colors = ['red' if x == 1 else 'blue' for x in is_at_front]
     ax.plot(np.arange(0, end_t), position, c='b', marker='o')
@@ -73,7 +77,7 @@ if __name__ == '__main__':
     ax.set_xlabel('Time')
     ax.set_ylabel('Resistance distance to front')
 
-    fig.savefig('/home/saif/Projects/PhysiLearning/scripts/figures/plots/Figure_3_ratchet.pdf', transparent=True)
+    #fig.savefig('/home/saif/Projects/PhysiLearning/scripts/figures/plots/Figure_3_ratchet.pdf', transparent=True)
     # with h5py.File(f'./sim_full_data/pcdl_data_job_14948503_port_0.h5', 'r') as f:
     #     runs = list(f.keys())
     #     times = list(f['run_3'].keys())

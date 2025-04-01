@@ -49,7 +49,7 @@ def plot(fig, ax):
 
     #SLV_files_list = [f'Evaluations/train_6_on_slvenv/SLvEnvEval__slv_197_number_noise_on_treat20250109_2DLV_average_less_1_onehalf_day_{i}.h5' for i in range(1,11)]
     SLV_files_list = [
-        f'./Evaluations/1402_lvs_evals_2/SLvEnvEval__only_rgr_mv_20250206_lv_1_{i}.h5'
+        f'./Evaluations/1402_lvs_evals_2/SLvEnvEval__20250206_lv_1_{i}.h5'
         for i in range(1, 11)]
     sim_type_3 = ['SLV' for i in range(10*runs)]
     agent_name_3 = [i for i in range(1,11) for j in range(runs) ]
@@ -102,4 +102,4 @@ if __name__ == '__main__':
     os.chdir('/home/saif/Projects/PhysiLearning')
     fig, ax = plt.subplots(figsize=(500 / 72, 130 / 72), constrained_layout=True)
     plot(fig, ax)
-    fig.savefig(r'./scripts/figures/plots/Figure_4_b_agents_lv_slv_pc.pdf', transparent = True)
+    #fig.savefig(r'./scripts/figures/plots/Figure_4_b_agents_lv_slv_pc.pdf', transparent = True)

@@ -64,6 +64,7 @@ def plot_finals():
         theta = [median_params[key] for key in params_fit.keys()]
         sol = ODEModel(theta=theta, treatment_schedule=treatment_schedule, y0 = [data.x[0], data.y[0]],
                     params=params_fit, consts=consts_fit, tmax=len(treatment_schedule), dt=1).simulate()
+        np.save(f'../figuresrlpaper/data/Figure_1_ode_at50_solution.npy', sol)
         ax.plot(data.time, sol[:, 0], color='#5E82B8', lw=2, ls="-.", markersize=12, label="X (Median)")
         ax.plot(data.time, sol[:, 1], color='#EBAA42', lw=2, ls="-.", markersize=14, label="Y (Median)")
         # ax.plot(data.time, sol[:, 0] + sol[:, 1], color="k", lw=2, ls="-.", markersize=14, label="Total (Median)")

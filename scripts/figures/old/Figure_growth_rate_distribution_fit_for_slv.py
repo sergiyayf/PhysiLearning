@@ -95,6 +95,10 @@ if __name__ == '__main__':
     popt_quad, pcov_quad = curve_fit(quadratic, dists[0:20], mean[0:20])
     print('Quad fit: ', popt_quad)
 
+
+    df = pd.DataFrame({'dists': dists, 'mean': mean, 'std': std})
+    df.to_hdf('/home/saif/Projects/figuresrlpaper/data/SI_data/SI_figure_growth_rate_distribution_fit_df.h5', key='df')
+
     fig, ax = plt.subplots()
     ax.errorbar(dists, mean, yerr=std, fmt='o', label='Mean and std')
     # ax.plot(dists, trunc_linear(dists, *popt), label='Fit')

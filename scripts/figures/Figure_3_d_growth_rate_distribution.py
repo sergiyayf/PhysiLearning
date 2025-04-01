@@ -57,6 +57,7 @@ if __name__ == '__main__':
     #df = pd.read_pickle('for_velocity_plotting_10_nc_runs_df.pkl')
     df_all['transition_rate'] = df_all['transition_rate']*720
     # plot cell positions, color map by growth rate
+    df.to_hdf('../figuresrlpaper/Figure_3_d_growth_rates.h5', key='df')
     fig, ax = plt.subplots(figsize=(150/72,150/72), constrained_layout=True)
     sns.scatterplot(x='x', y='y', data=df, hue='transition_rate', ax=ax, s=3)
     # plot colorbar instead of legend
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     cb.formatter.set_powerlimits((0, 0))
     cb.update_ticks()
     ax.axis('equal')
-    fig.savefig('./scripts/figures/plots/Figure_3_d_growth_rate_distribution.pdf', transparent = True)
+    #fig.savefig('./scripts/figures/plots/Figure_3_d_growth_rate_distribution.pdf', transparent = True)
 
     plt.show()
 

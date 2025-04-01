@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import matplotlib as mpl
+
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
@@ -88,68 +89,34 @@ def plot( df, title, scale='linear', truncate=False, ax=None, c='black'):
     # ax.legend()
     return ax
 
+
+def setup_figure(save_figure=False, dtf=None, save_name=None):
+    fig, ax = plt.subplots(figsize=(200 / 72, 70 / 72), constrained_layout=True)
+    plot(dtf, f'LV', scale='linear', truncate=False, ax=ax, c='red')
+    ax.set_xlim(0, 720)
+    ax.set_ylim(0, 1.5)
+    # divide x ticks by 4
+    ticks = ax.get_xticks()
+    tick_labels = [int(t / 4) for t in ticks]
+    ax.set_xticklabels(tick_labels)
+    ax.set_yscale('linear')
+    if save_figure:
+        fig.savefig(f'./scripts/figures/plots/{save_name}.pdf', transparent=True)
+    return fig, ax
+
 if __name__ == '__main__':
 
     os.chdir('/home/saif/Projects/PhysiLearning')
 
-    fig, ax = plt.subplots(figsize=(200 / 72, 70 / 72), constrained_layout=True)
-    # worst agnt 9 run 0 PC run 2 LV
-    # best agnt 4 run 0 PC run 3 LV
     df = pd.read_hdf(f'./Evaluations/1402_pcs_evals/run_9.h5', key=f'run_0')
-    # df = pd.read_hdf(f'./Evaluations/1402_lvs_evals/LvEnvEval__20250206_lv_1_4.h5', key=f'run_3')
-    plot(df, f'LV', scale='linear', truncate=False, ax = ax, c='red')
-    ax.set_xlim(0, 720)
-    ax.set_ylim(0, 1.5)
-    # divide x ticks by 4
-    ticks = ax.get_xticks()
-    tick_labels = [int(t/4) for t in ticks]
-    ax.set_xticklabels(tick_labels)
-    ax.set_yscale('linear')
-    fig.savefig('./scripts/figures/plots/Figure_2_trajectory_PC_worst_agent.pdf', transparent = True)
+    setup_figure(save_figure=False, dtf=df, save_name='Figure_2_trajectory_PC_worst_agent')
 
-    fig, ax = plt.subplots(figsize=(200 / 72, 70 / 72), constrained_layout=True)
-    # worst agnt 9 run 0 PC run 2 LV
-    # best agnt 4 run 0 PC run 3 LV
     df = pd.read_hdf(f'./Evaluations/1402_pcs_evals/run_4.h5', key=f'run_0')
-    # df = pd.read_hdf(f'./Evaluations/1402_lvs_evals/LvEnvEval__20250206_lv_1_4.h5', key=f'run_3')
-    plot(df, f'LV', scale='linear', truncate=False, ax=ax, c='red')
-    ax.set_xlim(0, 720)
-    ax.set_ylim(0, 1.5)
-    # divide x ticks by 4
-    ticks = ax.get_xticks()
-    tick_labels = [int(t / 4) for t in ticks]
-    ax.set_xticklabels(tick_labels)
-    ax.set_yscale('linear')
-    fig.savefig('./scripts/figures/plots/Figure_2_trajectory_PC_best_agent.pdf', transparent=True)
+    setup_figure(save_figure=False, dtf=df, save_name='Figure_2_trajectory_PC_best_agent')
 
-    fig, ax = plt.subplots(figsize=(200 / 72, 70 / 72), constrained_layout=True)
-    # worst agnt 9 run 0 PC run 2 LV
-    # best agnt 4 run 0 PC run 3 LV
-    # df = pd.read_hdf(f'./Evaluations/1402_pcs_evals/run_9.h5', key=f'run_0')
     df = pd.read_hdf(f'./Evaluations/1402_lvs_evals/LvEnvEval__20250206_lv_1_9.h5', key=f'run_2')
-    plot(df, f'LV', scale='linear', truncate=False, ax=ax, c='red')
-    ax.set_xlim(0, 720)
-    ax.set_ylim(0, 1.5)
-    # divide x ticks by 4
-    ticks = ax.get_xticks()
-    tick_labels = [int(t / 4) for t in ticks]
-    ax.set_xticklabels(tick_labels)
-    ax.set_yscale('linear')
-    fig.savefig('./scripts/figures/plots/Figure_2_trajectory_LV_worst_agent.pdf', transparent=True)
+    setup_figure(save_figure=False, dtf=df, save_name='Figure_2_trajectory_LV_worst_agent')
 
-    fig, ax = plt.subplots(figsize=(200 / 72, 70 / 72), constrained_layout=True)
-    # worst agnt 9 run 0 PC run 2 LV
-    # best agnt 4 run 0 PC run 3 LV
-    # df = pd.read_hdf(f'./Evaluations/1402_pcs_evals/run_9.h5', key=f'run_0')
     df = pd.read_hdf(f'./Evaluations/1402_lvs_evals/LvEnvEval__20250206_lv_1_4.h5', key=f'run_3')
-    plot(df, f'LV', scale='linear', truncate=False, ax=ax, c='red')
-    ax.set_xlim(0, 720)
-    ax.set_ylim(0, 1.5)
-    # divide x ticks by 4
-    ticks = ax.get_xticks()
-    tick_labels = [int(t / 4) for t in ticks]
-    ax.set_xticklabels(tick_labels)
-    ax.set_yscale('linear')
-    fig.savefig('./scripts/figures/plots/Figure_2_trajectory_LV_best_agent.pdf', transparent=True)
-    #
+    setup_figure(save_figure=False, dtf=df, save_name='Figure_2_trajectory_LV_best_agent')
     plt.show()

@@ -207,6 +207,8 @@ if __name__ == '__main__':
 
     qpopt, qpcov = curve_fit(quadratic, rads[0:16], mean_projections.values[0:16], sigma=std_projs[0:16])
     print('quadratic: ', qpopt)
+    vel_df = pd.DataFrame({'rads': np.array(rads), 'mean_projections': np.array(mean_projections), 'std_projs': np.array(std_projs)})
+    vel_df.to_hdf('/home/saif/Projects/figuresrlpaper/data/SI_data/velocity_fit_SI_figure_data.h5', key='vel_df')
     ax.plot(rads, trunc_quadratic(rads, *qpopt), 'g-', label='fit quadratic')
     ax.errorbar(rads, trunc_quadratic(rads,*qpopt), yerr=3*trunc_quadratic(rads,*qpopt)+3, fmt='o', color='green', ecolor='green', elinewidth=3, capsize=0)
     #
@@ -242,7 +244,7 @@ if __name__ == '__main__':
     fig.colorbar(sc)
 
     # save all_cells_df to pickle for efficient loading
-    all_cells_df.to_pickle('/home/saif/Projects/PhysiLearning/data/for_velocity_plotting_50_nc_runs_df.pkl')
+    #all_cells_df.to_pickle('/home/saif/Projects/PhysiLearning/data/for_velocity_plotting_50_nc_runs_df.pkl')
     plt.show()
 
     # R: 1.3945e+02 6.2623e-04
