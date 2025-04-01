@@ -9,7 +9,7 @@ description = 'A package for reinforcement learning in adaptive therapy'
 name = 'physilearning'
 year = '2024'
 url = ''
-version = '0.5.0'
+version = '0.6.0'
 
 setup(
     name=name,
