@@ -154,6 +154,11 @@ if __name__ == '__main__':
     # average the projections by same bin
     mean_projections = pd.concat(avg_projections, axis=1).mean(axis=1)
     median_projections = pd.concat(median_projections, axis=1).median(axis=1)
+    # do 25 and 75 percentile
+    # mean_projections = pd.concat(avg_projections, axis=1).mean(axis=1)
+    # mean_projections = pd.concat(avg_projections, axis=1).median(axis=1)
+    quantile_25_projections = pd.concat(avg_projections, axis=1).quantile(0.25, axis=1)
+    quantile_75_projections = pd.concat(avg_projections, axis=1).quantile(0.75, axis=1)
 
     # calculate the standard deviation by gaussian rule
     std_projs = pd.concat(std_projs, axis=1)
@@ -207,7 +212,9 @@ if __name__ == '__main__':
 
     qpopt, qpcov = curve_fit(quadratic, rads[0:16], mean_projections.values[0:16], sigma=std_projs[0:16])
     print('quadratic: ', qpopt)
-    vel_df = pd.DataFrame({'rads': np.array(rads), 'mean_projections': np.array(mean_projections), 'std_projs': np.array(std_projs)})
+    vel_df = pd.DataFrame({'rads': np.array(rads), 'mean_projections': np.array(mean_projections), 'std_projs': np.array(std_projs),
+                           'median_projections': np.array(median_projections), 'quantile_25_projections': np.array(quantile_25_projections),
+                           'quantile_75_projections': np.array(quantile_75_projections)})
     vel_df.to_hdf('/home/saif/Projects/figuresrlpaper/data/SI_data/velocity_fit_SI_figure_data.h5', key='vel_df')
     ax.plot(rads, trunc_quadratic(rads, *qpopt), 'g-', label='fit quadratic')
     ax.errorbar(rads, trunc_quadratic(rads,*qpopt), yerr=3*trunc_quadratic(rads,*qpopt)+3, fmt='o', color='green', ecolor='green', elinewidth=3, capsize=0)
