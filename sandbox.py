@@ -185,48 +185,29 @@ def main():
 # df = pd.read_hdf('./Evaluations/LvEnvEval__e_110-090.h5', key=f'run_1')
 # plot(df, f'LV', scale='linear', truncate=False, ax = ax, c='red')
 #
-fig, axs = plt.subplots(10,10)
-for i in range(1,11):
-    for j in range(0,10):
-        # fig, ax = plt.subplots()
+fig, ax = plt.subplots()
+df = pd.read_hdf('./data/GRAPE_important_data/SLV_training/Evaluations/SLvEnvEval_test_at50_agent_slv20250206_slv_1_9.h5', key='run_0')
+# scatter first 4 points with skip 6, plot the rest
+probing = 28
+skip = 1
+ax.scatter(df.index[:probing:skip]/4, df['Type 0'][:probing:skip], color='blue', label='Type 0', s=2)
+ax.scatter(df.index[:probing:skip]/4, df['Type 1'][:probing:skip], color='red', label='Type 1', s=2)
+# plot the rest with line
 
-        #df = pd.read_hdf(f'./Evaluations/lv_weekend_1001_trains/train_5/LvEnvEval__agnt_20250110_2DLV_improve_try_{i}.h5', key=f'run_{j}')
-        # df = pd.read_hdf(f'./Evaluations/0901_onehalf_day_6/LvEnvEval__agnt_20250109_2DLV_average_less_1_onehalf_day_{i}.h5', key=f'run_{j}')
-        df = pd.read_hdf(f'./Evaluations/train_6_physicell_evals/train_6_run_{i}.h5', key=f'run_{j}')
-        #df = pd.read_hdf(f'./Evaluations/train_6_on_slvenv/SLvEnvEval__slv_20250109_2DLV_average_less_1_onehalf_day_{i}.h5', key=f'run_{j}')
-        # df = pd.read_hdf(f'./Evaluations/1402_lvs_evals/LvEnvEval__20250206_lv_1_{i}.h5',
-        #df=pd.read_hdf(f'./Evaluations/1402_pcs_evals/run_{i}.h5',
-        # df = pd.read_hdf(f'./Evaluations/2002_pc_evals_of_slvs/run_{i}.h5',
-        #                 key=f'run_{j}')
-        ax = axs[i-1, j]
-        plot(df, f'PC Daily', scale='linear', truncate=False, ax = ax, c='red')
-        # calculate average totatl cell count
-        tot = df['Type 0'] + df['Type 1']
-        tot = tot[tot > 0]
-        print(np.mean(tot))
-        max_sens = np.max(df['Type 0'])
-        min_sens = np.min(df['Type 0'])
-        min_tot = np.min(tot)
-        ax.set_title(f'C: {np.mean(tot):.2f}, A: {min_tot:.2f}')
-        ax.set_xlim(0, 120)
-        #fig.savefig(f'./plots/lucky_4_pc_{i}.pdf')
-        #ax.set_yscale('log')
-        fig.suptitle(f'pc')
-#
-# for i in range(6):
-#     fig, ax = plt.subplots()
-#     df = pd.read_hdf('./Evaluations/pcs_09_6/PcEnvEval_run20250109_2DLV_average_less_1_onehalf_day_4.h5', key=f'run_{i}')
-#     plot(df, f'PC', scale='linear', truncate=False, ax = ax, c='red')
-#     ax.set_xlim(0, 100)
-#ax.set_yscale('log')
-# ax[0].set_xlim(0, 300)
-# for i in range(1,6):
-#     df = pd.read_hdf(f'./Evaluations/ptb{i}.h5', key=f'run_0')
-#     plot(df, f'perturbed {i}', scale='linear', truncate=False, ax = ax[i], c='red')
-#     ax[i].set_xlim(0, 300)
-# fig, ax = plt.subplots()
-# df = pd.read_hdf('./Evaluations/SLvEnvEval_r9t820241202_2DLV_8.h5', key=f'run_1')
-# plot(df, f'original', scale='linear', truncate=False, ax = ax, c='red')
-# ax.set_xlim(0, 300)
-#main()
+ax.plot(df.index[probing::skip]/4, df['Type 0'][probing::skip], color='blue', label='Type 0')
+ax.plot(df.index[probing::skip]/4, df['Type 1'][probing::skip], color='red', label='Type 1')
+ax.plot(df.index[probing::skip]/4, df['Type 0'][probing::skip] + df['Type 1'][probing::skip], color='k', label='Total')
+
+fig, ax = plt.subplots()
+df = pd.read_hdf('./data/GRAPE_important_data/SLV_training/Evaluations/SLvEnvEval_test_at100_agent_slv20250206_slv_1_9.h5', key='run_0')
+probing = 28
+skip = 1
+ax.scatter(df.index[:probing:skip]/4, df['Type 0'][:probing:skip], color='blue', label='Type 0', s=2)
+ax.scatter(df.index[:probing:skip]/4, df['Type 1'][:probing:skip], color='red', label='Type 1', s=2)
+# plot the rest with line
+
+ax.plot(df.index[probing::skip]/4, df['Type 0'][probing::skip], color='blue', label='Type 0')
+ax.plot(df.index[probing::skip]/4, df['Type 1'][probing::skip], color='red', label='Type 1')
+ax.plot(df.index[probing::skip]/4, df['Type 0'][probing::skip] + df['Type 1'][probing::skip], color='k', label='Total')
+
 plt.show()
