@@ -60,7 +60,7 @@ class Trainer:
     def __init__(self, config_file: str = 'config.yaml'):
         with open(config_file, 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
-            print('Parsing config file {0}'.format(config_file))
+            #print('Parsing config file {0}'.format(config_file))
         self.env = None
         self.config_file = config_file
         self.model = None
@@ -110,7 +110,7 @@ class Trainer:
 
         # Single environment
         if self.n_envs == 1:
-            print('Training on single environment')
+            #print('Training on single environment')
             if self.wrap:
                 if self.wrapper == 'VecFrameStack':
                     env = DummyVecEnv([make_env(EnvClass, env_kwargs=env_kwargs, config_file=self.config_file)])

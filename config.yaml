@@ -24,13 +24,13 @@ learning:
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
     average_steps: 12
     model_kwargs:
-      n_steps: 512
-      batch_size: 128
+      n_steps: 128
+      batch_size: 32
       n_epochs: 4
       verbose: 1
       ent_coef: 0.02
       clip_range: 0.01
-      learning_rate: 1.0e-3
+      learning_rate: 1.0e-4
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
@@ -39,16 +39,16 @@ learning:
           vf: [64, 64]
     total_timesteps: 3.0e+5
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '2025_03_19_mela_ttp_hist_load'
+    model_save_prefix: '2025_09_kpp_lv_model_test_1'
     load:
-      enable_loading: 1
+      enable_loading: 0
       last_model: 0
       saved_model_name: './Training/SavedModels/2025_03_19_mela_ttp_hist_best_reward'
 
 # Environment configuration
 env:
   # general env settings
-  type: 'KppEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
+  type: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv' # 'SLvEnv' # 'MeltdEnv'
   n_envs: 1
   wrap: True
   wrapper: 'VecFrameStack' # 'DummyVecEnv' # 'VecFrameStack' # 'SubprocVecEnv'
@@ -61,15 +61,16 @@ env:
   action_type: 'discrete' # 'discrete' # 'continuous'
   see_resistance: False
   see_prev_action: True
+  know_day: True
   max_tumor_size: 3.0 # 2006 #3086 #100000 # 110000 # 4000
-  max_time: 36400 #122 # 120
-  initial_wt: 3584 #39771 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
-  initial_mut: 5 # 4 # 'random' - used for meltd atserhii train
-  growth_rate_wt: 0.302 #0.096 #'0.096pm0.001 ' # 0.079 - meltd. 0.116 - current
-  growth_rate_mut: 0.302 #0.12 # 0.076 - meltd. 0.23 - current
-  death_rate_wt: 1.43e-6
-  death_rate_mut: 1.43e-6
-  treat_death_rate_wt: 0.21 #3.59 #0.075 #0.108 #0.118 #2.076 #'2.076pm0.005' # 2.388 - meltd. 2.57 - current
+  max_time: 24000 #122 # 120
+  initial_wt: 0.9997 #39771 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
+  initial_mut: 0.0003 # 4 # 'random' - used for meltd atserhii train
+  growth_rate_wt: 0.171 # LV fit: 0.090
+  growth_rate_mut: 0.418 # LV fit: 0.2
+  death_rate_wt: 0.0068 # LV fit: 0.01
+  death_rate_mut: 0.0068 # LV fit: 0.01
+  treat_death_rate_wt: 0.139 # LV fit: 0.081
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 800
   reward_shaping: 'ttp' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
@@ -83,74 +84,17 @@ env:
 
   # LV environment settings
   LvEnv:
-    carrying_capacity: 18000 #120000 # '48300pm1210'
-    competition_wt: 4.78 # 1.732 - fixed treat #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
+    carrying_capacity: 7.963 #120000 # '48300pm1210'
+    competition_wt: 5.56 # LV fit: 6
     competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
-    growth_function_flag: 'instant_fixed_treat_with_noise' #'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
-    image_sampling_type: 'dense' #'mutant_position' # 'dense' # 'random'
-    k: 0.57
-    t0: 1.12
+    growth_function_flag: 'ramped_with_noise' #'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
+    timestep_size: 0.0025
+    ramp_time_up: 7.31 # LV fit 4.0
+    ramp_time_down: 2.255 # LV fit 4.0
+    min_death_during_treat: 0.014
+    on_treat_threshold: 1.4
+    off_treat_threshold: 1.9
 
-  SLvEnv:
-    carrying_capacity: 18000 #120000 # '48300pm1210'
-    competition_wt: 4.78 # 1.732 - fixed treat #1.772 #1.802 - 1.3# 1.795 # 1.323 #2400.0
-    competition_mut: 1.0 # 3.408 #3.299 - 1.3 # 3.319 # 0.0 #0.336
-    growth_function_flag: 'instant_fixed_treat_with_noise' #'instant_fixed_treat_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
-    image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 207 #70.5 # 92
-    cell_volume: 2494 #2144
-    growth_layer: 150 # 110
-    dimension: 2
-    growth_fit: 'quadratic'
-  # note this is not yet functional
-  PcEnv:
-    domain_size: 2050 #1250
-    cpus_per_sim: 10
-    transport_type: 'ipc://' # Linux: 'ipc://' # Windows: 'tcp://'
-    transport_address: '/tmp/' # for raven use '/ptmp/saif/', for mela use '/tmp/'. For windows use '5555'
-    xml:
-      use_2D:
-          parent_nodes: ['domain']
-          value: 'true'
-      number_of_susceptible_cells:
-          parent_nodes: ['user_parameters']
-          value: 2500
-      number_of_resistant_cells:
-          parent_nodes: ['user_parameters']
-          value: 5
-      enable_chkpt:
-          parent_nodes: ['user_parameters']
-          value: 'false'
-      filename_chkpt:
-          parent_nodes: ['user_parameters']
-          value:  './../paper_presims/patient_285/final' #'./../3D_presim/output/output00000112' # './../paper_presims/patient_80/final'
-      treatment_time_step:
-          parent_nodes: ['user_parameters']
-          value: 720
-      treatment_strength:
-          parent_nodes: ['user_parameters']
-          value: 6.0e2 # 3.0e2 or 6.0e2
-
-  # LatticeBased environment settings
-  GridEnv:
-    cell_positioning: 'surround_mutant' # 'surround_mutant' # 'random' # 'load'
-
-  MeltdEnv:
-    growth_function_flag: 'delayed_with_noise' # 'instant', 'delayed', 'delayed_with_noise'
-    image_sampling_type: 'mutant_position' #'mutant_position' # 'dense' # 'random'
-    mutant_distance_to_front: 705.7 #150
-    cell_area: 976
-    growth_layer: 150
-    dimension: 2
-
-  ArrEnv:
-    carrying_capacity: 43600
-    arrest_rate: 0.82 #0.55
-    recover_rate: 0.14 #0.126
-    arresting_time_threshold: 2
-    recovering_time_threshold: 3
-    dying_time_threshold: 2
-    initial_growth_reduction: 0.25
 
   KppEnv:
     r_bins: 700
@@ -169,15 +113,15 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 1
+  from_file: 0
   path: './data/ttp_1903_overnights_6'
   model_prefix: '2025_03_19_ttp_6'
   step_to_load: '_best_reward'
-  save_name: ''
+  save_name: 'mtd_test2'
   # evaluation settings
-  fixed_AT_protocol: 0
+  fixed_AT_protocol: 1
   at_type: 'zhang_et_al' #'effective_high_1.10_low_1.20' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 1.0
   num_episodes: 5
-  evaluate_on: 'KppEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
+  evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False

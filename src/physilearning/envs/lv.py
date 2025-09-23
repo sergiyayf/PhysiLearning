@@ -56,6 +56,7 @@ class LvEnv(BaseEnv):
         patient_id: int | list = 0,
         see_prev_action: bool = False,
         see_resistance: bool = False,
+        know_day: bool = False,
         env_specific_params: dict = {},
         **kwargs,
     ) -> None:
@@ -67,9 +68,10 @@ class LvEnv(BaseEnv):
                          treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
                          treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
-                         see_prev_action=see_prev_action, see_resistance=see_resistance
+                         see_prev_action=see_prev_action, see_resistance=see_resistance, know_day=know_day,
+                         env_specific_params=env_specific_params
                          )
-
+        self.env_specific_params = env_specific_params
         self.capacity_non_normalized = env_specific_params.get('carrying_capacity', 6500)
         # Normalizazion
         if self.normalize:
@@ -87,6 +89,7 @@ class LvEnv(BaseEnv):
 
         self.growth_function_flag = env_specific_params.get('growth_function_flag', 'delayed')
 
+        self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time/self.treatment_time_step) + 1))
         self.trajectory[:, 0] = self.state
 
         self.image_sampling_type = env_specific_params.get('image_sampling_type', 'random')
@@ -99,6 +102,16 @@ class LvEnv(BaseEnv):
         self.k = env_specific_params.get('k', 0.1)
         self.t0 = env_specific_params.get('t0', 100)
         self.time_on_treatment = 0
+        self.day = 0
+        self.timestep_size = self.env_specific_params['timestep_size']
+        self.min_death_during_treat = env_specific_params.get('min_death_during_treat', 0.01)
+        self.growth_fraction = 1
+        self.death_fraction = 0
+        self.current_sensitive_growth_rate = self.growth_rate[0] * self.growth_fraction
+        self.current_treat_death_rate = self.death_rate_treat[0] * self.death_fraction
+        self.time_off_treatment = 100
+        self.on_treat_threshold = env_specific_params.get('on_treat_threshold', 2)
+        self.off_treat_threshold = env_specific_params.get('off_treat_threshold', 2)
 
     def _set_patient_specific_competition(self, patient_id):
         self.competition = [self.config['patients'][patient_id]['LvEnv']['competition_wt'],
@@ -176,6 +189,12 @@ class LvEnv(BaseEnv):
 
         # grow_tumor
         reward = 0
+        if self.day == 5 or (self.day > 5 and (self.day - 5) % 7 == 0):
+            self.treatment_time_step = int(self.config['env']['treatment_time_step'] * 1.5)
+            self.day +=3
+        else:
+            self.treatment_time_step = self.config['env']['treatment_time_step']
+            self.day += 2
 
         for t in range(0, self.treatment_time_step):
             # step time
@@ -185,10 +204,10 @@ class LvEnv(BaseEnv):
             self.state[1] = self.grow(1, 0, self.growth_function_flag)
             self.burden = np.sum(self.state[0:2])
 
-            if action:
-                self.time_on_treatment += 1
-            else:
-                self.time_on_treatment = 0
+            #if action:
+            #    self.time_on_treatment += 1
+            #else:
+            #    self.time_on_treatment = 0
 
             # record trajectory
             #self.state[2] = action
@@ -198,8 +217,8 @@ class LvEnv(BaseEnv):
             if self.state[0] <= 0 and self.state[1] <= 0:
                 self.state = [0, 0, 0]
 
-            # get the reward
-            reward += self.get_reward()
+        # get the reward
+        reward += self.get_reward()
 
         self.current_rew += reward
 
@@ -212,6 +231,8 @@ class LvEnv(BaseEnv):
                 obs = [np.sum(self.state[0:2])]
             if self.see_prev_action:
                 obs = np.append(obs, action)
+            if self.know_day:
+                obs = np.append(obs, self.day)
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(action)
             self.image_trajectory[:, :, int(self.time/self.treatment_time_step)] = self.image[0, :, :]
@@ -234,7 +255,7 @@ class LvEnv(BaseEnv):
                 reward = (self.current_rew/self.mtd_rew-1)*100
             else:
                 reward = 0
-
+        # print('Obs: ', obs)
         return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):
@@ -255,6 +276,7 @@ class LvEnv(BaseEnv):
 
         self.state = [self.initial_wt, self.initial_mut, self.initial_drug]
         self.time = 0
+        self.day = 1
         self.time_on_treatment = 0
         self.current_rew = 0
         self.done = False
@@ -269,6 +291,8 @@ class LvEnv(BaseEnv):
                 obs = [np.sum(self.state[0:2])]
             if self.see_prev_action:
                 obs = np.append(obs, 0)
+            if self.know_day:
+                obs = np.append(obs, self.day)
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(self.initial_drug)
             self.image_trajectory = np.zeros(
@@ -347,6 +371,57 @@ class LvEnv(BaseEnv):
                             self.growth_rate[i] * self.death_rate[i]) - self.state[2] * self.death_rate_treat[i] * \
                            self.state[i] / (1 + np.exp(-self.k * (self.time_on_treatment - self.t0)))
         # one time step delay in treatment effect
+        elif flag == 'ramped' or flag == 'ramped_with_noise':
+            # 1. update growth and death rate
+            step_up = self.timestep_size / self.env_specific_params['ramp_time_up']
+            step_down = self.timestep_size / self.env_specific_params['ramp_time_down']
+
+            if self.state[2] == 1:
+                if self.time_off_treatment > 0:
+                    self.time_off_treatment = 0
+                self.time_on_treatment += self.timestep_size
+            else:
+                if self.time_on_treatment > 0:
+                    self.time_on_treatment = 0
+                self.time_off_treatment += self.timestep_size
+
+            if ((self.state[2] and (self.time_on_treatment > self.on_treat_threshold))
+                    or (self.state[2] == 0 and (self.time_off_treatment < self.off_treat_threshold))):
+                if self.growth_fraction > 0:
+                    self.growth_fraction -= step_down#*self.time_on_treatment
+                    if self.growth_fraction < 0:
+                        self.growth_fraction = 0
+                else:
+                    self.death_fraction += step_down#*self.time_on_treatment
+                    if self.death_fraction > 1:
+                        self.death_fraction = 1
+            else:
+                if self.death_fraction > 0:
+                    self.death_fraction -= step_up#*self.time_off_treatment
+                    if self.death_fraction < 0:
+                        self.death_fraction = 0
+                else:
+                    self.growth_fraction += step_up#*self.time_off_treatment
+                    if self.growth_fraction > 1:
+                        self.growth_fraction = 1
+
+            # 2- update step
+            self.current_sensitive_growth_rate = self.growth_rate[0] * self.growth_fraction
+            self.current_treat_death_rate = self.death_rate_treat[0] * self.death_fraction
+            self.current_growth_rate = [self.current_sensitive_growth_rate, self.growth_rate[1]]
+            self.current_death_rate_treat = [self.current_treat_death_rate, self.death_rate_treat[1]]
+
+            if self.death_fraction > 0:
+                treat = [1,0]
+            else:
+                treat = [0,0]
+
+            new_pop_size = self.state[i] * \
+                           (1 + self.timestep_size*self.current_growth_rate[i] *
+                            (1 - (self.state[i] + self.state[j] * self.competition[j]) / self.capacity) -
+                            self.current_death_rate_treat[i]*treat[i] * self.timestep_size -
+                            self.death_rate[i] * self.timestep_size) - treat[i]*self.min_death_during_treat*self.timestep_size
+
         elif flag == 'delayed' or flag == 'delayed_with_noise':
             treat = self.state[2]
             if self.state[2] == 0:
@@ -382,15 +457,16 @@ class LvEnv(BaseEnv):
         else:
             raise NotImplementedError
 
-        if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+        if new_pop_size < 1.e-4:
             new_pop_size = 0
-        if flag == 'instant_with_noise' or flag == 'instant_fixed_treat_with_noise' or flag == 'delayed_with_noise':
+        if (flag == 'instant_with_noise' or flag == 'instant_fixed_treat_with_noise'
+                or flag == 'delayed_with_noise') or flag == 'ramped_with_noise':
 
             rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
             if np.abs(rand) > 0.05 * new_pop_size:
                 rand = 0.05 * new_pop_size * np.sign(rand)
             new_pop_size += rand
-        if new_pop_size < 10 * self.normalization_factor and self.death_rate_treat[i] * self.state[2] > 0:
+        if new_pop_size < 1.e-4:
             new_pop_size = 0
         return new_pop_size
 

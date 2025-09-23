@@ -56,6 +56,7 @@ class KppEnv(BaseEnv):
         patient_id: int | list = 0,
         see_resistance: bool = False,
         see_prev_action: bool = False,
+        know_day: bool = False,
         env_specific_params: dict = {},
         **kwargs,
     ) -> None:
@@ -67,7 +68,7 @@ class KppEnv(BaseEnv):
                          treat_death_rate_wt=treat_death_rate_wt, treat_death_rate_mut=treat_death_rate_mut,
                          treatment_time_step=treatment_time_step, reward_shaping_flag=reward_shaping_flag,
                          normalize=normalize, normalize_to=normalize_to, image_size=image_size, patient_id=patient_id,
-                         see_resistance=see_resistance, see_prev_action=see_prev_action,
+                         see_resistance=see_resistance, see_prev_action=see_prev_action, know_day=know_day,
                          env_specific_params=env_specific_params,
                          )
         self.env_specific_params = env_specific_params
@@ -85,6 +86,8 @@ class KppEnv(BaseEnv):
         self.timestep_size = self.env_specific_params['timestep_size']
         self.sensitive_population, self.resistant_population = None, None
         self.initialize_population()
+        self.day = 0
+        print('Know day: ', self.know_day)
 
         # rewrite initial state and normalizations
         self.initial_wt = self.density_to_number(self.sensitive_population)
@@ -182,6 +185,13 @@ class KppEnv(BaseEnv):
 
         # grow_tumor
         reward = 0
+        # check which day it is to update treatment time step. every day 5 + 7*n day do double treatment time step
+        if self.day == 5 or (self.day > 5 and (self.day - 5) % 7 == 0):
+            self.treatment_time_step = int(self.config['env']['treatment_time_step'] * 1.5)
+            self.day +=3
+        else:
+            self.treatment_time_step = self.config['env']['treatment_time_step']
+            self.day += 2
         for t in range(0, self.treatment_time_step):
             # step time
             self.time += 1
@@ -209,6 +219,8 @@ class KppEnv(BaseEnv):
                 obs = [np.sum(self.state[0:2])]
             if self.see_prev_action:
                 obs = np.append(obs, action)
+            if self.know_day:
+                obs = np.append(obs, self.day)
         elif self.observation_type == 'image' or self.observation_type == 'multiobs':
             self.image = self._get_image(action)
             self.image_trajectory[:, :, int(self.time / self.treatment_time_step)] = self.image[0, :, :]
@@ -232,7 +244,7 @@ class KppEnv(BaseEnv):
         terminate = self.terminate()
         truncate = self.truncate()
         self.done = terminate or truncate
-
+        print('Obs: ', obs)
         return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):
@@ -253,21 +265,21 @@ class KppEnv(BaseEnv):
 
         self.burden = np.sum(self.state[0:2])
         self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time) + 1))
-        for t in range(0, int(self.treatment_time_step/2)):
-            # step time
-            self.time += 1
-            self.state[2] = 0
-            s,r = self.grow()
-            self.state[0] = s#*self.normalization_factor
-            self.state[1] = r#*self.normalization_factor
-            self.burden = np.sum(self.state[0:2])
-
-            self.trajectory[:, self.time] = self.state
-            self.density_trajectory[:, self.time, 0] = self.sensitive_population
-            self.density_trajectory[:, self.time, 1] = self.resistant_population
-            # check if done
-            if self.state[0] <= 0 and self.state[1] <= 0:
-                self.state = [0, 0, 0]
+        # for t in range(0, int(self.treatment_time_step/2)):
+        #     # step time
+        #     self.time += 1
+        #     self.state[2] = 0
+        #     s,r = self.grow()
+        #     self.state[0] = s#*self.normalization_factor
+        #     self.state[1] = r#*self.normalization_factor
+        #     self.burden = np.sum(self.state[0:2])
+        #
+        #     self.trajectory[:, self.time] = self.state
+        #     self.density_trajectory[:, self.time, 0] = self.sensitive_population
+        #     self.density_trajectory[:, self.time, 1] = self.resistant_population
+        #     # check if done
+        #     if self.state[0] <= 0 and self.state[1] <= 0:
+        #         self.state = [0, 0, 0]
 
         if self.normalize:
             self.normalization_factor = self.normalize_to / (self.state[0] + self.state[1])
@@ -281,6 +293,7 @@ class KppEnv(BaseEnv):
         self.trajectory[:, 0] = [self.initial_wt, self.initial_mut, 0]
 
         self.reward = 0
+        self.day = 1
         if self.observation_type == 'number':
             if self.see_resistance:
                 obs = self.state[0:2]
@@ -288,7 +301,8 @@ class KppEnv(BaseEnv):
                 obs = [np.sum(self.state[0:2])]
             if self.see_prev_action:
                 obs = np.append(obs, 0)
-
+            if self.know_day:
+                obs = np.append(obs, self.day)
 
         return obs, {}
 

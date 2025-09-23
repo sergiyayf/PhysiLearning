@@ -51,6 +51,7 @@ class BaseEnv(Env):
         action_type: str = 'discrete',
         see_resistance: bool = False,
         see_prev_action: bool = False,
+        know_day: bool = False,
         max_tumor_size: float = 1000,
         max_time: int = 3000,
         initial_wt: float = 45,
@@ -111,6 +112,7 @@ class BaseEnv(Env):
         self.action_type = action_type
         self.see_resistance = see_resistance
         self.see_prev_action = see_prev_action
+        self.know_day = know_day
         if self.action_type == 'discrete':
             self.action_space = Discrete(2)
         elif self.action_type == 'continuous':
@@ -147,6 +149,8 @@ class BaseEnv(Env):
             if self.see_prev_action:
                 num_obs+=1
             if see_resistance:
+                num_obs+=1
+            if self.know_day:
                 num_obs+=1
             self.observation_space = Box(low=0, high=self.threshold_burden, shape=(num_obs,))
 
@@ -200,6 +204,7 @@ class BaseEnv(Env):
                    action_type=config['env']['action_type'],
                    see_resistance=config['env']['see_resistance'],
                    see_prev_action=config['env']['see_prev_action'],
+                   know_day=config['env']['know_day'],
                    max_tumor_size=config['env']['max_tumor_size'],
                    max_time=config['env']['max_time'],
                    initial_wt=config['env']['initial_wt'],
