@@ -17,8 +17,9 @@ from simplified_lv import TumorGrowthModel
 
 def error_function(sen_simulation, res_simulation, sen_ground_truth, res_ground_truth):
     # Compute the absolute difference for S+R
-    sen_total_sum = np.sum((sen_simulation[1:] - sen_ground_truth[1:])**2)
-    res_total_sum = np.sum((res_simulation[1:] - res_ground_truth[1:])**2)
+    sen_total_sum = np.mean(np.sqrt((sen_simulation[:] - sen_ground_truth[:])**2))
+    res_total_sum = np.mean(np.sqrt((res_simulation[:] - res_ground_truth[:])**2))
+    #print('Sen error:', sen_total_sum, 'Res error:', res_total_sum)
     return sen_total_sum, res_total_sum
 
 
@@ -26,7 +27,7 @@ def run_simulation(initial_guess=[1,2,3], initial_condition=[0.99,0.01], exp_dat
     #growth_rate_sus, growth_rate_res, treat_sus = initial_guess
     # growth_rate_res, growth_rate_sus, random_death, death_treat_sus,
     # competition, ramp_time, min_treat
-    (growth_rate_sus, growth_rate_res, random_death, death_treat_sus, competition,
+    (growth_rate_sus, growth_rate_res, competition, random_death, death_treat_sus,
      ramp_time_up, ramp_time_down, carrying_capacity, min_treat,
      on_treat_threshold, off_treat_threshold) = initial_guess
     sus, res = [], []
@@ -80,11 +81,11 @@ def run_simulation(initial_guess=[1,2,3], initial_condition=[0.99,0.01], exp_dat
                 action = 0
 
         obs, reward, term, trunc, info = evaluation.env.step(action)
-
-        if i == 0 and exp_data is not None:
-            #evaluation.env.env.state[0] = exp_data[0][1]
-            evaluation.env.env.state[1] = exp_data[1][1]
-            obs[1] = exp_data[1][1]
+        #
+        # if i == 0 and exp_data is not None:
+        #     #evaluation.env.env.state[0] = exp_data[0][1]
+        #     evaluation.env.env.state[1] = exp_data[1][1]
+        #     obs[1] = exp_data[1][1]
         #print(f"Step {i+1}, Action: {action}, Observation: {obs}, Reward: {reward}")
         sus.append(obs[0])
         res.append(obs[1])
@@ -115,7 +116,7 @@ def get_data(path = '/home/saif/Projects/PhysiLearning/data/experimental_data_el
     ini_tot = data['sus'].iloc[0] + data['res'].iloc[0]
     data['sus'] /= ini_tot
     data['res'] /= ini_tot
-    return data['sus'].values, data['res'].values
+    return data['sus'].values[:9], data['res'].values[:9]
 
 
 def minimization_function(initial_guess):
@@ -187,14 +188,17 @@ def minimization_function(initial_guess):
 
 def fit_simulation():
     # params for sim_time = 28000
-    initial_guess = [0.17, 0.417, 0.0068, 0.14, 5.56, 7.32, 2.25, 7.96, 0.014, 1.4, 1.91]  # growth_rate_res, growth_rate_sus, random_death, death_treat_sus,
-    # fitted_params = [1.739e-01  6.759e-03  1.616e-01  6.222e+00  7.503e+00
-    #                   2.134e+00  7.596e+00  1.572e-02  1.475e+00  1.745e+00]
-    # params with res growht   1.70938296e-01 4.17564435e-01 6.80164249e-03 1.39281076e-01
-    #  5.56382183e+00 7.31752169e+00 2.25522011e+00 7.96293382e+00
-    #  1.43646694e-02 1.39999904e+00 1.91250523e+00
-    # competition, ramp_time, min_treat
-    bounds = [(0.01, 2.9), (0.01, 2.9), (0.00001, 2.5), (0.001, 2.9), (0.5, 20),
+    initial_guess = [0.2, 0.4, 4.0, 0.01, 0.15, 8.0, 2.5, 8.0, 0.02, 1.5, 2.0]
+
+    # fit: sus, res, rand, treat, comp, up, down, capacity, min_tr, del_on, del_off
+    # ini guess: [0.2, 0.5, 0.01, 0.15, 6.0, 8.0, 2.5, 8.0, 0.02, 1.5, 2.0]
+    # opt:  0.17755832 0.59949529 0.01063255 0.15297911 7.71573758 7.26500753
+    #  2.23749569 7.6092458  0.02006237 1.33749947 1.81038069
+    # no res no comp:
+    # 1.52333168e-01 1.00887479e-02 1.88428914e-01 5.51329535e+00
+    #  2.27782628e+00 1.36217490e+01 1.91365566e-02 1.40250242e+00
+    #  1.96225709e+00
+    bounds = [(0.01, 5.0), (0.01, 5.0), (0.01, 500.0), (0.00001, 5.0), (0.001, 5.0),
               (0.1, 10000), (0.1, 10000), (1,1000), (0.00001, 1.0),
               (0.0001, 10000), (0.0001, 10000)]  # bounds for growth_rate_res and death_treat_sus
 
@@ -207,6 +211,9 @@ def fit_simulation():
 
     print(result)
     print("Optimized parameters:", optimized_params)
+    # save the result
+    np.save('fit_simulation_mse_sus_res_comp_rand_treat_up_down_cap_mintr_delon_deloff.npy', optimized_params)
+    print("res, comp mse")
     #torch.save(result, 'fit_simulation_new_model.pth')
     return optimized_params
 

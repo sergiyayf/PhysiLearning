@@ -278,7 +278,10 @@ class LvEnv(BaseEnv):
         self.time = 0
         self.day = 1
         self.time_on_treatment = 0
+        self.time_off_treatment = 100
         self.current_rew = 0
+        self.growth_fraction = 1
+        self.death_fraction = 0
         self.done = False
 
         self.trajectory = np.zeros((np.shape(self.state)[0], int(self.max_time)+1))
@@ -306,16 +309,6 @@ class LvEnv(BaseEnv):
                 raise NotImplementedError
         else:
             raise NotImplementedError
-
-        # do day zero without treatment
-        # for tt in [0, 1]:
-        #     self.time += 1
-        #     self.state[0] = self.grow(0, 1, self.growth_function_flag)
-        #     self.state[1] = self.grow(1, 0, self.growth_function_flag)
-        #     self.burden = np.sum(self.state[0:2])
-        #     # record trajectory
-        #     # self.state[2] = action
-        #     self.trajectory[:, self.time] = self.state
         self.threshold_burden = self.max_tumor_size * (self.state[0]+self.state[1])
 
         if self.reward_shaping_flag == 'mtd_compare':
@@ -457,16 +450,16 @@ class LvEnv(BaseEnv):
         else:
             raise NotImplementedError
 
-        if new_pop_size < 1.e-4:
+        if new_pop_size < 1.e-5:
             new_pop_size = 0
         if (flag == 'instant_with_noise' or flag == 'instant_fixed_treat_with_noise'
                 or flag == 'delayed_with_noise') or flag == 'ramped_with_noise':
 
-            rand = np.random.normal(0, 0.01 * new_pop_size, 1)[0]
-            if np.abs(rand) > 0.05 * new_pop_size:
-                rand = 0.05 * new_pop_size * np.sign(rand)
+            rand = np.random.normal(0, 0.002 * new_pop_size, 1)[0]
+            if np.abs(rand) > 0.005 * new_pop_size:
+                rand = 0.005 * new_pop_size * np.sign(rand)
             new_pop_size += rand
-        if new_pop_size < 1.e-4:
+        if new_pop_size < 1.e-5:
             new_pop_size = 0
         return new_pop_size
 
