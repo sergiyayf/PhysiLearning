@@ -5,8 +5,8 @@ mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-df = pd.read_hdf('./Evaluations/LvEnvEval_t12025_09_kpp_good_lv_test_1.h5', key='run_0')
-skip = 400 # do every 400 frames, which represent 1 day
+df = pd.read_hdf('./Evaluations/KppEnvEval__test_kpp_at100.h5', key='run_2')
+skip = 800 # do every 400 frames, which represent 1 day
 sus = df['Type 0'].values[::skip]
 res = df['Type 1'].values[::skip]
 day = np.arange(len(sus))

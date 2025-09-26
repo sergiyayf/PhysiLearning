@@ -85,6 +85,7 @@ class KppEnv(BaseEnv):
         self.min_death_during_treat = self.env_specific_params['min_death_during_treat']
         self.timestep_size = self.env_specific_params['timestep_size']
         self.sensitive_population, self.resistant_population = None, None
+        self.carrying_capacity = self.env_specific_params['carrying_capacity']
         self.initialize_population()
         self.day = 0
         print('Know day: ', self.know_day)
@@ -126,6 +127,8 @@ class KppEnv(BaseEnv):
 
         sensitive_initialization = self.initialization_sigmoid(prms['sensitive_colony_radius'])
         resistant_initialization = 1.0 * self.initialization_gaussian(prms['peak_center'], prms['sigma'])
+        np.where(resistant_initialization < 0.0, 0.0, resistant_initialization)
+        np.where(sensitive_initialization < 0.0, 0.0, sensitive_initialization)
         sensitive_initialization -= resistant_initialization
         self.sensitive_population = sensitive_initialization
         self.resistant_population = resistant_initialization
@@ -134,21 +137,19 @@ class KppEnv(BaseEnv):
     def density_to_number(self, density):
         num = 2*np.pi*np.dot(density,self.radius_array)
         # add noise
-        num += np.random.normal(0, 0.05*num)
+        #num += np.random.normal(0, 0.05*num)
         if num < 0:
             num = 0
         return num
 
-    @staticmethod
-    def initialization_sigmoid(colony_radius):
-        x = np.linspace(0, 699, 700)
-        return 1 / (1 + np.exp(0.05 * (x - colony_radius)))
+    def initialization_sigmoid(self, colony_radius):
+        x = np.linspace(self.env_specific_params['r_min'], self.env_specific_params['r_max'], self.env_specific_params['r_bins'])
+        return self.carrying_capacity / (1 + np.exp(0.05 * (x - colony_radius)))
         #return 1 / (1 + np.exp(0.06 * (x - colony_radius)))
 
-    @staticmethod
-    def initialization_gaussian(peak_center, sigma):
-        x = np.linspace(0, 699, 700)
-        return .01 * np.exp(-((x - peak_center) ** 2) / (2 * sigma ** 2))
+    def initialization_gaussian(self, peak_center, sigma):
+        x = np.linspace(self.env_specific_params['r_min'], self.env_specific_params['r_max'], self.env_specific_params['r_bins'])
+        return self.carrying_capacity* 0.1 * np.exp(-((x - peak_center) ** 2) / (2 * sigma ** 2))
 
     def calculate_no_flux_laplacian(self, radial_population_array, density_dep_diffusion_coefficient):
         """
@@ -258,6 +259,7 @@ class KppEnv(BaseEnv):
 
         self.time = 0
         self.done = False
+        self.state = [self.initial_wt, self.initial_mut, 0]
 
         self.density_trajectory = np.zeros((self.env_specific_params['r_bins'], self.max_time+1, 2))
         self.density_trajectory[:, 0, 0] = self.sensitive_population
@@ -309,24 +311,25 @@ class KppEnv(BaseEnv):
     def grow(self):
 
         # 1. update growth and death rate
-        step = self.timestep_size / self.env_specific_params['ramp_time']
+        step_up = self.timestep_size*2 / self.env_specific_params['ramp_time_up']
+        step_down = self.timestep_size*2 / self.env_specific_params['ramp_time_down']
 
         if self.state[2]:
             if self.growth_fraction > 0:
-                self.growth_fraction -= step
+                self.growth_fraction -= step_down
                 if self.growth_fraction < 0:
                     self.growth_fraction = 0
             else:
-                self.death_fraction += step
+                self.death_fraction += step_down
                 if self.death_fraction > 1:
                     self.death_fraction = 1
         else:
             if self.death_fraction > 0:
-                self.death_fraction -= step
+                self.death_fraction -= step_up
                 if self.death_fraction < 0:
                     self.death_fraction = 0
             else:
-                self.growth_fraction += step
+                self.growth_fraction += step_up
                 if self.growth_fraction > 1:
                     self.growth_fraction = 1
 
@@ -336,9 +339,9 @@ class KppEnv(BaseEnv):
 
         total_density = self.sensitive_population + self.resistant_population
 
-        density_dep_diffusion_coef_sen = self.env_specific_params['diffusion_coefficient'] * (1 - total_density) ** self.env_specific_params[
+        density_dep_diffusion_coef_sen = self.env_specific_params['diffusion_coefficient'] * (1 - total_density/self.carrying_capacity) ** self.env_specific_params[
             'density_exponent_sensitive']
-        density_dep_diffusion_coef_res = self.env_specific_params['diffusion_coefficient'] * (1 - total_density) ** self.env_specific_params[
+        density_dep_diffusion_coef_res = self.env_specific_params['diffusion_coefficient'] * (1 - total_density/self.carrying_capacity) ** self.env_specific_params[
             'density_exponent_resistant']
         density_dep_diffusion_coef_sen[density_dep_diffusion_coef_sen < 0] = 0
         density_dep_diffusion_coef_res[density_dep_diffusion_coef_res < 0] = 0
@@ -348,8 +351,8 @@ class KppEnv(BaseEnv):
         laplacian_resistant = self.calculate_no_flux_laplacian(self.resistant_population,
                                                                density_dep_diffusion_coef_res)
 
-        growth_sensitive = self.current_sensitive_growth_rate * self.sensitive_population * (1 - total_density)
-        growth_resistant = self.growth_rate[1] * self.resistant_population * (1 - total_density)
+        growth_sensitive = self.current_sensitive_growth_rate * self.sensitive_population * (1 - total_density/self.carrying_capacity)
+        growth_resistant = self.growth_rate[1] * self.resistant_population * (1 - total_density/self.carrying_capacity)
 
         treat_death_sensitive = self.current_treat_death_rate * self.sensitive_population
         if self.death_fraction > 0:
@@ -362,8 +365,8 @@ class KppEnv(BaseEnv):
         self.resistant_population = (self.resistant_population + self.timestep_size *
                                      (laplacian_resistant + growth_resistant - random_death_resistant))
 
-        self.sensitive_population[self.sensitive_population < 1.e-4] = 0
-        self.resistant_population[self.resistant_population < 1.e-4] = 0
+        self.sensitive_population[self.sensitive_population < 0] = 0
+        self.resistant_population[self.resistant_population < 0] = 0
 
         pop_sens = self.density_to_number(self.sensitive_population)
         pop_res = self.density_to_number(self.resistant_population)
