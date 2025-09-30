@@ -366,8 +366,8 @@ class LvEnv(BaseEnv):
         # one time step delay in treatment effect
         elif flag == 'ramped' or flag == 'ramped_with_noise':
             # 1. update growth and death rate
-            step_up = self.timestep_size / self.env_specific_params['ramp_time_up']
-            step_down = self.timestep_size / self.env_specific_params['ramp_time_down']
+            step_up = self.timestep_size *2/ self.env_specific_params['ramp_time_up']
+            step_down = self.timestep_size *2/ self.env_specific_params['ramp_time_down']
 
             if self.state[2] == 1:
                 if self.time_off_treatment > 0:
@@ -380,6 +380,7 @@ class LvEnv(BaseEnv):
 
             if ((self.state[2] and (self.time_on_treatment > self.on_treat_threshold))
                     or (self.state[2] == 0 and (self.time_off_treatment < self.off_treat_threshold))):
+            #if self.state[2] == 1:
                 if self.growth_fraction > 0:
                     self.growth_fraction -= step_down#*self.time_on_treatment
                     if self.growth_fraction < 0:

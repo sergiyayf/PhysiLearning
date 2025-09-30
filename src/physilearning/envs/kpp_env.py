@@ -87,7 +87,7 @@ class KppEnv(BaseEnv):
         self.sensitive_population, self.resistant_population = None, None
         self.carrying_capacity = self.env_specific_params['carrying_capacity']
         self.initialize_population()
-        self.day = 0
+        self.day = 1
         print('Know day: ', self.know_day)
 
         # rewrite initial state and normalizations
@@ -136,6 +136,8 @@ class KppEnv(BaseEnv):
 
     def density_to_number(self, density):
         num = 2*np.pi*np.dot(density,self.radius_array)
+        #num = np.sum(density)
+
         # add noise
         #num += np.random.normal(0, 0.05*num)
         if num < 0:
@@ -144,7 +146,7 @@ class KppEnv(BaseEnv):
 
     def initialization_sigmoid(self, colony_radius):
         x = np.linspace(self.env_specific_params['r_min'], self.env_specific_params['r_max'], self.env_specific_params['r_bins'])
-        return self.carrying_capacity / (1 + np.exp(0.05 * (x - colony_radius)))
+        return self.carrying_capacity / (1 + np.exp(0.2 * (x - colony_radius)))
         #return 1 / (1 + np.exp(0.06 * (x - colony_radius)))
 
     def initialization_gaussian(self, peak_center, sigma):
@@ -194,6 +196,7 @@ class KppEnv(BaseEnv):
             self.treatment_time_step = self.config['env']['treatment_time_step']
             self.day += 2
         for t in range(0, self.treatment_time_step):
+            #print('Time: ', self.time, ' Action: ', action,)
             # step time
             self.time += 1
             self.state[2] = action
@@ -254,8 +257,8 @@ class KppEnv(BaseEnv):
         self.current_sensitive_growth_rate = self.growth_rate[0] * self.growth_fraction
         self.current_treat_death_rate = self.death_rate_treat[0] * self.death_fraction
         self.initialize_population()
-        self.initial_wt = np.sum(self.sensitive_population * 2 * np.pi * self.radius_array)
-        self.initial_mut = np.sum(self.resistant_population * 2 * np.pi * self.radius_array)
+        self.initial_wt = self.density_to_number(self.sensitive_population)
+        self.initial_mut = self.density_to_number(self.resistant_population)
 
         self.time = 0
         self.done = False
@@ -387,41 +390,56 @@ if __name__ == "__main__": # pragma: no cover
     treat.append(env.state[2])
     wt.append(env.state[0])
     mut.append(env.state[1])
-
+    it = 0
     while not env.done:
-        act = 1 #env.action_space.sample()
+        if it < 1:
+            act = 1 #env.action_space.sample()
+        else:
+            act = 0
         o, r, t, tr, i = env.step(act)
-        #print(r)
+        #print(o)
         #print(env.state)
         treat.append(env.state[2])
         wt.append(env.state[0])
         mut.append(env.state[1])
+        it += 1
 
     fig, ax = plt.subplots(1, 1)
     tot = np.array(wt) + np.array(mut)
     # normalize to 1
     wt = np.array(wt)#/tot[0]
     mut = np.array(mut)#/tot[0]
-    time = 2*np.arange(len(treat))
-    ax.plot(time,wt, label='wt')
-    ax.plot(time,mut, label='mut')
-    ax.fill_between(time, 1, 1.1, where=treat, color='orange', alpha=0.3,
-                    label='treatment')
-    ax.set_xlabel('time')
-    ax.set_ylabel('number')
+    # time = 2*np.arange(len(treat))
+    # ax.plot(time,wt, label='wt')
+    # ax.plot(time,mut, label='mut')
+    # ax.fill_between(time, 1, 1.1, where=treat, color='orange', alpha=0.3,
+    #                 label='treatment')
+    time = np.arange(env.trajectory.shape[1])/800
+    ax.plot(time, env.trajectory[0,:], label='wt')
+    ax.plot(time, env.trajectory[1,:], label='mut')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Size')
     ax.set_yscale('linear')
     ax.legend()
     ax.set_xlim(0, 50)
     ax.set_yscale('linear')
-
-    # plot initial density profile
-    fig, ax = plt.subplots(1, 1)
-    sens_density = env.density_trajectory[:,0,0]
-    res_density = env.density_trajectory[:,0,1]
-    ax.plot(env.radius_array, sens_density, label='initial')
-    ax.plot(env.radius_array, res_density, label='initial', c='r')
-
-    sens_density = env.density_trajectory[:, 10000, 0]
-    ax.plot(env.radius_array, sens_density, label='final')
-    ax.legend()
-
+    #
+    # fig, ax = plt.subplots(1, 1)
+    # time = np.arange(env.trajectory.shape[1])/800
+    # ax.plot(time, env.trajectory[0,:], label='wt')
+    # ax.plot(time, env.trajectory[1,:], label='mut')
+    # ax.set_xlabel('time')
+    # ax.set_ylabel('number')
+    # ax.set_yscale('linear')
+    #
+    # # plot initial density profile
+    # fig, ax = plt.subplots(1, 1)
+    # sens_density = env.density_trajectory[:,0,0]
+    # res_density = env.density_trajectory[:,0,1]
+    # ax.plot(env.radius_array, sens_density, label='initial')
+    # ax.plot(env.radius_array, res_density, label='initial', c='r')
+    #
+    # sens_density = env.density_trajectory[:, 10000, 0]
+    # ax.plot(env.radius_array, sens_density, label='final')
+    # ax.legend()
+    #

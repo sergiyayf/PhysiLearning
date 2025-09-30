@@ -28,8 +28,7 @@ def run_simulation(initial_guess=[1,2,3], initial_condition=[0.99,0.01], exp_dat
     # growth_rate_res, growth_rate_sus, random_death, death_treat_sus,
     # competition, ramp_time, min_treat
     (growth_rate_sus, growth_rate_res, competition, random_death, death_treat_sus,
-     ramp_time_up, ramp_time_down, carrying_capacity, min_treat,
-     on_treat_threshold, off_treat_threshold) = initial_guess
+     ramp_time_up, ramp_time_down, carrying_capacity, on_treat_threshold, off_treat_threshold, min_treat) = initial_guess
     sus, res = [], []
     config_file = '/home/saif/Projects/PhysiLearning/config.yaml'
     with open(config_file, 'r') as f:
@@ -188,7 +187,7 @@ def minimization_function(initial_guess):
 
 def fit_simulation():
     # params for sim_time = 28000
-    initial_guess = [0.2, 0.4, 4.0, 0.01, 0.15, 8.0, 2.5, 8.0, 0.02, 1.5, 2.0]
+    initial_guess = [0.07, 0.14, 2.0, 0.01, 0.06, 2.0, 1.0, 4.0, 6.5, 1.5, 0.01]
 
     # fit: sus, res, rand, treat, comp, up, down, capacity, min_tr, del_on, del_off
     # ini guess: [0.2, 0.5, 0.01, 0.15, 6.0, 8.0, 2.5, 8.0, 0.02, 1.5, 2.0]
@@ -199,8 +198,7 @@ def fit_simulation():
     #  2.27782628e+00 1.36217490e+01 1.91365566e-02 1.40250242e+00
     #  1.96225709e+00
     bounds = [(0.01, 5.0), (0.01, 5.0), (0.01, 500.0), (0.00001, 5.0), (0.001, 5.0),
-              (0.1, 10000), (0.1, 10000), (1,1000), (0.00001, 1.0),
-              (0.0001, 10000), (0.0001, 10000)]  # bounds for growth_rate_res and death_treat_sus
+              (0.1, 10000), (0.1, 10000), (1,1000), (0.1, 10000), (0.1, 10000), (0.001, 5.0)]  # bounds for growth_rate_res and death_treat_sus
 
     def callback_func(xk):
         print(xk)
@@ -212,8 +210,8 @@ def fit_simulation():
     print(result)
     print("Optimized parameters:", optimized_params)
     # save the result
-    np.save('fit_simulation_mse_sus_res_comp_rand_treat_up_down_cap_mintr_delon_deloff.npy', optimized_params)
-    print("res, comp mse")
+    np.save('29_sim_fits_res_comp_delays.npy', optimized_params)
+    print("new lv git, no tol")
     #torch.save(result, 'fit_simulation_new_model.pth')
     return optimized_params
 
@@ -333,8 +331,4 @@ if __name__ == "__main__":
     opt_params = main()
     visualize_results(opt_params)
 
-    # get_data()
-    # run_simulation()
-    # minimization_function([0.1, 0.1, 0.2])
-
-    #data = get_new_data(plate=1, well='B4')
+    #opt_params = np.load('fit_simulation_mse_sus_res_comp_rand_treat_up_down_cap_mintr_delon_deloff.npy')

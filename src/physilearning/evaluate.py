@@ -106,7 +106,7 @@ def fixed_at(environment: LvEnv or PcEnv or GridEnv,
             else:
                 action = 0
     elif at_type == 'pulse':
-        if environment.time == 400:
+        if environment.day < 3:
             action = 1
         else:
             action = 0
@@ -286,7 +286,7 @@ class Evaluation:
                     if not os.path.exists(save_name):
                         os.makedirs(save_name)
                     # save the density trajectory
-                    np.save(f'./{save_name}/density_{episode}.npy', self.density_trajectory)
+                    #np.save(f'./{save_name}/density_{episode}.npy', self.density_trajectory)
         return None
 
     @staticmethod
