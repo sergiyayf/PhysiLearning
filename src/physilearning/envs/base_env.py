@@ -386,7 +386,7 @@ class BaseEnv(Env):
         elif self.reward_shaping_flag == 'mtd_compare':
             reward = rewards.tendayaverage(self.trajectory, self.time)
         else:
-            reward = rewards.get_reward(self.state, self.time, self.trajectory)
+            reward = rewards.get_reward(self.state, self.day, self.trajectory)
         return reward
     def render(self, mode='human') -> mpl.animation.ArtistAnimation:
         """

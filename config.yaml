@@ -22,28 +22,28 @@ learning:
   model:
     name: 'PPO' #'RecurrentPPO' 'PPO' 'QRDQN' 'DQN' 'A2C' 'ACKTR' 'ACER' 'DDPG' 'PPO2' 'SAC' 'TRPO'
     policy: 'MlpPolicy' #'MlpLstmPolicy' # 'MlpPolicy'# 'CnnPolicy' # 'MultiInputPolicy'
-    average_steps: 12
+    average_steps: 8
     model_kwargs:
-      n_steps: 128
+      n_steps: 64
       batch_size: 32
       n_epochs: 4
       verbose: 1
-      ent_coef: 0.02
-      clip_range: 0.01
-      learning_rate: 1.0e-4
+      ent_coef: 0.00001
+      clip_range: 0.005
+      learning_rate: 2.0e-4
       policy_kwargs:
 #        features_extractor_kwargs:
 #          cnn_output_dim: 16
         net_arch:
           pi: [64, 64]
           vf: [64, 64]
-    total_timesteps: 3.0e+6
+    total_timesteps: 1.0e+5
     save_freq: 'best' # 1.e+6 use string for best reward save, int for every n steps
-    model_save_prefix: '2025_09_kpp_good_lv_test_1'
+    model_save_prefix: '2025_10_lv_real_mela_2'
     load:
       enable_loading: 0
       last_model: 0
-      saved_model_name: './Training/SavedModels/2025_03_19_mela_ttp_hist_best_reward'
+      saved_model_name: './Training/SavedModels/2025_10_lv_real_mela_1_best_reward'
 
 # Environment configuration
 env:
@@ -59,13 +59,13 @@ env:
   # general simulation settings
   observation_type: 'number' # 'image' # 'number' # 'multiobs' # 'mutant_position'
   action_type: 'discrete' # 'discrete' # 'continuous'
-  see_resistance: True
+  see_resistance: False
   see_prev_action: True
-  know_day: True
+  know_day: False
   max_tumor_size: 3.0 # 2006 #3086 #100000 # 110000 # 4000
   max_time: 112000 #122 # 120
-  initial_wt: 0.9999 #39771 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
-  initial_mut: 0.0001 # 4 # 'random' - used for meltd atserhii train
+  initial_wt: 0.9995 #39771 # 1539 #2761 # 74291 # 2761 # 8000 - used for meltd atserhii train
+  initial_mut: 0.0005 # 4 # 'random' - used for meltd atserhii train
   growth_rate_wt: 0.081 # LV fit: 0.180 # Kpp Timon: 1
   growth_rate_mut: 0.223 # LV fit: 0.387 # Kpp Timon: 1
   death_rate_wt: 0.00002 # LV fit: 0.012 # Kpp Timon: 0.02
@@ -73,7 +73,7 @@ env:
   treat_death_rate_wt: 0.0975 # LV fit: 0.147 # Kpp Timon: 0.01
   treat_death_rate_mut: 0.00 # 0.0
   treatment_time_step: 1600 # LV used 800
-  reward_shaping: 'ttp' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
+  reward_shaping: 'dont_treat' # 'dont_treat', 'ttp', 'seven_days_margin', 'less_than_x.y', 'average'
   normalize: True
   normalize_to: 1
   image_size: 124 #84 #124
@@ -115,15 +115,15 @@ env:
 # evaluation configuration
 eval:
   most_recent: 0
-  from_file: 0
+  from_file: 1
   path: './'
-  model_prefix: '2025_09_kpp_good_lv_test_1'
+  model_prefix: '2025_10_lv_real_mela_2'
   step_to_load: '_best_reward'
-  save_name: 'lv_mtd'
+  save_name: 'lv_agnt'
   # evaluation settings
-  fixed_AT_protocol: 1
+  fixed_AT_protocol: 0
   at_type: 'mtd' #'effective_high_1.10_low_1.20' #'zhang_et_al' # 'mtd' # 'fixed' # 'zhang_et_al'# 'no_treatment'
   threshold: 0.50
-  num_episodes: 5
+  num_episodes: 10
   evaluate_on: 'LvEnv' # 'PcEnv' # 'LvEnv' # 'GridEnv'
   pcdl: False

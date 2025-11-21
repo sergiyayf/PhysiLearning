@@ -204,13 +204,13 @@ def fit_simulation():
         print(xk)
 
     result = opt.minimize(minimization_function, np.array(initial_guess), method='Nelder-Mead', callback=callback_func,
-                          options={'disp': True, 'maxiter': 1000}, bounds=bounds)
+                          options={'disp': True, 'maxiter': 1}, bounds=bounds)
     optimized_params = result.x
 
     print(result)
     print("Optimized parameters:", optimized_params)
     # save the result
-    np.save('29_sim_fits_res_comp_delays.npy', optimized_params)
+    #np.save('29_sim_fits_res_comp_delays.npy', optimized_params)
     print("new lv git, no tol")
     #torch.save(result, 'fit_simulation_new_model.pth')
     return optimized_params

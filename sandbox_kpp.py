@@ -7,7 +7,7 @@ import numpy as np
 
 fig, ax = plt.subplots(1, 5, figsize=(15, 5))
 for i in range(5):
-    df = pd.read_hdf('./Evaluations/LvEnvEval__lv_mtd.h5', key=f'run_{i}')
+    df = pd.read_hdf('./Evaluations/evals/wednesday_evals/wednesday_5.h5', key=f'run_{i}')
     skip = 800 # do every 400 frames, which represent 1 day
     sus = df['Type 0'].values[::skip]
     res = df['Type 1'].values[::skip]

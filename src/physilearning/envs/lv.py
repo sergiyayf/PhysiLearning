@@ -256,6 +256,7 @@ class LvEnv(BaseEnv):
             else:
                 reward = 0
         # print('Obs: ', obs)
+        obs[0] += np.random.normal(0, 0.05*obs[0])
         return obs, reward, terminate, truncate, info
 
     def reset(self, *, seed=None, options=None):

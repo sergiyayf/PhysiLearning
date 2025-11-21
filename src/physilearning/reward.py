@@ -7,7 +7,11 @@ class Reward:
     def get_reward(self, obs, time, trajectory):
 
         if self.reward_shaping_flag == 'ttp':
-            reward = 1
+            if time == 5 or (time>5 and (time-5)%7==0):
+                reward = 3
+            else:
+                reward = 2
+
         elif self.reward_shaping_flag == 'ttp_lin':
             x = np.sum(obs[0:2])/np.sum(trajectory[0:2, 0])
             if np.sum(obs[0:2]) < 1:
@@ -15,8 +19,12 @@ class Reward:
             else:
                 reward = 1 - (x-1)/1.5
         elif self.reward_shaping_flag == 'dont_treat':
-            if obs[2] == 0 and np.sum(obs[0:2]) < 1.5*np.sum(trajectory[0:2, 0]):
-                reward = 1
+            if time == 5 or (time>5 and (time-5)%7==0):
+                r = 3
+            else:
+                r = 2
+            if obs[2] == 0 and np.sum(obs[0:2]) < 2.0*np.sum(trajectory[0:2, 0]):
+                reward = r
             else:
                 reward = 0
         elif self.reward_shaping_flag == 'seven_days_margin':
